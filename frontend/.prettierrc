@@ -1,0 +1,16 @@
+{
+    "singleQuote": true,
+    "tabWidth": 4,
+    "useTabs": false,
+    "printWidth": 90,
+    "importOrder": [
+        "^next",
+        "^@api/(.*)$",
+        "^@common/(.*)$",
+        "^@layout/(.*)$",
+        "^@modules/(.*)$",
+        "^[./]"
+    ],
+    "importOrderSeparation": true,
+    "importOrderSortSpecifiers": true
+}

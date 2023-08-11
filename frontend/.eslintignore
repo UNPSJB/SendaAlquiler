@@ -1,0 +1,6 @@
+/.next
+/app-copy
+/node_modules
+.vscode
+src/api/graphql.ts
+stripe.env.js
