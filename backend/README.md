@@ -33,19 +33,7 @@ Para la implementación de GraphQL en el contexto de Django, se ha optado por el
 
 ## Instrucciones de Instalación
 
-### 1. Clonación del Repositorio
-
-Para clonar el repositorio, es necesario contar con Git instalado.
-[Descargar Git](https://git-scm.com/)
-
-Ejecutar:
-
-```bash
-git clone https://github.com/UNPSJB/SendaAlquiler.git
-cd SendaAlquiler
-```
-
-### 2. Configuración del Entorno Virtual
+### 1. Configuración del Entorno Virtual
 
 #### Windows:
 
@@ -56,7 +44,7 @@ python -m venv venv
 
 El prefijo `(venv)` en la terminal indica que el entorno virtual ha sido activado.
 
-### 3. Instalación de Dependencias
+### 2. Instalación de Dependencias
 
 Con el entorno virtual activo:
 
@@ -64,7 +52,14 @@ Con el entorno virtual activo:
 pip install -r requirements.txt
 ```
 
+### 3. Configura las variables entorno
+
+Para el funcionamiento de la aplicación debes crear un archivo llamado ".env" en este mismo directorio.
+Puedes basarte en el archivo de ejemplo [**.env.example**](./.env.example).
+
 ### 4. Aplicación de Migraciones
+
+Django utiliza un sistema de migraciones para gestionar cambios en la base de datos. Antes de correr el proyecto, necesitas aplicar estas migraciones:
 
 ```bash
 python manage.py migrate
