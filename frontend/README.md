@@ -1,34 +1,69 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# SendaAlquiler - Frontend
 
-## Getting Started
+## Tabla de Contenidos
 
-First, run the development server:
+-   [Introducción](#introducción)
+-   [Tecnologías Utilizadas](#tecnologías-utilizadas)
+-   [Requisitos Previos](#requisitos-previos)
+-   [Instrucciones de Instalación](#instrucciones-de-instalación)
+-   [Configuración y Uso de GraphQL Codegen](#configuración-y-uso-de-graphql-codegen)
+-   [Diseño UI/UX](#diseño-uiux)
+-   [Recursos Educativos](#recursos-educativos)
+
+## Introducción
+
+SendaAlquiler - Frontend es la cara visible de nuestra aplicación de alquileres, construida con un conjunto moderno de tecnologías para proporcionar una experiencia fluida y dinámica al usuario. Este frontend se comunica con nuestro backend basado en Django a través de GraphQL.
+
+## Tecnologías Utilizadas
+
+-   **Next.js:** Framework web basado en React para aplicaciones de una sola página.
+-   **TypeScript:** Superset de JavaScript que añade tipado estático.
+-   **React Query:** Librería para manejar estado de Backend. React Query puede manejar las peticiones a una API, y puede gestionar cuándo debes actualizar los datos, incluso de forma automática.
+-   **Tailwind CSS:** Un framework CSS de bajo nivel para la construcción de diseños personalizados.
+-   **GraphQL Codegen:** Herramienta que genera automáticamente el tipado de TypeScript a partir de esquemas GraphQL.
+
+## Requisitos Previos
+
+-   **Yarn:** Gestor de paquetes utilizado para manejar y distribuir paquetes de software.  
+    [Descargar Yarn](https://classic.yarnpkg.com/en/docs/install/)
+
+## Instrucciones de Instalación
+
+### 1. Instalación de Dependencias
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+yarn install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Inicio del Servidor
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+yarn dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Esto iniciará el servidor en modo desarrollo. Normalmente, podrás acceder a la aplicación a través de `http://localhost:3000`.
 
-## Learn More
+## Configuración y Uso de GraphQL Codegen
 
-To learn more about Next.js, take a look at the following resources:
+GraphQL Codegen es una herramienta poderosa que facilita la integración de GraphQL con TypeScript. Para ejecturalo solo debes asegurarte de que tu endpoint de GraphQL (la aplicación backend de Django) esté accesible y ejecuta:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+yarn gen
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Esto generará automáticamente los tipos y hooks para tus consultas y mutaciones.
 
-## Deploy on Vercel
+## Diseño UI/UX
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+El diseño de la interfaz de usuario fue creado con Figma, proporcionando una visión clara y estructurada de la experiencia del usuario final. Es una herramienta valiosa para comprender visualmente la estructura y la interacción del proyecto.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+[Ver Diseño en Figma](https://www.figma.com/file/HoYo9swmWbeEHsJCdiExu1/Universidad?type=design&node-id=114%3A2&mode=design&t=lMzrc6hgys1Uirba-1)
+
+## Recursos Educativos
+
+Aquí se incluyen recursos adicionales para comprender mejor las tecnologías empleadas:
+
+-   [Documentación oficial de Next.js](https://nextjs.org/docs)
+-   [TypeScript en 5 minutos](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html)
+-   [Guía de React Query](https://react-query.tanstack.com/overview)
+-   [Documentación oficial de Tailwind CSS](https://tailwindcss.com/docs)
