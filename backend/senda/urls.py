@@ -4,23 +4,19 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.decorators.csrf import csrf_exempt
 from graphql_jwt.decorators import jwt_cookie
-from extensions.graphql.views import SentryGraphQLView
 from graphene_django.views import GraphQLView
 
 enable_graphiql = settings.ENVIRONMENT != "production"
-EnvGraphQLView = (
-    GraphQLView if settings.ENVIRONMENT == "development" else SentryGraphQLView
-)
 
 urlpatterns = [
     path("markdownx/", include("markdownx.urls")),
     path(
         "graphql",
-        csrf_exempt(jwt_cookie(EnvGraphQLView.as_view(graphiql=enable_graphiql))),
+        csrf_exempt(jwt_cookie(GraphQLView.as_view(graphiql=enable_graphiql))),
     ),
     path(
         "graphql/",
-        csrf_exempt(jwt_cookie(EnvGraphQLView.as_view(graphiql=enable_graphiql))),
+        csrf_exempt(jwt_cookie(GraphQLView.as_view(graphiql=enable_graphiql))),
     ),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

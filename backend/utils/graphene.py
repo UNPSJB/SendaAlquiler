@@ -1,5 +1,4 @@
 import graphene
-from users.decorators import administrator_required
 
 
 def non_null_list_of(model_type, **fields):
