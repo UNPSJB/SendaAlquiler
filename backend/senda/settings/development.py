@@ -12,6 +12,8 @@ class Development(Common):
         "http://localhost",
         "https://localhost:3000",
         "https://localhost",
+        "http://0.0.0.0:3000",
+        "https://0.0.0.0",
     ]
 
     CORS_ALLOW_CREDENTIALS = True
@@ -20,6 +22,9 @@ class Development(Common):
         "https://localhost:3000",
         "http://localhost:3000",
         "http://localhost",
+        "https://0.0.0.0:3000",
+        "http://0.0.0.0:3000",
+        "http://0.0.0.0",
         "http://127.0.0.1",
     ]
 
