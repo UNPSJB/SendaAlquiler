@@ -1,0 +1,45 @@
+version: "3"
+services:
+  # db:
+  #   image: postgres
+  #   environment:
+  #     POSTGRES_PASSWORD: qbK&5eDSqe
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data/
+  #   networks:
+  #     main:
+  #       aliases:
+  #         - db
+
+  api:
+    build: ./api
+    restart: always
+    command: bash -c "make migrate && make serve"
+    volumes:
+      - ./api:/docker_api
+    # networks:
+    #   main:
+    #     aliases:
+    #       - api
+    ports:
+      - "8000:8000"
+  # nginx:
+  #   build: ./nginx
+  #   restart: always
+  #   ports:
+  #     - "8080:80"
+  #   volumes:
+  #     - ./log:/var/log/nginx
+  #   depends_on:
+  #     - api
+  #   networks:
+  #     main:
+  #       aliases:
+  #         - nginx
+
+networks:
+  main:
+
+
+volumes:
+  pgdata:

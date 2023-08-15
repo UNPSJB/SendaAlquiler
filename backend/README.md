@@ -21,8 +21,8 @@ Para la implementación de GraphQL en el contexto de Django, se ha optado por el
 
 ## Requisitos Previos
 
-- **Python:** Lenguaje de programación en el que se basa Django.  
-  [Descargar Python](https://www.python.org/downloads/)  
+- **Python:** Lenguaje de programación en el que se basa Django. Importante usar una versión menor a 3.12 para compatibilidad con Django 4.1.1
+  [Descargar Python](https://www.python.org/downloads/)
   Al instalar Python, se instalará automáticamente `pip`, el gestor de paquetes de Python.
 
 - **virtualenv:** Herramienta para crear entornos virtuales en Python.  

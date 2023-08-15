@@ -3,9 +3,12 @@ import graphene
 import users.schema.queries
 import users.schema.mutations
 
+import senda.products.schema.queries
+
 
 # As the app grows the Query and Mutation class will extend from more schemas
 class Query(
+    senda.products.schema.queries.Query,
     users.schema.queries.Query,
     graphene.ObjectType,
 ):
