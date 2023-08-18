@@ -12,4 +12,12 @@ class UserModel(AbstractUser):
     :py:func:`~django.contrib.auth.get_user_model`.
     """
 
-    pass
+    def is_employee(self):
+        return hasattr(self, "employee") and self.employee is not None
+    
+    def get_employee(self):
+        if self.is_employee():
+            return self.employee
+        
+        return None
+    
