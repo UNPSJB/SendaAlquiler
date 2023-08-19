@@ -1,0 +1,21 @@
+import { PropsWithChildren } from 'react';
+import { getFormFieldHelpElementID } from './utils';
+
+type Props = PropsWithChildren<{
+    fieldID: string;
+}>;
+
+/**
+ * FormFieldHelp - Displays the help text for a given form field.
+ * @param props - Contains the field ID and the children (help text).
+ */
+const FormFieldHelp: React.FC<Props> = ({ fieldID, children }) => (
+    <span
+        id={getFormFieldHelpElementID(fieldID)}
+        className="block text-sm text-gray-500 font-headings"
+    >
+        {children}
+    </span>
+);
+
+export default FormFieldHelp;
