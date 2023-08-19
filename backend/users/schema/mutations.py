@@ -18,19 +18,21 @@ class Login(graphene.Mutation):
     token = graphene.String(required=True)
 
     def mutate(cls, info, email: str, password: str):
-        user = UserModel.objects.filter(email=email).first()
-        if user is None:
-            raise GraphQLError("El usuario no existe")
+        try:
+            user = UserModel.objects.filter(email=email).first()
+            if user is None:
+                raise GraphQLError("El usuario no existe")
 
-        if user.is_student() and user.student_model.already_created_by_signup is False:
-            raise GraphQLError("Debes registrarte para poder acceder")
+            user = authenticate(email=user.email, password=password)
+            if not user or not user.is_active:
+                raise GraphQLError("Contraseña incorrecta")
 
-        user = authenticate(email=user.email, password=password)
-        if not user or not user.is_active:
-            raise GraphQLError("Contraseña incorrecta")
-
-        token = get_token(user)
-        return Login(user=user, token=token)
+            token = get_token(user)
+            return Login(user=user, token=token)
+        except:
+            raise GraphQLError(
+                "Ocurrió un error al iniciar sesión. Por favor intentalo más tarde."
+            )
 
 
 class Mutation(graphene.ObjectType):
