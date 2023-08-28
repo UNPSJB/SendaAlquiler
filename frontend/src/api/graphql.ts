@@ -66,8 +66,15 @@ export type ObtainJsonWebToken = {
     token: Scalars['String']['output'];
 };
 
+export type Product = {
+    __typename?: 'Product';
+    id: Scalars['ID']['output'];
+    title: Scalars['String']['output'];
+};
+
 export type Query = {
     __typename?: 'Query';
+    products: Array<Product>;
     users: Array<User>;
 };
 

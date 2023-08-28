@@ -6,89 +6,107 @@ export { gql } from 'graphql-request';
 
 const url = process.env.NEXT_PUBLIC_API_HOST;
 
+/**
+ * Initialized GraphQL client instance.
+ */
 export const graphQLClient = new GraphQLClient(url, {
     credentials: 'include',
 });
 
+/**
+ * Enum to define fetch cache options.
+ */
 export enum FetchCache {
     NO_STORE = 'no-store',
     FORCE_CACHE = 'force-cache',
 }
 
-export const ssrGraphqlQuery = <T, V>(
+/**
+ * Generate the headers for GraphQL requests.
+ *
+ * @param token - The authorization token. Optional.
+ * @returns An object containing the headers.
+ */
+const generateHeaders = (token?: string | null): HeadersInit => {
+    const baseHeaders = {
+        'Content-Type': 'application/json',
+    };
+    if (token) {
+        return {
+            ...baseHeaders,
+            Authorization: `JWT ${token}`,
+        };
+    }
+    return baseHeaders;
+};
+
+/**
+ * Handle the GraphQL query response.
+ *
+ * @param response - The fetch API response object.
+ * @returns The data from the GraphQL response.
+ * @throws Will throw an error if the response contains errors.
+ */
+const handleResponse = async <T>(response: Response): Promise<T> => {
+    if (!response.ok) {
+        throw new Error(response.statusText);
+    }
+
+    const data = await response.json();
+    if (data.errors && data.errors.length > 0) {
+        const firstError = data.errors[0];
+        const message =
+            firstError.message.split('Error: ').slice(1).join('') || firstError.message;
+        throw new Error(message);
+    }
+
+    return data.data;
+};
+
+/**
+ * Execute a GraphQL query on the server during server-side rendering.
+ *
+ * @param token - The authorization token. Could be undefined or null.
+ * @param query - The GraphQL typed document.
+ * @param variables - The variables for the GraphQL query.
+ * @param cache - Cache settings for the fetch request.
+ * @returns The data from the GraphQL response.
+ */
+export const ssrGraphqlQuery = <TResult, TVariables>(
     token: string | undefined | null,
-    query: TypedDocumentNode<T, V>,
-    variables: V,
+    query: TypedDocumentNode<TResult, TVariables>,
+    variables: TVariables,
     cache: FetchCache = FetchCache.FORCE_CACHE,
-) =>
-    fetch(url, {
+) => {
+    return fetch(url, {
         cache,
         method: 'POST',
-        headers: token
-            ? {
-                  'Content-Type': 'application/json',
-                  Authorization: `JWT ${token}`,
-              }
-            : {
-                  'Content-Type': 'application/json',
-              },
+        headers: generateHeaders(token),
         body: JSON.stringify({
             query: print(query),
             variables: variables || undefined,
         }),
-    })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
+    }).then<TResult>(handleResponse);
+};
 
-            return response.json();
-        })
-        .then<T>((data) => {
-            return data.data;
-        })
-        .catch((error) => {
-            throw new Error(error);
-        });
-
-export const clientGraphqlQuery = <T, V>(query: TypedDocumentNode<T, V>, variables: V) =>
-    fetch(url, {
+/**
+ * Execute a GraphQL query on the client side.
+ *
+ * @param query - The GraphQL typed document.
+ * @param variables - The variables for the GraphQL query.
+ * @returns The data from the GraphQL response.
+ */
+export const clientGraphqlQuery = <TResult, TVariables>(
+    query: TypedDocumentNode<TResult, TVariables>,
+    variables: TVariables,
+) => {
+    const token = sessionStorage.getItem('token');
+    return fetch(url, {
         method: 'POST',
-        headers: sessionStorage.getItem('token')
-            ? {
-                  'Content-Type': 'application/json',
-                  Authorization: `JWT ${sessionStorage.getItem('token')}`,
-              }
-            : {
-                  'Content-Type': 'application/json',
-              },
+        headers: generateHeaders(token),
         body: JSON.stringify({
             query: print(query),
             variables,
         }),
-    })
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(response.statusText);
-            }
-
-            return response.json();
-        })
-        .then<T>((data) => {
-            if (data.errors && data.errors.length > 0) {
-                const firstError = data.errors[0];
-                let message = firstError.message;
-
-                const firstErrorSplitted = firstError.message.split('Error: ');
-                if (firstErrorSplitted.length > 1) {
-                    message = firstErrorSplitted.slice(1).join('');
-                }
-
-                throw new Error(message);
-            }
-
-            return data.data;
-        })
-        .catch((error) => {
-            throw new Error(error);
-        });
+    }).then<TResult>(handleResponse);
+};
