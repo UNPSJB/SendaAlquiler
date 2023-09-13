@@ -1,4 +1,5 @@
 import { PropsWithChildren } from 'react';
+
 import { getFormFieldHelpElementID } from './utils';
 
 type Props = PropsWithChildren<{
@@ -12,7 +13,7 @@ type Props = PropsWithChildren<{
 const FormFieldHelp: React.FC<Props> = ({ fieldID, children }) => (
     <span
         id={getFormFieldHelpElementID(fieldID)}
-        className="block text-sm text-gray-500 font-headings"
+        className="block font-headings text-sm text-gray-500"
     >
         {children}
     </span>
