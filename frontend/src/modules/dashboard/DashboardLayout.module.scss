@@ -1,0 +1,49 @@
+$background-color: #191a1e;
+
+//Burger Variables - COPY
+$burger-width: 30px;
+$burger-height: 20px;
+$burger-thickness: 3px;
+$burger-color: #fff;
+$burger-activated-color: gold;
+
+.burger {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: space-between;
+    width: $burger-width;
+    height: $burger-height;
+
+    @apply lg:hidden;
+
+    span {
+        width: 100%;
+        height: $burger-thickness;
+        background-color: $burger-color;
+        transition: all 0.25s;
+    }
+
+    &.activated {
+        span {
+            background-color: $burger-activated-color;
+        }
+    }
+
+    &.activated {
+        span {
+            &:nth-child(1) {
+                transform: translateY(($burger-height / 2) - $burger-thickness)
+                    rotate(45deg);
+            }
+
+            &:nth-child(2) {
+                opacity: 0;
+            }
+
+            &:nth-child(3) {
+                transform: translateY(-$burger-height / 2) rotate(-45deg);
+            }
+        }
+    }
+}

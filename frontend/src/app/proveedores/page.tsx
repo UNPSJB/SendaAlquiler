@@ -1,9 +1,7 @@
+import DashboardLayout from '@/modules/dashboard/DashboardLayout';
+
 const Page = () => {
-    return (
-        <div>
-            <h1>proveedores</h1>
-        </div>
-    );
+    return <DashboardLayout title="Proveedores" />;
 };
 
 export default Page;
