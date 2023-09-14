@@ -1,5 +1,6 @@
 import React from 'react';
 import { InputHTMLAttributes } from 'react';
+
 import { getFormFieldAriaProps } from './utils';
 
 type InputProps = Omit<
@@ -27,7 +28,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
     return (
         <input
             ref={ref}
-            className="border border-gray-200 rounded p-4 block w-full"
+            className="block w-full rounded border border-gray-200 p-4"
             {...ariaProps}
             {...rest}
         />
