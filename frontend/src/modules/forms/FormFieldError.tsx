@@ -1,4 +1,5 @@
 import { PropsWithChildren } from 'react';
+
 import { getFormFieldErrorElementID } from './utils';
 
 type Props = PropsWithChildren<{
@@ -12,7 +13,7 @@ type Props = PropsWithChildren<{
 const FormFieldError: React.FC<Props> = ({ fieldID, children }) => (
     <span
         id={getFormFieldErrorElementID(fieldID)}
-        className="block text-xs text-red-500 font-headings"
+        className="block font-headings text-xs text-red-500"
         role="alert"
     >
         {children}

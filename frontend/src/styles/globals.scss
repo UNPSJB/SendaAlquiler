@@ -1,0 +1,191 @@
+@use 'sass:list';
+@use 'sass:map';
+@use 'sass:math';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import './lib/tailwind-screens';
+
+@function escape_leading_numbers($string) {
+    $first-char: str_slice(#{$string}, 0, 1);
+    $found: index('1' '2' '3' '4' '5' '6' '7' '8' '9' '0', $first-char);
+
+    @if $found {
+        // TODO
+        @return '\\#{$string}';
+    } @else {
+        @return $string;
+    }
+}
+
+@mixin responsive($class, $screen) {
+    $keys: map-keys($screens);
+    $screen-index: list.index($keys, $screen);
+    $screen-width: map-get($screens, $screen);
+
+    @if $screen-index {
+        @for $i from 1 through $screen-index {
+            $some-screen: nth(map-keys($screens), $i);
+
+            @media (min-width: $screen-width) {
+                .#{escape_leading_numbers($some-screen)}\:#{$class} {
+                    @content;
+                }
+            }
+        }
+    }
+
+    @media (min-width: $screen-width) {
+        .#{$class} {
+            @content;
+        }
+    }
+}
+
+$containers-max-width: map-get($screens, '3xl');
+
+$containers: (
+    '1': (
+        'name': 'container',
+        'padding': (
+            '0': 24px,
+            'xs': 24px,
+            'sm': 24px,
+            'md': 24px,
+            'lg': 24px,
+            'xl': 24px,
+            '0xl': 24px,
+            '1xl': 24px,
+            '2xl': 24px,
+            '3xl': 24px,
+        ),
+    ),
+    '2': (
+        'name': 'container--big',
+        'padding': (
+            '0': 24px,
+            'xs': 24px,
+            'sm': 24px,
+            'md': 24px,
+            'lg': 24px,
+            'xl': 24px,
+            '0xl': 24px,
+            '1xl': 24px,
+            '2xl': 24px,
+            '3xl': 24px,
+        ),
+    ),
+);
+
+@mixin horizontal-containers($name, $padding) {
+    .pl-#{$name} {
+        padding-left: $padding;
+    }
+
+    .pr-#{$name} {
+        padding-right: $padding;
+    }
+
+    .px-#{$name} {
+        padding-left: $padding;
+        padding-right: $padding;
+    }
+
+    .-mx-in-#{$name} {
+        margin-left: $padding * -1;
+        margin-right: $padding * -1;
+    }
+}
+
+@function container-padding($container, $screen) {
+    @return map-get(map-get($container, 'padding'), $screen);
+}
+
+@mixin custom-container($container) {
+    $name: map-get($container, 'name');
+    $padding: container-padding($container, '0');
+
+    .#{$name} {
+        width: 100%;
+        margin-right: auto;
+        margin-left: auto;
+        padding-right: $padding;
+        padding-left: $padding;
+    }
+
+    @include horizontal-containers($name, $padding);
+
+    @for $i from 1 through length($screens) {
+        $screen: nth(map-keys($screens), $i);
+        $width: nth(map-values($screens), $i);
+
+        @media (min-width: $width) {
+            @include responsive($name, $screen) {
+                width: 100%;
+                margin-right: auto;
+                margin-left: auto;
+
+                padding-left: container-padding($container, $screen);
+                padding-right: container-padding($container, $screen);
+
+                max-width: $containers-max-width;
+            }
+        }
+
+        // horizontal containers
+        @if $width >= $containers-max-width {
+            $screen-padding: calc(
+                ((100vw - $containers-max-width) / 2) +
+                    container-padding($container, $screen)
+            );
+        }
+
+        $screen-padding: container-padding($container, $screen);
+
+        @include responsive('pl-#{$name}', $screen) {
+            padding-left: $screen-padding;
+        }
+
+        @include responsive('pr-#{$name}', $screen) {
+            padding-right: $screen-padding;
+        }
+
+        @include responsive('px-#{$name}', $screen) {
+            padding-left: $screen-padding;
+            padding-right: $screen-padding;
+        }
+    }
+}
+
+@each $key, $container in $containers {
+    @include custom-container($container);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    @apply font-headings;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.flatpickr-input {
+    display: none;
+}
+
+.flatpickr-calendar {
+    box-shadow: none !important;
+}

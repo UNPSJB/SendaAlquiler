@@ -14,7 +14,7 @@ export type LabelProps = Omit<
  */
 const Label: React.FC<LabelProps> = ({ label, children, ...rest }) => (
     <label className="block" {...rest}>
-        <span className="block text-sm mb-2">{label}</span>
+        <span className="mb-2 block text-sm">{label}</span>
         {children}
     </label>
 );

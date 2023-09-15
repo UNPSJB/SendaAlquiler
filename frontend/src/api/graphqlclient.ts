@@ -1,6 +1,6 @@
 import { TypedDocumentNode } from '@graphql-typed-document-node/core';
-import { GraphQLClient } from 'graphql-request';
 import { print } from 'graphql/language/printer';
+import { GraphQLClient } from 'graphql-request';
 
 export { gql } from 'graphql-request';
 

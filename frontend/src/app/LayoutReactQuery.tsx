@@ -14,8 +14,8 @@ type Props = {
     children: React.ReactNode;
 };
 
-const ReactQueryWrapper = ({ children }: Props) => (
+const LayoutReactQuery = ({ children }: Props) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-export default ReactQueryWrapper;
+export default LayoutReactQuery;
