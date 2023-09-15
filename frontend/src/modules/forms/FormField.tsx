@@ -16,7 +16,7 @@ type FormFieldProps = PropsWithChildren<{
 /**
  * FormField - A wrapper component that displays a form field with its label, error, and help text.
  */
-const FormField: React.FC<FormFieldProps> = (props) => {
+export const FormField: React.FC<FormFieldProps> = (props) => {
     const { fieldID, errorMessage, helpText, label, children } = props;
 
     return (

@@ -83,10 +83,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title }) =>
                     </button>
                 </header>
 
-                <nav className="pointer-events-auto relative flex flex-1 flex-col">
+                <nav className="relative flex flex-1 flex-col">
                     <ul
                         className={clsx(
-                            'container absolute flex h-full flex-col bg-black py-6 font-headings text-sm transition-all duration-200 lg:static lg:mx-0 lg:max-w-full lg:px-0',
+                            'container pointer-events-auto absolute flex h-full flex-col bg-black py-6 font-headings text-sm transition-all duration-200 lg:static lg:mx-0 lg:max-w-full lg:px-0',
                             isMenuOpen ? 'inset-0' : '-left-full right-full',
                         )}
                     >
