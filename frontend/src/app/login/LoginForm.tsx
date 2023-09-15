@@ -3,6 +3,8 @@ import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { RHFFormField } from '@/modules/forms/FormField';
 import Input from '@/modules/forms/Input';
 
+import Button from '@/components/Button';
+
 export type LoginFormValues = {
     email: string;
     password: string;
@@ -36,12 +38,10 @@ const LoginForm = ({ onSubmit }: { onSubmit: SubmitHandler<LoginFormValues> }) =
                         />
                     </RHFFormField>
                 </div>
-                <button
-                    className="block w-full rounded bg-black p-3 font-headings text-sm font-bold text-white"
-                    type="submit"
-                >
+
+                <Button fullWidth type="submit">
                     Iniciar sesión
-                </button>
+                </Button>
             </form>
         </FormProvider>
     );
