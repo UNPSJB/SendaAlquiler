@@ -18,7 +18,6 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=255)),
                 ('street', models.CharField(max_length=60)),
                 ('house_number', models.CharField(max_length=10)),
-                
                 ('note', models.CharField(max_length=255)),
             ],
         ),
