@@ -3,6 +3,7 @@ import graphene
 import users.schema.queries
 import users.schema.mutations
 
+import senda.office.schema.queries
 import senda.products.schema.queries
 import senda.locality.schema.queries
 
@@ -10,6 +11,7 @@ import senda.locality.schema.queries
 class Query(
     senda.products.schema.queries.Query,
     senda.locality.schema.queries.Query,
+    senda.office.schema.queries.Query,
     users.schema.queries.Query,
     graphene.ObjectType,
 ):
