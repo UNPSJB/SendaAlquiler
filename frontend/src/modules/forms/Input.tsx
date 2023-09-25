@@ -1,14 +1,21 @@
+import clsx from 'clsx';
 import React from 'react';
 import { InputHTMLAttributes } from 'react';
 
 import { getFormFieldAriaProps } from './utils';
 
+export enum InputSize {
+    SMALL = 'small',
+    BASE = 'base',
+}
+
 type InputProps = Omit<
     InputHTMLAttributes<HTMLInputElement>,
-    'className' | 'ref' | 'aria-invalid' | 'aria-describedby' | 'name' | 'id'
+    'className' | 'ref' | 'aria-invalid' | 'aria-describedby' | 'name' | 'id' | 'size'
 > & {
     hasError?: boolean;
     hasHelp?: boolean;
+    size?: InputSize;
     name: string;
     id: string;
 };
@@ -18,7 +25,7 @@ type InputProps = Omit<
  * @param props - Contains the usual input properties and additional flags for error and help indicators.
  */
 const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
-    const { hasError, hasHelp, ...rest } = props;
+    const { hasError, hasHelp, size, ...rest } = props;
     const ariaProps = getFormFieldAriaProps({
         fieldID: rest.id,
         hasError: !!hasError,
@@ -28,7 +35,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
     return (
         <input
             ref={ref}
-            className="block w-full rounded border border-gray-200 p-4"
+            className={clsx(
+                'block w-full rounded border border-gray-200 p-4',
+                size === InputSize.SMALL && 'text-sm',
+            )}
             {...ariaProps}
             {...rest}
         />
