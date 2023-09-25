@@ -51,10 +51,10 @@ class Common(Configuration):
 
     LOCAL_APPS: List[str] = [
         "users",
-        "senda.office.apps.OfficesAppConfig"
+        "senda.office.apps.OfficeAppConfig",
         "senda.products.apps.ProductsAppConfig",
         "senda.employees.apps.EmployeesAppConfig",
-        "senda.locality.apps.LocalityAppConfig"
+        "senda.locality.apps.LocalityAppConfig",
     ]
 
     INSTALLED_APPS: List[str] = LOCAL_APPS + DEFAULT_APPS + THIRD_PARTY_APPS
