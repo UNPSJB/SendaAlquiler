@@ -1,6 +1,11 @@
-import { UseMutationOptions, useMutation } from '@tanstack/react-query';
+import { UseMutationOptions, useMutation, useQuery } from '@tanstack/react-query';
 
-import { LoginDocument, LoginMutation, LoginMutationVariables } from './graphql';
+import {
+    ClientsDocument,
+    LoginDocument,
+    LoginMutation,
+    LoginMutationVariables,
+} from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
 /**
@@ -18,4 +23,10 @@ export const useLogin = (options: UseLoginOptions = {}) => {
     return useMutation<LoginMutation, Error, LoginMutationVariables>((data) => {
         return clientGraphqlQuery(LoginDocument, data);
     }, options);
+};
+
+export const useClients = () => {
+    return useQuery(['clients'], () => {
+        return clientGraphqlQuery(ClientsDocument, {});
+    });
 };
