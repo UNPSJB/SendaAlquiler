@@ -17,3 +17,12 @@ query clients {
         dni
     }
 }
+
+query localities {
+    localities {
+        id
+        name
+        postalCode
+        state
+    }
+}

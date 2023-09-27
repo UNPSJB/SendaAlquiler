@@ -217,6 +217,19 @@ export type ClientsQuery = {
     }>;
 };
 
+export type LocalitiesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type LocalitiesQuery = {
+    __typename?: 'Query';
+    localities: Array<{
+        __typename?: 'Locality';
+        id: string;
+        name: string;
+        postalCode: number;
+        state: LocalityLocalityModelStateChoices;
+    }>;
+};
+
 export type UsersQueryVariables = Exact<{ [key: string]: never }>;
 
 export type UsersQuery = {
@@ -326,6 +339,37 @@ export const ClientsDocument = {
         },
     ],
 } as unknown as DocumentNode<ClientsQuery, ClientsQueryVariables>;
+export const LocalitiesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'localities' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'localities' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'postalCode' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<LocalitiesQuery, LocalitiesQueryVariables>;
 export const UsersDocument = {
     kind: 'Document',
     definitions: [
