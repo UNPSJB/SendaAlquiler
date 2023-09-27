@@ -18,6 +18,12 @@
         "tsconfigRootDir": "./"
     },
     "rules": {
+        "tailwindcss/no-custom-classname": [
+            "error",
+            {
+                "whitelist": ["no-scrollbar", "pl-container$", "pr-container$"]
+            }
+        ],
         "no-unused-vars": "off",
         "@typescript-eslint/no-unused-vars": [
             "error",

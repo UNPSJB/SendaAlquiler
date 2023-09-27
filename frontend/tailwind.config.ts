@@ -1,6 +1,9 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
+    corePlugins: {
+        container: false,
+    },
     content: ['./src/**/*.{js,ts,jsx,tsx,mdx}'],
     theme: {
         extend: {
@@ -10,12 +13,6 @@ const config: Config = {
             },
             screens: {
                 xxl: '1400px',
-            },
-        },
-        container: {
-            center: true,
-            padding: {
-                DEFAULT: '7%',
             },
         },
     },

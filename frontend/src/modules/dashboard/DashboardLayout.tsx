@@ -41,7 +41,7 @@ const NavigationLink: React.FC<NavigationLinkProps> = ({ children, href }) => {
                 'flex items-center space-x-2 rounded p-4',
                 isActive
                     ? 'bg-white text-black'
-                    : 'transition-colors duration-200 hover:bg-white hover:bg-opacity-10',
+                    : 'transition-colors duration-200 hover:bg-white/10',
             )}
             aria-current={isActive ? 'page' : undefined}
             href={href}
