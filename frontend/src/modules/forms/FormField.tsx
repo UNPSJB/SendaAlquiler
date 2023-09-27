@@ -20,7 +20,7 @@ const FormField: React.FC<FormFieldProps> = (props) => {
     const { fieldID, errorMessage, helpText, label, children } = props;
 
     return (
-        <div className="form-field space-y-2" id={`${fieldID}-field`}>
+        <div className="space-y-2" id={`${fieldID}-field`}>
             <Label label={label} htmlFor={fieldID}>
                 {children}
             </Label>
