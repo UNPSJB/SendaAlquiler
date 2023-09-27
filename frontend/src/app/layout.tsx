@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 
 import '../styles/globals.scss';
 import LayoutReactQuery from './LayoutReactQuery';
+import 'react-loading-skeleton/dist/skeleton.css';
 
 const poppins = Poppins({
     variable: '--font-poppins',

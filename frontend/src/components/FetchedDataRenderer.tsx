@@ -8,7 +8,6 @@ export type FetchedDataRendererProps<T extends any> = {
     children: (data: NonNullable<T>) => React.ReactElement;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const FetchedDataRenderer = <T extends any>({
     isLoading,
     isError,

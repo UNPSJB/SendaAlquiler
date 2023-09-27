@@ -41,7 +41,7 @@ const NavigationLink: React.FC<NavigationLinkProps> = ({ children, href }) => {
                 'flex items-center space-x-2 rounded p-4',
                 isActive
                     ? 'bg-white text-black'
-                    : 'transition-colors duration-200 hover:bg-white hover:bg-opacity-10',
+                    : 'transition-colors duration-200 hover:bg-white/10',
             )}
             aria-current={isActive ? 'page' : undefined}
             href={href}
@@ -83,10 +83,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title }) =>
                     </button>
                 </header>
 
-                <nav className="pointer-events-auto relative flex flex-1 flex-col">
+                <nav className="relative flex flex-1 flex-col">
                     <ul
                         className={clsx(
-                            'container absolute flex h-full flex-col bg-black py-6 font-headings text-sm transition-all duration-200 lg:static lg:mx-0 lg:max-w-full lg:px-0',
+                            'container pointer-events-auto absolute flex h-full flex-col bg-black py-6 font-headings text-sm transition-all duration-200 lg:static lg:mx-0 lg:max-w-full lg:px-0',
                             isMenuOpen ? 'inset-0' : '-left-full right-full',
                         )}
                     >

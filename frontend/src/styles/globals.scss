@@ -1,6 +1,5 @@
 @use 'sass:list';
 @use 'sass:map';
-@use 'sass:math';
 
 @tailwind base;
 @tailwind components;
@@ -9,12 +8,11 @@
 @import './lib/tailwind-screens';
 
 @function escape_leading_numbers($string) {
-    $first-char: str_slice(#{$string}, 0, 1);
+    $first-char: str-slice(#{$string}, 0, 1);
     $found: index('1' '2' '3' '4' '5' '6' '7' '8' '9' '0', $first-char);
 
     @if $found {
-        // TODO
-        @return '\\#{$string}';
+        @return '\\3#{$first-char} #{str-slice($string, 2)}';
     } @else {
         @return $string;
     }
@@ -49,21 +47,6 @@ $containers-max-width: map-get($screens, '3xl');
 $containers: (
     '1': (
         'name': 'container',
-        'padding': (
-            '0': 24px,
-            'xs': 24px,
-            'sm': 24px,
-            'md': 24px,
-            'lg': 24px,
-            'xl': 24px,
-            '0xl': 24px,
-            '1xl': 24px,
-            '2xl': 24px,
-            '3xl': 24px,
-        ),
-    ),
-    '2': (
-        'name': 'container--big',
         'padding': (
             '0': 24px,
             'xs': 24px,

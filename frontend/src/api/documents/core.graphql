@@ -1,0 +1,19 @@
+query clients {
+    clients {
+        id
+        user {
+            email
+            firstName
+            lastName
+        }
+        phoneCode
+        phoneNumber
+        locality {
+            name
+        }
+        streetName
+        houseUnit
+        houseNumber
+        dni
+    }
+}
