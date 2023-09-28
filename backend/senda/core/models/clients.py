@@ -1,6 +1,6 @@
 from django.db import models
 from users.models import UserModel
-from senda.locality.models import LocalityModel
+from senda.core.models.localities import LocalityModel
 
 
 class ClientModel(models.Model):
