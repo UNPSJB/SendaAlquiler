@@ -1,17 +1,20 @@
 'use client';
 
-import { PropsWithChildren, useState } from 'react';
+import { PropsWithChildren, useState, useRef, useEffect } from 'react';
 import Skeleton from 'react-loading-skeleton';
 
 import { Client } from '@/api/graphql';
 import { useClients } from '@/api/hooks';
 
 import DashboardLayout from '@/modules/dashboard/DashboardLayout';
+import ArrowLeft from '@/modules/icons/ArrowLeft';
+import ArrowRigth from '@/modules/icons/ArrowRight';
+import VerticalEllipsis from '@/modules/icons/VerticalEllipsis';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
+import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import { TD, TH, TR, Table } from '@/components/Table';
-import ViewError from '@/components/ViewError';
 
 const ClientSkeleton = () => {
     return (
@@ -31,7 +34,7 @@ const ClientsTable = ({ children }: PropsWithChildren) => {
             <thead>
                 <tr>
                     <TH>Nombre</TH>
-                    <TH>E-Mail</TH>
+                    <TH>Correo</TH>
                     <TH>Celular</TH>
                     <TH>Domicilio</TH>
                     <TH>Localidad</TH>
@@ -43,17 +46,128 @@ const ClientsTable = ({ children }: PropsWithChildren) => {
     );
 };
 
+interface DropdownProps {
+    onRemove: () => void;
+}
+
+const Dropdown: React.FC<DropdownProps> = ({ onRemove }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const toggleDropdown = () => {
+        setIsOpen((prevIsOpen) => !prevIsOpen);
+    };
+
+    const handleRemove = () => {
+        onRemove();
+        setIsOpen(false);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = ({ target }: { target: EventTarget | null }) => {
+            if (
+                dropdownRef.current &&
+                (!(target instanceof HTMLElement) ||
+                    !dropdownRef.current.contains(target as Node))
+            ) {
+                setIsOpen(false);
+            }
+        };
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('click', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('click', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <button
+                onClick={toggleDropdown}
+                className="focus:outline-none"
+                aria-haspopup="true"
+                aria-expanded={isOpen}
+            >
+                <VerticalEllipsis />
+            </button>
+
+            {isOpen && (
+                <div
+                    className="absolute right-0 top-full mt-2 overflow-hidden rounded border border-gray-300 bg-white shadow"
+                    role="menu"
+                >
+                    <ul className="divide-y divide-gray-200 text-sm">
+                        <li>
+                            <button
+                                onClick={handleRemove}
+                                className="block w-full px-6 py-2 text-left font-headings font-bold first:rounded-t last:rounded-b hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                                role="menuitem"
+                            >
+                                Eliminar
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            )}
+        </div>
+    );
+};
+
+type PaginationProps = {
+    onPrevious: () => void;
+    onNext: () => void;
+};
+
+const Pagination: React.FC<PaginationProps> = ({ onPrevious, onNext }) => (
+    <div className="flex justify-between pt-8">
+        <Button
+            onClick={onPrevious}
+            className="flex items-center justify-center space-x-2"
+            variant={ButtonVariant.OUTLINE_WHITE}
+        >
+            <ArrowLeft /> <span>Anterior</span>
+        </Button>
+
+        <Button
+            onClick={onNext}
+            className="flex items-center justify-center space-x-2"
+            variant={ButtonVariant.OUTLINE_WHITE}
+        >
+            <span>Siguiente</span> <ArrowRigth />
+        </Button>
+    </div>
+);
+
 const Page = () => {
-    const [activeClientId, setActiveClientId] = useState<Client['id'] | null>(null);
     const useClientsResult = useClients();
+
+    const handlePrevious = () => {
+        console.log('previous');
+    };
+
+    const handleNext = () => {
+        console.log('next');
+    };
+
+    const handleRemove = (id: Client['id']) => {
+        console.log(`remove ${id}`);
+    };
 
     return (
         <DashboardLayout title="Clientes">
-            <div className="pr-container py-5 pl-10">
-                <FetchedDataRenderer
-                    {...useClientsResult}
-                    // isLoading
-                    Loading={
+            <FetchedDataRenderer
+                {...useClientsResult}
+                Loading={
+                    <div className="pr-container flex-1 py-5 pl-10">
                         <ClientsTable>
                             <ClientSkeleton />
                             <ClientSkeleton />
@@ -61,11 +175,21 @@ const Page = () => {
                             <ClientSkeleton />
                             <ClientSkeleton />
                         </ClientsTable>
-                    }
-                    Error={<ViewError />}
-                >
-                    {({ clients }) => {
-                        return (
+                    </div>
+                }
+                Error={
+                    <div className="flex w-full flex-1 items-center justify-center">
+                        <FetchStatusMessageWithDescription
+                            title="Ha ocurrido un error"
+                            line1="Hubo un error al cargar los clientes."
+                            line2="Prueba de nuevo más tarde."
+                        />
+                    </div>
+                }
+            >
+                {({ clients }) => {
+                    return (
+                        <div className="pr-container flex-1 py-5 pl-10">
                             <ClientsTable>
                                 {clients.map((client) => (
                                     <TR key={client.id}>
@@ -82,68 +206,19 @@ const Page = () => {
                                         </TD>
                                         <TD>{client.locality.name}</TD>
                                         <TD>
-                                            <button
-                                                onClick={() => {
-                                                    setActiveClientId((prev) => {
-                                                        if (prev === client.id) {
-                                                            return null;
-                                                        }
-
-                                                        return client.id;
-                                                    });
-                                                }}
-                                            >
-                                                <svg
-                                                    className="pointer-events-none"
-                                                    width="6"
-                                                    height="24"
-                                                    viewBox="0 0 6 24"
-                                                    fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                >
-                                                    <path
-                                                        d="M3 16.875C2.30381 16.875 1.63613 17.1516 1.14384 17.6438C0.651562 18.1361 0.375 18.8038 0.375 19.5C0.375 20.1962 0.651562 20.8639 1.14384 21.3562C1.63613 21.8484 2.30381 22.125 3 22.125C3.69619 22.125 4.36387 21.8484 4.85616 21.3562C5.34844 20.8639 5.625 20.1962 5.625 19.5C5.625 18.8038 5.34844 18.1361 4.85616 17.6438C4.36387 17.1516 3.69619 16.875 3 16.875ZM3 9.375C2.30381 9.375 1.63613 9.65156 1.14384 10.1438C0.651562 10.6361 0.375 11.3038 0.375 12C0.375 12.6962 0.651562 13.3639 1.14384 13.8562C1.63613 14.3484 2.30381 14.625 3 14.625C3.69619 14.625 4.36387 14.3484 4.85616 13.8562C5.34844 13.3639 5.625 12.6962 5.625 12C5.625 11.3038 5.34844 10.6361 4.85616 10.1438C4.36387 9.65156 3.69619 9.375 3 9.375ZM5.625 4.5C5.625 3.80381 5.34844 3.13613 4.85616 2.64384C4.36387 2.15156 3.69619 1.875 3 1.875C2.30381 1.875 1.63613 2.15156 1.14384 2.64384C0.651562 3.13613 0.375 3.80381 0.375 4.5C0.375 5.19619 0.651562 5.86387 1.14384 6.35616C1.63613 6.84844 2.30381 7.125 3 7.125C3.69619 7.125 4.36387 6.84844 4.85616 6.35616C5.34844 5.86387 5.625 5.19619 5.625 4.5Z"
-                                                        fill="black"
-                                                        className=""
-                                                    />
-                                                </svg>
-                                            </button>
-
-                                            {activeClientId === client.id && (
-                                                <div className="relative">
-                                                    <div className="absolute right-0 top-full -mt-1 overflow-hidden rounded border border-gray-300 bg-white shadow">
-                                                        <ul className="divide-y divide-gray-200 text-sm">
-                                                            <li>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setActiveClientId(
-                                                                            null,
-                                                                        );
-                                                                    }}
-                                                                    className="px-6 py-2 font-headings font-bold first:rounded-t last:rounded-b"
-                                                                >
-                                                                    Eliminar
-                                                                </button>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            )}
+                                            <Dropdown
+                                                onRemove={() => handleRemove(client.id)}
+                                            />
                                         </TD>
                                     </TR>
                                 ))}
                             </ClientsTable>
-                        );
-                    }}
-                </FetchedDataRenderer>
 
-                <div className="flex justify-between pt-8">
-                    <Button variant={ButtonVariant.OUTLINE_WHITE}>{'<-'} Anterior</Button>
-                    <Button variant={ButtonVariant.OUTLINE_WHITE}>
-                        Siguiente {'->'}
-                    </Button>
-                </div>
-            </div>
+                            <Pagination onPrevious={handlePrevious} onNext={handleNext} />
+                        </div>
+                    );
+                }}
+            </FetchedDataRenderer>
         </DashboardLayout>
     );
 };
