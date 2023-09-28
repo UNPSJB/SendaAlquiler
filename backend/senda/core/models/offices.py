@@ -1,5 +1,5 @@
 from django.db import models
-from senda.locality.models import LocalityModel
+from senda.core.models.localities import LocalityModel
 
 
 class OfficeModel(models.Model):
