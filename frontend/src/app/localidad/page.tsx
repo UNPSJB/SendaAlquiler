@@ -47,7 +47,7 @@ const Page = () => {
 
 
      return (
-        <DashboardLayout title="Clientes">
+        <DashboardLayout title="Localidades">
             <div className="pr-container py-5 pl-10">
                 <FetchedDataRenderer
                     {...useLocalitiesResult}
