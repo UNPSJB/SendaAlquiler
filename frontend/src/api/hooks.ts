@@ -2,6 +2,7 @@ import { UseMutationOptions, useMutation, useQuery } from '@tanstack/react-query
 
 import {
     ClientsDocument,
+    LocalitiesDocument,
     LoginDocument,
     LoginMutation,
     LoginMutationVariables,
@@ -28,5 +29,11 @@ export const useLogin = (options: UseLoginOptions = {}) => {
 export const useClients = () => {
     return useQuery(['clients'], () => {
         return clientGraphqlQuery(ClientsDocument, {});
+    });
+};
+
+export const useLocalities = () => {
+    return useQuery(['localities'], () => {
+        return clientGraphqlQuery(LocalitiesDocument, {});
     });
 };
