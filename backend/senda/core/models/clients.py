@@ -1,12 +1,11 @@
 from django.db import models
-from users.models import UserModel
 from senda.core.models.localities import LocalityModel
 
 
 class ClientModel(models.Model):
-    user = models.OneToOneField(
-        UserModel, on_delete=models.CASCADE, related_name="client"
-    )
+    email = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
     locality = models.ForeignKey(
         LocalityModel, on_delete=models.CASCADE, related_name="clients"
     )
@@ -33,4 +32,4 @@ class ClientModel(models.Model):
     )
 
     def __str__(self) -> str:
-        return self.user.email
+        return self.email

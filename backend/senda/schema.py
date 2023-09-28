@@ -9,6 +9,7 @@ import senda.core.schema.queries
 # As the app grows the Query and Mutation class will extend from more schemas
 class Query(
     senda.core.schema.queries.Query,
+    users.schema.queries.Query,
     graphene.ObjectType,
 ):
     pass

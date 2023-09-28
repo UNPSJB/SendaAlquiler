@@ -108,8 +108,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title }) =>
                 </nav>
             </aside>
 
-            <main className="lg:pr-container pt-20 lg:w-4/5 lg:pt-0">
-                <header className="border-b border-black py-5 lg:pl-10">
+            <main className="flex flex-col pt-20 lg:w-4/5 lg:pt-0">
+                <header className="lg:pr-container border-b border-black py-5 lg:pl-10">
                     <div className="container lg:mx-0 lg:max-w-full lg:px-0">
                         <h1 className="text-3xl font-bold">{title}</h1>
                     </div>

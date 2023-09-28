@@ -1,11 +1,9 @@
 query clients {
     clients {
         id
-        user {
-            email
-            firstName
-            lastName
-        }
+        email
+        firstName
+        lastName
         phoneCode
         phoneNumber
         locality {

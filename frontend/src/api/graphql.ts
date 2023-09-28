@@ -29,11 +29,14 @@ export type Client = {
     __typename?: 'Client';
     /** Número de documento de identidad del cliente */
     dni: Scalars['String']['output'];
+    email: Scalars['String']['output'];
+    firstName: Scalars['String']['output'];
     /** Número de la calle donde vive el cliente */
     houseNumber: Scalars['String']['output'];
     /** Número de la casa o departamento */
     houseUnit: Maybe<Scalars['String']['output']>;
     id: Scalars['ID']['output'];
+    lastName: Scalars['String']['output'];
     locality: Locality;
     /** Código de área del teléfono del cliente */
     phoneCode: Scalars['String']['output'];
@@ -41,21 +44,10 @@ export type Client = {
     phoneNumber: Scalars['String']['output'];
     /** Nombre de la calle donde vive el cliente */
     streetName: Scalars['String']['output'];
-    user: User;
-};
-
-export type Locality = {
-    __typename?: 'Locality';
-    clients: Array<Client>;
-    id: Scalars['ID']['output'];
-    name: Scalars['String']['output'];
-    officemodelSet: Array<Office>;
-    postalCode: Scalars['Int']['output'];
-    state: LocalityLocalityModelStateChoices;
 };
 
 /** An enumeration. */
-export enum LocalityLocalityModelStateChoices {
+export enum CoreLocalityModelStateChoices {
     /** BUENOS_AIRES */
     BuenosAires = 'BUENOS_AIRES',
     /** CATAMARCA */
@@ -103,6 +95,23 @@ export enum LocalityLocalityModelStateChoices {
     /** TUCUMAN */
     Tucuman = 'TUCUMAN',
 }
+
+export type Employee = {
+    __typename?: 'Employee';
+    id: Scalars['ID']['output'];
+    user: User;
+};
+
+export type Locality = {
+    __typename?: 'Locality';
+    clients: Array<Client>;
+    id: Scalars['ID']['output'];
+    name: Scalars['String']['output'];
+    officemodelSet: Array<Office>;
+    postalCode: Scalars['Int']['output'];
+    state: CoreLocalityModelStateChoices;
+    suppliermodelSet: Array<Supplier>;
+};
 
 export type Login = {
     __typename?: 'Login';
@@ -167,6 +176,7 @@ export type Query = {
     localities: Array<Locality>;
     offices: Array<Office>;
     products: Array<Product>;
+    suppliers: Array<Supplier>;
     users: Array<User>;
 };
 
@@ -177,11 +187,26 @@ export type Refresh = {
     token: Scalars['String']['output'];
 };
 
+export type Supplier = {
+    __typename?: 'Supplier';
+    apartment: Scalars['String']['output'];
+    cuit: Scalars['String']['output'];
+    email: Scalars['String']['output'];
+    houseNumber: Scalars['String']['output'];
+    id: Scalars['ID']['output'];
+    locality: Locality;
+    name: Scalars['String']['output'];
+    note: Scalars['String']['output'];
+    phoneCode: Scalars['String']['output'];
+    phoneNumber: Scalars['String']['output'];
+    street: Scalars['String']['output'];
+};
+
 export type User = {
     __typename?: 'User';
-    client: Maybe<Client>;
     dateJoined: Scalars['DateTime']['output'];
     email: Scalars['String']['output'];
+    employee: Maybe<Employee>;
     firstName: Scalars['String']['output'];
     id: Scalars['ID']['output'];
     /** Indica si el usuario debe ser tratado como activo. Desmarque esta opción en lugar de borrar la cuenta. */
@@ -206,13 +231,15 @@ export type ClientsQuery = {
     clients: Array<{
         __typename?: 'Client';
         id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
         phoneCode: string;
         phoneNumber: string;
         streetName: string;
         houseUnit: string | null;
         houseNumber: string;
         dni: string;
-        user: { __typename?: 'User'; email: string; firstName: string; lastName: string };
         locality: { __typename?: 'Locality'; name: string };
     }>;
 };
@@ -273,29 +300,14 @@ export const ClientsDocument = {
                             kind: 'SelectionSet',
                             selections: [
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'user' },
-                                    selectionSet: {
-                                        kind: 'SelectionSet',
-                                        selections: [
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'email' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'firstName',
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'lastName' },
-                                            },
-                                        ],
-                                    },
+                                    name: { kind: 'Name', value: 'firstName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'lastName' },
                                 },
                                 {
                                     kind: 'Field',
