@@ -4,6 +4,7 @@ from senda.core.models import (
     OfficeModel,
     ProductModel,
     ClientModel,
+    SupplierModel,
 )
 
 
@@ -33,3 +34,8 @@ class Employee(DjangoObjectType):
 class Client(DjangoObjectType):
     class Meta:
         model = ClientModel
+
+
+class Supplier(DjangoObjectType):
+    class Meta:
+        model = SupplierModel
