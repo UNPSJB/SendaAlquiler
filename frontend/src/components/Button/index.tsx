@@ -5,6 +5,7 @@ import { ButtonHTMLAttributes, AnchorHTMLAttributes, forwardRef, ReactNode } fro
 
 export enum ButtonVariant {
     BLACK = 'BLACK',
+    GRAY = 'GRAY',
     OUTLINE_WHITE = 'OUTLINE_WHITE',
 }
 
@@ -38,6 +39,14 @@ const buttonClasses: Record<ButtonVariant, string> = {
         'hover:border-gray-400 hover:bg-gray-100',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2',
         'active:border-gray-900 active:bg-gray-200 active:shadow-sm',
+        'disabled:pointer-events-none disabled:opacity-50',
+    ),
+    [ButtonVariant.GRAY]: clsx(
+        commonClasses,
+        'border-gray-300 bg-gray-200 text-gray-700',
+        'hover:border-gray-400 hover:bg-gray-300',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2',
+        'active:border-gray-600 active:bg-gray-300 active:shadow',
         'disabled:pointer-events-none disabled:opacity-50',
     ),
 };
@@ -93,14 +102,14 @@ const Button: React.FC<Props> = forwardRef<HTMLButtonElement | HTMLAnchorElement
 
             // Internal navigation using Next.js Link
             return (
-                <Link href={href} passHref>
-                    <a
-                        ref={ref as React.Ref<HTMLAnchorElement>}
-                        className={className}
-                        {...rest}
-                    >
-                        {children}
-                    </a>
+                <Link
+                    href={href}
+                    passHref
+                    ref={ref as React.Ref<HTMLAnchorElement>}
+                    className={className}
+                    {...rest}
+                >
+                    {children}
                 </Link>
             );
         }

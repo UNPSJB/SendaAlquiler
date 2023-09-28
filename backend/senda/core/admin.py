@@ -13,7 +13,7 @@ from import_export.admin import ImportExportModelAdmin
 
 @admin.register(ClientModel)
 class ClientModelAdmin(ImportExportModelAdmin):
-    search_fields = ("user",)
+    search_fields = ("email",)
 
 
 @admin.register(EmployeeModel)
