@@ -46,55 +46,27 @@ export type Client = {
     streetName: Scalars['String']['output'];
 };
 
-/** An enumeration. */
-export enum CoreLocalityModelStateChoices {
-    /** BUENOS_AIRES */
-    BuenosAires = 'BUENOS_AIRES',
-    /** CATAMARCA */
-    Catamarca = 'CATAMARCA',
-    /** CHACO */
-    Chaco = 'CHACO',
-    /** CHUBUT */
-    Chubut = 'CHUBUT',
-    /** CORDOBA */
-    Cordoba = 'CORDOBA',
-    /** CORRIENTES */
-    Corrientes = 'CORRIENTES',
-    /** ENTRE_RIOS */
-    EntreRios = 'ENTRE_RIOS',
-    /** FORMOSA */
-    Formosa = 'FORMOSA',
-    /** JUJUY */
-    Jujuy = 'JUJUY',
-    /** LA_PAMPA */
-    LaPampa = 'LA_PAMPA',
-    /** LA_RIOJA */
-    LaRioja = 'LA_RIOJA',
-    /** MENDOZA */
-    Mendoza = 'MENDOZA',
-    /** MISIONES */
-    Misiones = 'MISIONES',
-    /** NEUQUEN */
-    Neuquen = 'NEUQUEN',
-    /** RIO_NEGRO */
-    RioNegro = 'RIO_NEGRO',
-    /** SALTA */
-    Salta = 'SALTA',
-    /** SANTA_CRUZ */
-    SantaCruz = 'SANTA_CRUZ',
-    /** SANTA_FE */
-    SantaFe = 'SANTA_FE',
-    /** SANTIAGO_DEL_ESTERO */
-    SantiagoDelEstero = 'SANTIAGO_DEL_ESTERO',
-    /** SAN_JUAN */
-    SanJuan = 'SAN_JUAN',
-    /** SAN_LUIS */
-    SanLuis = 'SAN_LUIS',
-    /** TIERRA_DEL_FUEGO */
-    TierraDelFuego = 'TIERRA_DEL_FUEGO',
-    /** TUCUMAN */
-    Tucuman = 'TUCUMAN',
-}
+export type CreateClient = {
+    __typename?: 'CreateClient';
+    client: Maybe<Client>;
+    error: Maybe<Scalars['String']['output']>;
+};
+
+export type CreateClientInput = {
+    dni: Scalars['String']['input'];
+    email: Scalars['String']['input'];
+    firstName: Scalars['String']['input'];
+    houseNumber: Scalars['String']['input'];
+    houseUnit: InputMaybe<Scalars['String']['input']>;
+    lastName: Scalars['String']['input'];
+    localityId: InputMaybe<Scalars['ID']['input']>;
+    localityName: InputMaybe<Scalars['String']['input']>;
+    localityPostalCode: InputMaybe<Scalars['Int']['input']>;
+    localityState: InputMaybe<StateChoices>;
+    phoneCode: Scalars['String']['input'];
+    phoneNumber: Scalars['String']['input'];
+    streetName: Scalars['String']['input'];
+};
 
 export type Employee = {
     __typename?: 'Employee';
@@ -109,7 +81,7 @@ export type Locality = {
     name: Scalars['String']['output'];
     officemodelSet: Array<Office>;
     postalCode: Scalars['Int']['output'];
-    state: CoreLocalityModelStateChoices;
+    state: StateChoices;
     suppliermodelSet: Array<Supplier>;
 };
 
@@ -121,11 +93,17 @@ export type Login = {
 
 export type Mutation = {
     __typename?: 'Mutation';
+    createClient: Maybe<CreateClient>;
     login: Maybe<Login>;
     refreshToken: Maybe<Refresh>;
     /** Obtain JSON Web Token mutation */
     tokenAuth: Maybe<ObtainJsonWebToken>;
+    updateClient: Maybe<UpdateClient>;
     verifyToken: Maybe<Verify>;
+};
+
+export type MutationCreateClientArgs = {
+    clientData: CreateClientInput;
 };
 
 export type MutationLoginArgs = {
@@ -140,6 +118,10 @@ export type MutationRefreshTokenArgs = {
 export type MutationTokenAuthArgs = {
     email: Scalars['String']['input'];
     password: Scalars['String']['input'];
+};
+
+export type MutationUpdateClientArgs = {
+    clientData: UpdateClientInput;
 };
 
 export type MutationVerifyTokenArgs = {
@@ -187,6 +169,33 @@ export type Refresh = {
     token: Scalars['String']['output'];
 };
 
+/** An enumeration. */
+export enum StateChoices {
+    BuenosAires = 'BUENOS_AIRES',
+    Catamarca = 'CATAMARCA',
+    Chaco = 'CHACO',
+    Chubut = 'CHUBUT',
+    Cordoba = 'CORDOBA',
+    Corrientes = 'CORRIENTES',
+    EntreRios = 'ENTRE_RIOS',
+    Formosa = 'FORMOSA',
+    Jujuy = 'JUJUY',
+    LaPampa = 'LA_PAMPA',
+    LaRioja = 'LA_RIOJA',
+    Mendoza = 'MENDOZA',
+    Misiones = 'MISIONES',
+    Neuquen = 'NEUQUEN',
+    RioNegro = 'RIO_NEGRO',
+    Salta = 'SALTA',
+    SantaCruz = 'SANTA_CRUZ',
+    SantaFe = 'SANTA_FE',
+    SantiagoDelEstero = 'SANTIAGO_DEL_ESTERO',
+    SanJuan = 'SAN_JUAN',
+    SanLuis = 'SAN_LUIS',
+    TierraDelFuego = 'TIERRA_DEL_FUEGO',
+    Tucuman = 'TUCUMAN',
+}
+
 export type Supplier = {
     __typename?: 'Supplier';
     apartment: Scalars['String']['output'];
@@ -200,6 +209,29 @@ export type Supplier = {
     phoneCode: Scalars['String']['output'];
     phoneNumber: Scalars['String']['output'];
     street: Scalars['String']['output'];
+};
+
+export type UpdateClient = {
+    __typename?: 'UpdateClient';
+    client: Maybe<Client>;
+    error: Maybe<Scalars['String']['output']>;
+};
+
+export type UpdateClientInput = {
+    dni: InputMaybe<Scalars['String']['input']>;
+    email: InputMaybe<Scalars['String']['input']>;
+    firstName: InputMaybe<Scalars['String']['input']>;
+    houseNumber: InputMaybe<Scalars['String']['input']>;
+    houseUnit: InputMaybe<Scalars['String']['input']>;
+    id: Scalars['ID']['input'];
+    lastName: InputMaybe<Scalars['String']['input']>;
+    localityId: InputMaybe<Scalars['ID']['input']>;
+    localityName: InputMaybe<Scalars['String']['input']>;
+    localityPostalCode: InputMaybe<Scalars['Int']['input']>;
+    localityState: InputMaybe<StateChoices>;
+    phoneCode: InputMaybe<Scalars['String']['input']>;
+    phoneNumber: InputMaybe<Scalars['String']['input']>;
+    streetName: InputMaybe<Scalars['String']['input']>;
 };
 
 export type User = {
@@ -253,8 +285,21 @@ export type LocalitiesQuery = {
         id: string;
         name: string;
         postalCode: number;
-        state: LocalityLocalityModelStateChoices;
+        state: StateChoices;
     }>;
+};
+
+export type CreateClientMutationVariables = Exact<{
+    clientData: CreateClientInput;
+}>;
+
+export type CreateClientMutation = {
+    __typename?: 'Mutation';
+    createClient: {
+        __typename?: 'CreateClient';
+        error: string | null;
+        client: { __typename?: 'Client'; id: string } | null;
+    } | null;
 };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never }>;
@@ -382,6 +427,70 @@ export const LocalitiesDocument = {
         },
     ],
 } as unknown as DocumentNode<LocalitiesQuery, LocalitiesQueryVariables>;
+export const CreateClientDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'createClient' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'clientData' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreateClientInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'createClient' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'clientData' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'clientData' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'client' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<CreateClientMutation, CreateClientMutationVariables>;
 export const UsersDocument = {
     kind: 'Document',
     definitions: [

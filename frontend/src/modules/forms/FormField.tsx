@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import { PropsWithChildren } from 'react';
 import { useFormContext } from 'react-hook-form';
 
@@ -11,17 +12,20 @@ type FormFieldProps = PropsWithChildren<{
     label: string;
     helpText?: string;
     errorMessage?: string | null | undefined;
+    className?: string;
+    showRequired?: boolean;
 }>;
 
 /**
  * FormField - A wrapper component that displays a form field with its label, error, and help text.
  */
 export const FormField: React.FC<FormFieldProps> = (props) => {
-    const { fieldID, errorMessage, helpText, label, children } = props;
+    const { fieldID, errorMessage, helpText, label, className, showRequired, children } =
+        props;
 
     return (
-        <div className="space-y-2" id={`${fieldID}-field`}>
-            <Label label={label} htmlFor={fieldID}>
+        <div className={clsx('space-y-2', className)} id={`${fieldID}-field`}>
+            <Label label={label} htmlFor={fieldID} showRequired={showRequired}>
                 {children}
             </Label>
 

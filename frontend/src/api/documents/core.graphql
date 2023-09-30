@@ -24,3 +24,12 @@ query localities {
         state
     }
 }
+
+mutation createClient($clientData: CreateClientInput!) {
+    createClient(clientData: $clientData) {
+        client {
+            id
+        }
+        error
+    }
+}

@@ -172,3 +172,13 @@ h6 {
 .flatpickr-calendar {
     box-shadow: none !important;
 }
+
+input[type='number'] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+
+    &::-webkit-inner-spin-button {
+        display: none;
+    }
+}
