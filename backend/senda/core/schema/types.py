@@ -5,13 +5,19 @@ from senda.core.models import (
     ProductModel,
     ClientModel,
     SupplierModel,
+    StateChoices,
 )
 
 
 from graphene_django import DjangoObjectType
+import graphene
+
+StateChoicesEnum = graphene.Enum.from_enum(StateChoices)
 
 
 class Locality(DjangoObjectType):
+    state = StateChoicesEnum(required=True)
+
     class Meta:
         model = LocalityModel
 

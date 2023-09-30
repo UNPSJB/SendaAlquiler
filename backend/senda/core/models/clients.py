@@ -1,5 +1,49 @@
 from django.db import models
 from senda.core.models.localities import LocalityModel
+from django.core.validators import RegexValidator
+from senda.core.error_messages import ClientErrorMessages
+from senda.core.validators import only_digits_validator
+
+
+class ClientModelManager(models.Manager):
+    def create_client(
+        self,
+        email: str,
+        first_name: str,
+        last_name: str,
+        locality: LocalityModel,
+        house_number: str,
+        street_name: str,
+        house_unit: str,
+        dni: str,
+        phone_code: str,
+        phone_number: str,
+    ):
+        if self.filter(email=email).exists():
+            raise ValueError("Ya existe un cliente con ese email")
+
+        if self.filter(dni=dni).exists():
+            raise ValueError("Ya existe un cliente con ese DNI")
+
+        return self.create(
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            locality=locality,
+            house_number=house_number,
+            street_name=street_name,
+            house_unit=house_unit,
+            dni=dni,
+            phone_code=phone_code,
+            phone_number=phone_number,
+        )
+
+    def update_client(self, client, locality, **kwargs):
+        client.locality = locality
+        for field, value in kwargs.items():
+            setattr(client, field, value)
+        client.save()
+        return client
 
 
 class ClientModel(models.Model):
@@ -22,14 +66,29 @@ class ClientModel(models.Model):
         null=True,
     )
     dni = models.CharField(
-        max_length=20, help_text="Número de documento de identidad del cliente"
+        max_length=20,
+        help_text="Número de documento de identidad del cliente",
+        unique=True,
+        validators=[
+            only_digits_validator,
+        ],
     )
     phone_code = models.CharField(
-        max_length=10, help_text="Código de área del teléfono del cliente"
+        max_length=10,
+        help_text="Código de área del teléfono del cliente",
+        validators=[
+            only_digits_validator,
+        ],
     )
     phone_number = models.CharField(
-        max_length=10, help_text="Número de teléfono del cliente"
+        max_length=10,
+        help_text="Número de teléfono del cliente",
+        validators=[
+            only_digits_validator,
+        ],
     )
+
+    objects = ClientModelManager()
 
     def __str__(self) -> str:
         return self.email

@@ -1,5 +1,6 @@
 from django.db import models
-    
+
+
 class StateChoices(models.TextChoices):
     BUENOS_AIRES = "BUENOS_AIRES", "BUENOS_AIRES"
     CATAMARCA = "CATAMARCA", "CATAMARCA"
@@ -25,10 +26,21 @@ class StateChoices(models.TextChoices):
     TIERRA_DEL_FUEGO = "TIERRA_DEL_FUEGO", "TIERRA_DEL_FUEGO"
     TUCUMAN = "TUCUMAN", "TUCUMAN"
 
+
+class LocalityModelManager(models.Manager):
+    def get_or_create_locality(self, name: str, postal_code: int, state: StateChoices):
+        locality, created = self.get_or_create(
+            name=name, postal_code=postal_code, state=state
+        )
+        return locality
+
+
 class LocalityModel(models.Model):
     name = models.CharField(max_length=255)
     postal_code = models.IntegerField()
     state = models.CharField(choices=StateChoices.choices, max_length=30)
+
+    objects = LocalityModelManager()
 
     def __str__(self) -> str:
         return self.name
