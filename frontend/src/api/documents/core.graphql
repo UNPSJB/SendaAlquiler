@@ -25,6 +25,24 @@ query localities {
     }
 }
 
+query suppliers {
+    suppliers {
+        id
+        cuit
+        name
+        phoneCode
+        phoneNumber
+        email
+        locality {
+            name
+        }
+        street
+        houseNumber
+        apartment
+        note
+    }
+}
+
 mutation createClient($clientData: CreateClientInput!) {
     createClient(clientData: $clientData) {
         client {

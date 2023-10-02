@@ -14,12 +14,14 @@ import {
     LoginDocument,
     LoginMutation,
     LoginMutationVariables,
+    SuppliersDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
 const queryKeys = {
     clients: ['clients'],
     localities: ['localities'],
+    suppliers: ['suppliers'],
 };
 
 /**
@@ -48,6 +50,12 @@ export const useClients = () => {
 export const useLocalities = () => {
     return useQuery(queryKeys.localities, () => {
         return clientGraphqlQuery(LocalitiesDocument, {});
+    });
+};
+
+export const useSuppliers = () => {
+    return useQuery(queryKeys.suppliers, () => {
+        return clientGraphqlQuery(SuppliersDocument, {});
     });
 };
 

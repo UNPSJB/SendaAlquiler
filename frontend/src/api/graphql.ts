@@ -289,6 +289,26 @@ export type LocalitiesQuery = {
     }>;
 };
 
+export type SuppliersQueryVariables = Exact<{ [key: string]: never }>;
+
+export type SuppliersQuery = {
+    __typename?: 'Query';
+    suppliers: Array<{
+        __typename?: 'Supplier';
+        id: string;
+        cuit: string;
+        name: string;
+        phoneCode: string;
+        phoneNumber: string;
+        email: string;
+        street: string;
+        houseNumber: string;
+        apartment: string;
+        note: string;
+        locality: { __typename?: 'Locality'; name: string };
+    }>;
+};
+
 export type CreateClientMutationVariables = Exact<{
     clientData: CreateClientInput;
 }>;
@@ -427,6 +447,68 @@ export const LocalitiesDocument = {
         },
     ],
 } as unknown as DocumentNode<LocalitiesQuery, LocalitiesQueryVariables>;
+export const SuppliersDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'suppliers' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'suppliers' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'cuit' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'phoneCode' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'phoneNumber' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'locality' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'street' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseNumber' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'apartment' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'note' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<SuppliersQuery, SuppliersQueryVariables>;
 export const CreateClientDocument = {
     kind: 'Document',
     definitions: [
