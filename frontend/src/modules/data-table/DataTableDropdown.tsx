@@ -78,13 +78,6 @@ const DataTableDropdown: React.FC<DropdownProps> = ({ onRemove }) => {
                             >
                                 Eliminar
                             </button>
-                            <button
-                                onClick={handleRemove}
-                                className="block w-full px-6 py-2 text-left font-headings font-bold first:rounded-t last:rounded-b hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                                role="menuitem"
-                            >
-                                Editar
-                            </button>
                         </li>
                     </ul>
                 </div>

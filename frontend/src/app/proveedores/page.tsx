@@ -60,7 +60,7 @@ const SupplierRowRenderer = (handleRemove: (id: Supplier['id']) => void) => {
 
 
 const Page = () => {
-    const useClientsResult = useSuppliers();
+    const useSuppliersResult = useSuppliers();
 
     const handlePrevious = () => {
         console.log('previous');
@@ -77,7 +77,7 @@ const Page = () => {
     return (
         <DashboardLayout title="Proveedores">
             <FetchedDataRenderer
-                {...useClientsResult}
+                {...useSuppliersResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
                         <DataTable
@@ -91,7 +91,7 @@ const Page = () => {
                     <div className="flex w-full flex-1 items-center justify-center">
                         <FetchStatusMessageWithDescription
                             title="Ha ocurrido un error"
-                            line1="Hubo un error al cargar los clientes."
+                            line1="Hubo un error al cargar los proveedores."
                             line2="Prueba de nuevo más tarde."
                         />
                     </div>
