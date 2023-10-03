@@ -338,45 +338,13 @@
                         "name": "localityId",
                         "description": null,
                         "type": {
-                            "kind": "SCALAR",
-                            "name": "ID",
-                            "ofType": null
-                        },
-                        "defaultValue": null,
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "localityName",
-                        "description": null,
-                        "type": {
-                            "kind": "SCALAR",
-                            "name": "String",
-                            "ofType": null
-                        },
-                        "defaultValue": null,
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "localityPostalCode",
-                        "description": null,
-                        "type": {
-                            "kind": "SCALAR",
-                            "name": "Int",
-                            "ofType": null
-                        },
-                        "defaultValue": null,
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "localityState",
-                        "description": null,
-                        "type": {
-                            "kind": "ENUM",
-                            "name": "StateChoices",
-                            "ofType": null
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "ID",
+                                "ofType": null
+                            }
                         },
                         "defaultValue": null,
                         "isDeprecated": false,
@@ -432,6 +400,41 @@
                     }
                 ],
                 "interfaces": null,
+                "enumValues": null,
+                "possibleTypes": null
+            },
+            {
+                "kind": "OBJECT",
+                "name": "CreateLocality",
+                "description": null,
+                "fields": [
+                    {
+                        "name": "error",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "locality",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "OBJECT",
+                            "name": "Locality",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "inputFields": null,
+                "interfaces": [],
                 "enumValues": null,
                 "possibleTypes": null
             },
@@ -612,7 +615,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "SCALAR",
-                                "name": "Int",
+                                "name": "String",
                                 "ofType": null
                             }
                         },
@@ -737,6 +740,67 @@
                         "type": {
                             "kind": "OBJECT",
                             "name": "CreateClient",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "createLocality",
+                        "description": null,
+                        "args": [
+                            {
+                                "name": "name",
+                                "description": null,
+                                "type": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "SCALAR",
+                                        "name": "String",
+                                        "ofType": null
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "postalCode",
+                                "description": null,
+                                "type": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "SCALAR",
+                                        "name": "String",
+                                        "ofType": null
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "state",
+                                "description": null,
+                                "type": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "ENUM",
+                                        "name": "StateChoices",
+                                        "ofType": null
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            }
+                        ],
+                        "type": {
+                            "kind": "OBJECT",
+                            "name": "CreateLocality",
                             "ofType": null
                         },
                         "isDeprecated": false,
@@ -1821,42 +1885,6 @@
                         "type": {
                             "kind": "SCALAR",
                             "name": "ID",
-                            "ofType": null
-                        },
-                        "defaultValue": null,
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "localityName",
-                        "description": null,
-                        "type": {
-                            "kind": "SCALAR",
-                            "name": "String",
-                            "ofType": null
-                        },
-                        "defaultValue": null,
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "localityPostalCode",
-                        "description": null,
-                        "type": {
-                            "kind": "SCALAR",
-                            "name": "Int",
-                            "ofType": null
-                        },
-                        "defaultValue": null,
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "localityState",
-                        "description": null,
-                        "type": {
-                            "kind": "ENUM",
-                            "name": "StateChoices",
                             "ofType": null
                         },
                         "defaultValue": null,

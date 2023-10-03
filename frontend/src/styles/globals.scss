@@ -182,3 +182,23 @@ input[type='number'] {
         display: none;
     }
 }
+
+.react-select__control {
+    @apply p-4;
+}
+
+.react-select__value-container,
+.react-select__input-container {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 0 !important;
+}
+
+.react-select__input-container,
+.react-select__placeholder {
+    margin: 0 !important;
+}
+
+.react-select__indicator.react-select__dropdown-indicator {
+    @apply px-2 py-0;
+}

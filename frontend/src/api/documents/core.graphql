@@ -51,3 +51,13 @@ mutation createClient($clientData: CreateClientInput!) {
         error
     }
 }
+
+mutation createLocality($name: String!, $state: StateChoices!, $postalCode: String!) {
+    createLocality(name: $name, state: $state, postalCode: $postalCode) {
+        locality {
+            id
+            name
+        }
+        error
+    }
+}

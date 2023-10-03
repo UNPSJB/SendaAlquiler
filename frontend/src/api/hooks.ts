@@ -10,7 +10,11 @@ import {
     CreateClientDocument,
     CreateClientMutation,
     CreateClientMutationVariables,
+    CreateLocalityDocument,
+    CreateLocalityMutation,
+    CreateLocalityMutationVariables,
     LocalitiesDocument,
+    LocalitiesQuery,
     LoginDocument,
     LoginMutation,
     LoginMutationVariables,
@@ -83,6 +87,56 @@ export const useCreateClient = ({
 
                 if (onSuccess) {
                     onSuccess(data, context, variables);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+type UseCreateLocalityOptions = UseMutationOptions<
+    CreateLocalityMutation,
+    Error,
+    CreateLocalityMutationVariables
+>;
+
+export const useCreateLocality = ({
+    onSuccess,
+    ...options
+}: UseCreateLocalityOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<CreateLocalityMutation, Error, CreateLocalityMutationVariables>(
+        (data) => {
+            return clientGraphqlQuery(CreateLocalityDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                const locality = data.createLocality?.locality;
+                if (locality) {
+                    client.setQueryData<LocalitiesQuery>(queryKeys.localities, (prev) => {
+                        if (!prev) {
+                            return prev;
+                        }
+
+                        return {
+                            ...prev,
+                            localities: [
+                                ...prev.localities,
+                                {
+                                    __typename: 'Locality',
+                                    id: locality.id,
+                                    name: locality.name,
+                                    postalCode: variables.postalCode,
+                                    state: variables.state,
+                                },
+                            ],
+                        };
+                    });
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
                 }
             },
             ...options,

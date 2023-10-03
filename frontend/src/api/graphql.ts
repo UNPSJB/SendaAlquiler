@@ -59,13 +59,16 @@ export type CreateClientInput = {
     houseNumber: Scalars['String']['input'];
     houseUnit: InputMaybe<Scalars['String']['input']>;
     lastName: Scalars['String']['input'];
-    localityId: InputMaybe<Scalars['ID']['input']>;
-    localityName: InputMaybe<Scalars['String']['input']>;
-    localityPostalCode: InputMaybe<Scalars['Int']['input']>;
-    localityState: InputMaybe<StateChoices>;
+    localityId: Scalars['ID']['input'];
     phoneCode: Scalars['String']['input'];
     phoneNumber: Scalars['String']['input'];
     streetName: Scalars['String']['input'];
+};
+
+export type CreateLocality = {
+    __typename?: 'CreateLocality';
+    error: Maybe<Scalars['String']['output']>;
+    locality: Maybe<Locality>;
 };
 
 export type Employee = {
@@ -80,7 +83,7 @@ export type Locality = {
     id: Scalars['ID']['output'];
     name: Scalars['String']['output'];
     officemodelSet: Array<Office>;
-    postalCode: Scalars['Int']['output'];
+    postalCode: Scalars['String']['output'];
     state: StateChoices;
     suppliermodelSet: Array<Supplier>;
 };
@@ -94,6 +97,7 @@ export type Login = {
 export type Mutation = {
     __typename?: 'Mutation';
     createClient: Maybe<CreateClient>;
+    createLocality: Maybe<CreateLocality>;
     login: Maybe<Login>;
     refreshToken: Maybe<Refresh>;
     /** Obtain JSON Web Token mutation */
@@ -104,6 +108,12 @@ export type Mutation = {
 
 export type MutationCreateClientArgs = {
     clientData: CreateClientInput;
+};
+
+export type MutationCreateLocalityArgs = {
+    name: Scalars['String']['input'];
+    postalCode: Scalars['String']['input'];
+    state: StateChoices;
 };
 
 export type MutationLoginArgs = {
@@ -226,9 +236,6 @@ export type UpdateClientInput = {
     id: Scalars['ID']['input'];
     lastName: InputMaybe<Scalars['String']['input']>;
     localityId: InputMaybe<Scalars['ID']['input']>;
-    localityName: InputMaybe<Scalars['String']['input']>;
-    localityPostalCode: InputMaybe<Scalars['Int']['input']>;
-    localityState: InputMaybe<StateChoices>;
     phoneCode: InputMaybe<Scalars['String']['input']>;
     phoneNumber: InputMaybe<Scalars['String']['input']>;
     streetName: InputMaybe<Scalars['String']['input']>;
@@ -284,7 +291,7 @@ export type LocalitiesQuery = {
         __typename?: 'Locality';
         id: string;
         name: string;
-        postalCode: number;
+        postalCode: string;
         state: StateChoices;
     }>;
 };
@@ -319,6 +326,21 @@ export type CreateClientMutation = {
         __typename?: 'CreateClient';
         error: string | null;
         client: { __typename?: 'Client'; id: string } | null;
+    } | null;
+};
+
+export type CreateLocalityMutationVariables = Exact<{
+    name: Scalars['String']['input'];
+    state: StateChoices;
+    postalCode: Scalars['String']['input'];
+}>;
+
+export type CreateLocalityMutation = {
+    __typename?: 'Mutation';
+    createLocality: {
+        __typename?: 'CreateLocality';
+        error: string | null;
+        locality: { __typename?: 'Locality'; id: string; name: string } | null;
     } | null;
 };
 
@@ -573,6 +595,115 @@ export const CreateClientDocument = {
         },
     ],
 } as unknown as DocumentNode<CreateClientMutation, CreateClientMutationVariables>;
+export const CreateLocalityDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'createLocality' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'name' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'state' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'StateChoices' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'postalCode' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'createLocality' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'name' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'name' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'state' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'state' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'postalCode' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'postalCode' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'locality' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<CreateLocalityMutation, CreateLocalityMutationVariables>;
 export const UsersDocument = {
     kind: 'Document',
     definitions: [

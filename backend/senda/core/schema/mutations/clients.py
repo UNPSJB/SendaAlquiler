@@ -1,6 +1,6 @@
 import graphene
 from senda.core.models import ClientModel, LocalityModel
-from senda.core.schema.types import Client, StateChoicesEnum
+from senda.core.schema.types import Client
 
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
@@ -11,14 +11,25 @@ class ErrorMessages:
     NOT_FOUND = "El cliente no existe"
 
 
-class BaseClientInput(graphene.InputObjectType):
+class CreateClientInput(graphene.InputObjectType):
+    email = graphene.String(required=True)
+    first_name = graphene.String(required=True)
+    last_name = graphene.String(required=True)
+    locality_id = graphene.ID(required=True)
+    street_name = graphene.String(required=True)
+    house_number = graphene.String(required=True)
+    house_unit = graphene.String()
+    dni = graphene.String(required=True)
+    phone_code = graphene.String(required=True)
+    phone_number = graphene.String(required=True)
+
+
+class UpdateClientInput(graphene.InputObjectType):
+    id = graphene.ID(required=True)
     email = graphene.String()
     first_name = graphene.String()
     last_name = graphene.String()
     locality_id = graphene.ID()
-    locality_name = graphene.String()
-    locality_postal_code = graphene.Int()
-    locality_state = StateChoicesEnum()
     street_name = graphene.String()
     house_number = graphene.String()
     house_unit = graphene.String()
@@ -27,43 +38,17 @@ class BaseClientInput(graphene.InputObjectType):
     phone_number = graphene.String()
 
 
-class CreateClientInput(BaseClientInput):
-    email = graphene.String(required=True)
-    first_name = graphene.String(required=True)
-    last_name = graphene.String(required=True)
-    street_name = graphene.String(required=True)
-    house_number = graphene.String(required=True)
-    dni = graphene.String(required=True)
-    phone_code = graphene.String(required=True)
-    phone_number = graphene.String(required=True)
-
-
-class UpdateClientInput(BaseClientInput):
-    id = graphene.ID(required=True)
-
-
-def get_locality(data):
-    locality_id = data.get("locality_id")
-    locality_name = data.get("locality_name")
-    locality_postal_code = data.get("locality_postal_code")
-    locality_state = data.get("locality_state")
-
+def get_locality(locality_id: str):
     if locality_id:
         try:
             return LocalityModel.objects.get(id=locality_id)
         except ObjectDoesNotExist:
             raise ValueError(ErrorMessages.LOCALITY_NOT_FOUND)
-    elif locality_name and locality_postal_code and locality_state:
-        return LocalityModel.objects.get_or_create_locality(
-            name=locality_name,
-            postal_code=locality_postal_code,
-            state=locality_state,
-        )
     else:
-        raise ValueError(ErrorMessages.INVALID_LOCALITY)
+        return None
 
 
-def client_data_to_dict(client_data: BaseClientInput):
+def client_data_to_dict(client_data: graphene.InputObjectType):
     """Converts InputObjectType to dictionary."""
     return {field: getattr(client_data, field) for field in client_data._meta.fields}
 
@@ -79,7 +64,11 @@ class CreateClient(graphene.Mutation):
         client_data_dict = client_data_to_dict(client_data)
 
         try:
-            locality = get_locality(client_data_dict)
+            locality_id = client_data_dict.pop("locality_id")
+            locality = get_locality(locality_id)
+            if locality is None:
+                raise ValueError(ErrorMessages.INVALID_LOCALITY)
+
             client = ClientModel.objects.create_client(
                 locality=locality, **client_data_dict
             )
@@ -106,7 +95,11 @@ class UpdateClient(graphene.Mutation):
             return UpdateClient(error=ErrorMessages.NOT_FOUND)
 
         try:
-            locality = get_locality(client_data_dict)
+            locality_id = client_data_dict.pop("locality_id")
+            locality = get_locality(locality_id)
+            if locality is None:
+                raise ValueError(ErrorMessages.INVALID_LOCALITY)
+
             updated_client = ClientModel.objects.update_client(
                 client=client, locality=locality, **client_data_dict
             )

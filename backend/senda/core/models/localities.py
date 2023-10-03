@@ -28,6 +28,16 @@ class StateChoices(models.TextChoices):
 
 
 class LocalityModelManager(models.Manager):
+    def create_locality(self, name, postal_code, state):
+        name = name.strip().lower().title()
+
+        if LocalityModel.objects.filter(
+            name=name, postal_code=postal_code, state=state
+        ).exists():
+            raise ValueError("La localidad ya existe")
+
+        return self.create(name=name, postal_code=postal_code, state=state)
+
     def get_or_create_locality(self, name: str, postal_code: int, state: StateChoices):
         locality, created = self.get_or_create(
             name=name, postal_code=postal_code, state=state
@@ -37,10 +47,17 @@ class LocalityModelManager(models.Manager):
 
 class LocalityModel(models.Model):
     name = models.CharField(max_length=255)
-    postal_code = models.IntegerField()
+    postal_code = models.CharField(max_length=10)
     state = models.CharField(choices=StateChoices.choices, max_length=30)
 
     objects = LocalityModelManager()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name", "postal_code", "state"], name="unique_locality"
+            )
+        ]
 
     def __str__(self) -> str:
         return self.name
