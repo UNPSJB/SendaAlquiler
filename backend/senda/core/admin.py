@@ -33,7 +33,7 @@ class OfficeModelAdmin(ImportExportModelAdmin):
 
 @admin.register(ProductModel)
 class ProductModelAdmin(ImportExportModelAdmin):
-    list_display = ("title",)
+    list_display = ("name",)
 
 
 @admin.register(SupplierModel)
