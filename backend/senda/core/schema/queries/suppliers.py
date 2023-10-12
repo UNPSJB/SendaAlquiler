@@ -9,3 +9,8 @@ class Query(graphene.ObjectType):
 
     def resolve_suppliers(self, info):
         return SupplierModel.objects.all()
+
+    supplier_by_id = graphene.Field(Supplier, id=graphene.ID(required=True))
+
+    def resolve_supplier_by_id(self, info, id: str):
+        return SupplierModel.objects.filter(id=id).first()

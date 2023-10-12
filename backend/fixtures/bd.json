@@ -1,0 +1,68 @@
+[
+{
+    "model": "core.localitymodel",
+    "pk": 1,
+    "fields": {
+        "name": "Trelew",
+        "postal_code": "9100",
+        "state": "CHUBUT"
+    }
+},
+{
+    "model": "core.localitymodel",
+    "pk": 2,
+    "fields": {
+        "name": "Gaiman",
+        "postal_code": "9105",
+        "state": "CHUBUT"
+    }
+},
+{
+    "model": "core.clientmodel",
+    "pk": 1,
+    "fields": {
+        "email": "bruce@wayne.com",
+        "first_name": "Bruce",
+        "last_name": "Wayne",
+        "locality": 1,
+        "house_number": "123",
+        "street_name": "Fontana",
+        "house_unit": null,
+        "dni": "34825193",
+        "phone_code": "549",
+        "phone_number": "2804728514"
+    }
+},
+{
+    "model": "core.suppliermodel",
+    "pk": 1,
+    "fields": {
+        "cuit": "206665500",
+        "name": "Carlos Service",
+        "email": "asdf@mail.com",
+        "locality": 2,
+        "house_number": "35",
+        "street_name": "",
+        "house_unit": null,
+        "phone_code": "2804",
+        "phone_number": "4856202",
+        "note": null
+    }
+},
+{
+    "model": "users.usermodel",
+    "fields": {
+        "password": "pbkdf2_sha256$390000$e6oDWouCRAArI59cZOaxok$9NxVD13GDN3UsF3K9KZmpckBE3jzazI7GaoVm7AQhwI=",
+        "last_login": "2023-09-30T13:53:24.546Z",
+        "is_superuser": true,
+        "is_staff": true,
+        "date_joined": "2023-09-28T02:19:53.660Z",
+        "first_name": "",
+        "last_name": "",
+        "email": "1@mail.com",
+        "is_active": true,
+        "groups": [],
+        "user_permissions": []
+    }
+}
+]

@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query';
 
 import {
+    ClientByIdDocument,
     ClientsDocument,
     CreateClientDocument,
     CreateClientMutation,
@@ -18,14 +19,19 @@ import {
     LoginDocument,
     LoginMutation,
     LoginMutationVariables,
+    SupplierByIdDocument,
     SuppliersDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
 const queryKeys = {
     clients: ['clients'],
+    clientById: (id: string | undefined) => [...queryKeys.clients, id],
+
     localities: ['localities'],
+
     suppliers: ['suppliers'],
+    supplierById: (id: string | undefined) => [...queryKeys.suppliers, id],
 };
 
 /**
@@ -51,6 +57,20 @@ export const useClients = () => {
     });
 };
 
+export const useClientById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.clientById(id),
+        () => {
+            return clientGraphqlQuery(ClientByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
+};
+
 export const useLocalities = () => {
     return useQuery(queryKeys.localities, () => {
         return clientGraphqlQuery(LocalitiesDocument, {});
@@ -61,6 +81,20 @@ export const useSuppliers = () => {
     return useQuery(queryKeys.suppliers, () => {
         return clientGraphqlQuery(SuppliersDocument, {});
     });
+};
+
+export const useSupplierById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.supplierById(id),
+        () => {
+            return clientGraphqlQuery(SupplierByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
 };
 
 type UseCreateClientOptions = UseMutationOptions<

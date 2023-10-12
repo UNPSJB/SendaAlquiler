@@ -1,7 +1,5 @@
 from django.db import models
 from senda.core.models.localities import LocalityModel
-from django.core.validators import RegexValidator
-from senda.core.error_messages import ClientErrorMessages
 from senda.core.validators import only_digits_validator
 
 

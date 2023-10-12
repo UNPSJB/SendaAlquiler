@@ -53,15 +53,19 @@ const NavigationLink: React.FC<NavigationLinkProps> = ({ children, href }) => {
     );
 };
 
+export const DashboardLayoutBigTitle: React.FC<PropsWithChildren> = ({ children }) => {
+    return <h1 className="text-3xl font-bold">{children}</h1>;
+};
+
 type DashboardLayoutProps = PropsWithChildren<{
-    title: string;
+    header: React.ReactNode;
 }>;
 
 /**
  * DashboardLayout component.
  * Represents the main dashboard layout structure with a sidebar.
  */
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title }) => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) => {
     const [isMenuOpen, setMenuOpen] = useState(false);
     const toggleMenu = useCallback(() => setMenuOpen((prev) => !prev), []);
 
@@ -111,7 +115,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title }) =>
             <main className="flex flex-col pt-20 lg:w-4/5 lg:pt-0">
                 <header className="lg:pr-container border-b border-black py-5 lg:pl-10">
                     <div className="container lg:mx-0 lg:max-w-full lg:px-0">
-                        <h1 className="text-3xl font-bold">{title}</h1>
+                        {header}
                     </div>
                 </header>
 
