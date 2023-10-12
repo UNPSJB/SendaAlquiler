@@ -8,6 +8,7 @@ __pycache__/
 .vscode/
 .devcontainer/
 .DS_Store
+db.sqlite3
 
 collected_static
 *.ipynb
