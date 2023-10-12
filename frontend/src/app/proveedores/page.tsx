@@ -1,11 +1,15 @@
 'use client';
 
+import Link from 'next/link';
+
 import Skeleton from 'react-loading-skeleton';
 
 import { Supplier, SuppliersQuery } from '@/api/graphql';
 import { useSuppliers } from '@/api/hooks';
 
-import DashboardLayout from '@/modules/dashboard/DashboardLayout';
+import DashboardLayout, {
+    DashboardLayoutBigTitle,
+} from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
 import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
@@ -38,7 +42,9 @@ const SupplierRowRenderer = (handleRemove: (id: Supplier['id']) => void) => {
     const renderer = (supplier: ArrayElement<SuppliersQuery['suppliers']>) => (
         <TR key={supplier.id}>
             <TD>
-                {supplier.name} 
+                <Link className="text-violet-600" href={`/proveedores/${supplier.id}`}>
+                    {supplier.name}
+                </Link>
             </TD>
             <TD>{supplier.email}</TD>
             <TD>
@@ -46,7 +52,7 @@ const SupplierRowRenderer = (handleRemove: (id: Supplier['id']) => void) => {
                 {supplier.phoneNumber}
             </TD>
             <TD>
-                {supplier.street} {supplier.houseNumber}
+                {supplier.streetName} {supplier.houseNumber}
             </TD>
             <TD>{supplier.locality.name}</TD>
             <TD>
@@ -57,7 +63,6 @@ const SupplierRowRenderer = (handleRemove: (id: Supplier['id']) => void) => {
 
     return renderer;
 };
-
 
 const Page = () => {
     const useSuppliersResult = useSuppliers();
@@ -75,7 +80,9 @@ const Page = () => {
     };
 
     return (
-        <DashboardLayout title="Proveedores">
+        <DashboardLayout
+            header={<DashboardLayoutBigTitle>Proveedores</DashboardLayoutBigTitle>}
+        >
             <FetchedDataRenderer
                 {...useSuppliersResult}
                 Loading={

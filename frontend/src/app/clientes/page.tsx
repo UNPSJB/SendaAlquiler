@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import Skeleton from 'react-loading-skeleton';
 
 import { Client, ClientsQuery } from '@/api/graphql';
@@ -38,7 +40,9 @@ const ClientRowRenderer = (handleRemove: (id: Client['id']) => void) => {
     const renderer = (client: ArrayElement<ClientsQuery['clients']>) => (
         <TR key={client.id}>
             <TD>
-                {client.firstName} {client.lastName}
+                <Link className="text-violet-600" href={`/clientes/${client.id}`}>
+                    {client.firstName} {client.lastName}
+                </Link>
             </TD>
             <TD>{client.email}</TD>
             <TD>
@@ -74,7 +78,7 @@ const Page = () => {
     };
 
     return (
-        <DashboardLayout title="Clientes">
+        <DashboardLayout header="Clientes">
             <FetchedDataRenderer
                 {...useClientsResult}
                 Loading={

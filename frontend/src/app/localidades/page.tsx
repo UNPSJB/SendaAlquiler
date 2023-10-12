@@ -5,7 +5,9 @@ import Skeleton from 'react-loading-skeleton';
 import { LocalitiesQuery, Locality } from '@/api/graphql';
 import { useLocalities } from '@/api/hooks';
 
-import DashboardLayout from '@/modules/dashboard/DashboardLayout';
+import DashboardLayout, {
+    DashboardLayoutBigTitle,
+} from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
 import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
@@ -63,7 +65,9 @@ const Page = () => {
     };
 
     return (
-        <DashboardLayout title="Localidades">
+        <DashboardLayout
+            header={<DashboardLayoutBigTitle>Localidades</DashboardLayoutBigTitle>}
+        >
             <FetchedDataRenderer
                 {...useLocalitiesResult}
                 Loading={

@@ -1,7 +1,13 @@
-import DashboardLayout from '@/modules/dashboard/DashboardLayout';
+import DashboardLayout, {
+    DashboardLayoutBigTitle,
+} from '@/modules/dashboard/DashboardLayout';
 
 const Page = () => {
-    return <DashboardLayout title="Productos" />;
+    return (
+        <DashboardLayout
+            header={<DashboardLayoutBigTitle>Productos</DashboardLayoutBigTitle>}
+        />
+    );
 };
 
 export default Page;

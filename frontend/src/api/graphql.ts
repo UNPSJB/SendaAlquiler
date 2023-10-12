@@ -46,6 +46,14 @@ export type Client = {
     streetName: Scalars['String']['output'];
 };
 
+/** An enumeration. */
+export enum CoreProductModelTypeChoices {
+    /** ALQUILABLE */
+    Alquilable = 'ALQUILABLE',
+    /** COMERCIABLE */
+    Comerciable = 'COMERCIABLE',
+}
+
 export type CreateClient = {
     __typename?: 'CreateClient';
     client: Maybe<Client>;
@@ -85,7 +93,7 @@ export type Locality = {
     officemodelSet: Array<Office>;
     postalCode: Scalars['String']['output'];
     state: StateChoices;
-    suppliermodelSet: Array<Supplier>;
+    suppliers: Array<Supplier>;
 };
 
 export type Login = {
@@ -158,18 +166,32 @@ export type Office = {
 
 export type Product = {
     __typename?: 'Product';
+    description: Maybe<Scalars['String']['output']>;
     id: Scalars['ID']['output'];
-    title: Scalars['String']['output'];
+    name: Scalars['String']['output'];
+    price: Maybe<Scalars['Float']['output']>;
+    sku: Maybe<Scalars['String']['output']>;
+    type: CoreProductModelTypeChoices;
 };
 
 export type Query = {
     __typename?: 'Query';
+    clientById: Maybe<Client>;
     clients: Array<Client>;
     localities: Array<Locality>;
     offices: Array<Office>;
     products: Array<Product>;
+    supplierById: Maybe<Supplier>;
     suppliers: Array<Supplier>;
     users: Array<User>;
+};
+
+export type QueryClientByIdArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type QuerySupplierByIdArgs = {
+    id: Scalars['ID']['input'];
 };
 
 export type Refresh = {
@@ -208,17 +230,22 @@ export enum StateChoices {
 
 export type Supplier = {
     __typename?: 'Supplier';
-    apartment: Scalars['String']['output'];
     cuit: Scalars['String']['output'];
     email: Scalars['String']['output'];
+    /** Número de la calle donde vive el proveedor */
     houseNumber: Scalars['String']['output'];
+    /** Número de la casa o departamento */
+    houseUnit: Maybe<Scalars['String']['output']>;
     id: Scalars['ID']['output'];
     locality: Locality;
     name: Scalars['String']['output'];
-    note: Scalars['String']['output'];
+    note: Maybe<Scalars['String']['output']>;
+    /** Código de área del teléfono del proveedor */
     phoneCode: Scalars['String']['output'];
+    /** Número de teléfono del proveedor */
     phoneNumber: Scalars['String']['output'];
-    street: Scalars['String']['output'];
+    /** Nombre de la calle donde vive el proveedor */
+    streetName: Scalars['String']['output'];
 };
 
 export type UpdateClient = {
@@ -308,10 +335,10 @@ export type SuppliersQuery = {
         phoneCode: string;
         phoneNumber: string;
         email: string;
-        street: string;
+        streetName: string;
         houseNumber: string;
-        apartment: string;
-        note: string;
+        houseUnit: string | null;
+        note: string | null;
         locality: { __typename?: 'Locality'; name: string };
     }>;
 };
@@ -341,6 +368,57 @@ export type CreateLocalityMutation = {
         __typename?: 'CreateLocality';
         error: string | null;
         locality: { __typename?: 'Locality'; id: string; name: string } | null;
+    } | null;
+};
+
+export type ClientByIdQueryVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type ClientByIdQuery = {
+    __typename?: 'Query';
+    clientById: {
+        __typename?: 'Client';
+        firstName: string;
+        lastName: string;
+        email: string;
+        dni: string;
+        phoneCode: string;
+        phoneNumber: string;
+        houseNumber: string;
+        houseUnit: string | null;
+        streetName: string;
+        locality: {
+            __typename?: 'Locality';
+            name: string;
+            state: StateChoices;
+            postalCode: string;
+        };
+    } | null;
+};
+
+export type SupplierByIdQueryVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type SupplierByIdQuery = {
+    __typename?: 'Query';
+    supplierById: {
+        __typename?: 'Supplier';
+        name: string;
+        email: string;
+        cuit: string;
+        phoneCode: string;
+        phoneNumber: string;
+        houseNumber: string;
+        houseUnit: string | null;
+        streetName: string;
+        locality: {
+            __typename?: 'Locality';
+            name: string;
+            state: StateChoices;
+            postalCode: string;
+        };
     } | null;
 };
 
@@ -512,7 +590,7 @@ export const SuppliersDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'street' },
+                                    name: { kind: 'Name', value: 'streetName' },
                                 },
                                 {
                                     kind: 'Field',
@@ -520,7 +598,7 @@ export const SuppliersDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'apartment' },
+                                    name: { kind: 'Name', value: 'houseUnit' },
                                 },
                                 { kind: 'Field', name: { kind: 'Name', value: 'note' } },
                             ],
@@ -704,6 +782,195 @@ export const CreateLocalityDocument = {
         },
     ],
 } as unknown as DocumentNode<CreateLocalityMutation, CreateLocalityMutationVariables>;
+export const ClientByIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'clientById' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'clientById' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'firstName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'lastName' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'dni' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'phoneCode' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'phoneNumber' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseNumber' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseUnit' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'streetName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'locality' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'state' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'postalCode',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<ClientByIdQuery, ClientByIdQueryVariables>;
+export const SupplierByIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'supplierById' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'supplierById' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'cuit' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'phoneCode' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'phoneNumber' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseNumber' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseUnit' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'streetName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'locality' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'state' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'postalCode',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<SupplierByIdQuery, SupplierByIdQueryVariables>;
 export const UsersDocument = {
     kind: 'Document',
     definitions: [
