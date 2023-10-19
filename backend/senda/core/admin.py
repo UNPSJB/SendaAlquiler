@@ -6,9 +6,15 @@ from senda.core.models import (
     OfficeModel,
     ProductModel,
     ClientModel,
+    BrandModel,
     SupplierModel,
 )
 from import_export.admin import ImportExportModelAdmin
+
+
+@admin.register(BrandModel)
+class BrandModelAdmin(ImportExportModelAdmin):
+    search_fields = ("name",)
 
 
 @admin.register(ClientModel)
@@ -34,6 +40,7 @@ class OfficeModelAdmin(ImportExportModelAdmin):
 @admin.register(ProductModel)
 class ProductModelAdmin(ImportExportModelAdmin):
     list_display = ("name",)
+    raw_id_fields = ("brand",)
 
 
 @admin.register(SupplierModel)
