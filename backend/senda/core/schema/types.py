@@ -6,6 +6,7 @@ from senda.core.models import (
     ClientModel,
     SupplierModel,
     StateChoices,
+    InternalOrderModel,
 )
 
 
@@ -45,3 +46,7 @@ class Client(DjangoObjectType):
 class Supplier(DjangoObjectType):
     class Meta:
         model = SupplierModel
+
+class InternalOrder(DjangoObjectType):
+    class Meta:
+        model = InternalOrderModel
