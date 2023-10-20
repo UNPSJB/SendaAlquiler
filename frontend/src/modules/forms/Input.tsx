@@ -35,7 +35,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
     const [inputValue, setInputValue] = useState<string | number>('');
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.trim();
+        const value = e.target.value;
         if (type === 'number' && value !== '') {
             const valueWithRemovedNonDigits = value.replace(/\D/g, '');
             setInputValue(valueWithRemovedNonDigits);
