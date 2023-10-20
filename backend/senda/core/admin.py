@@ -52,8 +52,9 @@ class SupplierModelAdmin(ImportExportModelAdmin):
 
 @admin.register(OrderSupplierModel)
 class OrderSupplierModelAdmin(ImportExportModelAdmin):
-    list_display = ("id")
-  
+    list_display = ("id",)
+
+
 @admin.register(InternalOrderModel)
 class InternalOrderModelAdmin(ImportExportModelAdmin):
-    list_display = ("id")
+    list_display = ("id",)
