@@ -8,6 +8,7 @@ from senda.core.models import (
     StateChoices,
     OrderSupplierModel,
     InternalOrderModel,
+    BrandModel,
 )
 
 
@@ -15,6 +16,11 @@ from graphene_django import DjangoObjectType
 import graphene
 
 StateChoicesEnum = graphene.Enum.from_enum(StateChoices)
+
+
+class Brand(DjangoObjectType):
+    class Meta:
+        model = BrandModel
 
 
 class Locality(DjangoObjectType):
@@ -48,10 +54,12 @@ class Supplier(DjangoObjectType):
     class Meta:
         model = SupplierModel
 
+
 class OrderSupplier(DjangoObjectType):
     class Meta:
         model = OrderSupplierModel
-        
+
+
 class InternalOrder(DjangoObjectType):
     class Meta:
         model = InternalOrderModel
