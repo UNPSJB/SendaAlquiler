@@ -7,11 +7,14 @@ import Skeleton from 'react-loading-skeleton';
 import { Client, ClientsQuery } from '@/api/graphql';
 import { useClients } from '@/api/hooks';
 
-import DashboardLayout from '@/modules/dashboard/DashboardLayout';
+import DashboardLayout, {
+    DashboardLayoutBigTitle,
+} from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
 import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
+import Button from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -78,7 +81,15 @@ const Page = () => {
     };
 
     return (
-        <DashboardLayout header="Clientes">
+        <DashboardLayout
+            header={
+                <div className="flex items-center justify-between">
+                    <DashboardLayoutBigTitle>Clientes</DashboardLayoutBigTitle>
+
+                    <Button href="/clientes/add">+ Añadir cliente</Button>
+                </div>
+            }
+        >
             <FetchedDataRenderer
                 {...useClientsResult}
                 Loading={

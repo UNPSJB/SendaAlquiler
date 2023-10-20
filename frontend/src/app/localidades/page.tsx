@@ -12,6 +12,7 @@ import DataTable from '@/modules/data-table/DataTable';
 import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
+import Button from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -66,7 +67,13 @@ const Page = () => {
 
     return (
         <DashboardLayout
-            header={<DashboardLayoutBigTitle>Localidades</DashboardLayoutBigTitle>}
+            header={
+                <div className="flex items-center justify-between">
+                    <DashboardLayoutBigTitle>Localidades</DashboardLayoutBigTitle>
+
+                    <Button href="/localidades/add">+ Añadir localidad</Button>
+                </div>
+            }
         >
             <FetchedDataRenderer
                 {...useLocalitiesResult}
