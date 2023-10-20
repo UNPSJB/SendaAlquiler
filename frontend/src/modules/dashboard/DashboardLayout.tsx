@@ -19,6 +19,7 @@ const MAIN_LINKS: NavLink[] = [
     { href: '/clientes', label: 'Clientes' },
     { href: '/proveedores', label: 'Proveedores' },
     { href: '/localidades', label: 'Localidades' },
+    { href: '/pedidos-a-proveedores', label: 'Pedidos a proveedores' },
 ];
 
 type NavigationLinkProps = PropsWithChildren<{
