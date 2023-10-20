@@ -25,6 +25,13 @@ export type Scalars = {
     GenericScalar: { input: any; output: any };
 };
 
+export type Brand = {
+    __typename?: 'Brand';
+    id: Scalars['ID']['output'];
+    name: Scalars['String']['output'];
+    products: Array<Product>;
+};
+
 export type Client = {
     __typename?: 'Client';
     /** Número de documento de identidad del cliente */
@@ -84,6 +91,34 @@ export type Employee = {
     id: Scalars['ID']['output'];
     user: User;
 };
+
+export type InternalOrder = {
+    __typename?: 'InternalOrder';
+    currentHistory: Maybe<InternalOrderHistory>;
+    dateCreated: Scalars['DateTime']['output'];
+    history: Array<InternalOrderHistory>;
+    id: Scalars['ID']['output'];
+    officeBranch: Office;
+    officeDestination: Office;
+};
+
+export type InternalOrderHistory = {
+    __typename?: 'InternalOrderHistory';
+    currentOrder: Maybe<InternalOrder>;
+    date: Scalars['DateTime']['output'];
+    id: Scalars['ID']['output'];
+    internalOrder: InternalOrder;
+    status: InternalOrderHistoryStatusChoices;
+    user: Maybe<User>;
+};
+
+/** An enumeration. */
+export enum InternalOrderHistoryStatusChoices {
+    Canceled = 'CANCELED',
+    Completed = 'COMPLETED',
+    InProgress = 'IN_PROGRESS',
+    Pending = 'PENDING',
+}
 
 export type Locality = {
     __typename?: 'Locality';
@@ -158,14 +193,27 @@ export type Office = {
     __typename?: 'Office';
     houseNumber: Scalars['String']['output'];
     id: Scalars['ID']['output'];
+    internalOrdersBranch: Array<InternalOrder>;
+    internalOrdersDestination: Array<InternalOrder>;
     locality: Locality;
     name: Scalars['String']['output'];
     note: Scalars['String']['output'];
+    ordersuppliermodelSet: Array<OrderSupplier>;
     street: Scalars['String']['output'];
+};
+
+export type OrderSupplier = {
+    __typename?: 'OrderSupplier';
+    date: Scalars['DateTime']['output'];
+    id: Scalars['ID']['output'];
+    office: Office;
+    price: Maybe<Scalars['Float']['output']>;
+    supplier: Supplier;
 };
 
 export type Product = {
     __typename?: 'Product';
+    brand: Brand;
     description: Maybe<Scalars['String']['output']>;
     id: Scalars['ID']['output'];
     name: Scalars['String']['output'];
@@ -178,6 +226,7 @@ export type Query = {
     __typename?: 'Query';
     clientById: Maybe<Client>;
     clients: Array<Client>;
+    internalOrders: Array<InternalOrder>;
     localities: Array<Locality>;
     offices: Array<Office>;
     products: Array<Product>;
@@ -240,6 +289,7 @@ export type Supplier = {
     locality: Locality;
     name: Scalars['String']['output'];
     note: Maybe<Scalars['String']['output']>;
+    ordersuppliermodelSet: Array<OrderSupplier>;
     /** Código de área del teléfono del proveedor */
     phoneCode: Scalars['String']['output'];
     /** Número de teléfono del proveedor */
@@ -275,6 +325,7 @@ export type User = {
     employee: Maybe<Employee>;
     firstName: Scalars['String']['output'];
     id: Scalars['ID']['output'];
+    internalorderhistorymodelSet: Array<InternalOrderHistory>;
     /** Indica si el usuario debe ser tratado como activo. Desmarque esta opción en lugar de borrar la cuenta. */
     isActive: Scalars['Boolean']['output'];
     /** Designates whether the user can log into the admin site. */
@@ -420,6 +471,23 @@ export type SupplierByIdQuery = {
             postalCode: string;
         };
     } | null;
+};
+
+export type InternalOrdersQueryVariables = Exact<{ [key: string]: never }>;
+
+export type InternalOrdersQuery = {
+    __typename?: 'Query';
+    internalOrders: Array<{
+        __typename?: 'InternalOrder';
+        id: string;
+        dateCreated: any;
+        officeBranch: { __typename?: 'Office'; name: string };
+        officeDestination: { __typename?: 'Office'; name: string };
+        currentHistory: {
+            __typename?: 'InternalOrderHistory';
+            status: InternalOrderHistoryStatusChoices;
+        } | null;
+    }>;
 };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never }>;
@@ -971,6 +1039,74 @@ export const SupplierByIdDocument = {
         },
     ],
 } as unknown as DocumentNode<SupplierByIdQuery, SupplierByIdQueryVariables>;
+export const InternalOrdersDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'internalOrders' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'internalOrders' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'officeBranch' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'officeDestination' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'dateCreated' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'currentHistory' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<InternalOrdersQuery, InternalOrdersQueryVariables>;
 export const UsersDocument = {
     kind: 'Document',
     definitions: [

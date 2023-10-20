@@ -9,6 +9,8 @@ from senda.core.models import (
     OrderSupplierModel,
     InternalOrderModel,
     BrandModel,
+    InternalOrderHistoryModel,
+    InternalOrderHistoryStatusChoices,
 )
 
 
@@ -16,6 +18,9 @@ from graphene_django import DjangoObjectType
 import graphene
 
 StateChoicesEnum = graphene.Enum.from_enum(StateChoices)
+InternalOrderHistoryStatusEnum = graphene.Enum.from_enum(
+    InternalOrderHistoryStatusChoices
+)
 
 
 class Brand(DjangoObjectType):
@@ -63,3 +68,10 @@ class OrderSupplier(DjangoObjectType):
 class InternalOrder(DjangoObjectType):
     class Meta:
         model = InternalOrderModel
+
+
+class InternalOrderHistory(DjangoObjectType):
+    status = InternalOrderHistoryStatusEnum(required=True)
+
+    class Meta:
+        model = InternalOrderHistoryModel

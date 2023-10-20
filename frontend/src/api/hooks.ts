@@ -14,6 +14,7 @@ import {
     CreateLocalityDocument,
     CreateLocalityMutation,
     CreateLocalityMutationVariables,
+    InternalOrdersDocument,
     LocalitiesDocument,
     LocalitiesQuery,
     LoginDocument,
@@ -32,6 +33,9 @@ const queryKeys = {
 
     suppliers: ['suppliers'],
     supplierById: (id: string | undefined) => [...queryKeys.suppliers, id],
+
+    internalOrders: ['internal-orders'],
+    internalOrderById: (id: string | undefined) => [...queryKeys.internalOrders, id],
 };
 
 /**
@@ -176,4 +180,10 @@ export const useCreateLocality = ({
             ...options,
         },
     );
+};
+
+export const useInternalOrders = () => {
+    return useQuery(queryKeys.internalOrders, () => {
+        return clientGraphqlQuery(InternalOrdersDocument, {});
+    });
 };

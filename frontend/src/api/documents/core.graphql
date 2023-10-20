@@ -98,3 +98,19 @@ query supplierById($id: ID!) {
         }
     }
 }
+
+query internalOrders {
+    internalOrders {
+        id
+        officeBranch {
+            name
+        }
+        officeDestination {
+            name
+        }
+        dateCreated
+        currentHistory {
+            status
+        }
+    }
+}
