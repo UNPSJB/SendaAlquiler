@@ -1,9 +1,11 @@
 import graphene
 from senda.core.models import OfficeModel, InternalOrderModel
+from senda.core.schema.types import InternalOrder
 from senda.core.models.order_internal import InternalOrderProductsDict
-from senda.core.schema.types import Office
 
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+
+from utils.graphene import non_null_list_of
 
 
 class ErrorMessages:
@@ -19,9 +21,7 @@ class CreateInternalOrderProductInput(graphene.InputObjectType):
 class CreateInternalOrderInput(graphene.InputObjectType):
     office_branch_id = graphene.ID(required=True)
     office_destination_id = graphene.ID(required=True)
-    products = graphene.NonNull(
-        graphene.List(graphene.NonNull(CreateInternalOrderProductInput))
-    )
+    products = non_null_list_of(CreateInternalOrderProductInput)
 
 
 def get_office(office_id: str):
@@ -40,7 +40,7 @@ def internal_order_data_to_dict(data: graphene.InputObjectType):
 
 
 class CreateInternalOrder(graphene.Mutation):
-    internal_order = graphene.Field(InternalOrderModel)
+    internal_order = graphene.Field(InternalOrder)
     error = graphene.String()
 
     class Arguments:
@@ -55,7 +55,7 @@ class CreateInternalOrder(graphene.Mutation):
             if office_branch is None:
                 raise ValueError(ErrorMessages.INVALID_OFFICE)
 
-            office_destination_id = data_dict.pop("office_origin_id")
+            office_destination_id = data_dict.pop("office_destination_id")
             office_destination = get_office(office_destination_id)
             if office_destination is None:
                 raise ValueError(ErrorMessages.INVALID_OFFICE)
@@ -66,11 +66,13 @@ class CreateInternalOrder(graphene.Mutation):
                 office_branch=office_branch,
                 office_destination=office_destination,
                 products=products,
-                user=None
+                user=None,
             )
 
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
             return CreateInternalOrder(error=str(e))
+        except Exception as e:
+            return CreateInternalOrder(error="Error desconocido")
 
         return CreateInternalOrder(internal_order=internal_order)
 
