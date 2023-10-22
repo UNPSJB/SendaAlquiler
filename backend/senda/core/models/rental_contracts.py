@@ -1,16 +1,19 @@
 from django.db import models
 from users.models import UserModel
 from .products import ProductTypeChoices, ProductModel
+from .clients import ClientModel
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+from django.core.exceptions import ValidationError
 
 
 class RentalContractModel(models.Model):
     rental_contract_items: models.QuerySet["RentalContractItemModel"]
 
-    user = models.OneToOneField(
-        UserModel, on_delete=models.CASCADE, related_name="rental_contract"
+    client = models.ForeignKey(
+        ClientModel, on_delete=models.CASCADE, related_name="rental_contracts"
     )
     current_history: "RentalContractHistoryModel" = models.OneToOneField(
         "RentalContractHistoryModel",
@@ -29,7 +32,7 @@ class RentalContractModel(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
-        return self.user.email
+        return self.client.email
 
     class Meta:
         verbose_name = "Rental Contract"
@@ -96,11 +99,8 @@ class RentalContractItemModel(models.Model):
                 check=models.Q(quantity__gte=1), name="quantity_must_be_greater_than_0"
             ),
             models.CheckConstraint(
-                check=models.Q(product__type=ProductTypeChoices.ALQUILABLE),
-                name="product_must_be_rentable",
-            ),
-            models.CheckConstraint(
-                check=models.Q(total__gte=0), name="total_must_be_positive"
+                check=models.Q(total__gte=0),
+                name="rental_contract_item_total_must_be_positive",
             ),
             models.CheckConstraint(
                 check=models.Q(quantity_returned__lte=models.F("quantity")),
@@ -108,9 +108,17 @@ class RentalContractItemModel(models.Model):
             ),
         ]
 
+    def clean(self):
+        if self.product.type != ProductTypeChoices.ALQUILABLE:
+            raise ValidationError(
+                "No se puede agregar un producto que no sea ALQUILABLE a un contrato de alquiler"
+            )
+
     def save(self, *args, **kwargs):
         if not self.total:
             self.total = self.product.price * self.quantity
+
+        self.clean()
 
         super().save(*args, **kwargs)
 
