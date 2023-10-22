@@ -9,6 +9,12 @@ from .purchases import (
     PurchaseStatusChoices,
     PurchaseHistoryModel,
 )
+from .rental_contracts import (
+    RentalContractModel,
+    RentalContractItemModel,
+    RentalContractHistoryModel,
+    RentalContractStatusChoices,
+)
 from .products import (
     ProductModel,
     BrandModel,

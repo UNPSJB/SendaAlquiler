@@ -11,6 +11,9 @@ from senda.core.models import (
     OrderSupplierModel,
     InternalOrderModel,
     ProductStockInOfficeModel,
+    RentalContractModel,
+    RentalContractItemModel,
+    RentalContractHistoryModel,
 )
 from import_export.admin import ImportExportModelAdmin
 
@@ -64,3 +67,18 @@ class InternalOrderModelAdmin(ImportExportModelAdmin):
 @admin.register(ProductStockInOfficeModel)
 class ProductStockInOfficeModelAdmin(ImportExportModelAdmin):
     list_display = ("product", "office", "stock")
+
+
+@admin.register(RentalContractModel)
+class RentalContractModelAdmin(ImportExportModelAdmin):
+    pass
+
+
+@admin.register(RentalContractItemModel)
+class RentalContractItemModelAdmin(ImportExportModelAdmin):
+    pass
+
+
+@admin.register(RentalContractHistoryModel)
+class RentalContractHistoryModelAdmin(ImportExportModelAdmin):
+    pass

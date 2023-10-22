@@ -14,8 +14,10 @@ from senda.core.models import (
     ProductStockInOfficeModel,
     PurchaseModel,
     PurchaseItemModel,
-    PurchaseStatusChoices,
     PurchaseHistoryModel,
+    RentalContractModel,
+    RentalContractItemModel,
+    RentalContractHistoryModel,
 )
 
 
@@ -97,11 +99,21 @@ class PurchaseItem(DjangoObjectType):
         model = PurchaseItemModel
 
 
-class PurchaseStatusCh(DjangoObjectType):
-    class Meta:
-        model = PurchaseStatusChoices
-
-
 class PurchaseHistory(DjangoObjectType):
     class Meta:
         model = PurchaseHistoryModel
+
+
+class RentalContract(DjangoObjectType):
+    class Meta:
+        model = RentalContractModel
+
+
+class RentalContractItem(DjangoObjectType):
+    class Meta:
+        model = RentalContractItemModel
+
+
+class RentalContractHistory(DjangoObjectType):
+    class Meta:
+        model = RentalContractHistoryModel
