@@ -3,7 +3,7 @@ from senda.core.models.localities import LocalityModel
 from senda.core.validators import only_digits_validator
 
 
-class ClientModelManager(models.Manager):
+class ClientModelManager(models.Manager["ClientModel"]):
     def create_client(
         self,
         email: str,
@@ -86,7 +86,7 @@ class ClientModel(models.Model):
         ],
     )
 
-    objects = ClientModelManager()
+    objects: ClientModelManager = ClientModelManager()
 
     def __str__(self) -> str:
         return self.email
