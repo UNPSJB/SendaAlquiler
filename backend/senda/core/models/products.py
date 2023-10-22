@@ -22,7 +22,7 @@ class ProductModel(models.Model):
         BrandModel, on_delete=models.CASCADE, related_name="products"
     )
     type = models.CharField(max_length=50, choices=ProductTypeChoices.choices)
-    price = models.FloatField(null=True, blank=True)
+    price = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
 
     def __str__(self) -> str:
         return self.name
@@ -50,4 +50,4 @@ class ProductSupplierModel(models.Model):
     supplier = models.ForeignKey(
         SupplierModel, on_delete=models.CASCADE, related_name="products"
     )
-    price = models.FloatField()
+    price = models.DecimalField(decimal_places=2, max_digits=10)

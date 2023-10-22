@@ -6,7 +6,7 @@ class OrderSupplierModel(models.Model):
     office = models.ForeignKey(OfficeModel, on_delete=models.CASCADE)
     supplier = models.ForeignKey(SupplierModel, on_delete=models.CASCADE)
     date = models.DateTimeField()
-    price = models.FloatField(null=True, blank=True)
+    price = models.DecimalField(decimal_places=2, max_digits=10)
 
     def __str__(self) -> str:
         return self.id
