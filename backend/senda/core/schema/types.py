@@ -12,6 +12,10 @@ from senda.core.models import (
     InternalOrderHistoryModel,
     InternalOrderHistoryStatusChoices,
     ProductStockInOfficeModel,
+    PurchaseModel,
+    PurchaseItemModel,
+    PurchaseStatusChoices,
+    PurchaseHistoryModel,
 )
 
 
@@ -81,3 +85,23 @@ class InternalOrderHistory(DjangoObjectType):
 class ProductStockInOffice(DjangoObjectType):
     class Meta:
         model = ProductStockInOfficeModel
+
+
+class Purchase(DjangoObjectType):
+    class Meta:
+        model = PurchaseModel
+
+
+class PurchaseItem(DjangoObjectType):
+    class Meta:
+        model = PurchaseItemModel
+
+
+class PurchaseStatusCh(DjangoObjectType):
+    class Meta:
+        model = PurchaseStatusChoices
+
+
+class PurchaseHistory(DjangoObjectType):
+    class Meta:
+        model = PurchaseHistoryModel
