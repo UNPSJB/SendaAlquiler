@@ -6,7 +6,7 @@ from .suppliers import SupplierModel
 from .products import (
     ProductModel,
     BrandModel,
-    ProductOfficeModel,
+    ProductStockInOfficeModel,
     ProductSupplierModel,
     ProductTypeChoices,
 )

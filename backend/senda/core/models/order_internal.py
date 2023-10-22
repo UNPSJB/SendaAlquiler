@@ -2,12 +2,17 @@ from django.db import models
 from senda.core.models import OfficeModel, ProductModel
 from users.models import UserModel
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 from typing import TypedDict, List
+from django.db import transaction
 
 InternalOrderProductsDict = TypedDict("Products", {"id": str, "quantity": int})
 
 
 class InternalOrderManager(models.Manager):
+    @transaction.atomic
     def create_internal_order(
         self,
         office_branch: OfficeModel,
@@ -18,6 +23,7 @@ class InternalOrderManager(models.Manager):
         internal_order = self.create(
             office_branch=office_branch, office_destination=office_destination
         )
+        internal_order.save()
 
         InternalOrderHistoryModel.objects.create(
             status=InternalOrderHistoryStatusChoices.PENDING,
@@ -51,16 +57,13 @@ class InternalOrderModel(models.Model):
         on_delete=models.SET_NULL,
         related_name="current_order",
         blank=True,
-        null=True
+        null=True,
     )
 
     objects: InternalOrderManager = InternalOrderManager()
 
     def __str__(self) -> str:
         return str(self.id)
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
 
 
 class InternalOrderProduct(models.Model):
@@ -107,7 +110,9 @@ class InternalOrderHistoryStatusChoices(models.TextChoices):
 
 
 class InternalOrderHistoryModel(models.Model):
-    status = models.CharField(max_length=20, choices=InternalOrderHistoryStatusChoices.choices)
+    status = models.CharField(
+        max_length=20, choices=InternalOrderHistoryStatusChoices.choices
+    )
     internal_order = models.ForeignKey(
         InternalOrderModel, on_delete=models.CASCADE, related_name="history"
     )
@@ -116,9 +121,10 @@ class InternalOrderHistoryModel(models.Model):
         "users.UserModel", on_delete=models.SET_NULL, null=True, blank=True
     )
 
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            self.internal_order.current_history = self
-            self.internal_order.save()
 
-        super().save(*args, **kwargs)
+@receiver(post_save, sender=InternalOrderHistoryModel)
+def update_current_history(sender, instance, created, **kwargs):
+    if created:
+        internal_order = instance.internal_order
+        internal_order.current_history = instance
+        internal_order.save()

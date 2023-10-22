@@ -202,3 +202,7 @@ input[type='number'] {
 .react-select__indicator.react-select__dropdown-indicator {
     @apply px-2 py-0;
 }
+
+.react-select__clear-indicator {
+    padding: 0 !important;
+}

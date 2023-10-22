@@ -77,7 +77,7 @@ const customFilter: ReactSelectProps<
 
 const LocalityField: React.FC = () => {
     const { control: contextControl, setValue: setContextValue } = useFormContext();
-    const { data } = useLocalities();
+    const { data, isLoading } = useLocalities();
 
     const [localityToCreate, setLocalityToCreate] = useState<string | null>(null);
 
@@ -110,7 +110,7 @@ const LocalityField: React.FC = () => {
                     <CreatableSelect
                         classNamePrefix="react-select"
                         isDisabled={!!localityToCreate}
-                        isLoading={!!localityToCreate}
+                        isLoading={!!localityToCreate || isLoading}
                         options={(data ? data.localities : []).map((locality) => {
                             return {
                                 label: <LocalityOption locality={locality} />,

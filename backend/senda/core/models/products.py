@@ -28,7 +28,7 @@ class ProductModel(models.Model):
         return self.name
 
 
-class ProductOfficeModel(models.Model):
+class ProductStockInOfficeModel(models.Model):
     office = models.ForeignKey(
         OfficeModel, on_delete=models.CASCADE, related_name="stock"
     )
@@ -36,6 +36,11 @@ class ProductOfficeModel(models.Model):
         ProductModel, on_delete=models.CASCADE, related_name="stock"
     )
     stock = models.IntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["office", "product"], name="unique_stock")
+        ]
 
 
 class ProductSupplierModel(models.Model):

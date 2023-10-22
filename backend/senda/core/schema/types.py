@@ -11,6 +11,7 @@ from senda.core.models import (
     BrandModel,
     InternalOrderHistoryModel,
     InternalOrderHistoryStatusChoices,
+    ProductStockInOfficeModel,
 )
 
 
@@ -75,3 +76,8 @@ class InternalOrderHistory(DjangoObjectType):
 
     class Meta:
         model = InternalOrderHistoryModel
+
+
+class ProductStockInOffice(DjangoObjectType):
+    class Meta:
+        model = ProductStockInOfficeModel

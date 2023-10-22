@@ -80,6 +80,23 @@ export type CreateClientInput = {
     streetName: Scalars['String']['input'];
 };
 
+export type CreateInternalOrder = {
+    __typename?: 'CreateInternalOrder';
+    error: Maybe<Scalars['String']['output']>;
+    internalOrder: Maybe<InternalOrder>;
+};
+
+export type CreateInternalOrderInput = {
+    officeBranchId: Scalars['ID']['input'];
+    officeDestinationId: Scalars['ID']['input'];
+    products: Array<CreateInternalOrderProductInput>;
+};
+
+export type CreateInternalOrderProductInput = {
+    id: Scalars['ID']['input'];
+    quantity: Scalars['Int']['input'];
+};
+
 export type CreateLocality = {
     __typename?: 'CreateLocality';
     error: Maybe<Scalars['String']['output']>;
@@ -140,6 +157,7 @@ export type Login = {
 export type Mutation = {
     __typename?: 'Mutation';
     createClient: Maybe<CreateClient>;
+    createInternalOrder: Maybe<CreateInternalOrder>;
     createLocality: Maybe<CreateLocality>;
     login: Maybe<Login>;
     refreshToken: Maybe<Refresh>;
@@ -151,6 +169,10 @@ export type Mutation = {
 
 export type MutationCreateClientArgs = {
     clientData: CreateClientInput;
+};
+
+export type MutationCreateInternalOrderArgs = {
+    data: CreateInternalOrderInput;
 };
 
 export type MutationCreateLocalityArgs = {
@@ -197,8 +219,9 @@ export type Office = {
     internalOrdersDestination: Array<InternalOrder>;
     locality: Locality;
     name: Scalars['String']['output'];
-    note: Scalars['String']['output'];
+    note: Maybe<Scalars['String']['output']>;
     ordersuppliermodelSet: Array<OrderSupplier>;
+    stock: Array<ProductStockInOffice>;
     street: Scalars['String']['output'];
 };
 
@@ -219,7 +242,16 @@ export type Product = {
     name: Scalars['String']['output'];
     price: Maybe<Scalars['Float']['output']>;
     sku: Maybe<Scalars['String']['output']>;
+    stock: Array<ProductStockInOffice>;
     type: CoreProductModelTypeChoices;
+};
+
+export type ProductStockInOffice = {
+    __typename?: 'ProductStockInOffice';
+    id: Scalars['ID']['output'];
+    office: Office;
+    product: Product;
+    stock: Scalars['Int']['output'];
 };
 
 export type Query = {
@@ -228,8 +260,10 @@ export type Query = {
     clients: Array<Client>;
     internalOrders: Array<InternalOrder>;
     localities: Array<Locality>;
+    officeById: Maybe<Office>;
     offices: Array<Office>;
     products: Array<Product>;
+    productsStocksByOfficeId: Array<ProductStockInOffice>;
     supplierById: Maybe<Supplier>;
     suppliers: Array<Supplier>;
     users: Array<User>;
@@ -237,6 +271,14 @@ export type Query = {
 
 export type QueryClientByIdArgs = {
     id: Scalars['ID']['input'];
+};
+
+export type QueryOfficeByIdArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type QueryProductsStocksByOfficeIdArgs = {
+    officeId: Scalars['ID']['input'];
 };
 
 export type QuerySupplierByIdArgs = {
@@ -487,6 +529,53 @@ export type InternalOrdersQuery = {
             __typename?: 'InternalOrderHistory';
             status: InternalOrderHistoryStatusChoices;
         } | null;
+    }>;
+};
+
+export type CreateInternalOrderMutationVariables = Exact<{
+    data: CreateInternalOrderInput;
+}>;
+
+export type CreateInternalOrderMutation = {
+    __typename?: 'Mutation';
+    createInternalOrder: {
+        __typename?: 'CreateInternalOrder';
+        error: string | null;
+        internalOrder: { __typename?: 'InternalOrder'; id: string } | null;
+    } | null;
+};
+
+export type OfficesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type OfficesQuery = {
+    __typename?: 'Query';
+    offices: Array<{
+        __typename?: 'Office';
+        id: string;
+        name: string;
+        street: string;
+        houseNumber: string;
+        locality: {
+            __typename?: 'Locality';
+            state: StateChoices;
+            postalCode: string;
+            name: string;
+        };
+        stock: Array<{ __typename?: 'ProductStockInOffice'; stock: number }>;
+    }>;
+};
+
+export type ProductsStocksByOfficeIdQueryVariables = Exact<{
+    officeId: Scalars['ID']['input'];
+}>;
+
+export type ProductsStocksByOfficeIdQuery = {
+    __typename?: 'Query';
+    productsStocksByOfficeId: Array<{
+        __typename?: 'ProductStockInOffice';
+        id: string;
+        stock: number;
+        product: { __typename?: 'Product'; id: string; name: string };
     }>;
 };
 
@@ -1107,6 +1196,210 @@ export const InternalOrdersDocument = {
         },
     ],
 } as unknown as DocumentNode<InternalOrdersQuery, InternalOrdersQueryVariables>;
+export const CreateInternalOrderDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'createInternalOrder' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'data' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreateInternalOrderInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'createInternalOrder' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'data' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'data' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'internalOrder' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    CreateInternalOrderMutation,
+    CreateInternalOrderMutationVariables
+>;
+export const OfficesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'offices' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'offices' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'street' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseNumber' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'locality' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'state' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'postalCode',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'stock' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'stock' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<OfficesQuery, OfficesQueryVariables>;
+export const ProductsStocksByOfficeIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'productsStocksByOfficeId' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'officeId' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'productsStocksByOfficeId' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'officeId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'officeId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'product' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'stock' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    ProductsStocksByOfficeIdQuery,
+    ProductsStocksByOfficeIdQueryVariables
+>;
 export const UsersDocument = {
     kind: 'Document',
     definitions: [

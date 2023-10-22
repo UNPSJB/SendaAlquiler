@@ -25,7 +25,7 @@ type InputProps = Omit<
  * @param props - Contains the usual input properties and additional flags for error and help indicators.
  */
 const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
-    const { hasError, hasHelp, size, type = 'text', onChange, ...rest } = props;
+    const { hasError, hasHelp, size, type = 'text', min, max, onChange, ...rest } = props;
     const ariaProps = getFormFieldAriaProps({
         fieldID: rest.id,
         hasError: !!hasError,
@@ -38,6 +38,33 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
         const value = e.target.value;
         if (type === 'number' && value !== '') {
             const valueWithRemovedNonDigits = value.replace(/\D/g, '');
+            const valueInt = parseInt(valueWithRemovedNonDigits, 10);
+
+            console.log(min, max);
+            let minInt: number | undefined = undefined;
+            if (typeof min === 'number') {
+                minInt = min;
+            } else if (typeof min === 'string') {
+                minInt = parseInt(min, 10);
+            }
+
+            if (minInt !== undefined && valueInt < minInt) {
+                setInputValue(minInt.toString());
+                return;
+            }
+
+            let maxInt: number | undefined = undefined;
+            if (typeof max === 'number') {
+                maxInt = max;
+            } else if (typeof max === 'string') {
+                maxInt = parseInt(max, 10);
+            }
+
+            if (maxInt !== undefined && valueInt > maxInt) {
+                setInputValue(maxInt.toString());
+                return;
+            }
+
             setInputValue(valueWithRemovedNonDigits);
             return;
         }
@@ -63,6 +90,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
             )}
             onChange={handleInputChange}
             value={inputValue}
+            min={min}
+            max={max}
             {...ariaProps}
             {...rest}
         />
