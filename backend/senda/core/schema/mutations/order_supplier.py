@@ -5,6 +5,8 @@ from senda.core.models import SupplierModel, OfficeModel, OrderSupplierModel
 from senda.core.schema.types import Office, Supplier
 
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from utils.graphene import input_object_type_to_dict
+
 
 class ErrorMessages:
     INVALID_OFFICE = "Debes especificar una sucursal"
@@ -12,15 +14,19 @@ class ErrorMessages:
     INVALID_SUPPLIER = "Debes especificar un proveedor"
     SUPPLIER_NOT_FOUND = "El proveedor no existe"
 
+
 class CreateSupplierOrderProductInput(graphene.InputObjectType):
     id = graphene.ID(required=True)
     cant = graphene.Int(required=True)
-    
-class CreateSupplierOrderInput(graphene.InputObjectType):
 
+
+class CreateSupplierOrderInput(graphene.InputObjectType):
     office_destination_id = graphene.ID(required=True)
     Supplier_id = graphene.ID(required=True)
-    products = graphene.NonNull(graphene.List(graphene.NonNull(CreateSupplierOrderProductInput)))
+    products = graphene.NonNull(
+        graphene.List(graphene.NonNull(CreateSupplierOrderProductInput))
+    )
+
 
 def get_office(office_id: str):
     if office_id:
@@ -31,6 +37,7 @@ def get_office(office_id: str):
     else:
         return None
 
+
 def get_supplier(supplier_id: str):
     if supplier_id:
         try:
@@ -40,9 +47,6 @@ def get_supplier(supplier_id: str):
     else:
         return None
 
-def supplier_order_data_to_dict(data: graphene.InputObjectType):
-    """Converts InputObjectType to dictionary."""
-    return {field: getattr(data, field) for field in data._meta.fields}
 
 class CreateSupplierOrder(graphene.Mutation):
     supplier_order = graphene.Field(OrderSupplierModel)
@@ -52,7 +56,7 @@ class CreateSupplierOrder(graphene.Mutation):
         data = CreateSupplierOrderInput(required=True)
 
     def mutate(self, info, data: CreateSupplierOrderInput):
-        data_dict = supplier_order_data_to_dict(data)
+        data_dict = input_object_type_to_dict(data)
 
         try:
             office_destination_id = data_dict.pop("office_destination_id")
@@ -68,8 +72,8 @@ class CreateSupplierOrder(graphene.Mutation):
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
             return CreateSupplierOrder(error=str(e))
 
-        return CreateSupplierOrder(order_supplier=order_supplier) 
-    
+        return CreateSupplierOrder(order_supplier=order_supplier)
+
 
 class Mutation(graphene.ObjectType):
     CreateSupplierOrder = CreateSupplierOrder.Field()

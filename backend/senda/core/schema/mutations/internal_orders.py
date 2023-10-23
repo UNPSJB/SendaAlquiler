@@ -5,7 +5,7 @@ from senda.core.models.order_internal import InternalOrderProductsDict
 
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
-from utils.graphene import non_null_list_of
+from utils.graphene import non_null_list_of, input_object_type_to_dict
 
 
 class ErrorMessages:
@@ -34,11 +34,6 @@ def get_office(office_id: str):
         return None
 
 
-def internal_order_data_to_dict(data: graphene.InputObjectType):
-    """Converts InputObjectType to dictionary."""
-    return {field: getattr(data, field) for field in data._meta.fields}
-
-
 class CreateInternalOrder(graphene.Mutation):
     internal_order = graphene.Field(InternalOrder)
     error = graphene.String()
@@ -47,7 +42,7 @@ class CreateInternalOrder(graphene.Mutation):
         data = CreateInternalOrderInput(required=True)
 
     def mutate(self, info, data: CreateInternalOrderInput):
-        data_dict = internal_order_data_to_dict(data)
+        data_dict = input_object_type_to_dict(data)
 
         try:
             office_branch_id = data_dict.pop("office_branch_id")
