@@ -30,7 +30,7 @@ test: ## Run tests
 
 .PHONY: serve
 serve: ## Run the Django server
-	python manage.py runserver 0.0.0.0:8000
+	python manage.py runserver localhost:8000
 
 .PHONY: csu
 csu: ## Run createsuperuser
