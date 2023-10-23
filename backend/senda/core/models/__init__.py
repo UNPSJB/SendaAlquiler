@@ -15,6 +15,7 @@ from .rental_contracts import (
     RentalContractHistoryModel,
     RentalContractStatusChoices,
 )
+from .services import ServiceModel
 from .products import (
     ProductModel,
     BrandModel,

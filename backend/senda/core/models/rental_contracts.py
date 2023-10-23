@@ -1,17 +1,26 @@
 from django.db import models
-from users.models import UserModel
+from .offices import OfficeModel
+from .localities import LocalityModel
 from .products import ProductTypeChoices, ProductModel
 from .clients import ClientModel
+from .services import ServiceModel
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from django.core.exceptions import ValidationError
 
+from django.utils import timezone
+
 
 class RentalContractModel(models.Model):
     rental_contract_items: models.QuerySet["RentalContractItemModel"]
 
+    office = models.ForeignKey(
+        OfficeModel,
+        on_delete=models.CASCADE,
+        related_name="rental_contracts",
+    )
     client = models.ForeignKey(
         ClientModel, on_delete=models.CASCADE, related_name="rental_contracts"
     )
@@ -22,14 +31,30 @@ class RentalContractModel(models.Model):
         blank=True,
         null=True,
     )
-    deposit_amount = models.DecimalField(
-        blank=True, null=True, decimal_places=2, max_digits=10
-    )
-    payment_amount = models.DecimalField(
-        blank=True, null=True, decimal_places=2, max_digits=10
-    )
+    has_payed_deposit = models.BooleanField(default=False)
+    has_payed_remaining_amount = models.BooleanField(default=False)
     total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
     date_created = models.DateTimeField(auto_now_add=True)
+    expiration_date = models.DateTimeField(blank=True, null=True)
+
+    contract_start_datetime = models.DateTimeField()
+    contract_end_datetime = models.DateTimeField()
+
+    locality = models.ForeignKey(
+        LocalityModel, on_delete=models.CASCADE, related_name="rental_contracts"
+    )
+    house_number = models.CharField(
+        max_length=10, help_text="Número de la calle donde vive el cliente"
+    )
+    street_name = models.CharField(
+        max_length=255, help_text="Nombre de la calle donde vive el cliente"
+    )
+    house_unit = models.CharField(
+        max_length=10,
+        help_text="Número de la casa o departamento",
+        blank=True,
+        null=True,
+    )
 
     def __str__(self) -> str:
         return self.client.email
@@ -37,34 +62,15 @@ class RentalContractModel(models.Model):
     class Meta:
         verbose_name = "Rental Contract"
         verbose_name_plural = "Rental Contracts"
-        constraints = [
-            models.CheckConstraint(
-                check=models.Q(deposit_amount__gte=0), name="deposit_amount_positive"
-            ),
-            models.CheckConstraint(
-                check=models.Q(total__gte=0), name="total_must_be_positive"
-            ),
-            models.CheckConstraint(
-                check=models.Q(deposit_amount__lte=models.F("total")),
-                name="deposit_amount_must_be_less_than_total",
-            ),
-            models.CheckConstraint(
-                check=models.Q(total__gte=models.F("deposit_amount")),
-                name="total_must_be_greater_than_deposit_amount",
-            ),
-            models.CheckConstraint(
-                check=models.Q(
-                    total=models.F("deposit_amount") + models.F("payment_amount")
-                ),
-                name="deposit_amount_plus_payment_amount_must_be_equal_to_total",
-            ),
-        ]
 
     def save(self, *args, **kwargs):
         if not self.total:
             self.total = sum(
                 [item.total for item in self.rental_contract_items.all() if item.total]
             )
+
+        if not self.expiration_date:
+            self.expiration_date = self.date_created + timezone.timedelta(days=14)
 
         super().save(*args, **kwargs)
 
@@ -81,8 +87,22 @@ class RentalContractItemModel(models.Model):
         related_name="rental_contract_items",
     )
     quantity = models.PositiveIntegerField(default=1)
+    price = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
     total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
     quantity_returned = models.PositiveIntegerField(default=0, blank=True, null=True)
+    service = models.ForeignKey(
+        ServiceModel,
+        on_delete=models.CASCADE,
+        related_name="rental_contract_items",
+        null=True,
+        blank=True,
+    )
+    service_price = models.DecimalField(
+        blank=True, null=True, decimal_places=2, max_digits=10
+    )
+    service_total = models.DecimalField(
+        null=True, blank=True, decimal_places=2, max_digits=10
+    )
 
     def __str__(self) -> str:
         return f"{self.rental_contract} - {self.product}"
@@ -92,19 +112,15 @@ class RentalContractItemModel(models.Model):
         verbose_name_plural = "Rental Contract Items"
         constraints = [
             models.UniqueConstraint(
-                fields=["rental_contract", "product"],
+                fields=["rental_contract", "product", "service"],
                 name="unique_rental_contract_item",
             ),
             models.CheckConstraint(
                 check=models.Q(quantity__gte=1), name="quantity_must_be_greater_than_0"
             ),
             models.CheckConstraint(
-                check=models.Q(total__gte=0),
-                name="rental_contract_item_total_must_be_positive",
-            ),
-            models.CheckConstraint(
                 check=models.Q(quantity_returned__lte=models.F("quantity")),
-                name="quantity_returned_must_be_less_than_quantity",
+                name="quantity_returned_must_be_lte_quantity",
             ),
         ]
 
@@ -116,7 +132,16 @@ class RentalContractItemModel(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.total:
-            self.total = self.product.price * self.quantity
+            self.total = self.price * self.quantity
+
+        if self.service and not self.service_total:
+            self.service_total += self.service.price * self.quantity
+
+        if not self.price:
+            self.price = self.product.price
+
+        if not self.service_price:
+            self.service_price = self.service.price
 
         self.clean()
 
@@ -129,7 +154,10 @@ class RentalContractStatusChoices(models.TextChoices):
     PAGADO = "PAGADO", "PAGADO"
     CANCELADO = "CANCELADO", "CANCELADO"
     ACTIVO = "ACTIVO", "ACTIVO"
+    VENCIDO = "VENCIDO", "VENCIDO"
     FINALIZADO = "FINALIZADO", "FINALIZADO"
+    DEVOLUCION_EXITOSA = "DEVOLUCION_EXITOSA", "DEVOLUCION EXITOSA"
+    DEVOLUCION_FALLIDA = "DEVOLUCION_FALLIDA", "DEVOLUCION FALLIDA"
 
 
 class RentalContractHistoryModel(models.Model):

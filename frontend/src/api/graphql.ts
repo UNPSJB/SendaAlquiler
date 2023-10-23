@@ -22,6 +22,7 @@ export type Scalars = {
     Int: { input: number; output: number };
     Float: { input: number; output: number };
     DateTime: { input: any; output: any };
+    Decimal: { input: any; output: any };
     GenericScalar: { input: any; output: any };
 };
 
@@ -49,6 +50,8 @@ export type Client = {
     phoneCode: Scalars['String']['output'];
     /** Número de teléfono del cliente */
     phoneNumber: Scalars['String']['output'];
+    purchases: Array<Purchase>;
+    rentalContracts: Array<RentalContract>;
     /** Nombre de la calle donde vive el cliente */
     streetName: Scalars['String']['output'];
 };
@@ -59,6 +62,38 @@ export enum CoreProductModelTypeChoices {
     Alquilable = 'ALQUILABLE',
     /** COMERCIABLE */
     Comerciable = 'COMERCIABLE',
+}
+
+/** An enumeration. */
+export enum CorePurchaseHistoryModelStatusChoices {
+    /** Cancelado */
+    Canceled = 'CANCELED',
+    /** Pagado */
+    Paid = 'PAID',
+    /** Pendiente */
+    Pending = 'PENDING',
+}
+
+/** An enumeration. */
+export enum CoreRentalContractHistoryModelStatusChoices {
+    /** ACTIVO */
+    Activo = 'ACTIVO',
+    /** CANCELADO */
+    Cancelado = 'CANCELADO',
+    /** SEÑADO */
+    ConDeposito = 'CON_DEPOSITO',
+    /** DEVOLUCION EXITOSA */
+    DevolucionExitosa = 'DEVOLUCION_EXITOSA',
+    /** DEVOLUCION FALLIDA */
+    DevolucionFallida = 'DEVOLUCION_FALLIDA',
+    /** FINALIZADO */
+    Finalizado = 'FINALIZADO',
+    /** PAGADO */
+    Pagado = 'PAGADO',
+    /** PRESUPUESTADO */
+    Presupuestado = 'PRESUPUESTADO',
+    /** VENCIDO */
+    Vencido = 'VENCIDO',
 }
 
 export type CreateClient = {
@@ -144,6 +179,7 @@ export type Locality = {
     name: Scalars['String']['output'];
     officemodelSet: Array<Office>;
     postalCode: Scalars['String']['output'];
+    rentalContracts: Array<RentalContract>;
     state: StateChoices;
     suppliers: Array<Supplier>;
 };
@@ -221,6 +257,7 @@ export type Office = {
     name: Scalars['String']['output'];
     note: Maybe<Scalars['String']['output']>;
     ordersuppliermodelSet: Array<OrderSupplier>;
+    rentalContracts: Array<RentalContract>;
     stock: Array<ProductStockInOffice>;
     street: Scalars['String']['output'];
 };
@@ -230,17 +267,20 @@ export type OrderSupplier = {
     date: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     office: Office;
-    price: Maybe<Scalars['Float']['output']>;
+    price: Scalars['Decimal']['output'];
     supplier: Supplier;
 };
 
 export type Product = {
     __typename?: 'Product';
-    brand: Brand;
+    brand: Maybe<Brand>;
     description: Maybe<Scalars['String']['output']>;
     id: Scalars['ID']['output'];
     name: Scalars['String']['output'];
-    price: Maybe<Scalars['Float']['output']>;
+    price: Maybe<Scalars['Decimal']['output']>;
+    purchaseItems: Array<PurchaseItem>;
+    rentalContractItems: Array<RentalContractItem>;
+    services: Array<Service>;
     sku: Maybe<Scalars['String']['output']>;
     stock: Array<ProductStockInOffice>;
     type: CoreProductModelTypeChoices;
@@ -252,6 +292,35 @@ export type ProductStockInOffice = {
     office: Office;
     product: Product;
     stock: Scalars['Int']['output'];
+};
+
+export type Purchase = {
+    __typename?: 'Purchase';
+    client: Client;
+    currentHistory: Maybe<PurchaseHistory>;
+    date: Scalars['DateTime']['output'];
+    id: Scalars['ID']['output'];
+    purchaseItems: Array<PurchaseItem>;
+    purchasehistorymodelSet: Array<PurchaseHistory>;
+    total: Scalars['Decimal']['output'];
+};
+
+export type PurchaseHistory = {
+    __typename?: 'PurchaseHistory';
+    createdAt: Scalars['DateTime']['output'];
+    currentPurchase: Maybe<Purchase>;
+    id: Scalars['ID']['output'];
+    purchase: Purchase;
+    status: CorePurchaseHistoryModelStatusChoices;
+};
+
+export type PurchaseItem = {
+    __typename?: 'PurchaseItem';
+    id: Scalars['ID']['output'];
+    price: Scalars['Decimal']['output'];
+    product: Product;
+    purchase: Purchase;
+    quantity: Scalars['Int']['output'];
 };
 
 export type Query = {
@@ -290,6 +359,61 @@ export type Refresh = {
     payload: Scalars['GenericScalar']['output'];
     refreshExpiresIn: Scalars['Int']['output'];
     token: Scalars['String']['output'];
+};
+
+export type RentalContract = {
+    __typename?: 'RentalContract';
+    client: Client;
+    contractEndDatetime: Scalars['DateTime']['output'];
+    contractStartDatetime: Scalars['DateTime']['output'];
+    currentHistory: Maybe<RentalContractHistory>;
+    dateCreated: Scalars['DateTime']['output'];
+    expirationDate: Maybe<Scalars['DateTime']['output']>;
+    hasPayedDeposit: Scalars['Boolean']['output'];
+    hasPayedRemainingAmount: Scalars['Boolean']['output'];
+    /** Número de la calle donde vive el cliente */
+    houseNumber: Scalars['String']['output'];
+    /** Número de la casa o departamento */
+    houseUnit: Maybe<Scalars['String']['output']>;
+    id: Scalars['ID']['output'];
+    locality: Locality;
+    office: Office;
+    rentalContractHistory: Array<RentalContractHistory>;
+    rentalContractItems: Array<RentalContractItem>;
+    /** Nombre de la calle donde vive el cliente */
+    streetName: Scalars['String']['output'];
+    total: Scalars['Decimal']['output'];
+};
+
+export type RentalContractHistory = {
+    __typename?: 'RentalContractHistory';
+    currentRentalContract: Maybe<RentalContract>;
+    id: Scalars['ID']['output'];
+    rentalContract: RentalContract;
+    status: CoreRentalContractHistoryModelStatusChoices;
+};
+
+export type RentalContractItem = {
+    __typename?: 'RentalContractItem';
+    id: Scalars['ID']['output'];
+    price: Scalars['Decimal']['output'];
+    product: Product;
+    quantity: Scalars['Int']['output'];
+    quantityReturned: Maybe<Scalars['Int']['output']>;
+    rentalContract: RentalContract;
+    service: Maybe<Service>;
+    servicePrice: Maybe<Scalars['Decimal']['output']>;
+    serviceTotal: Maybe<Scalars['Decimal']['output']>;
+    total: Scalars['Decimal']['output'];
+};
+
+export type Service = {
+    __typename?: 'Service';
+    id: Scalars['ID']['output'];
+    name: Scalars['String']['output'];
+    price: Scalars['Decimal']['output'];
+    product: Product;
+    rentalContractItems: Array<RentalContractItem>;
 };
 
 /** An enumeration. */

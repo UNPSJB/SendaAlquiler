@@ -39,7 +39,6 @@ class PurchaseModel(models.Model):
 
 class PurchaseStatusChoices(models.TextChoices):
     PENDING = "PENDING", "Pendiente"
-    DELIVERED = "DELIVERED", "Entregado"
     CANCELED = "CANCELED", "Cancelado"
     PAID = "PAID", "Pagado"
 

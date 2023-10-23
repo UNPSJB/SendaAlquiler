@@ -18,6 +18,7 @@ from senda.core.models import (
     RentalContractModel,
     RentalContractItemModel,
     RentalContractHistoryModel,
+    ServiceModel,
 )
 
 
@@ -117,3 +118,8 @@ class RentalContractItem(DjangoObjectType):
 class RentalContractHistory(DjangoObjectType):
     class Meta:
         model = RentalContractHistoryModel
+
+
+class Service(DjangoObjectType):
+    class Meta:
+        model = ServiceModel
