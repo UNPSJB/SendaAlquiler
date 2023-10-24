@@ -9,6 +9,7 @@ from senda.core.models import (
     BrandModel,
     SupplierModel,
     SupplierOrderModel,
+    InternalOrderModel,
 )
 from import_export.admin import ImportExportModelAdmin
 
@@ -51,4 +52,8 @@ class SupplierModelAdmin(ImportExportModelAdmin):
 
 @admin.register(SupplierOrderModel)
 class OrderSupplierModelAdmin(ImportExportModelAdmin):
+    list_display = ("id")
+  
+@admin.register(InternalOrderModel)
+class InternalOrderModelAdmin(ImportExportModelAdmin):
     list_display = ("id")
