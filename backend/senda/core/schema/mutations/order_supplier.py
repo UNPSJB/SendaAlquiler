@@ -1,6 +1,6 @@
 import graphene
 from backend.senda.core.models.order_supplier import SupplierOrderProduct
-from senda.core.models import SupplierModel, OfficeModel, OrderSupplierModel
+from senda.core.models import SupplierModel, OfficeModel, SupplierOrderModel 
 
 from senda.core.schema.types import Office, Supplier
 
@@ -45,7 +45,7 @@ def supplier_order_data_to_dict(data: graphene.InputObjectType):
     return {field: getattr(data, field) for field in data._meta.fields}
 
 class CreateSupplierOrder(graphene.Mutation):
-    supplier_order = graphene.Field(OrderSupplierModel)
+    supplier_order = graphene.Field(SupplierOrderModel)
     error = graphene.String()
 
     class Arguments:
@@ -68,7 +68,7 @@ class CreateSupplierOrder(graphene.Mutation):
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
             return CreateSupplierOrder(error=str(e))
 
-        return CreateSupplierOrder(order_supplier=order_supplier) 
+        return CreateSupplierOrder(supplier_order=supplier_order) 
     
 
 class Mutation(graphene.ObjectType):

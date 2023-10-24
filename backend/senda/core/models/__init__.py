@@ -4,4 +4,4 @@ from .offices import OfficeModel
 from .clients import ClientModel
 from .suppliers import SupplierModel
 from .products import ProductModel, BrandModel, ProductOfficeModel, ProductSupplierModel, ProductTypeChoices
-from .order_supplier import OrderSupplierModel, SupplierOrderProduct
+from .order_supplier import SupplierOrderModel, SupplierOrderProduct
