@@ -70,7 +70,7 @@ class SupplierOrderModel(models.Model):
 
 class SupplierOrderProduct(models.Model):
     product = models.ForeignKey(
-        ProductModel, on_delete=models.CASCADE, related_name="related_orders"
+        ProductModel, on_delete=models.CASCADE, related_name="related_supplier_orders"
     )
 
     quantity = models.PositiveIntegerField(default=0)
@@ -86,19 +86,19 @@ class SupplierOrderProduct(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["product", "supplier_order"],
-                name="unique_product_supplier_order",
+                name="order_supplier_unique_product",
             ),
             models.CheckConstraint(
                 check=models.Q(quantity__gte=0),
-                name="quantity_must_be_positive",
+                name="order_supplier_quantity_must_be_positive",
             ),
             models.CheckConstraint(
                 check=models.Q(quantity_received__gte=0),
-                name="quantity_received_must_be_positive",
+                name="order_supplier_quantity_received_must_be_positive",
             ),
             models.CheckConstraint(
                 check=models.Q(quantity_received__lte=models.F("quantity")),
-                name="quantity_received_must_be_lte_to_quantity",
+                name="order_supplier_quantity_received_must_be_lte_to_quantity",
             ),
         ]
 

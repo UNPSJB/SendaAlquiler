@@ -85,19 +85,19 @@ class InternalOrderProduct(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["product", "internal_order"],
-                name="unique_product_internal_order",
+                name="internal_order_unique_product",
             ),
             models.CheckConstraint(
                 check=models.Q(quantity__gte=0),
-                name="quantity_must_be_positive",
+                name="internal_order_quantity_must_be_positive",
             ),
             models.CheckConstraint(
                 check=models.Q(quantity_received__gte=0),
-                name="quantity_received_must_be_positive",
+                name="internal_order_quantity_received_must_be_positive",
             ),
             models.CheckConstraint(
                 check=models.Q(quantity_received__lte=models.F("quantity")),
-                name="quantity_received_must_be_lte_to_quantity",
+                name="internal_order_quantity_received_must_be_lte_to_quantity",
             ),
         ]
 
