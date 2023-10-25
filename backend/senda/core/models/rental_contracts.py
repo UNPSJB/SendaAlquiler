@@ -64,15 +64,17 @@ class RentalContractModel(models.Model):
         verbose_name_plural = "Rental Contracts"
 
     def save(self, *args, **kwargs):
-        if not self.total:
-            self.total = sum(
-                [item.total for item in self.rental_contract_items.all() if item.total]
-            )
-
         if not self.expiration_date:
             self.expiration_date = self.date_created + timezone.timedelta(days=14)
 
         super().save(*args, **kwargs)
+
+    def calculate_total(self):
+        total = 0
+        for item in self.rental_contract_items.all():
+            total += item.total
+
+        return total
 
 
 class RentalContractItemModel(models.Model):
