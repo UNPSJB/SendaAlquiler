@@ -3,6 +3,14 @@ from .employees import EmployeeModel
 from .offices import OfficeModel
 from .clients import ClientModel
 from .suppliers import SupplierModel
+from .products import (
+    ProductModel,
+    BrandModel,
+    ProductStockInOfficeModel,
+    ProductSupplierModel,
+    ProductTypeChoices,
+)
+
 from .purchases import (
     PurchaseModel,
     PurchaseItemModel,
@@ -29,4 +37,4 @@ from .order_internal import (
     InternalOrderHistoryStatusChoices,
     InternalOrderHistoryModel,
 )
-from .order_supplier import OrderSupplierModel, SupplierOrderProduct
+from .order_supplier import SupplierOrderModel, SupplierOrderProduct

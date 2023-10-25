@@ -1,6 +1,6 @@
 import graphene
 from backend.senda.core.models.order_supplier import SupplierOrderProduct
-from senda.core.models import SupplierModel, OfficeModel, OrderSupplierModel
+from senda.core.models import SupplierModel, OfficeModel, SupplierOrderModel
 
 from senda.core.schema.types import Office, Supplier
 
@@ -17,12 +17,12 @@ class ErrorMessages:
 
 class CreateSupplierOrderProductInput(graphene.InputObjectType):
     id = graphene.ID(required=True)
-    cant = graphene.Int(required=True)
+    quantity = graphene.Int(required=True)
 
 
 class CreateSupplierOrderInput(graphene.InputObjectType):
     office_destination_id = graphene.ID(required=True)
-    Supplier_id = graphene.ID(required=True)
+    supplier_id = graphene.ID(required=True)
     products = graphene.NonNull(
         graphene.List(graphene.NonNull(CreateSupplierOrderProductInput))
     )
@@ -49,7 +49,7 @@ def get_supplier(supplier_id: str):
 
 
 class CreateSupplierOrder(graphene.Mutation):
-    supplier_order = graphene.Field(OrderSupplierModel)
+    supplier_order = graphene.Field(SupplierOrderModel)
     error = graphene.String()
 
     class Arguments:
@@ -60,17 +60,25 @@ class CreateSupplierOrder(graphene.Mutation):
 
         try:
             office_destination_id = data_dict.pop("office_destination_id")
-            office_destination_id = get_office(office_destination_id)
-            if office_destination_id is None:
+            office_destination = get_office(office_destination_id)
+            if office_destination is None:
                 raise ValueError(ErrorMessages.INVALID_OFFICE)
 
-            Supplier_id = data_dict.pop("Supplier_id")
-            Supplier_id = get_office(Supplier_id)
-            if Supplier_id is None:
+            supplier_id = data_dict.pop("supplier_id")
+            supplier = get_office(supplier_id)
+            if supplier is None:
                 raise ValueError(ErrorMessages.INVALID_SUPPLIER)
 
+            order_supplier = SupplierOrderModel.objects.create_supplier_order(
+                supplier=supplier,
+                office_destination=office_destination,
+                user=info.context.user,
+                **data_dict,
+            )
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
             return CreateSupplierOrder(error=str(e))
+        except Exception as e:
+            return CreateSupplierOrder(error="Error desconocido")
 
         return CreateSupplierOrder(order_supplier=order_supplier)
 
