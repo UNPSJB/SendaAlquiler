@@ -1,6 +1,6 @@
 import graphene
 from backend.senda.core.models.order_supplier import SupplierOrderProduct
-from senda.core.models import SupplierModel, OfficeModel, SupplierOrderModel 
+from senda.core.models import SupplierModel, OfficeModel, SupplierOrderModel
 
 from senda.core.schema.types import Office, Supplier
 
@@ -68,16 +68,17 @@ class CreateSupplierOrder(graphene.Mutation):
             supplier = get_office(supplier_id)
             if supplier is None:
                 raise ValueError(ErrorMessages.INVALID_SUPPLIER)
-            
+
             order_supplier = SupplierOrderModel.objects.create_supplier_order(
                 supplier=supplier,
                 office_destination=office_destination,
                 user=info.context.user,
                 **data_dict,
             )
-
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
             return CreateSupplierOrder(error=str(e))
+        except Exception as e:
+            return CreateSupplierOrder(error="Error desconocido")
 
         return CreateSupplierOrder(order_supplier=order_supplier)
 

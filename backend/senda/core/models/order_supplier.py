@@ -37,14 +37,17 @@ class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
             SupplierOrderProduct.objects.create(
                 product_id=product["id"],
                 quantity=product["quantity"],
-                product_price=product["price"],
-                total=product["price"] * product["quantity"],
                 supplier_order=supplier_order,
             )
+
+        supplier_order.total = supplier_order.calculate_total()
+
         return supplier_order
 
 
 class SupplierOrderModel(models.Model):
+    orders: models.QuerySet["SupplierOrderProduct"]
+
     supplier = models.ForeignKey(
         SupplierModel, on_delete=models.CASCADE, related_name="supplier_orders_branch"
     )
@@ -62,25 +65,46 @@ class SupplierOrderModel(models.Model):
         blank=True,
         null=True,
     )
+
+    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
+
     objects: SupplierOrderManager = SupplierOrderManager()
 
     def __str__(self) -> str:
         return str(self.id)
+
+    def calculate_total(self):
+        total = 0
+        for order in self.orders.all():
+            total += order.total
+
+        return total
 
 
 class SupplierOrderProduct(models.Model):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="related_supplier_orders"
     )
+    price = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
+    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
 
     quantity = models.PositiveIntegerField(default=0)
     quantity_received = models.PositiveIntegerField(default=0)
     supplier_order = models.ForeignKey(
-        SupplierOrderModel, on_delete=models.CASCADE, related_name="suppliers_orders"
+        SupplierOrderModel, on_delete=models.CASCADE, related_name="orders"
     )
 
     def __str__(self) -> str:
         return f"{self.product.name} - {self.quantity}"
+
+    def save(self, *args, **kwargs):
+        if not self.price:
+            self.price = self.product.price
+
+        if not self.total:
+            self.total = self.price * self.quantity
+
+        super().save(*args, **kwargs)
 
     class Meta:
         constraints = [
