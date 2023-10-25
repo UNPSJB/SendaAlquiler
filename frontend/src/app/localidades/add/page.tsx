@@ -1,5 +1,7 @@
+import CreateLocalityForm from '@/modules/create-forms/CreateLocalityForm';
+
 const Page = () => {
-    return <div>crear localidad</div>;
+    return <CreateLocalityForm cancelHref="/localidades" />;
 };
 
 export default Page;

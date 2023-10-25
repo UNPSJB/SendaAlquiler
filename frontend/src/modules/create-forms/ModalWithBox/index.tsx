@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
 
 import useModalCancel from './hooks';
-import styles from './modal-with-box.module.scss';
+import styles from './index.module.scss';
 
 import Portal from '@/components/Portal';
 

@@ -10,6 +10,11 @@ from senda.core.models import (
     SupplierModel,
     SupplierOrderModel,
     InternalOrderModel,
+    ProductStockInOfficeModel,
+    RentalContractModel,
+    RentalContractItemModel,
+    RentalContractHistoryModel,
+    ServiceModel,
 )
 from import_export.admin import ImportExportModelAdmin
 
@@ -39,8 +44,15 @@ class OfficeModelAdmin(ImportExportModelAdmin):
     list_display = ("name",)
 
 
+class ServiceModelInline(admin.TabularInline):
+    model = ServiceModel
+
+
 @admin.register(ProductModel)
 class ProductModelAdmin(ImportExportModelAdmin):
+    inlines = [
+        ServiceModelInline,
+    ]
     list_display = ("name",)
     raw_id_fields = ("brand",)
 
@@ -52,8 +64,34 @@ class SupplierModelAdmin(ImportExportModelAdmin):
 
 @admin.register(SupplierOrderModel)
 class OrderSupplierModelAdmin(ImportExportModelAdmin):
-    list_display = ("id")
-  
+    list_display = ("id",)
+
+
 @admin.register(InternalOrderModel)
 class InternalOrderModelAdmin(ImportExportModelAdmin):
-    list_display = ("id")
+    list_display = ("id",)
+
+
+@admin.register(ProductStockInOfficeModel)
+class ProductStockInOfficeModelAdmin(ImportExportModelAdmin):
+    list_display = ("product", "office", "stock")
+
+
+@admin.register(RentalContractModel)
+class RentalContractModelAdmin(ImportExportModelAdmin):
+    pass
+
+
+@admin.register(RentalContractItemModel)
+class RentalContractItemModelAdmin(ImportExportModelAdmin):
+    pass
+
+
+@admin.register(RentalContractHistoryModel)
+class RentalContractHistoryModelAdmin(ImportExportModelAdmin):
+    pass
+
+
+@admin.register(ServiceModel)
+class ServiceModelAdmin(ImportExportModelAdmin):
+    pass

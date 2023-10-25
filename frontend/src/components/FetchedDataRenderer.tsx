@@ -5,7 +5,7 @@ export type FetchedDataRendererProps<T extends any> = {
     data: T;
     Loading: React.ReactElement;
     Error: React.ReactElement | null;
-    children: (data: NonNullable<T>) => React.ReactElement;
+    children: (data: NonNullable<T>) => React.ReactElement | null;
 };
 
 const FetchedDataRenderer = <T extends any>({

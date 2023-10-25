@@ -3,6 +3,7 @@ from senda.core.models import ClientModel, LocalityModel
 from senda.core.schema.types import Client
 
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from utils.graphene import input_object_type_to_dict
 
 
 class ErrorMessages:
@@ -48,11 +49,6 @@ def get_locality(locality_id: str):
         return None
 
 
-def client_data_to_dict(client_data: graphene.InputObjectType):
-    """Converts InputObjectType to dictionary."""
-    return {field: getattr(client_data, field) for field in client_data._meta.fields}
-
-
 class CreateClient(graphene.Mutation):
     client = graphene.Field(Client)
     error = graphene.String()
@@ -61,7 +57,7 @@ class CreateClient(graphene.Mutation):
         client_data = CreateClientInput(required=True)
 
     def mutate(self, info, client_data):
-        client_data_dict = client_data_to_dict(client_data)
+        client_data_dict = input_object_type_to_dict(client_data)
 
         try:
             locality_id = client_data_dict.pop("locality_id")
@@ -86,7 +82,7 @@ class UpdateClient(graphene.Mutation):
         client_data = UpdateClientInput(required=True)
 
     def mutate(self, info, client_data):
-        client_data_dict = client_data_to_dict(client_data)
+        client_data_dict = input_object_type_to_dict(client_data)
 
         client_id = client_data_dict.pop("id")
         try:

@@ -98,3 +98,56 @@ query supplierById($id: ID!) {
         }
     }
 }
+
+query internalOrders {
+    internalOrders {
+        id
+        officeBranch {
+            name
+        }
+        officeDestination {
+            name
+        }
+        dateCreated
+        currentHistory {
+            status
+        }
+    }
+}
+
+mutation createInternalOrder($data: CreateInternalOrderInput!) {
+    createInternalOrder(data: $data) {
+        internalOrder {
+            id
+        }
+        error
+    }
+}
+
+query offices {
+    offices {
+        id
+        name
+        street
+        houseNumber
+        locality {
+            state
+            postalCode
+            name
+        }
+        stock {
+            stock
+        }
+    }
+}
+
+query productsStocksByOfficeId($officeId: ID!) {
+    productsStocksByOfficeId(officeId: $officeId) {
+        id
+        product {
+            id
+            name
+        }
+        stock
+    }
+}

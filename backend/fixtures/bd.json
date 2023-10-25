@@ -12,57 +12,216 @@
     "model": "core.localitymodel",
     "pk": 2,
     "fields": {
-        "name": "Gaiman",
-        "postal_code": "9105",
+        "name": "Comodoro",
+        "postal_code": "9000",
         "state": "CHUBUT"
     }
 },
 {
-    "model": "core.clientmodel",
+    "model": "core.officemodel",
     "pk": 1,
     "fields": {
-        "email": "bruce@wayne.com",
-        "first_name": "Bruce",
-        "last_name": "Wayne",
+        "name": "Sucursal de Trelew",
+        "street": "Calle",
+        "house_number": "1",
         "locality": 1,
-        "house_number": "123",
-        "street_name": "Fontana",
-        "house_unit": null,
-        "dni": "34825193",
-        "phone_code": "549",
-        "phone_number": "2804728514"
+        "note": null
     }
 },
 {
-    "model": "core.suppliermodel",
+    "model": "core.officemodel",
+    "pk": 2,
+    "fields": {
+        "name": "Sucursal de Comodoro",
+        "street": "Calle Dos",
+        "house_number": "1",
+        "locality": 2,
+        "note": null
+    }
+},
+{
+    "model": "core.productmodel",
     "pk": 1,
     "fields": {
-        "cuit": "206665500",
-        "name": "Carlos Service",
-        "email": "asdf@mail.com",
-        "locality": 2,
-        "house_number": "35",
-        "street_name": "",
-        "house_unit": null,
-        "phone_code": "2804",
-        "phone_number": "4856202",
-        "note": null
+        "sku": null,
+        "name": "Baño",
+        "description": "",
+        "brand": null,
+        "type": "ALQUILABLE",
+        "price": null
+    }
+},
+{
+    "model": "core.productmodel",
+    "pk": 2,
+    "fields": {
+        "sku": null,
+        "name": "Carpa Chica",
+        "description": "",
+        "brand": null,
+        "type": "ALQUILABLE",
+        "price": null
+    }
+},
+{
+    "model": "core.productmodel",
+    "pk": 3,
+    "fields": {
+        "sku": null,
+        "name": "Carpa Mediana",
+        "description": "",
+        "brand": null,
+        "type": "ALQUILABLE",
+        "price": null
+    }
+},
+{
+    "model": "core.productmodel",
+    "pk": 4,
+    "fields": {
+        "sku": null,
+        "name": "Carpa Grande",
+        "description": "",
+        "brand": null,
+        "type": "ALQUILABLE",
+        "price": null
+    }
+},
+{
+    "model": "core.productstockinofficemodel",
+    "pk": 1,
+    "fields": {
+        "office": 1,
+        "product": 1,
+        "stock": 10
+    }
+},
+{
+    "model": "core.productstockinofficemodel",
+    "pk": 2,
+    "fields": {
+        "office": 1,
+        "product": 3,
+        "stock": 2
+    }
+},
+{
+    "model": "core.productstockinofficemodel",
+    "pk": 3,
+    "fields": {
+        "office": 2,
+        "product": 1,
+        "stock": 3
+    }
+},
+{
+    "model": "core.productstockinofficemodel",
+    "pk": 4,
+    "fields": {
+        "office": 2,
+        "product": 4,
+        "stock": 10
+    }
+},
+{
+    "model": "core.servicemodel",
+    "pk": 1,
+    "fields": {
+        "product": 1,
+        "name": "Limpieza para Obra",
+        "price": "10.00"
+    }
+},
+{
+    "model": "core.servicemodel",
+    "pk": 2,
+    "fields": {
+        "product": 1,
+        "name": "Limpieza para Evento",
+        "price": "10.00"
+    }
+},
+{
+    "model": "core.servicemodel",
+    "pk": 3,
+    "fields": {
+        "product": 2,
+        "name": "Armado",
+        "price": "10.00"
+    }
+},
+{
+    "model": "core.servicemodel",
+    "pk": 4,
+    "fields": {
+        "product": 3,
+        "name": "Armado",
+        "price": "10.00"
+    }
+},
+{
+    "model": "core.servicemodel",
+    "pk": 5,
+    "fields": {
+        "product": 4,
+        "name": "Armado",
+        "price": "10.00"
+    }
+},
+{
+    "model": "core.internalordermodel",
+    "pk": 1,
+    "fields": {
+        "office_branch": 1,
+        "office_destination": 2,
+        "date_created": "2023-10-23T20:30:47.180Z",
+        "current_history": 1
+    }
+},
+{
+    "model": "core.internalorderproduct",
+    "pk": 1,
+    "fields": {
+        "product": 3,
+        "quantity": 2,
+        "quantity_received": 0,
+        "internal_order": 1
+    }
+},
+{
+    "model": "core.internalorderproduct",
+    "pk": 2,
+    "fields": {
+        "product": 1,
+        "quantity": 10,
+        "quantity_received": 0,
+        "internal_order": 1
     }
 },
 {
     "model": "users.usermodel",
     "fields": {
-        "password": "pbkdf2_sha256$390000$e6oDWouCRAArI59cZOaxok$9NxVD13GDN3UsF3K9KZmpckBE3jzazI7GaoVm7AQhwI=",
-        "last_login": "2023-09-30T13:53:24.546Z",
+        "password": "pbkdf2_sha256$390000$Kz4lNwFQMvCkYxzdmMEFVn$Ye8prLsXqEplT5mp6IuNqpPcn9MWc71qmU4aTtldNjw=",
+        "last_login": "2023-10-23T20:19:45.390Z",
         "is_superuser": true,
         "is_staff": true,
-        "date_joined": "2023-09-28T02:19:53.660Z",
+        "date_joined": "2023-10-23T20:19:36.866Z",
         "first_name": "",
         "last_name": "",
         "email": "1@mail.com",
         "is_active": true,
         "groups": [],
         "user_permissions": []
+    }
+},
+{
+    "model": "core.internalorderhistorymodel",
+    "pk": 1,
+    "fields": {
+        "status": "PENDING",
+        "internal_order": 1,
+        "date": "2023-10-23T20:30:47.181Z",
+        "user": null
     }
 }
 ]

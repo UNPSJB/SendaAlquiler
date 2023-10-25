@@ -60,6 +60,7 @@ const Button: React.FC<Props> = forwardRef<HTMLButtonElement | HTMLAnchorElement
             external,
             nativeAnchor,
             children,
+            type = 'button',
             className: extraClassName,
             ...rest
         } = props;
@@ -76,7 +77,7 @@ const Button: React.FC<Props> = forwardRef<HTMLButtonElement | HTMLAnchorElement
                     <a
                         ref={ref as React.Ref<HTMLAnchorElement>}
                         href={href}
-                        className={className}
+                        className={clsx(className, 'text-center')}
                         target="_blank"
                         rel="noopener noreferrer"
                         {...rest}
@@ -92,7 +93,7 @@ const Button: React.FC<Props> = forwardRef<HTMLButtonElement | HTMLAnchorElement
                     <a
                         ref={ref as React.Ref<HTMLAnchorElement>}
                         href={href}
-                        className={className}
+                        className={clsx(className, 'text-center')}
                         {...rest}
                     >
                         {children}
@@ -106,7 +107,7 @@ const Button: React.FC<Props> = forwardRef<HTMLButtonElement | HTMLAnchorElement
                     href={href}
                     passHref
                     ref={ref as React.Ref<HTMLAnchorElement>}
-                    className={className}
+                    className={clsx(className, 'text-center')}
                     {...rest}
                 >
                     {children}
@@ -119,6 +120,7 @@ const Button: React.FC<Props> = forwardRef<HTMLButtonElement | HTMLAnchorElement
             <button
                 ref={ref as React.Ref<HTMLButtonElement>}
                 className={className}
+                type={type}
                 {...rest}
             >
                 {children}

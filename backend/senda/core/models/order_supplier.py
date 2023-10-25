@@ -8,10 +8,10 @@ from django.dispatch import receiver
 from typing import TypedDict, List
 from django.db import transaction
 
-SupplierOrderProductsDict = TypedDict("Products", {"id": str, "quantity": int, "price": float})
+SupplierOrderProductsDict = TypedDict("Products", {"id": str, "quantity": int})
 
 
-class SupplierOrderManager(models.Manager):
+class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
     @transaction.atomic
     def create_supplier_order(
         self,
@@ -37,12 +37,13 @@ class SupplierOrderManager(models.Manager):
             SupplierOrderProduct.objects.create(
                 product_id=product["id"],
                 quantity=product["quantity"],
-                product_price = product["price"],
-                total= total + product["price"] * product["quantity"],
-                supplier_order_order=supplier_order,
+                product_price=product["price"],
+                total=product["price"] * product["quantity"],
+                supplier_order=supplier_order,
             )
         return supplier_order
-    
+
+
 class SupplierOrderModel(models.Model):
     supplier = models.ForeignKey(
         SupplierModel, on_delete=models.CASCADE, related_name="supplier_orders_branch"
@@ -65,7 +66,7 @@ class SupplierOrderModel(models.Model):
 
     def __str__(self) -> str:
         return str(self.id)
-    
+
 
 class SupplierOrderProduct(models.Model):
     product = models.ForeignKey(
@@ -77,11 +78,10 @@ class SupplierOrderProduct(models.Model):
     supplier_order = models.ForeignKey(
         SupplierOrderModel, on_delete=models.CASCADE, related_name="suppliers_orders"
     )
-    
 
     def __str__(self) -> str:
         return f"{self.product.name} - {self.quantity}"
-    
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -101,7 +101,7 @@ class SupplierOrderProduct(models.Model):
                 name="quantity_received_must_be_lte_to_quantity",
             ),
         ]
-    
+
 
 class SupplierOrderHistoryStatusChoices(models.TextChoices):
     PENDING = "PENDING", "Pendiente"
@@ -121,6 +121,7 @@ class SupplierOrderHistoryModel(models.Model):
     user = models.ForeignKey(
         "users.UserModel", on_delete=models.SET_NULL, null=True, blank=True
     )
+
 
 @receiver(post_save, sender=SupplierOrderHistoryModel)
 def update_current_history(sender, instance, created, **kwargs):

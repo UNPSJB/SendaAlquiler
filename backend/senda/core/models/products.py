@@ -15,20 +15,43 @@ class BrandModel(models.Model):
 
 
 class ProductModel(models.Model):
-    sku = models.CharField(max_length=10, null=True, blank=True)
+    sku = models.CharField(
+        max_length=10, null=True, blank=True, unique=True, db_index=True
+    )
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     brand = models.ForeignKey(
-        BrandModel, on_delete=models.CASCADE, related_name="products"
+        BrandModel,
+        on_delete=models.CASCADE,
+        related_name="products",
+        null=True,
+        blank=True,
     )
     type = models.CharField(max_length=50, choices=ProductTypeChoices.choices)
-    price = models.FloatField(null=True, blank=True)
+    price = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
 
     def __str__(self) -> str:
         return self.name
 
+    def clean(self, *args, **kwargs):
+        if not self.brand and self.type == ProductTypeChoices.COMERCIABLE:
+            raise ValueError("Brand is required for COMERCIABLE products")
 
-class ProductOfficeModel(models.Model):
+        return super().clean(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(price__gte=0), name="price_must_be_greater_than_0"
+            ),
+        ]
+
+
+class ProductStockInOfficeModel(models.Model):
     office = models.ForeignKey(
         OfficeModel, on_delete=models.CASCADE, related_name="stock"
     )
@@ -36,6 +59,11 @@ class ProductOfficeModel(models.Model):
         ProductModel, on_delete=models.CASCADE, related_name="stock"
     )
     stock = models.IntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["office", "product"], name="unique_stock")
+        ]
 
 
 class ProductSupplierModel(models.Model):
@@ -45,4 +73,4 @@ class ProductSupplierModel(models.Model):
     supplier = models.ForeignKey(
         SupplierModel, on_delete=models.CASCADE, related_name="products"
     )
-    price = models.FloatField()
+    price = models.DecimalField(decimal_places=2, max_digits=10)

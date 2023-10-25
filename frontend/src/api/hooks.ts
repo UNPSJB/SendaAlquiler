@@ -11,14 +11,20 @@ import {
     CreateClientDocument,
     CreateClientMutation,
     CreateClientMutationVariables,
+    CreateInternalOrderDocument,
+    CreateInternalOrderMutation,
+    CreateInternalOrderMutationVariables,
     CreateLocalityDocument,
     CreateLocalityMutation,
     CreateLocalityMutationVariables,
+    InternalOrdersDocument,
     LocalitiesDocument,
     LocalitiesQuery,
     LoginDocument,
     LoginMutation,
     LoginMutationVariables,
+    OfficesDocument,
+    ProductsStocksByOfficeIdDocument,
     SupplierByIdDocument,
     SuppliersDocument,
 } from './graphql';
@@ -32,6 +38,13 @@ const queryKeys = {
 
     suppliers: ['suppliers'],
     supplierById: (id: string | undefined) => [...queryKeys.suppliers, id],
+
+    internalOrders: ['internal-orders'],
+    internalOrderById: (id: string | undefined) => [...queryKeys.internalOrders, id],
+
+    offices: ['offices'],
+
+    productsStocksByOfficeId: (id: string) => ['products-stocks-by-office-id', id],
 };
 
 /**
@@ -176,4 +189,59 @@ export const useCreateLocality = ({
             ...options,
         },
     );
+};
+
+export const useInternalOrders = () => {
+    return useQuery(queryKeys.internalOrders, () => {
+        return clientGraphqlQuery(InternalOrdersDocument, {});
+    });
+};
+
+type UseCreateInternalOrderOptions = UseMutationOptions<
+    CreateInternalOrderMutation,
+    Error,
+    CreateInternalOrderMutationVariables
+>;
+
+export const useCreateInternalOrder = ({
+    onSuccess,
+    ...options
+}: UseCreateInternalOrderOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<
+        CreateInternalOrderMutation,
+        Error,
+        CreateInternalOrderMutationVariables
+    >(
+        (data) => {
+            return clientGraphqlQuery(CreateInternalOrderDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                if (data.createInternalOrder?.internalOrder) {
+                    client.invalidateQueries(queryKeys.internalOrders);
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useOffices = () => {
+    return useQuery(queryKeys.offices, () => {
+        return clientGraphqlQuery(OfficesDocument, {});
+    });
+};
+
+export const useProductsStocksByOfficeId = (officeId: string) => {
+    return useQuery(queryKeys.productsStocksByOfficeId(officeId), () => {
+        return clientGraphqlQuery(ProductsStocksByOfficeIdDocument, {
+            officeId,
+        });
+    });
 };
