@@ -7,24 +7,35 @@ import clsx from 'clsx';
 import { PropsWithChildren, useCallback, useState } from 'react';
 
 import styles from './DashboardLayout.module.scss';
+import IconHome from './Icons/IconHome';
+
+export type DashboardIconProps = {
+    isActive: boolean;
+};
 
 type NavLink = {
     href: string;
     label: string;
+    Icon: React.FC<DashboardIconProps>;
 };
 
 const MAIN_LINKS: NavLink[] = [
-    { href: '/', label: 'Dashboard' },
-    { href: '/productos', label: 'Productos' },
-    { href: '/clientes', label: 'Clientes' },
-    { href: '/proveedores', label: 'Proveedores' },
-    { href: '/localidades', label: 'Localidades' },
-    { href: '/pedidos-a-proveedores', label: 'Pedidos a proveedores' },
-    { href: '/pedidos-internos', label: 'Pedidos internos' },
+    {
+        href: '/',
+        label: 'Dashboard',
+        Icon: IconHome,
+    },
+    { href: '/productos', label: 'Productos', Icon: IconHome },
+    { href: '/clientes', label: 'Clientes', Icon: IconHome },
+    { href: '/proveedores', label: 'Proveedores', Icon: IconHome },
+    { href: '/localidades', label: 'Localidades', Icon: IconHome },
+    { href: '/pedidos-a-proveedores', label: 'Pedidos a proveedores', Icon: IconHome },
+    { href: '/pedidos-internos', label: 'Pedidos internos', Icon: IconHome },
 ];
 
 type NavigationLinkProps = PropsWithChildren<{
     href: string;
+    Icon: NavLink['Icon'];
 }>;
 
 /**
@@ -34,22 +45,23 @@ type NavigationLinkProps = PropsWithChildren<{
  * @param {string} href - The path the link should navigate to.
  * @param {React.ReactNode} children - Content to be displayed inside the link.
  */
-const NavigationLink: React.FC<NavigationLinkProps> = ({ children, href }) => {
+const NavigationLink: React.FC<NavigationLinkProps> = ({ children, href, Icon }) => {
     const currentPath = usePathname();
-    const isActive = href === '/' ? currentPath === href : currentPath.startsWith(href);
+    const currenLinkIsActive =
+        href === '/' ? currentPath === href : currentPath.startsWith(href);
 
     return (
         <Link
             className={clsx(
                 'flex items-center space-x-2 rounded p-4',
-                isActive
+                currenLinkIsActive
                     ? 'bg-white text-black'
                     : 'transition-colors duration-200 hover:bg-white/10',
             )}
-            aria-current={isActive ? 'page' : undefined}
+            aria-current={currenLinkIsActive ? 'page' : undefined}
             href={href}
         >
-            <span className="block h-6 w-6 rounded bg-gray-200"></span>
+            <Icon isActive={currenLinkIsActive} />
             <span>{children}</span>
         </Link>
     );
@@ -99,14 +111,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
                     >
                         {MAIN_LINKS.map((link) => (
                             <li className="pb-4" key={link.href}>
-                                <NavigationLink href={link.href}>
+                                <NavigationLink href={link.href} Icon={link.Icon}>
                                     {link.label}
                                 </NavigationLink>
                             </li>
                         ))}
 
                         <li className="mt-auto border-t border-white py-5 pt-4">
-                            <NavigationLink href="/configuracion">
+                            <NavigationLink
+                                href="/configuracion"
+                                Icon={() => <svg></svg>}
+                            >
                                 Configuración
                             </NavigationLink>
                         </li>
