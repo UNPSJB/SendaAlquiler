@@ -8,6 +8,15 @@ import { PropsWithChildren, useCallback, useState } from 'react';
 
 import styles from './DashboardLayout.module.scss';
 import IconHome from './Icons/IconHome';
+import BagShopping from './Icons/BagShopping'
+import House from './Icons/House';
+import Gear from './Icons/Gear';
+import User from './Icons/User';
+import ClipBoard from './Icons/ClipBoard';
+import ClipBoardList from './Icons/ClipBoardList';
+import LocationDot from './Icons/LocationDot';
+import ClipBoardUser from './Icons/ClipBoardUser';
+
 
 export type DashboardIconProps = {
     isActive: boolean;
@@ -20,17 +29,13 @@ type NavLink = {
 };
 
 const MAIN_LINKS: NavLink[] = [
-    {
-        href: '/',
-        label: 'Dashboard',
-        Icon: IconHome,
-    },
-    { href: '/productos', label: 'Productos', Icon: IconHome },
-    { href: '/clientes', label: 'Clientes', Icon: IconHome },
-    { href: '/proveedores', label: 'Proveedores', Icon: IconHome },
-    { href: '/localidades', label: 'Localidades', Icon: IconHome },
-    { href: '/pedidos-a-proveedores', label: 'Pedidos a proveedores', Icon: IconHome },
-    { href: '/pedidos-internos', label: 'Pedidos internos', Icon: IconHome },
+    {href: '/', label: 'Dashboard', Icon: House},
+    { href: '/productos', label: 'Productos', Icon:  BagShopping},
+    { href: '/clientes', label: 'Clientes', Icon: User },
+    { href: '/proveedores', label: 'Proveedores', Icon: ClipBoard },
+    { href: '/localidades', label: 'Localidades', Icon: LocationDot },
+    { href: '/pedidos-a-proveedores', label: 'Pedidos a proveedores', Icon: ClipBoardList },
+    { href: '/pedidos-internos', label: 'Pedidos internos', Icon: ClipBoardUser },
 ];
 
 type NavigationLinkProps = PropsWithChildren<{
@@ -120,7 +125,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
                         <li className="mt-auto border-t border-white py-5 pt-4">
                             <NavigationLink
                                 href="/configuracion"
-                                Icon={() => <svg></svg>}
+                                Icon={Gear}
                             >
                                 Configuración
                             </NavigationLink>
