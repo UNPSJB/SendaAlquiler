@@ -1,9 +1,15 @@
 'use client';
 
-import DashboardLayout from '@/modules/dashboard/DashboardLayout';
+import DashboardLayout, {
+    DashboardLayoutBigTitle,
+} from '@/modules/dashboard/DashboardLayout';
 
 const Home = () => {
-    return <DashboardLayout header="Dashboard" />;
+    return (
+        <DashboardLayout
+            header={<DashboardLayoutBigTitle>Dashboard</DashboardLayoutBigTitle>}
+        />
+    );
 };
 
 export default Home;
