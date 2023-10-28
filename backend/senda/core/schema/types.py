@@ -6,7 +6,7 @@ from senda.core.models import (
     ClientModel,
     SupplierModel,
     StateChoices,
-    OrderSupplierModel,
+    SupplierOrderModel,
     InternalOrderModel,
     BrandModel,
     InternalOrderHistoryModel,
@@ -70,7 +70,7 @@ class Supplier(DjangoObjectType):
 
 class OrderSupplier(DjangoObjectType):
     class Meta:
-        model = OrderSupplierModel
+        model = SupplierOrderModel
 
 
 class InternalOrder(DjangoObjectType):
