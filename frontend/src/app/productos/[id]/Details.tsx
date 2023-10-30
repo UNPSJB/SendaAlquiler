@@ -10,45 +10,41 @@ const LI: React.FC<PropsWithChildren> = ({ children }) => {
     return <li className="my-2">{children}</li>;
 };
 
-const SN: React.FC<PropsWithChildren> = ({ children }) => {
-    return <span className="font-bold">{children}</span>;
-};
-
-
 const ProductByIdDetailsTab: React.FC<ProductByIdTabComponentProps> = ({ product }) => {
     return (
         <>
             <UL>
                 <h1 className="mb-3 text-xl font-bold">Información Básica</h1>
                 <LI>
-                    <SN>SKU: </SN>
+                    <b>SKU: </b>
                     {product.sku}
                 </LI>
                 <LI>
-                    <SN>Descripción: </SN>
+                    <b>Descripción: </b>
                     {product.description}
                 </LI>
                 <LI>
-                    <SN>Tipo: </SN>
+                    <b>Tipo: </b>
                     {product.type}
                 </LI>
                 <LI>
-                    <SN>Precio: </SN>
-                    $ {product.price}
+                    <b>Precio: </b>$ {product.price}
                 </LI>
                 <LI>
-                    <SN>Servicio/s: </SN>
+                    <b>Servicio/s: </b>
                     {product.services.map((service, index) => (
-                        <span key={index}>{service.name}{index !== product.services.length - 1 ? ', ' : ''}</span>
+                        <span key={index}>
+                            {service.name}
+                            {index !== product.services.length - 1 ? ', ' : ''}
+                        </span>
                     ))}
                 </LI>
-
             </UL>
             <UL>
                 <h1 className="mb-3 text-xl font-bold">Stock</h1>
                 {product.stock.map((stockItem, index) => (
                     <LI key={index}>
-                        <SN>{stockItem.office.locality.name}: </SN>
+                        <b>{stockItem.office.locality.name}: </b>
                         {stockItem.stock}
                     </LI>
                 ))}

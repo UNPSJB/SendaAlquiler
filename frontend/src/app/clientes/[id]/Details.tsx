@@ -10,49 +10,45 @@ const LI: React.FC<PropsWithChildren> = ({ children }) => {
     return <li className="my-2">{children}</li>;
 };
 
-const SN: React.FC<PropsWithChildren> = ({ children }) => {
-    return <span className="font-bold">{children}</span>;
-};
-
 const ClientByIdDetailsTab: React.FC<ClientByIdTabComponentProps> = ({ client }) => {
     return (
         <>
             <UL>
                 <h1 className="mb-3 text-xl font-bold">Información Básica</h1>
                 <LI>
-                    <SN>Correo: </SN>
+                    <b>Correo: </b>
                     {client.email}
                 </LI>
                 <LI>
-                    <SN>Telefono: </SN>
+                    <b>Telefono: </b>
                     {client.phoneCode}
                     {client.phoneNumber}
                 </LI>
                 <LI>
-                    <SN>Dni: </SN>
+                    <b>Dni: </b>
                     {client.dni}
                 </LI>
             </UL>
             <UL>
                 <h1 className="mb-3 text-xl font-bold">Ubicación</h1>
                 <LI>
-                    <SN>Provincia: </SN>
+                    <b>Provincia: </b>
                     {client.locality.state}
                 </LI>
                 <LI>
-                    <SN>Ciudad: </SN> {client.locality.name}
+                    <b>Ciudad: </b> {client.locality.name}
                 </LI>
                 <LI>
-                    <SN>Codigo Postal: </SN> {client.locality.postalCode}
+                    <b>Codigo Postal: </b> {client.locality.postalCode}
                 </LI>
                 <LI>
-                    <SN>Calle: </SN> {client.streetName}
+                    <b>Calle: </b> {client.streetName}
                 </LI>
                 <LI>
-                    <SN>N° de Casa: </SN> {client.houseNumber}
+                    <b>N° de Casa: </b> {client.houseNumber}
                 </LI>
                 <LI>
-                    <SN>Apartamento, habitación, unidad, etc: </SN> {client.houseUnit}
+                    <b>Apartamento, habitación, unidad, etc: </b> {client.houseUnit}
                 </LI>
             </UL>
         </>
