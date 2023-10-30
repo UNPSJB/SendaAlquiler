@@ -24,6 +24,8 @@ import {
     LoginMutation,
     LoginMutationVariables,
     OfficesDocument,
+    ProductByIdDocument,
+    ProductsDocument,
     ProductsStocksByOfficeIdDocument,
     SupplierByIdDocument,
     SuppliersDocument,
@@ -43,6 +45,9 @@ const queryKeys = {
     internalOrderById: (id: string | undefined) => [...queryKeys.internalOrders, id],
 
     offices: ['offices'],
+
+    products:['products'],
+    productById: (id: string | undefined) => [...queryKeys.products, id],
 
     productsStocksByOfficeId: (id: string) => ['products-stocks-by-office-id', id],
 };
@@ -88,6 +93,26 @@ export const useLocalities = () => {
     return useQuery(queryKeys.localities, () => {
         return clientGraphqlQuery(LocalitiesDocument, {});
     });
+};
+
+export const useProducts = () => {
+    return useQuery(queryKeys.products, () => {
+        return clientGraphqlQuery(ProductsDocument, {});
+    });
+};
+
+export const useProductById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.productById(id),
+        () => {
+            return clientGraphqlQuery(ProductByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
 };
 
 export const useSuppliers = () => {

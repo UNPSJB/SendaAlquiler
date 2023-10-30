@@ -17,3 +17,10 @@ class Query(graphene.ObjectType):
 
     def resolve_products_stocks_by_office_id(self, info, office_id: str):
         return ProductStockInOfficeModel.objects.filter(office=office_id)
+
+    product_by_id = graphene.Field(
+        Product, id=graphene.ID(required=True)
+    )
+
+    def resolve_product_by_id(self, info, id: str):
+        return ProductModel.objects.filter(id=id).first()

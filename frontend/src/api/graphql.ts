@@ -256,19 +256,19 @@ export type Office = {
     locality: Locality;
     name: Scalars['String']['output'];
     note: Maybe<Scalars['String']['output']>;
-    ordersuppliermodelSet: Array<OrderSupplier>;
     rentalContracts: Array<RentalContract>;
     stock: Array<ProductStockInOffice>;
     street: Scalars['String']['output'];
+    supplierOrdersDestination: Array<OrderSupplier>;
 };
 
 export type OrderSupplier = {
     __typename?: 'OrderSupplier';
-    date: Scalars['DateTime']['output'];
+    dateCreated: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
-    office: Office;
-    price: Scalars['Decimal']['output'];
+    officeDestination: Office;
     supplier: Supplier;
+    total: Scalars['Decimal']['output'];
 };
 
 export type Product = {
@@ -331,6 +331,7 @@ export type Query = {
     localities: Array<Locality>;
     officeById: Maybe<Office>;
     offices: Array<Office>;
+    productById: Maybe<Product>;
     products: Array<Product>;
     productsStocksByOfficeId: Array<ProductStockInOffice>;
     supplierById: Maybe<Supplier>;
@@ -343,6 +344,10 @@ export type QueryClientByIdArgs = {
 };
 
 export type QueryOfficeByIdArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type QueryProductByIdArgs = {
     id: Scalars['ID']['input'];
 };
 
@@ -455,13 +460,13 @@ export type Supplier = {
     locality: Locality;
     name: Scalars['String']['output'];
     note: Maybe<Scalars['String']['output']>;
-    ordersuppliermodelSet: Array<OrderSupplier>;
     /** Código de área del teléfono del proveedor */
     phoneCode: Scalars['String']['output'];
     /** Número de teléfono del proveedor */
     phoneNumber: Scalars['String']['output'];
     /** Nombre de la calle donde vive el proveedor */
     streetName: Scalars['String']['output'];
+    supplierOrdersBranch: Array<OrderSupplier>;
 };
 
 export type UpdateClient = {
@@ -537,6 +542,20 @@ export type LocalitiesQuery = {
         name: string;
         postalCode: string;
         state: StateChoices;
+    }>;
+};
+
+export type ProductsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type ProductsQuery = {
+    __typename?: 'Query';
+    products: Array<{
+        __typename?: 'Product';
+        id: string;
+        name: string;
+        price: any | null;
+        type: CoreProductModelTypeChoices;
+        brand: { __typename?: 'Brand'; name: string } | null;
     }>;
 };
 
@@ -636,6 +655,32 @@ export type SupplierByIdQuery = {
             state: StateChoices;
             postalCode: string;
         };
+    } | null;
+};
+
+export type ProductByIdQueryVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type ProductByIdQuery = {
+    __typename?: 'Query';
+    productById: {
+        __typename?: 'Product';
+        sku: string | null;
+        name: string;
+        description: string | null;
+        type: CoreProductModelTypeChoices;
+        price: any | null;
+        brand: { __typename?: 'Brand'; name: string } | null;
+        stock: Array<{
+            __typename?: 'ProductStockInOffice';
+            stock: number;
+            office: {
+                __typename?: 'Office';
+                locality: { __typename?: 'Locality'; name: string };
+            };
+        }>;
+        services: Array<{ __typename?: 'Service'; name: string }>;
     } | null;
 };
 
@@ -828,6 +873,47 @@ export const LocalitiesDocument = {
         },
     ],
 } as unknown as DocumentNode<LocalitiesQuery, LocalitiesQueryVariables>;
+export const ProductsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'products' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'products' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'brand' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<ProductsQuery, ProductsQueryVariables>;
 export const SuppliersDocument = {
     kind: 'Document',
     definitions: [
@@ -1252,6 +1338,125 @@ export const SupplierByIdDocument = {
         },
     ],
 } as unknown as DocumentNode<SupplierByIdQuery, SupplierByIdQueryVariables>;
+export const ProductByIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'productById' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'productById' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'description' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'brand' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'stock' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'office' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'locality',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'stock' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'services' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<ProductByIdQuery, ProductByIdQueryVariables>;
 export const InternalOrdersDocument = {
     kind: 'Document',
     definitions: [
