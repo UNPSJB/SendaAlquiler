@@ -1,12 +1,11 @@
 import graphene
 import graphql_jwt
+from django.contrib.auth import authenticate
+from graphql import GraphQLError
+from graphql_jwt.shortcuts import get_token
 
 from users.models import UserModel
 from users.schema.types import User
-from graphql import GraphQLError
-from django.contrib.auth import authenticate
-
-from graphql_jwt.shortcuts import get_token
 
 
 class Login(graphene.Mutation):

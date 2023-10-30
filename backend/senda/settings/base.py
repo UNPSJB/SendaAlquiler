@@ -1,8 +1,8 @@
-import sys
 import os
-
+import sys
 from pathlib import Path
 from typing import List
+
 from configurations import Configuration
 from decouple import config
 

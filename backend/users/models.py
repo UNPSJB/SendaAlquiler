@@ -2,8 +2,9 @@
 Mixin classes used to create this class may be found in mixins.py
 The UserManager is found in managers.py
 """
-from .model_mixins import AbstractUser
 from django.db import models
+
+from .model_mixins import AbstractUser
 
 
 class UserModel(AbstractUser):

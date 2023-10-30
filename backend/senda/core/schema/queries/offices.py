@@ -2,7 +2,6 @@ import graphene
 
 from senda.core.models.offices import OfficeModel
 from senda.core.schema.types import Office
-
 from utils.graphene import non_null_list_of
 
 

@@ -1,6 +1,6 @@
 import graphene
 
-from senda.core.models import ClientModel
+from senda.core.models.clients import ClientModel
 from senda.core.schema.types import Client
 from utils.graphene import non_null_list_of
 

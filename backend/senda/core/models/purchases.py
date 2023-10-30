@@ -1,10 +1,9 @@
-from django.db import models
-from .products import ProductModel
-from .clients import ClientModel
-from django.db import transaction
-
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
+from .clients import ClientModel
+from .products import ProductModel
 
 
 def calculate_purchase_total(purchase):
