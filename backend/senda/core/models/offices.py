@@ -1,4 +1,5 @@
 from django.db import models
+
 from senda.core.models.localities import LocalityModel
 
 

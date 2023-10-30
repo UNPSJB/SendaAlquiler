@@ -1,5 +1,7 @@
 from django.db import models
-from senda.core.models import SupplierModel, OfficeModel
+
+from senda.core.models.offices import OfficeModel
+from senda.core.models.suppliers import SupplierModel
 
 
 class ProductTypeChoices(models.TextChoices):
