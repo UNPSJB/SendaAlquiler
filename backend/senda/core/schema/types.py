@@ -1,34 +1,35 @@
+import graphene
+from graphene_django import DjangoObjectType
+
 from senda.core.models import (
+    BrandModel,
+    ClientModel,
     EmployeeModel,
+    InternalOrderHistoryModel,
+    InternalOrderHistoryStatusChoices,
+    InternalOrderModel,
     LocalityModel,
     OfficeModel,
     ProductModel,
-    ClientModel,
-    SupplierModel,
-    StateChoices,
-    SupplierOrderModel,
-    InternalOrderModel,
-    BrandModel,
-    InternalOrderHistoryModel,
-    InternalOrderHistoryStatusChoices,
     ProductStockInOfficeModel,
-    PurchaseModel,
-    PurchaseItemModel,
+    ProductTypeChoices,
     PurchaseHistoryModel,
-    RentalContractModel,
-    RentalContractItemModel,
+    PurchaseItemModel,
+    PurchaseModel,
     RentalContractHistoryModel,
+    RentalContractItemModel,
+    RentalContractModel,
     ServiceModel,
+    StateChoices,
+    SupplierModel,
+    SupplierOrderModel,
 )
-
-
-from graphene_django import DjangoObjectType
-import graphene
 
 StateChoicesEnum = graphene.Enum.from_enum(StateChoices)
 InternalOrderHistoryStatusEnum = graphene.Enum.from_enum(
     InternalOrderHistoryStatusChoices
 )
+ProductTypeChoicesEnum = graphene.Enum.from_enum(ProductTypeChoices)
 
 
 class Brand(DjangoObjectType):
@@ -49,6 +50,8 @@ class Office(DjangoObjectType):
 
 
 class Product(DjangoObjectType):
+    type = ProductTypeChoicesEnum(required=True)
+
     class Meta:
         model = ProductModel
 
