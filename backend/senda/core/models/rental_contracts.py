@@ -2,6 +2,9 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.exceptions import ValidationError
+
+from django.db import transaction
 from django.utils import timezone
 
 from .clients import ClientModel
@@ -9,6 +12,49 @@ from .localities import LocalityModel
 from .offices import OfficeModel
 from .products import ProductModel, ProductServiceModel, ProductTypeChoices
 
+from typing import List, TypedDict, Optional
+
+RentalContractProductsItemDict = TypedDict(
+    "Products", {"id": str, "quantity": int, "service": Optional[str]}
+)
+
+
+class RentalContractManager(models.Manager["RentalContractModel"]):
+    @transaction.atomic
+    def create_rental_contract(
+        self,
+        client: ClientModel,
+        products: List[RentalContractProductsItemDict],
+        office: OfficeModel,
+        locality: LocalityModel,
+        house_number: str,
+        street_number: str,
+        house_unit: str,
+        contract_start_datetime: str,
+        contract_end_datetime: str,
+    ):
+        rental_contract = self.create(
+            client=client,
+            office=office,
+            locality=locality,
+            house_number=house_number,
+            street_number=street_number,
+            house_unit=house_unit,
+            contract_start_datetime=contract_start_datetime,
+            contract_end_datetime=contract_end_datetime,
+        )
+
+        for product in products:
+            RentalContractItemModel.objects.create(
+                quantity=product["quantity"],
+                product_id=product["id"],
+                rental_contract=rental_contract,
+            )
+
+        RentalContractHistoryModel.objects.create(
+            status=RentalContractStatusChoices.PRESUPUESTADO,
+            rental_contract=rental_contract,
+        )
 
 class RentalContractModel(models.Model):
     rental_contract_items: models.QuerySet["RentalContractItemModel"]
@@ -52,6 +98,8 @@ class RentalContractModel(models.Model):
         blank=True,
         null=True,
     )
+
+    objects: RentalContractManager = RentalContractManager()
 
     def __str__(self) -> str:
         return self.client.email
@@ -130,17 +178,17 @@ class RentalContractItemModel(models.Model):
             )
 
     def save(self, *args, **kwargs):
-        if not self.total:
-            self.total = self.price * self.quantity
-
-        if self.service and not self.service_total:
-            self.service_total += self.service.price * self.quantity
-
         if not self.price:
             self.price = self.product.price
 
         if not self.service_price:
             self.service_price = self.service.price
+
+        if not self.total:
+            self.total = self.price * self.quantity
+
+        if self.service and not self.service_total:
+            self.service_total += self.service.price * self.quantity
 
         self.clean()
 
