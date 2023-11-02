@@ -10,13 +10,16 @@ class ServiceInput(graphene.InputObjectType):
     service_id = graphene.ID(required=True)
     price = graphene.String(required=True)
 
+
 class StockInput(graphene.InputObjectType):
     office_id = graphene.ID(required=True)
     stock = graphene.Int(required=True)
 
+
 class ProductSupplierInput(graphene.InputObjectType):
     supplier_id = graphene.ID(required=True)
     price = graphene.String(required=True)
+
 
 class CreateProductInput(graphene.InputObjectType):
     name = graphene.String(required=True)
@@ -28,6 +31,7 @@ class CreateProductInput(graphene.InputObjectType):
     services = non_null_list_of(ServiceInput)
     stock = non_null_list_of(StockInput)
     supplier = non_null_list_of(ProductSupplierInput)
+
 
 class UpdateProductInput(graphene.InputObjectType):
     id = graphene.ID(required=True)
@@ -41,7 +45,7 @@ class UpdateProductInput(graphene.InputObjectType):
     stock = non_null_list_of(StockInput)
     suppliers = non_null_list_of(ProductSupplierInput)
 
-    
+
 class CreateProduct(graphene.Mutation):
     product = graphene.Field(Product)
     error = graphene.String()
@@ -51,12 +55,12 @@ class CreateProduct(graphene.Mutation):
 
     def mutate(self, info, product_data):
         product_data_dict = input_object_type_to_dict(product_data)
-            
-        product = ProductModel.objects.create_product(
-            **product_data_dict
-        )
-    
+
+        product = ProductModel.objects.create_product(**product_data_dict)
+
+
 # class UpdateProducts(graphene.Mutation):
+
 
 class Mutation(graphene.ObjectType):
     create_product = CreateProduct.Field()
