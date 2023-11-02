@@ -16,6 +16,7 @@ from .models.rental_contracts import (
 )
 from .models.services import ServiceModel
 from .models.suppliers import SupplierModel
+from .models.Purchase_products import PurchaseProductModel
 
 
 @admin.register(BrandModel)
@@ -108,4 +109,8 @@ class PurchaseItemModelAdmin(ImportExportModelAdmin):
 
 @admin.register(PurchaseModel)
 class PurchaseModelAdmin(ImportExportModelAdmin):
+    pass
+
+@admin.register(PurchaseProductModel)
+class PurchaseProductModelAdmin(ImportExportModelAdmin):
     pass
