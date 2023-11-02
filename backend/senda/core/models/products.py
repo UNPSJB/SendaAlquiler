@@ -2,7 +2,8 @@ from typing import List, TypedDict
 
 from django.db import models
 
-from senda.core.models import OfficeModel, SupplierModel
+from senda.core.models.offices import OfficeModel
+from senda.core.models.suppliers import SupplierModel
 
 
 class ProductTypeChoices(models.TextChoices):
@@ -43,7 +44,7 @@ class ProductModelManager(models.Manager["ProductModel"]):
     ):
         if self.filter(sku=sku).exists():
             raise ValueError("Ya existe un producto con ese sku")
-        
+
         for stock_data in stock:
             pass
             # TODO
@@ -80,7 +81,7 @@ class ProductModel(models.Model):
     )
     type = models.CharField(max_length=50, choices=ProductTypeChoices.choices)
     price = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
-    
+
     def __str__(self) -> str:
         return self.name
 

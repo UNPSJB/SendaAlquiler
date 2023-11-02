@@ -1,5 +1,6 @@
 from django.db import models
-from senda.core.models import LocalityModel
+
+from senda.core.models.localities import LocalityModel
 from senda.core.validators import only_digits_validator
 
 

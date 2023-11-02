@@ -1,8 +1,9 @@
 """User Manager used by Improved User; may be extended"""
 
+from typing import TYPE_CHECKING, Any, Tuple, Union
+
 from django.contrib.auth.models import BaseUserManager
 
-from typing import TYPE_CHECKING, Any,Tuple, Union
 if TYPE_CHECKING:
     from .models import UserModel
 
