@@ -1,17 +1,17 @@
+from django.core.exceptions import ValidationError
 from django.db import models
-from .offices import OfficeModel
-from .localities import LocalityModel
-from .products import ProductTypeChoices, ProductModel
-from .clients import ClientModel
-from .services import ServiceModel
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
 from django.core.exceptions import ValidationError
 
 from django.db import transaction
 from django.utils import timezone
+
+from .clients import ClientModel
+from .localities import LocalityModel
+from .offices import OfficeModel
+from .products import ProductModel, ProductTypeChoices
+from .services import ServiceModel
 
 from typing import List, TypedDict, Optional
 
@@ -56,7 +56,6 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
             status=RentalContractStatusChoices.PRESUPUESTADO,
             rental_contract=rental_contract,
         )
-
 
 class RentalContractModel(models.Model):
     rental_contract_items: models.QuerySet["RentalContractItemModel"]

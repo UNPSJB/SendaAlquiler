@@ -1,8 +1,8 @@
 import graphene
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+
 from senda.core.models import LocalityModel
 from senda.core.schema.types import Locality, StateChoicesEnum
-
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 
 class CreateLocality(graphene.Mutation):

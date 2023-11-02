@@ -1,12 +1,12 @@
-from django.db import models
-from senda.core.models import OfficeModel, ProductModel
-from users.models import UserModel
+from typing import List, TypedDict
 
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from typing import TypedDict, List
-from django.db import transaction
+from senda.core.models.offices import OfficeModel
+from senda.core.models.products import ProductModel
+from users.models import UserModel
 
 InternalOrderProductsDict = TypedDict("Products", {"id": str, "quantity": int})
 

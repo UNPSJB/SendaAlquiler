@@ -1,22 +1,21 @@
 from django.contrib import admin
-
-from senda.core.models import (
-    EmployeeModel,
-    LocalityModel,
-    OfficeModel,
-    ProductModel,
-    ClientModel,
-    BrandModel,
-    SupplierModel,
-    SupplierOrderModel,
-    InternalOrderModel,
-    ProductStockInOfficeModel,
-    RentalContractModel,
-    RentalContractItemModel,
-    RentalContractHistoryModel,
-    ServiceModel,
-)
 from import_export.admin import ImportExportModelAdmin
+
+from .models.clients import ClientModel
+from .models.employees import EmployeeModel
+from .models.localities import LocalityModel
+from .models.offices import OfficeModel
+from .models.order_internal import InternalOrderModel
+from .models.order_supplier import SupplierOrderModel
+from .models.products import BrandModel, ProductModel, ProductStockInOfficeModel
+from .models.purchases import PurchaseHistoryModel, PurchaseItemModel, PurchaseModel
+from .models.rental_contracts import (
+    RentalContractHistoryModel,
+    RentalContractItemModel,
+    RentalContractModel,
+)
+from .models.services import ServiceModel
+from .models.suppliers import SupplierModel
 
 
 @admin.register(BrandModel)
@@ -94,4 +93,19 @@ class RentalContractHistoryModelAdmin(ImportExportModelAdmin):
 
 @admin.register(ServiceModel)
 class ServiceModelAdmin(ImportExportModelAdmin):
+    pass
+
+
+@admin.register(PurchaseHistoryModel)
+class PurchaseHistoryModelAdmin(ImportExportModelAdmin):
+    pass
+
+
+@admin.register(PurchaseItemModel)
+class PurchaseItemModelAdmin(ImportExportModelAdmin):
+    pass
+
+
+@admin.register(PurchaseModel)
+class PurchaseModelAdmin(ImportExportModelAdmin):
     pass

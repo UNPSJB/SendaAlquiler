@@ -1,10 +1,9 @@
 import graphene
 
-import users.schema.queries
-import users.schema.mutations
-
-import senda.core.schema.queries
 import senda.core.schema.mutations
+import senda.core.schema.queries
+import users.schema.mutations
+import users.schema.queries
 
 
 # As the app grows the Query and Mutation class will extend from more schemas

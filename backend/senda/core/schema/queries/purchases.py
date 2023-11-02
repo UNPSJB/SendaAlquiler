@@ -1,16 +1,7 @@
-from core.models import (
-    PurchaseModel,
-    PurchaseItemModel,
-    PurchaseHistoryModel,
-)
-
-from core.schema.types import (
-    Purchase,
-    PurchaseItem,
-    PurchaseHistory,
-)
-
 import graphene
+from core.models.purchases import PurchaseHistoryModel, PurchaseItemModel, PurchaseModel
+from core.schema.types import Purchase, PurchaseHistory, PurchaseItem
+
 from utils.graphene import non_null_list_of
 
 

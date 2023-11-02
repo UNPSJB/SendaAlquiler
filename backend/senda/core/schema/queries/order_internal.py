@@ -2,7 +2,6 @@ import graphene
 
 from senda.core.models.order_internal import InternalOrderModel
 from senda.core.schema.types import InternalOrder
-
 from utils.graphene import non_null_list_of
 
 

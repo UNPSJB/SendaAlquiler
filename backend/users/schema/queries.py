@@ -2,7 +2,6 @@ import graphene
 
 from users.models import UserModel
 from users.schema.types import User
-
 from utils.graphene import non_null_list_of
 
 

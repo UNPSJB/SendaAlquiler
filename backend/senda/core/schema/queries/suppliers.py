@@ -1,6 +1,6 @@
 import graphene
 
-from senda.core.models import SupplierModel
+from senda.core.models.suppliers import SupplierModel
 from senda.core.schema.types import Supplier
 
 

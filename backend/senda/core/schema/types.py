@@ -1,29 +1,28 @@
+import graphene
+from graphene_django import DjangoObjectType
+
 from senda.core.models import (
+    BrandModel,
+    ClientModel,
     EmployeeModel,
+    InternalOrderHistoryModel,
+    InternalOrderHistoryStatusChoices,
+    InternalOrderModel,
     LocalityModel,
     OfficeModel,
     ProductModel,
-    ClientModel,
-    SupplierModel,
-    StateChoices,
-    OrderSupplierModel,
-    InternalOrderModel,
-    BrandModel,
-    InternalOrderHistoryModel,
-    InternalOrderHistoryStatusChoices,
     ProductStockInOfficeModel,
-    PurchaseModel,
-    PurchaseItemModel,
     PurchaseHistoryModel,
-    RentalContractModel,
-    RentalContractItemModel,
+    PurchaseItemModel,
+    PurchaseModel,
     RentalContractHistoryModel,
+    RentalContractItemModel,
+    RentalContractModel,
     ServiceModel,
+    StateChoices,
+    SupplierModel,
+    SupplierOrderModel,
 )
-
-
-from graphene_django import DjangoObjectType
-import graphene
 
 StateChoicesEnum = graphene.Enum.from_enum(StateChoices)
 InternalOrderHistoryStatusEnum = graphene.Enum.from_enum(
@@ -70,7 +69,7 @@ class Supplier(DjangoObjectType):
 
 class OrderSupplier(DjangoObjectType):
     class Meta:
-        model = OrderSupplierModel
+        model = SupplierOrderModel
 
 
 class InternalOrder(DjangoObjectType):
