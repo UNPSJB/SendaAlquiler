@@ -101,6 +101,8 @@ class RentalContractModel(models.Model):
         null=True,
     )
 
+    objects: RentalContractManager = RentalContractManager()
+
     def __str__(self) -> str:
         return self.client.email
 
