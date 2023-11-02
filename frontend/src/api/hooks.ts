@@ -36,6 +36,8 @@ const queryKeys = {
     clients: ['clients'],
     clientById: (id: string | undefined) => [...queryKeys.clients, id],
 
+    brands: ['brands'],
+
     localities: ['localities'],
 
     suppliers: ['suppliers'],

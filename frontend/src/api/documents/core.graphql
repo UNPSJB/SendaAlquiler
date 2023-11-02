@@ -16,6 +16,7 @@ query clients {
     }
 }
 
+
 query localities {
     localities {
         id
