@@ -16,12 +16,25 @@ query clients {
     }
 }
 
+
 query localities {
     localities {
         id
         name
         postalCode
         state
+    }
+}
+
+query products {
+    products {
+        id
+        name
+        price
+        type
+        brand {
+            name
+        }
     }
 }
 
@@ -95,6 +108,30 @@ query supplierById($id: ID!) {
             name
             state
             postalCode
+        }
+    }
+}
+
+query productById($id: ID!) {
+    productById(id: $id) {
+        sku
+        name
+        description
+        brand {
+            name
+        }
+        type
+        price
+        stock {
+            office {
+                locality {
+                    name
+                }
+            }
+            stock
+        }
+        services {
+            name
         }
     }
 }

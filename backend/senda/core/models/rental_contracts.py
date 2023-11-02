@@ -10,8 +10,7 @@ from django.utils import timezone
 from .clients import ClientModel
 from .localities import LocalityModel
 from .offices import OfficeModel
-from .products import ProductModel, ProductTypeChoices
-from .services import ServiceModel
+from .products import ProductModel, ProductServiceModel, ProductTypeChoices
 
 from typing import List, TypedDict, Optional
 
@@ -139,7 +138,7 @@ class RentalContractItemModel(models.Model):
     total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
     quantity_returned = models.PositiveIntegerField(default=0, blank=True, null=True)
     service = models.ForeignKey(
-        ServiceModel,
+        ProductServiceModel,
         on_delete=models.CASCADE,
         related_name="rental_contract_items",
         null=True,
