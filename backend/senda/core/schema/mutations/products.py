@@ -1,13 +1,12 @@
 import graphene
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-from senda.core.models import ProductModel
+from senda.core.models.products import ProductModel
 from senda.core.schema.types import Product, ProductTypeChoicesEnum
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
 
 class ServiceInput(graphene.InputObjectType):
-    service_id = graphene.ID(required=True)
+    name = graphene.String(required=True)
     price = graphene.String(required=True)
 
 
@@ -30,7 +29,7 @@ class CreateProductInput(graphene.InputObjectType):
     price = graphene.String(required=True)
     services = non_null_list_of(ServiceInput)
     stock = non_null_list_of(StockInput)
-    supplier = non_null_list_of(ProductSupplierInput)
+    suppliers = non_null_list_of(ProductSupplierInput)
 
 
 class UpdateProductInput(graphene.InputObjectType):
@@ -54,12 +53,12 @@ class CreateProduct(graphene.Mutation):
         product_data = CreateProductInput(required=True)
 
     def mutate(self, info, product_data):
-        product_data_dict = input_object_type_to_dict(product_data)
-
-        product = ProductModel.objects.create_product(**product_data_dict)
-
-
-# class UpdateProducts(graphene.Mutation):
+        try:
+            product_data_dict = input_object_type_to_dict(product_data)
+            product = ProductModel.objects.create_product(**product_data_dict)
+            return CreateProduct(product=product)
+        except Exception as e:
+            return CreateProduct(error=e)
 
 
 class Mutation(graphene.ObjectType):

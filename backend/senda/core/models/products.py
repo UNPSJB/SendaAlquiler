@@ -71,10 +71,10 @@ class ProductModelManager(models.Manager["ProductModel"]):
         for supplier_data in suppliers:
             ProductSupplierModel.objects.create(
                 product=product,
-                supplier=supplier_data["supplier_id"],
+                supplier_id=supplier_data["supplier_id"],
                 price=supplier_data["price"]
             )
-            
+
         return product
 
 # falta update

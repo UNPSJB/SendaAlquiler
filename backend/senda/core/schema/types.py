@@ -1,29 +1,34 @@
 import graphene
 from graphene_django import DjangoObjectType
 
-from senda.core.models import (
-    BrandModel,
-    ClientModel,
-    EmployeeModel,
+from senda.core.models.clients import ClientModel
+from senda.core.models.employees import EmployeeModel
+from senda.core.models.localities import LocalityModel, StateChoices
+from senda.core.models.offices import OfficeModel
+from senda.core.models.order_internal import (
     InternalOrderHistoryModel,
     InternalOrderHistoryStatusChoices,
     InternalOrderModel,
-    LocalityModel,
-    OfficeModel,
+)
+from senda.core.models.order_supplier import SupplierOrderModel
+from senda.core.models.products import (
+    BrandModel,
     ProductModel,
+    ProductServiceModel,
     ProductStockInOfficeModel,
     ProductTypeChoices,
+)
+from senda.core.models.purchases import (
     PurchaseHistoryModel,
     PurchaseItemModel,
     PurchaseModel,
+)
+from senda.core.models.rental_contracts import (
     RentalContractHistoryModel,
     RentalContractItemModel,
     RentalContractModel,
-    ServiceModel,
-    StateChoices,
-    SupplierModel,
-    SupplierOrderModel,
 )
+from senda.core.models.suppliers import SupplierModel
 
 StateChoicesEnum = graphene.Enum.from_enum(StateChoices)
 InternalOrderHistoryStatusEnum = graphene.Enum.from_enum(
@@ -125,4 +130,4 @@ class RentalContractHistory(DjangoObjectType):
 
 class Service(DjangoObjectType):
     class Meta:
-        model = ServiceModel
+        model = ProductServiceModel
