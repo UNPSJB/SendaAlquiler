@@ -7,14 +7,18 @@ from .models.localities import LocalityModel
 from .models.offices import OfficeModel
 from .models.order_internal import InternalOrderModel
 from .models.order_supplier import SupplierOrderModel
-from .models.products import BrandModel, ProductModel, ProductStockInOfficeModel
+from .models.products import (
+    BrandModel,
+    ProductModel,
+    ProductServiceModel,
+    ProductStockInOfficeModel,
+)
 from .models.purchases import PurchaseHistoryModel, PurchaseItemModel, PurchaseModel
 from .models.rental_contracts import (
     RentalContractHistoryModel,
     RentalContractItemModel,
     RentalContractModel,
 )
-from .models.services import ServiceModel
 from .models.suppliers import SupplierModel
 
 
@@ -44,7 +48,7 @@ class OfficeModelAdmin(ImportExportModelAdmin):
 
 
 class ServiceModelInline(admin.TabularInline):
-    model = ServiceModel
+    model = ProductServiceModel
 
 
 @admin.register(ProductModel)
@@ -91,7 +95,7 @@ class RentalContractHistoryModelAdmin(ImportExportModelAdmin):
     pass
 
 
-@admin.register(ServiceModel)
+@admin.register(ProductServiceModel)
 class ServiceModelAdmin(ImportExportModelAdmin):
     pass
 
