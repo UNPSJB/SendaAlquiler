@@ -14,7 +14,7 @@ import {
 } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { CreateProductMutationVariables } from '@/api/graphql';
+import { CreateProductMutationVariables, ProductTypeChoices } from '@/api/graphql';
 import { useCreateProduct } from '@/api/hooks';
 
 import BrandField from '@/modules/create-forms/BrandField';
@@ -29,17 +29,11 @@ type FormValues = CreateProductMutationVariables['productData'];
 type FieldsComponentProps = {
     formErrors: FormState<FormValues>['errors'];
     register: UseFormRegister<FormValues>;
-}
-
+};
 
 const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register }) => (
     <>
-        <RHFFormField
-            className="flex-1"
-            fieldID="sku"
-            label="Sku"
-            showRequired
-        >
+        <RHFFormField className="flex-1" fieldID="sku" label="Sku" showRequired>
             <Input
                 id="sku"
                 placeholder="XYZ12345"
@@ -48,13 +42,7 @@ const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
             />
         </RHFFormField>
 
-
-        <RHFFormField
-            className="flex-1"
-            fieldID="name"
-            label="Nombre"
-            showRequired
-        >
+        <RHFFormField className="flex-1" fieldID="name" label="Nombre" showRequired>
             <Input
                 id="name"
                 placeholder="Lavandina"
@@ -86,12 +74,7 @@ const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
             <BrandField />
         </RHFFormField>
 
-        <RHFFormField
-            className="flex-1"
-            fieldID="type"
-            label="Tipo"
-            showRequired
-        >
+        <RHFFormField className="flex-1" fieldID="type" label="Tipo" showRequired>
             {/* <Input
                 id="type"
                 placeholder="Ayudin"
@@ -99,8 +82,8 @@ const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
                 {...register('brand', { required: true })}
             /> */}
             <select id="type" {...register('type', { required: true })}>
-                <option value="ALQUILABLE">ALQUILABLE</option>
-                <option value="COMERCIABLE">COMERCIABLE</option>
+                <option value={ProductTypeChoices.Alquilable}>ALQUILABLE</option>
+                <option value={ProductTypeChoices.Comerciable}>COMERCIABLE</option>
             </select>
         </RHFFormField>
 
@@ -114,7 +97,7 @@ const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
                 type="number"
                 id="price"
                 placeholder="0.00"
-                hasError={!!formErrors.lastName}
+                hasError={!!formErrors.price}
                 {...register('price', {
                     required: true,
                     maxLength: 1000000,
@@ -124,14 +107,16 @@ const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
     </>
 );
 
-const ProductExtraDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register }) => (
+const ProductExtraDataStep: React.FC<FieldsComponentProps> = ({
+    formErrors,
+    register,
+}) => (
     <>
         {/* Aca deberia ir algo de stock */}
 
         <RHFFormField fieldID="services" label="Servicios" showRequired>
             <ServiceField />
         </RHFFormField>
-
     </>
 );
 
@@ -156,7 +141,7 @@ const STEPS: Step[] = [
         title: 'Información adicional',
         description: 'Información del stock y servicios del producto',
         Component: ProductExtraDataStep,
-        fields: ['services',],
+        fields: ['services'],
     },
 ];
 
@@ -183,8 +168,7 @@ const CreateProductForm: React.FC<NavigationButtonsCancelProps> = (props) => {
         },
     });
 
-
-// en este ver lo de localityId
+    // en este ver lo de localityId
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         mutate({
             productData: {

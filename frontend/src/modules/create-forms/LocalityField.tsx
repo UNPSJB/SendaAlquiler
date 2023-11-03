@@ -137,14 +137,14 @@ const LocalityField: React.FC = () => {
                         onCreateOption={onCreateOption}
                         value={value}
                         onChange={(val) => {
-                            if (val && 'data' in val) {
-                                onChange({
-                                    value: val.value,
-                                    label: val.data.name,
-                                });
-                            } else {
-                                onChange(null);
-                            }
+                            // if (val && 'data' in val) {
+                            onChange({
+                                value: val.value,
+                                label: val.data.name,
+                            });
+                            // } else {
+                            //     onChange(null);
+                            // }
                         }}
                     />
                 )}

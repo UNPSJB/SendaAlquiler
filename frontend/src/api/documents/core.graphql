@@ -16,7 +16,6 @@ query clients {
     }
 }
 
-
 query localities {
     localities {
         id
@@ -186,5 +185,14 @@ query productsStocksByOfficeId($officeId: ID!) {
             name
         }
         stock
+    }
+}
+
+mutation createProduct($productData: CreateProductInput!) {
+    createProduct(productData: $productData) {
+        product {
+            id
+        }
+        error
     }
 }
