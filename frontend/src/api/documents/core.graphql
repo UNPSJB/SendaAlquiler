@@ -16,6 +16,15 @@ query clients {
     }
 }
 
+query employees {
+    users {
+        id
+        firstName
+        lastName
+        email
+        isActive
+    }
+}
 
 query localities {
     localities {

@@ -57,14 +57,6 @@ export type Client = {
 };
 
 /** An enumeration. */
-export enum CoreProductModelTypeChoices {
-    /** ALQUILABLE */
-    Alquilable = 'ALQUILABLE',
-    /** COMERCIABLE */
-    Comerciable = 'COMERCIABLE',
-}
-
-/** An enumeration. */
 export enum CorePurchaseHistoryModelStatusChoices {
     /** Cancelado */
     Canceled = 'CANCELED',
@@ -138,6 +130,24 @@ export type CreateLocality = {
     locality: Maybe<Locality>;
 };
 
+export type CreateProduct = {
+    __typename?: 'CreateProduct';
+    error: Maybe<Scalars['String']['output']>;
+    product: Maybe<Product>;
+};
+
+export type CreateProductInput = {
+    brandId: Scalars['ID']['input'];
+    description: Scalars['String']['input'];
+    name: Scalars['String']['input'];
+    price: Scalars['String']['input'];
+    services: Array<ServiceInput>;
+    sku: Scalars['String']['input'];
+    stock: Array<StockInput>;
+    suppliers: Array<ProductSupplierInput>;
+    type: ProductTypeChoices;
+};
+
 export type Employee = {
     __typename?: 'Employee';
     id: Scalars['ID']['output'];
@@ -195,6 +205,7 @@ export type Mutation = {
     createClient: Maybe<CreateClient>;
     createInternalOrder: Maybe<CreateInternalOrder>;
     createLocality: Maybe<CreateLocality>;
+    createProduct: Maybe<CreateProduct>;
     login: Maybe<Login>;
     refreshToken: Maybe<Refresh>;
     /** Obtain JSON Web Token mutation */
@@ -215,6 +226,10 @@ export type MutationCreateLocalityArgs = {
     name: Scalars['String']['input'];
     postalCode: Scalars['String']['input'];
     state: StateChoices;
+};
+
+export type MutationCreateProductArgs = {
+    productData: CreateProductInput;
 };
 
 export type MutationLoginArgs = {
@@ -283,7 +298,7 @@ export type Product = {
     services: Array<Service>;
     sku: Maybe<Scalars['String']['output']>;
     stock: Array<ProductStockInOffice>;
-    type: CoreProductModelTypeChoices;
+    type: ProductTypeChoices;
 };
 
 export type ProductStockInOffice = {
@@ -293,6 +308,17 @@ export type ProductStockInOffice = {
     product: Product;
     stock: Scalars['Int']['output'];
 };
+
+export type ProductSupplierInput = {
+    price: Scalars['String']['input'];
+    supplierId: Scalars['ID']['input'];
+};
+
+/** An enumeration. */
+export enum ProductTypeChoices {
+    Alquilable = 'ALQUILABLE',
+    Comerciable = 'COMERCIABLE',
+}
 
 export type Purchase = {
     __typename?: 'Purchase';
@@ -421,6 +447,11 @@ export type Service = {
     rentalContractItems: Array<RentalContractItem>;
 };
 
+export type ServiceInput = {
+    name: Scalars['String']['input'];
+    price: Scalars['String']['input'];
+};
+
 /** An enumeration. */
 export enum StateChoices {
     BuenosAires = 'BUENOS_AIRES',
@@ -447,6 +478,11 @@ export enum StateChoices {
     TierraDelFuego = 'TIERRA_DEL_FUEGO',
     Tucuman = 'TUCUMAN',
 }
+
+export type StockInput = {
+    officeId: Scalars['ID']['input'];
+    stock: Scalars['Int']['input'];
+};
 
 export type Supplier = {
     __typename?: 'Supplier';
@@ -532,6 +568,20 @@ export type ClientsQuery = {
     }>;
 };
 
+export type EmployeesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type EmployeesQuery = {
+    __typename?: 'Query';
+    users: Array<{
+        __typename?: 'User';
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        isActive: boolean;
+    }>;
+};
+
 export type LocalitiesQueryVariables = Exact<{ [key: string]: never }>;
 
 export type LocalitiesQuery = {
@@ -554,7 +604,7 @@ export type ProductsQuery = {
         id: string;
         name: string;
         price: any | null;
-        type: CoreProductModelTypeChoices;
+        type: ProductTypeChoices;
         brand: { __typename?: 'Brand'; name: string } | null;
     }>;
 };
@@ -669,7 +719,7 @@ export type ProductByIdQuery = {
         sku: string | null;
         name: string;
         description: string | null;
-        type: CoreProductModelTypeChoices;
+        type: ProductTypeChoices;
         price: any | null;
         brand: { __typename?: 'Brand'; name: string } | null;
         stock: Array<{
@@ -842,6 +892,44 @@ export const ClientsDocument = {
         },
     ],
 } as unknown as DocumentNode<ClientsQuery, ClientsQueryVariables>;
+export const EmployeesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'employees' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'users' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'firstName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'lastName' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'isActive' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<EmployeesQuery, EmployeesQueryVariables>;
 export const LocalitiesDocument = {
     kind: 'Document',
     definitions: [

@@ -17,6 +17,7 @@ import {
     CreateLocalityDocument,
     CreateLocalityMutation,
     CreateLocalityMutationVariables,
+    EmployeesDocument,
     InternalOrdersDocument,
     LocalitiesDocument,
     LocalitiesQuery,
@@ -35,6 +36,8 @@ import { clientGraphqlQuery } from './graphqlclient';
 const queryKeys = {
     clients: ['clients'],
     clientById: (id: string | undefined) => [...queryKeys.clients, id],
+
+    employees: ['employees'],
 
     brands: ['brands'],
 
@@ -69,6 +72,12 @@ export const useLogin = (options: UseLoginOptions = {}) => {
     return useMutation<LoginMutation, Error, LoginMutationVariables>((data) => {
         return clientGraphqlQuery(LoginDocument, data);
     }, options);
+};
+
+export const useEmployees = () => {
+    return useQuery(queryKeys.employees, () => {
+        return clientGraphqlQuery(EmployeesDocument, {});
+    });
 };
 
 export const useClients = () => {
