@@ -1,5 +1,7 @@
 from django.db import models
 
+from extensions.db.models import TimeStampedModel
+
 
 class StateChoices(models.TextChoices):
     BUENOS_AIRES = "BUENOS_AIRES", "BUENOS_AIRES"
@@ -45,7 +47,7 @@ class LocalityModelManager(models.Manager):
         return locality
 
 
-class LocalityModel(models.Model):
+class LocalityModel(TimeStampedModel):
     name = models.CharField(max_length=255)
     postal_code = models.CharField(max_length=10)
     state = models.CharField(choices=StateChoices.choices, max_length=30)

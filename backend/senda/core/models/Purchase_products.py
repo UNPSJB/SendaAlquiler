@@ -1,18 +1,15 @@
+from typing import List, Optional, TypedDict
+
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.exceptions import ValidationError
-
-from django.db import transaction
 from django.utils import timezone
 
 from .clients import ClientModel
 from .localities import LocalityModel
 from .offices import OfficeModel
 from .products import ProductModel, ProductTypeChoices
-
-from typing import List, TypedDict, Optional
 
 PurchaseProductsItemDict = TypedDict(
     "Products", {"id": str, "quantity": int, "service": None}
@@ -50,7 +47,7 @@ class PurchaseProductManager(models.Manager["PurchaseProductModel"]):
             purchase_Products=purchase_Products,
         )
     
-class PurchaseProductModel(models.Model):
+class PurchaseProductModel(TimeStampedModel):
     purchase_product_items: models.QuerySet["PurchaseProductItemModel"]
 
     office = models.ForeignKey(
@@ -106,7 +103,7 @@ class PurchaseProductModel(models.Model):
 
         return total
     
-class PurchaseProductItemModel(models.Model):
+class PurchaseProductItemModel(TimeStampedModel):
     purchase_products = models.ForeignKey(
         PurchaseProductModel,
         on_delete=models.CASCADE,
@@ -137,11 +134,7 @@ class PurchaseProductItemModel(models.Model):
             ),
         ]
     
-    def clean(self):
-        if self.product.type != ProductTypeChoices.COMERCIABLE:
-            raise ValidationError(
-                "No se puede agregar un producto que no sea Comerciable a una venta en sucursal"
-            )
+
         
     def save(self, *args, **kwargs):
         if not self.price:
@@ -155,7 +148,7 @@ class PurchaseProductItemModel(models.Model):
         super().save(*args, **kwargs)
     
 
-class PurchaseProductsHistoryModel(models.Model):
+class PurchaseProductsHistoryModel(TimeStampedModel):
     rental_contract = models.ForeignKey(
         PurchaseProductModel,
         on_delete=models.CASCADE,

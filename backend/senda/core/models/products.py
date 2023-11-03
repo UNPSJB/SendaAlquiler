@@ -1,5 +1,6 @@
 from django.db import models
 
+from extensions.db.models import TimeStampedModel
 from senda.core.models.offices import OfficeModel
 from senda.core.models.suppliers import SupplierModel
 
@@ -9,14 +10,14 @@ class ProductTypeChoices(models.TextChoices):
     COMERCIABLE = "COMERCIABLE", "COMERCIABLE"
 
 
-class BrandModel(models.Model):
+class BrandModel(TimeStampedModel):
     name = models.CharField(max_length=50)
 
     def __str__(self) -> str:
         return self.name
 
 
-class ProductModel(models.Model):
+class ProductModel(TimeStampedModel):
     sku = models.CharField(
         max_length=10, null=True, blank=True, unique=True, db_index=True
     )
@@ -53,7 +54,7 @@ class ProductModel(models.Model):
         ]
 
 
-class ProductStockInOfficeModel(models.Model):
+class ProductStockInOfficeModel(TimeStampedModel):
     office = models.ForeignKey(
         OfficeModel, on_delete=models.CASCADE, related_name="stock"
     )
@@ -68,7 +69,7 @@ class ProductStockInOfficeModel(models.Model):
         ]
 
 
-class ProductSupplierModel(models.Model):
+class ProductSupplierModel(TimeStampedModel):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="suppliers"
     )

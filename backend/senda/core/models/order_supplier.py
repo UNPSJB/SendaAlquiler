@@ -4,6 +4,7 @@ from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from extensions.db.models import TimeStampedModel
 from senda.core.models.offices import OfficeModel
 from senda.core.models.products import ProductModel
 from senda.core.models.suppliers import SupplierModel
@@ -46,7 +47,7 @@ class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
         return supplier_order
 
 
-class SupplierOrderModel(models.Model):
+class SupplierOrderModel(TimeStampedModel):
     orders: models.QuerySet["SupplierOrderProduct"]
 
     supplier = models.ForeignKey(
@@ -82,7 +83,7 @@ class SupplierOrderModel(models.Model):
         return total
 
 
-class SupplierOrderProduct(models.Model):
+class SupplierOrderProduct(TimeStampedModel):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="related_supplier_orders"
     )
@@ -135,7 +136,7 @@ class SupplierOrderHistoryStatusChoices(models.TextChoices):
     CANCELED = "CANCELED", "Cancelado"
 
 
-class SupplierOrderHistoryModel(models.Model):
+class SupplierOrderHistoryModel(TimeStampedModel):
     status = models.CharField(
         max_length=20, choices=SupplierOrderHistoryStatusChoices.choices
     )

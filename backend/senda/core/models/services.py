@@ -1,9 +1,11 @@
 from django.db import models
 
+from extensions.db.models import TimeStampedModel
+
 from .products import ProductModel
 
 
-class ServiceModel(models.Model):
+class ServiceModel(TimeStampedModel):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="services"
     )
