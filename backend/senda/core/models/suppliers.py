@@ -1,10 +1,11 @@
 from django.db import models
 
+from extensions.db.models import TimeStampedModel
 from senda.core.models.localities import LocalityModel
 from senda.core.validators import only_digits_validator
 
 
-class SupplierModel(models.Model):
+class SupplierModel(TimeStampedModel):
     cuit = models.CharField(max_length=12)
     name = models.CharField(max_length=30)
     email = models.EmailField(unique=True)

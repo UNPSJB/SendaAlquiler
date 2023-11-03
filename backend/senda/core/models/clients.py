@@ -1,5 +1,6 @@
 from django.db import models
 
+from extensions.db.models import TimeStampedModel
 from senda.core.models.localities import LocalityModel
 from senda.core.validators import only_digits_validator
 
@@ -45,7 +46,7 @@ class ClientModelManager(models.Manager["ClientModel"]):
         return client
 
 
-class ClientModel(models.Model):
+class ClientModel(TimeStampedModel):
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)

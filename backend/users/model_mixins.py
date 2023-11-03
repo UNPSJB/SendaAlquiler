@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from .managers import UserManager
 
 
-class DjangoIntegrationMixin(models.Model):
+class DjangoIntegrationMixin(TimeStampedModel):
     """Mixin provides fields for Django integration to work correctly
     Provides permissions for Django Admin integration, as well as date
     field used by authentication code.
@@ -29,7 +29,7 @@ class DjangoIntegrationMixin(models.Model):
         abstract = True
 
 
-class FirstNameMixin(models.Model):
+class FirstNameMixin(TimeStampedModel):
     """A mixin to provide an optional first name field"""
 
     first_name = models.CharField(max_length=200, blank=True)
@@ -42,7 +42,7 @@ class FirstNameMixin(models.Model):
         return self.first_name
 
 
-class LastNameMixin(models.Model):
+class LastNameMixin(TimeStampedModel):
     """A mixin to provide an optional last name field"""
 
     last_name = models.CharField(max_length=200, blank=True)
@@ -55,7 +55,7 @@ class LastNameMixin(models.Model):
         return self.last_name
 
 
-class EmailAuthMixin(models.Model):
+class EmailAuthMixin(TimeStampedModel):
     """A mixin to use email as the username"""
 
     email = models.EmailField(_("email address"), max_length=254, unique=True)

@@ -1,18 +1,17 @@
+from typing import List, Optional, TypedDict
+
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.exceptions import ValidationError
-
-from django.db import transaction
 from django.utils import timezone
+
+from extensions.db.models import TimeStampedModel
 
 from .clients import ClientModel
 from .localities import LocalityModel
 from .offices import OfficeModel
 from .products import ProductModel, ProductServiceModel, ProductTypeChoices
-
-from typing import List, TypedDict, Optional
 
 RentalContractProductsItemDict = TypedDict(
     "Products", {"id": str, "quantity": int, "service": Optional[str]}
@@ -56,7 +55,8 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
             rental_contract=rental_contract,
         )
 
-class RentalContractModel(models.Model):
+
+class RentalContractModel(TimeStampedModel):
     rental_contract_items: models.QuerySet["RentalContractItemModel"]
 
     office = models.ForeignKey(
@@ -122,7 +122,7 @@ class RentalContractModel(models.Model):
         return total
 
 
-class RentalContractItemModel(models.Model):
+class RentalContractItemModel(TimeStampedModel):
     rental_contract = models.ForeignKey(
         RentalContractModel,
         on_delete=models.CASCADE,
@@ -207,7 +207,7 @@ class RentalContractStatusChoices(models.TextChoices):
     DEVOLUCION_FALLIDA = "DEVOLUCION_FALLIDA", "DEVOLUCION FALLIDA"
 
 
-class RentalContractHistoryModel(models.Model):
+class RentalContractHistoryModel(TimeStampedModel):
     rental_contract = models.ForeignKey(
         RentalContractModel,
         on_delete=models.CASCADE,

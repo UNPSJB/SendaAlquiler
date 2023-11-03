@@ -4,6 +4,7 @@ from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from extensions.db.models import TimeStampedModel
 from senda.core.models.offices import OfficeModel
 from senda.core.models.products import ProductModel
 from users.models import UserModel
@@ -41,7 +42,7 @@ class InternalOrderManager(models.Manager):
         return internal_order
 
 
-class InternalOrderModel(models.Model):
+class InternalOrderModel(TimeStampedModel):
     office_branch = models.ForeignKey(
         OfficeModel, on_delete=models.CASCADE, related_name="internal_orders_branch"
     )
@@ -66,7 +67,7 @@ class InternalOrderModel(models.Model):
         return str(self.id)
 
 
-class InternalOrderProduct(models.Model):
+class InternalOrderProduct(TimeStampedModel):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="related_orders"
     )
@@ -109,7 +110,7 @@ class InternalOrderHistoryStatusChoices(models.TextChoices):
     CANCELED = "CANCELED", "Cancelado"
 
 
-class InternalOrderHistoryModel(models.Model):
+class InternalOrderHistoryModel(TimeStampedModel):
     status = models.CharField(
         max_length=20, choices=InternalOrderHistoryStatusChoices.choices
     )

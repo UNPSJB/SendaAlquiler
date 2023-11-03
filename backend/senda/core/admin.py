@@ -13,7 +13,7 @@ from .models.products import (
     ProductServiceModel,
     ProductStockInOfficeModel,
 )
-from .models.purchases import PurchaseHistoryModel, PurchaseItemModel, PurchaseModel
+from .models.purchases import PurchaseItemModel, PurchaseModel
 from .models.rental_contracts import (
     RentalContractHistoryModel,
     RentalContractItemModel,
@@ -97,11 +97,6 @@ class RentalContractHistoryModelAdmin(ImportExportModelAdmin):
 
 @admin.register(ProductServiceModel)
 class ServiceModelAdmin(ImportExportModelAdmin):
-    pass
-
-
-@admin.register(PurchaseHistoryModel)
-class PurchaseHistoryModelAdmin(ImportExportModelAdmin):
     pass
 
 

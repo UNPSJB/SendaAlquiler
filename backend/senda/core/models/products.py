@@ -2,6 +2,7 @@ from typing import List, TypedDict
 
 from django.db import models
 
+from extensions.db.models import TimeStampedModel
 from senda.core.models.offices import OfficeModel
 from senda.core.models.suppliers import SupplierModel
 
@@ -11,7 +12,7 @@ class ProductTypeChoices(models.TextChoices):
     COMERCIABLE = "COMERCIABLE", "COMERCIABLE"
 
 
-class BrandModel(models.Model):
+class BrandModel(TimeStampedModel):
     name = models.CharField(max_length=50)
 
     def __str__(self) -> str:
@@ -63,24 +64,20 @@ class ProductModelManager(models.Manager["ProductModel"]):
 
         for service_data in services:
             ProductServiceModel.objects.create(
-                product=product,
-                name=service_data["name"],
-                price=service_data["price"]
+                product=product, name=service_data["name"], price=service_data["price"]
             )
 
         for supplier_data in suppliers:
             ProductSupplierModel.objects.create(
                 product=product,
                 supplier_id=supplier_data["supplier_id"],
-                price=supplier_data["price"]
+                price=supplier_data["price"],
             )
 
         return product
 
-# falta update
 
-
-class ProductModel(models.Model):
+class ProductModel(TimeStampedModel):
     """
     Modelo que representa un producto en el sistema.
 
@@ -135,7 +132,7 @@ class ProductModel(models.Model):
     objects: ProductModelManager = ProductModelManager()
 
 
-class ProductStockInOfficeModel(models.Model):
+class ProductStockInOfficeModel(TimeStampedModel):
     """
     Modelo que representa el stock de un producto en una oficina específica.
 
@@ -162,7 +159,7 @@ class ProductStockInOfficeModel(models.Model):
         ]
 
 
-class ProductSupplierModel(models.Model):
+class ProductSupplierModel(TimeStampedModel):
     """
     Modelo que representa la relación entre un producto y un proveedor.
 
