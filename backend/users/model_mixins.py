@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from .managers import UserManager
 
 
-class DjangoIntegrationMixin(TimeStampedModel):
+class DjangoIntegrationMixin(models.Model):
     """Mixin provides fields for Django integration to work correctly
     Provides permissions for Django Admin integration, as well as date
     field used by authentication code.
@@ -19,9 +19,7 @@ class DjangoIntegrationMixin(TimeStampedModel):
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,
-        help_text=_(
-            "Designates whether the user can log into the admin site."
-        ),
+        help_text=_("Designates whether the user can log into the admin site."),
     )
     date_joined = models.DateTimeField(default=timezone.now)
 
@@ -29,7 +27,7 @@ class DjangoIntegrationMixin(TimeStampedModel):
         abstract = True
 
 
-class FirstNameMixin(TimeStampedModel):
+class FirstNameMixin(models.Model):
     """A mixin to provide an optional first name field"""
 
     first_name = models.CharField(max_length=200, blank=True)
@@ -42,7 +40,7 @@ class FirstNameMixin(TimeStampedModel):
         return self.first_name
 
 
-class LastNameMixin(TimeStampedModel):
+class LastNameMixin(models.Model):
     """A mixin to provide an optional last name field"""
 
     last_name = models.CharField(max_length=200, blank=True)
@@ -55,7 +53,7 @@ class LastNameMixin(TimeStampedModel):
         return self.last_name
 
 
-class EmailAuthMixin(TimeStampedModel):
+class EmailAuthMixin(models.Model):
     """A mixin to use email as the username"""
 
     email = models.EmailField(_("email address"), max_length=254, unique=True)
@@ -100,6 +98,7 @@ class AbstractUser(
     :class:`~django.contrib.auth.models.AbstractBaseUser` may be helpful
     in understanding this class.
     """
+
     id = models.AutoField(primary_key=True)
     is_active = models.BooleanField(
         _("active"),
@@ -111,7 +110,7 @@ class AbstractUser(
     )
 
     objects = UserManager()
-   
+
     # misnomer; fields Dj prompts for when user calls createsuperuser
     # https://docs.djangoproject.com/en/stable/topics/auth/customizing/#django.contrib.auth.models.CustomUser.REQUIRED_FIELDS
     REQUIRED_FIELDS: List[str] = []
