@@ -22,7 +22,7 @@ import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWi
 import Spinner from '@/components/Spinner/Spinner';
 
 const getAvatarText = (name: string) => {
-    return (name[0]).toUpperCase();
+    return name[0].toUpperCase();
 };
 
 const getDasboardTitle = (product: ProductByIdQuery['productById'] | undefined) => {
@@ -34,9 +34,7 @@ const getDasboardTitle = (product: ProductByIdQuery['productById'] | undefined) 
         <div className="flex items-center space-x-4">
             <DashboardLayoutBigTitle>Productos</DashboardLayoutBigTitle>
             <ChevronRight />
-            <span className="font-headings text-sm">
-                {product.name} 
-            </span>
+            <span className="font-headings text-sm">{product.name}</span>
         </div>
     );
 };
@@ -98,14 +96,12 @@ const Page = () => {
                         <div className="flex  flex-1 flex-col">
                             <header className="border-b pl-10">
                                 <div className="mb-10 flex items-center">
-                                    <Avatar>
-                                        {getAvatarText(product.name)}
-                                    </Avatar>
+                                    <Avatar>{getAvatarText(product.name)}</Avatar>
                                     <div className="pl-6">
                                         <h1 className="my-2 mt-10 text-xl font-bold">
-                                            {product.name} 
+                                            {product.name}
                                         </h1>
-                                        <p>{product.brand.name}</p>
+                                        <p>{product.brand?.name || '-'}</p>
                                     </div>
                                 </div>
 

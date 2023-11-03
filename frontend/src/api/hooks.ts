@@ -6,8 +6,13 @@ import {
 } from '@tanstack/react-query';
 
 import {
+    BrandsDocument,
+    BrandsQuery,
     ClientByIdDocument,
     ClientsDocument,
+    CreateBrandDocument,
+    CreateBrandMutation,
+    CreateBrandMutationVariables,
     CreateClientDocument,
     CreateClientMutation,
     CreateClientMutationVariables,
@@ -17,6 +22,9 @@ import {
     CreateLocalityDocument,
     CreateLocalityMutation,
     CreateLocalityMutationVariables,
+    CreateProductDocument,
+    CreateProductMutation,
+    CreateProductMutationVariables,
     InternalOrdersDocument,
     LocalitiesDocument,
     LocalitiesQuery,
@@ -26,6 +34,7 @@ import {
     OfficesDocument,
     ProductByIdDocument,
     ProductsDocument,
+    ProductsQuery,
     ProductsStocksByOfficeIdDocument,
     SupplierByIdDocument,
     SuppliersDocument,
@@ -48,7 +57,7 @@ const queryKeys = {
 
     offices: ['offices'],
 
-    products:['products'],
+    products: ['products'],
     productById: (id: string | undefined) => [...queryKeys.products, id],
 
     productsStocksByOfficeId: (id: string) => ['products-stocks-by-office-id', id],
@@ -270,5 +279,100 @@ export const useProductsStocksByOfficeId = (officeId: string) => {
         return clientGraphqlQuery(ProductsStocksByOfficeIdDocument, {
             officeId,
         });
+    });
+};
+
+type UseCreateProductOptions = UseMutationOptions<
+    CreateProductMutation,
+    Error,
+    CreateProductMutationVariables
+>;
+
+export const useCreateProduct = ({
+    onSuccess,
+    ...options
+}: UseCreateProductOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<CreateProductMutation, Error, CreateProductMutationVariables>(
+        (data) => {
+            return clientGraphqlQuery(CreateProductDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                const product = data.createProduct?.product;
+
+                if (product) {
+                    client.setQueryData<ProductsQuery>(queryKeys.products, (prev) => {
+                        const products = prev?.products;
+
+                        if (!products) {
+                            return prev;
+                        }
+
+                        const next: ProductsQuery = {
+                            ...prev,
+                            products: [...products, product],
+                        };
+
+                        return next;
+                    });
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+type UseCreateBrandOptions = UseMutationOptions<
+    CreateBrandMutation,
+    Error,
+    CreateBrandMutationVariables
+>;
+
+export const useCreateBrand = ({ onSuccess, ...options }: UseCreateBrandOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<CreateBrandMutation, Error, CreateBrandMutationVariables>(
+        (data) => {
+            return clientGraphqlQuery(CreateBrandDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                const brand = data.createBrand?.brand;
+
+                if (brand) {
+                    client.setQueryData<BrandsQuery>(queryKeys.brands, (prev) => {
+                        const brands = prev?.brands;
+
+                        if (!brands) {
+                            return prev;
+                        }
+
+                        const next: BrandsQuery = {
+                            ...prev,
+                            brands: [...brands, brand],
+                        };
+
+                        return next;
+                    });
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useBrands = () => {
+    return useQuery(queryKeys.brands, () => {
+        return clientGraphqlQuery(BrandsDocument, {});
     });
 };

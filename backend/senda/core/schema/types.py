@@ -18,11 +18,7 @@ from senda.core.models.products import (
     ProductStockInOfficeModel,
     ProductTypeChoices,
 )
-from senda.core.models.purchases import (
-    PurchaseHistoryModel,
-    PurchaseItemModel,
-    PurchaseModel,
-)
+from senda.core.models.purchases import PurchaseItemModel, PurchaseModel
 from senda.core.models.rental_contracts import (
     RentalContractHistoryModel,
     RentalContractItemModel,
@@ -106,11 +102,6 @@ class Purchase(DjangoObjectType):
 class PurchaseItem(DjangoObjectType):
     class Meta:
         model = PurchaseItemModel
-
-
-class PurchaseHistory(DjangoObjectType):
-    class Meta:
-        model = PurchaseHistoryModel
 
 
 class RentalContract(DjangoObjectType):

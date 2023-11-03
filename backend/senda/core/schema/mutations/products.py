@@ -1,7 +1,7 @@
 import graphene
 
-from senda.core.models.products import ProductModel
-from senda.core.schema.types import Product, ProductTypeChoicesEnum
+from senda.core.models.products import BrandModel, ProductModel
+from senda.core.schema.types import Brand, Product, ProductTypeChoicesEnum
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
 
@@ -61,5 +61,21 @@ class CreateProduct(graphene.Mutation):
             return CreateProduct(error=e)
 
 
+class CreateBrand(graphene.Mutation):
+    brand = graphene.Field(Brand)
+    error = graphene.String()
+
+    class Arguments:
+        name = graphene.String(required=True)
+
+    def mutate(self, info, name: str):
+        try:
+            brand = BrandModel.objects.create(name=name)
+            return CreateBrand(brand=brand)
+        except Exception as e:
+            return CreateBrand(error=e)
+
+
 class Mutation(graphene.ObjectType):
     create_product = CreateProduct.Field()
+    create_brand = CreateBrand.Field()

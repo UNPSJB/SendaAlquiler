@@ -1,3 +1,4 @@
+from decimal import Decimal, InvalidOperation
 from typing import List, TypedDict
 
 from django.db import models
@@ -5,6 +6,15 @@ from django.db import models
 from extensions.db.models import TimeStampedModel
 from senda.core.models.offices import OfficeModel
 from senda.core.models.suppliers import SupplierModel
+
+
+def parse_price(price_str):
+    # Replace dots with nothing and commas with dots
+    standard_format_str = price_str.replace(".", "").replace(",", ".")
+    try:
+        return Decimal(standard_format_str)
+    except InvalidOperation:
+        raise ValueError(f"The price {price_str} is not a valid number format")
 
 
 class ProductTypeChoices(models.TextChoices):
@@ -52,7 +62,7 @@ class ProductModelManager(models.Manager["ProductModel"]):
             brand_id=brand_id,
             description=description,
             type=type,
-            price=price,
+            price=parse_price(price),
         )
 
         for stock_data in stock:
@@ -64,14 +74,16 @@ class ProductModelManager(models.Manager["ProductModel"]):
 
         for service_data in services:
             ProductServiceModel.objects.create(
-                product=product, name=service_data["name"], price=service_data["price"]
+                product=product,
+                name=service_data["name"],
+                price=parse_price(service_data["price"]),
             )
 
         for supplier_data in suppliers:
             ProductSupplierModel.objects.create(
                 product=product,
                 supplier_id=supplier_data["supplier_id"],
-                price=supplier_data["price"],
+                price=parse_price(supplier_data["price"]),
             )
 
         return product
