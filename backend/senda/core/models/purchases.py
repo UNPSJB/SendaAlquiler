@@ -1,9 +1,12 @@
+from typing import List, TypedDict
+
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 
 from extensions.db.models import TimeStampedModel
 
 from .clients import ClientModel
+from .offices import OfficeModel
 from .products import ProductModel, ProductTypeChoices
 
 
@@ -12,20 +15,36 @@ def calculate_purchase_total(purchase: "PurchaseModel"):
     return total
 
 
+PurchaseProductsItemDict = TypedDict("Products", {"id": str, "quantity": int})
+
+
+class PurchaseProductManager(models.Manager["PurchaseModel"]):
+    @transaction.atomic
+    def create_Purchase_Product(
+        self,
+        client: ClientModel,
+        products: List[PurchaseProductsItemDict],
+        office: OfficeModel,
+    ):
+        purchase = self.create(
+            client=client,
+            office=office,
+        )
+
+        for product in products:
+            PurchaseItemModel.objects.create(
+                quantity=product["quantity"],
+                product_id=product["id"],
+                purchase_Products=purchase,
+            )
+
+
 class PurchaseModel(TimeStampedModel):
     date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
     client = models.ForeignKey(
         ClientModel, on_delete=models.CASCADE, related_name="purchases"
     )
-    current_history = models.OneToOneField(
-        "PurchaseHistoryModel",
-        on_delete=models.SET_NULL,
-        related_name="current_purchase",
-        blank=True,
-        null=True,
-    )
-
     purchase_items: models.QuerySet["PurchaseItemModel"]
 
     def __str__(self) -> str:
@@ -56,7 +75,8 @@ class PurchaseItemModel(TimeStampedModel):
                 fields=["product", "purchase"], name="unique_purchase_product_item"
             ),
             models.CheckConstraint(
-                check=models.Q(quantity__gte=1), name="quantity_must_be_greater_than_0"
+                check=models.Q(quantity__gte=1),
+                name="purchase_product_item_quantity_must_be_greater_than_0",
             ),
         ]
 

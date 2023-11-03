@@ -8,7 +8,7 @@ from .models.offices import OfficeModel
 from .models.order_internal import InternalOrderModel
 from .models.order_supplier import SupplierOrderModel
 from .models.products import BrandModel, ProductModel, ProductStockInOfficeModel
-from .models.purchases import PurchaseHistoryModel, PurchaseItemModel, PurchaseModel
+from .models.purchases import PurchaseItemModel, PurchaseModel
 from .models.rental_contracts import (
     RentalContractHistoryModel,
     RentalContractItemModel,
@@ -16,7 +16,6 @@ from .models.rental_contracts import (
 )
 from .models.services import ServiceModel
 from .models.suppliers import SupplierModel
-from .models.Purchase_products import PurchaseProductModel
 
 
 @admin.register(BrandModel)
@@ -97,11 +96,6 @@ class ServiceModelAdmin(ImportExportModelAdmin):
     pass
 
 
-@admin.register(PurchaseHistoryModel)
-class PurchaseHistoryModelAdmin(ImportExportModelAdmin):
-    pass
-
-
 @admin.register(PurchaseItemModel)
 class PurchaseItemModelAdmin(ImportExportModelAdmin):
     pass
@@ -109,8 +103,4 @@ class PurchaseItemModelAdmin(ImportExportModelAdmin):
 
 @admin.register(PurchaseModel)
 class PurchaseModelAdmin(ImportExportModelAdmin):
-    pass
-
-@admin.register(PurchaseProductModel)
-class PurchaseProductModelAdmin(ImportExportModelAdmin):
     pass
