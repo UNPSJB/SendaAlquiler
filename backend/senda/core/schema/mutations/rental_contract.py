@@ -1,11 +1,17 @@
-import graphene
-from senda.core.models.rental_contracts import RentalContractModel, RentalContractStatusChoices,RentalContractHistoryModel
-from senda.core.models import ClientModel, OfficeModel, LocalityModel
-from senda.core.schema.types import RentalContract
-
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
-from utils.graphene import input_object_type_to_dict, non_null_list_of
 from typing import List
+
+import graphene
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+
+from senda.core.models.clients import ClientModel, LocalityModel
+from senda.core.models.offices import OfficeModel
+from senda.core.models.rental_contracts import (
+    RentalContractHistoryModel,
+    RentalContractModel,
+    RentalContractStatusChoices,
+)
+from senda.core.schema.types import RentalContract
+from utils.graphene import input_object_type_to_dict, non_null_list_of
 
 
 class ErrorMessages:
@@ -22,6 +28,7 @@ class RentalContractProductsItemInput(graphene.InputObjectType):
     id = graphene.ID(required=True)
     quantity = graphene.Int(required=True)
     service = graphene.String(Required=False)
+
 
 class CreateRentalContractInput(graphene.InputObjectType):
     office_id = graphene.ID(required=True)
@@ -53,7 +60,8 @@ def get_client(client_id: str):
             raise ValueError(ErrorMessages.CLIENT_NOT_FOUND)
     else:
         return None
-    
+
+
 def get_locality(locality_id: str):
     if locality_id:
         try:
@@ -62,7 +70,6 @@ def get_locality(locality_id: str):
             raise ValueError(ErrorMessages.LOCALITY_NOT_FOUND)
     else:
         return None
-
 
 
 class CreateRentalContract(graphene.Mutation):
@@ -85,7 +92,7 @@ class CreateRentalContract(graphene.Mutation):
             client = get_client(client_id)
             if client is None:
                 raise ValueError(ErrorMessages.INVALID_CLIENT)
-            
+
             locality_id = data_dict.pop("locality_id")
             locality = get_locality(locality_id)
             if locality is None:
@@ -109,30 +116,35 @@ class CreateRentalContract(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     CreateRentalContract = CreateRentalContract.Field()
 
+
 class BaseChangeContractStatus(graphene.Mutation):
     rental_contract = graphene.Field(RentalContract)
     error = graphene.String()
-    
+
     class Arguments:
         rental_contract_id = graphene.ID(required=True)
 
     @classmethod
     def get_contract(cls, id: str):
         rental_contract = RentalContractModel.objects.filter(id=id).first()
-        
+
         if rental_contract is None:
             raise Exception("No existe contrato con ese ID")
-        
+
         return rental_contract
 
     @classmethod
-    def check_contract_status_is_one_of_and_update_status(cls, contract: RentalContractModel, status: List[RentalContractStatusChoices], new_status: RentalContractStatusChoices):
+    def check_contract_status_is_one_of_and_update_status(
+        cls,
+        contract: RentalContractModel,
+        status: List[RentalContractStatusChoices],
+        new_status: RentalContractStatusChoices,
+    ):
         if contract.current_history.status not in status:
             raise Exception("El contrato no esta en un estado valido")
-        
+
         RentalContractHistoryModel.objects.create(
-            rental_contract=contract,
-            status=new_status
+            rental_contract=contract, status=new_status
         )
 
 
@@ -141,100 +153,129 @@ class PayContractDeposit(BaseChangeContractStatus):
     def mutate(cls, self, info, rental_contract_id: str):
         try:
             contract = cls.get_contract(rental_contract_id)
-            cls.check_contract_status_is_one_of_and_update_status(contract, [
-                RentalContractStatusChoices.PRESUPUESTADO
-            ], RentalContractStatusChoices.CON_DEPOSITO)
+            cls.check_contract_status_is_one_of_and_update_status(
+                contract,
+                [RentalContractStatusChoices.PRESUPUESTADO],
+                RentalContractStatusChoices.CON_DEPOSITO,
+            )
 
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:
             return BaseChangeContractStatus(error=str(e))
+
 
 class PayTotalContract(BaseChangeContractStatus):
     @classmethod
     def mutate(cls, self, info, rental_contract_id: str):
         try:
             contract = cls.get_contract(rental_contract_id)
-            cls.check_contract_status_is_one_of_and_update_status(contract, [
-                RentalContractStatusChoices.CON_DEPOSITO
-            ], RentalContractStatusChoices.PAGADO)
+            cls.check_contract_status_is_one_of_and_update_status(
+                contract,
+                [RentalContractStatusChoices.CON_DEPOSITO],
+                RentalContractStatusChoices.PAGADO,
+            )
 
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:
             return BaseChangeContractStatus(error=str(e))
-        
+
+
 class CancelContract(BaseChangeContractStatus):
     @classmethod
     def mutate(cls, self, info, rental_contract_id: str):
         try:
             contract = cls.get_contract(rental_contract_id)
-            cls.check_contract_status_is_one_of_and_update_status(contract, [
-                RentalContractStatusChoices.CON_DEPOSITO, RentalContractStatusChoices.PAGADO
-            ], RentalContractStatusChoices.CANCELADO)
+            cls.check_contract_status_is_one_of_and_update_status(
+                contract,
+                [
+                    RentalContractStatusChoices.CON_DEPOSITO,
+                    RentalContractStatusChoices.PAGADO,
+                ],
+                RentalContractStatusChoices.CANCELADO,
+            )
 
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:
             return BaseChangeContractStatus(error=str(e))
+
 
 class StartContract(BaseChangeContractStatus):
     @classmethod
     def mutate(cls, self, info, rental_contract_id: str):
         try:
             contract = cls.get_contract(rental_contract_id)
-            cls.check_contract_status_is_one_of_and_update_status(contract, [
-                RentalContractStatusChoices.PAGADO
-            ], RentalContractStatusChoices.ACTIVO)
+            cls.check_contract_status_is_one_of_and_update_status(
+                contract,
+                [RentalContractStatusChoices.PAGADO],
+                RentalContractStatusChoices.ACTIVO,
+            )
 
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:
             return BaseChangeContractStatus(error=str(e))
+
 
 class ExpiredContract(BaseChangeContractStatus):
     @classmethod
     def mutate(cls, self, info, rental_contract_id: str):
         try:
             contract = cls.get_contract(rental_contract_id)
-            cls.check_contract_status_is_one_of_and_update_status(contract, [
-                RentalContractStatusChoices.CON_DEPOSITO, RentalContractStatusChoices.PRESUPUESTADO
-            ], RentalContractStatusChoices.VENCIDO)
+            cls.check_contract_status_is_one_of_and_update_status(
+                contract,
+                [
+                    RentalContractStatusChoices.CON_DEPOSITO,
+                    RentalContractStatusChoices.PRESUPUESTADO,
+                ],
+                RentalContractStatusChoices.VENCIDO,
+            )
 
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:
             return BaseChangeContractStatus(error=str(e))
+
 
 class FinishContract(BaseChangeContractStatus):
     @classmethod
     def mutate(cls, self, info, rental_contract_id: str):
         try:
             contract = cls.get_contract(rental_contract_id)
-            cls.check_contract_status_is_one_of_and_update_status(contract, [
-                RentalContractStatusChoices.ACTIVO
-            ], RentalContractStatusChoices.FINALIZADO)
+            cls.check_contract_status_is_one_of_and_update_status(
+                contract,
+                [RentalContractStatusChoices.ACTIVO],
+                RentalContractStatusChoices.FINALIZADO,
+            )
 
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:
             return BaseChangeContractStatus(error=str(e))
+
 
 class FailedReturnContract(BaseChangeContractStatus):
     @classmethod
     def mutate(cls, self, info, rental_contract_id: str):
         try:
             contract = cls.get_contract(rental_contract_id)
-            cls.check_contract_status_is_one_of_and_update_status(contract, [
-                RentalContractStatusChoices.FINALIZADO
-            ], RentalContractStatusChoices.DEVOLUCION_FALLIDA)
+            cls.check_contract_status_is_one_of_and_update_status(
+                contract,
+                [RentalContractStatusChoices.FINALIZADO],
+                RentalContractStatusChoices.DEVOLUCION_FALLIDA,
+            )
 
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:
             return BaseChangeContractStatus(error=str(e))
+
 
 class SuccessfulReturnContract(BaseChangeContractStatus):
     @classmethod
     def mutate(cls, self, info, rental_contract_id: str):
         try:
             contract = cls.get_contract(rental_contract_id)
-            cls.check_contract_status_is_one_of_and_update_status(contract, [
-                RentalContractStatusChoices.FINALIZADO
-            ], RentalContractStatusChoices.DEVOLUCION_EXITOSA)
+            cls.check_contract_status_is_one_of_and_update_status(
+                contract,
+                [RentalContractStatusChoices.FINALIZADO],
+                RentalContractStatusChoices.DEVOLUCION_EXITOSA,
+            )
 
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:

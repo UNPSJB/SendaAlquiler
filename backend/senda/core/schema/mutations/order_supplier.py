@@ -1,9 +1,9 @@
 import graphene
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-from backend.senda.core.models.order_supplier import SupplierOrderProduct
-from senda.core.models import OfficeModel, SupplierModel, SupplierOrderModel
-from senda.core.schema.types import Office, Supplier
+from senda.core.models.offices import OfficeModel
+from senda.core.models.order_supplier import SupplierOrderModel
+from senda.core.models.suppliers import SupplierModel
 from utils.graphene import input_object_type_to_dict
 
 

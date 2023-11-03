@@ -1,8 +1,11 @@
 import graphene
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-from senda.core.models import InternalOrderModel, OfficeModel
-from senda.core.models.order_internal import InternalOrderProductsDict
+from senda.core.models.offices import OfficeModel
+from senda.core.models.order_internal import (
+    InternalOrderModel,
+    InternalOrderProductsDict,
+)
 from senda.core.schema.types import InternalOrder
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 

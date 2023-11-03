@@ -25,6 +25,18 @@ query localities {
     }
 }
 
+query products {
+    products {
+        id
+        name
+        price
+        type
+        brand {
+            name
+        }
+    }
+}
+
 query suppliers {
     suppliers {
         id
@@ -99,6 +111,30 @@ query supplierById($id: ID!) {
     }
 }
 
+query productById($id: ID!) {
+    productById(id: $id) {
+        sku
+        name
+        description
+        brand {
+            name
+        }
+        type
+        price
+        stock {
+            office {
+                locality {
+                    name
+                }
+            }
+            stock
+        }
+        services {
+            name
+        }
+    }
+}
+
 query internalOrders {
     internalOrders {
         id
@@ -149,5 +185,14 @@ query productsStocksByOfficeId($officeId: ID!) {
             name
         }
         stock
+    }
+}
+
+mutation createProduct($productData: CreateProductInput!) {
+    createProduct(productData: $productData) {
+        product {
+            id
+        }
+        error
     }
 }
