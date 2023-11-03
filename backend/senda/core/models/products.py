@@ -181,7 +181,7 @@ class ProductSupplierModel(TimeStampedModel):
     price = models.DecimalField(decimal_places=2, max_digits=10)
 
 
-class ProductServiceModel(models.Model):
+class ProductServiceModel(TimeStampedModel):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="services"
     )
