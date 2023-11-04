@@ -55,7 +55,7 @@ class ProductModel(TimeStampedModel):
         blank=True,
     )
     type = models.CharField(max_length=50, choices=ProductTypeChoices.choices)
-    price: models.DecimalField[Optional[Decimal]] = models.DecimalField(
+    price = models.DecimalField(
         null=True, blank=True, decimal_places=2, max_digits=10
     )
 
@@ -137,7 +137,7 @@ class ProductServiceModel(TimeStampedModel):
     )
 
     name = models.CharField(max_length=100)
-    price: models.DecimalField[Decimal] = models.DecimalField(
+    price = models.DecimalField(
         decimal_places=2, max_digits=10
     )
 
