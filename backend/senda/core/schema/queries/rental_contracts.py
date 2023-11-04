@@ -1,9 +1,9 @@
 from typing import Any
 
 import graphene  # pyright: ignore
-from core.models.rental_contracts import RentalContractModel
-from core.schema.types import RentalContract
 
+from senda.core.models.rental_contracts import RentalContractModel
+from senda.core.schema.types import RentalContract
 from utils.graphene import non_null_list_of
 
 
