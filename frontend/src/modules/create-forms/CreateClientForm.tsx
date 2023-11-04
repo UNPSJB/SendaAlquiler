@@ -17,7 +17,7 @@ import toast from 'react-hot-toast';
 import { CreateClientMutationVariables } from '@/api/graphql';
 import { useCreateClient } from '@/api/hooks';
 
-import LocalityField from '@/modules/create-forms/LocalityField';
+import LocalityField from '@/modules/create-forms/fields/LocalityField';
 import { RHFFormField } from '@/modules/forms/FormField';
 import Input from '@/modules/forms/Input';
 
