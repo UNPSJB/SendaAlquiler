@@ -18,6 +18,7 @@ import {
     CreateLocalityMutation,
     CreateLocalityMutationVariables,
     EmployeesDocument,
+    EmployeeByIdDocument,
     InternalOrdersDocument,
     LocalitiesDocument,
     LocalitiesQuery,
@@ -38,6 +39,7 @@ const queryKeys = {
     clientById: (id: string | undefined) => [...queryKeys.clients, id],
 
     employees: ['employees'],
+    employeeById: (id: string | undefined) => [...queryKeys.employees, id],
 
     brands: ['brands'],
 
@@ -78,6 +80,20 @@ export const useEmployees = () => {
     return useQuery(queryKeys.employees, () => {
         return clientGraphqlQuery(EmployeesDocument, {});
     });
+};
+
+export const useEmployeeById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.employeeById(id),
+        () => {
+            return clientGraphqlQuery(EmployeeByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
 };
 
 export const useClients = () => {
