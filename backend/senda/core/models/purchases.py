@@ -1,45 +1,24 @@
-from typing import List, TypedDict
+from decimal import Decimal
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 
 from extensions.db.models import TimeStampedModel
+from senda.core.managers import PurchaseModelManager
 
 from .clients import ClientModel
-from .offices import OfficeModel
 from .products import ProductModel, ProductTypeChoices
 
 
-def calculate_purchase_total(purchase: "PurchaseModel"):
+def calculate_purchase_total(purchase: "PurchaseModel") -> Decimal:
     total = sum([item.quantity * item.price for item in purchase.purchase_items.all()])
-    return total
-
-
-PurchaseProductsItemDict = TypedDict("Products", {"id": str, "quantity": int})
-
-
-class PurchaseProductManager(models.Manager["PurchaseModel"]):
-    @transaction.atomic
-    def create_Purchase_Product(
-        self,
-        client: ClientModel,
-        products: List[PurchaseProductsItemDict],
-        office: OfficeModel,
-    ):
-        purchase = self.create(
-            client=client,
-            office=office,
-        )
-
-        for product in products:
-            PurchaseItemModel.objects.create(
-                quantity=product["quantity"],
-                product_id=product["id"],
-                purchase_Products=purchase,
-            )
+    return Decimal(total)
 
 
 class PurchaseModel(TimeStampedModel):
+    purchase_items: models.QuerySet["PurchaseItemModel"]
+
     date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
     client = models.ForeignKey(
@@ -47,11 +26,13 @@ class PurchaseModel(TimeStampedModel):
     )
     purchase_items: models.QuerySet["PurchaseItemModel"]
 
+    objects: PurchaseModelManager = PurchaseModelManager() # pyright: ignore
+
     def __str__(self) -> str:
         return f"{self.date} - {self.total}"
 
     @transaction.atomic
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any):
         if not self.total:
             self.total = calculate_purchase_total(self)
 
@@ -66,10 +47,14 @@ class PurchaseItemModel(TimeStampedModel):
         PurchaseModel, on_delete=models.CASCADE, related_name="purchase_items"
     )
     quantity = models.IntegerField()
-    price = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
-    total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
+    price: models.DecimalField[Decimal] = models.DecimalField(
+        blank=True, decimal_places=2, max_digits=10
+    )
+    total: models.DecimalField[Decimal] = models.DecimalField(
+        blank=True, decimal_places=2, max_digits=10
+    )
 
-    class Meta:
+    class Meta(TimeStampedModel.Meta):
         constraints = [
             models.UniqueConstraint(
                 fields=["product", "purchase"], name="unique_purchase_product_item"
@@ -89,8 +74,8 @@ class PurchaseItemModel(TimeStampedModel):
     def __str__(self) -> str:
         return f"{self.product.name} - {self.quantity}"
 
-    def save(self, *args, **kwargs):
-        if not self.price:
+    def save(self, *args: Any, **kwargs: Any):
+        if not self.price and self.product.price:
             self.price = self.product.price
 
         super().save(*args, **kwargs)

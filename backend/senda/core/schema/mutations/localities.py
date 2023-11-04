@@ -1,4 +1,6 @@
-import graphene
+from typing import Any
+
+import graphene  # pyright: ignore
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from senda.core.models.localities import LocalityModel
@@ -14,7 +16,7 @@ class CreateLocality(graphene.Mutation):
         state = StateChoicesEnum(required=True)
         postal_code = graphene.String(required=True)
 
-    def mutate(self, info, **kwargs):
+    def mutate(self, info: Any, **kwargs: Any):
         try:
             locality = LocalityModel.objects.create_locality(**kwargs)
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:

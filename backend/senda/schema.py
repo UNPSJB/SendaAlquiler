@@ -1,4 +1,4 @@
-import graphene
+import graphene  # pyright: ignore
 
 import senda.core.schema.mutations
 import senda.core.schema.queries

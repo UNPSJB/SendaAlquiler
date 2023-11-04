@@ -1,20 +1,21 @@
 import os
 
 from decouple import config
+from typing import Union
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'senda.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "senda.settings")
 
 enviroment = config("ENVIROMENT")
 if enviroment == "staging":
-    DJANGO_CONFIGURATION = 'Staging'
+    DJANGO_CONFIGURATION = "Staging"
 elif enviroment == "preview":
-    DJANGO_CONFIGURATION = 'Preview'
+    DJANGO_CONFIGURATION = "Preview"
 elif enviroment == "production":
-    DJANGO_CONFIGURATION = 'Production'
+    DJANGO_CONFIGURATION = "Production"
 else:
-    DJANGO_CONFIGURATION = 'Development'
+    DJANGO_CONFIGURATION = "Development"
 
-os.environ.setdefault('DJANGO_CONFIGURATION', DJANGO_CONFIGURATION)
+os.environ.setdefault("DJANGO_CONFIGURATION", DJANGO_CONFIGURATION)
 
 from configurations.wsgi import get_wsgi_application
 

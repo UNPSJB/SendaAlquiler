@@ -1,11 +1,11 @@
-import graphene
+from typing import Any, List
+
+import graphene  # pyright: ignore
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
+from senda.core.managers import InternalOrderProductsDict
 from senda.core.models.offices import OfficeModel
-from senda.core.models.order_internal import (
-    InternalOrderModel,
-    InternalOrderProductsDict,
-)
+from senda.core.models.order_internal import InternalOrderModel
 from senda.core.schema.types import InternalOrder
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
@@ -43,7 +43,7 @@ class CreateInternalOrder(graphene.Mutation):
     class Arguments:
         data = CreateInternalOrderInput(required=True)
 
-    def mutate(self, info, data: CreateInternalOrderInput):
+    def mutate(self, info: Any, data: CreateInternalOrderInput):
         data_dict = input_object_type_to_dict(data)
 
         try:
@@ -57,7 +57,7 @@ class CreateInternalOrder(graphene.Mutation):
             if office_destination is None:
                 raise ValueError(ErrorMessages.INVALID_OFFICE)
 
-            products: InternalOrderProductsDict = data_dict.pop("products")
+            products: List[InternalOrderProductsDict] = data_dict.pop("products")
 
             internal_order = InternalOrderModel.objects.create_internal_order(
                 office_branch=office_branch,

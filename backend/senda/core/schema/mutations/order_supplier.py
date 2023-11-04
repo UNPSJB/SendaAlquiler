@@ -1,4 +1,6 @@
-import graphene
+from typing import Any
+
+import graphene  # pyright: ignore
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from senda.core.models.offices import OfficeModel
@@ -54,7 +56,7 @@ class CreateSupplierOrder(graphene.Mutation):
     class Arguments:
         data = CreateSupplierOrderInput(required=True)
 
-    def mutate(self, info, data: CreateSupplierOrderInput):
+    def mutate(self, info: Any, data: CreateSupplierOrderInput):
         data_dict = input_object_type_to_dict(data)
 
         try:
@@ -64,7 +66,7 @@ class CreateSupplierOrder(graphene.Mutation):
                 raise ValueError(ErrorMessages.INVALID_OFFICE)
 
             supplier_id = data_dict.pop("supplier_id")
-            supplier = get_office(supplier_id)
+            supplier = get_supplier(supplier_id)
             if supplier is None:
                 raise ValueError(ErrorMessages.INVALID_SUPPLIER)
 

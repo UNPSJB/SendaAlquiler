@@ -1,4 +1,6 @@
-import graphene
+from typing import Any
+
+import graphene  # pyright: ignore
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from senda.core.models.clients import ClientModel, LocalityModel
@@ -56,7 +58,7 @@ class CreateClient(graphene.Mutation):
     class Arguments:
         client_data = CreateClientInput(required=True)
 
-    def mutate(self, info, client_data):
+    def mutate(self, info: Any, client_data: CreateClientInput):
         client_data_dict = input_object_type_to_dict(client_data)
 
         try:
@@ -81,7 +83,7 @@ class UpdateClient(graphene.Mutation):
     class Arguments:
         client_data = UpdateClientInput(required=True)
 
-    def mutate(self, info, client_data):
+    def mutate(self, info: Any, client_data: UpdateClientInput):
         client_data_dict = input_object_type_to_dict(client_data)
 
         client_id = client_data_dict.pop("id")

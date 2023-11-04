@@ -1,4 +1,6 @@
-import graphene
+from typing import Any
+
+import graphene  # pyright: ignore
 
 from users.models import UserModel
 from users.schema.types import User
@@ -8,7 +10,7 @@ from utils.graphene import non_null_list_of
 class UserQuery(graphene.ObjectType):
     users = non_null_list_of(User)
 
-    def resolve_users(self, info):
+    def resolve_users(self, info: Any):
         return UserModel.objects.all()
 
 

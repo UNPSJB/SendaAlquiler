@@ -47,7 +47,7 @@ class OfficeModelAdmin(ImportExportModelAdmin):
     list_display = ("name",)
 
 
-class ServiceModelInline(admin.TabularInline):
+class ServiceModelInline(admin.TabularInline[ProductServiceModel]):
     model = ProductServiceModel
 
 

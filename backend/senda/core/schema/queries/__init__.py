@@ -1,4 +1,4 @@
-import graphene
+import graphene  # pyright: ignore
 
 from .clients import Query as ClientQuery
 from .localities import Query as LocalityQuery

@@ -1,49 +1,9 @@
 from django.db import models
 
 from extensions.db.models import TimeStampedModel
+from senda.core.managers import ClientModelManager
 from senda.core.models.localities import LocalityModel
 from senda.core.validators import only_digits_validator
-
-
-class ClientModelManager(models.Manager["ClientModel"]):
-    def create_client(
-        self,
-        email: str,
-        first_name: str,
-        last_name: str,
-        locality: LocalityModel,
-        house_number: str,
-        street_name: str,
-        house_unit: str,
-        dni: str,
-        phone_code: str,
-        phone_number: str,
-    ):
-        if self.filter(email=email).exists():
-            raise ValueError("Ya existe un cliente con ese email")
-
-        if self.filter(dni=dni).exists():
-            raise ValueError("Ya existe un cliente con ese DNI")
-
-        return self.create(
-            email=email,
-            first_name=first_name,
-            last_name=last_name,
-            locality=locality,
-            house_number=house_number,
-            street_name=street_name,
-            house_unit=house_unit,
-            dni=dni,
-            phone_code=phone_code,
-            phone_number=phone_number,
-        )
-
-    def update_client(self, client, locality, **kwargs):
-        client.locality = locality
-        for field, value in kwargs.items():
-            setattr(client, field, value)
-        client.save()
-        return client
 
 
 class ClientModel(TimeStampedModel):
@@ -88,7 +48,7 @@ class ClientModel(TimeStampedModel):
         ],
     )
 
-    objects: ClientModelManager = ClientModelManager()
+    objects: ClientModelManager = ClientModelManager() # pyright: ignore
 
     def __str__(self) -> str:
         return self.email

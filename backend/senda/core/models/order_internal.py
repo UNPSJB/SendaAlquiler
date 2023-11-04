@@ -1,48 +1,19 @@
-from typing import List, TypedDict
+from typing import Any, Optional
 
-from django.db import models, transaction
+from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from extensions.db.models import TimeStampedModel
+from senda.core.managers import InternalOrderManager
 from senda.core.models.offices import OfficeModel
 from senda.core.models.products import ProductModel
-from users.models import UserModel
-
-InternalOrderProductsDict = TypedDict("Products", {"id": str, "quantity": int})
-
-
-class InternalOrderManager(models.Manager):
-    @transaction.atomic
-    def create_internal_order(
-        self,
-        office_branch: OfficeModel,
-        office_destination: OfficeModel,
-        user: UserModel,
-        products: List[InternalOrderProductsDict],
-    ):
-        internal_order = self.create(
-            office_branch=office_branch, office_destination=office_destination
-        )
-        internal_order.save()
-
-        InternalOrderHistoryModel.objects.create(
-            status=InternalOrderHistoryStatusChoices.PENDING,
-            internal_order=internal_order,
-            user=user,
-        )
-
-        for product in products:
-            InternalOrderProduct.objects.create(
-                product_id=product["id"],
-                quantity=product["quantity"],
-                internal_order=internal_order,
-            )
-
-        return internal_order
 
 
 class InternalOrderModel(TimeStampedModel):
+    history: models.QuerySet["InternalOrderHistoryModel"]
+    orders: models.QuerySet["InternalOrderProduct"]
+
     office_branch = models.ForeignKey(
         OfficeModel, on_delete=models.CASCADE, related_name="internal_orders_branch"
     )
@@ -53,7 +24,9 @@ class InternalOrderModel(TimeStampedModel):
     )
     date_created = models.DateTimeField(auto_now_add=True)
 
-    current_history = models.OneToOneField(
+    current_history: models.OneToOneField[
+        Optional["InternalOrderHistoryModel"]
+    ] = models.OneToOneField(
         "InternalOrderHistoryModel",
         on_delete=models.SET_NULL,
         related_name="current_order",
@@ -61,10 +34,10 @@ class InternalOrderModel(TimeStampedModel):
         null=True,
     )
 
-    objects: InternalOrderManager = InternalOrderManager()
+    objects: InternalOrderManager = InternalOrderManager()  # pyright: ignore
 
     def __str__(self) -> str:
-        return str(self.id)
+        return str(self.pk)
 
 
 class InternalOrderProduct(TimeStampedModel):
@@ -82,7 +55,7 @@ class InternalOrderProduct(TimeStampedModel):
     def __str__(self) -> str:
         return f"{self.product.name} - {self.quantity}"
 
-    class Meta:
+    class Meta(TimeStampedModel.Meta):
         constraints = [
             models.UniqueConstraint(
                 fields=["product", "internal_order"],
@@ -124,7 +97,12 @@ class InternalOrderHistoryModel(TimeStampedModel):
 
 
 @receiver(post_save, sender=InternalOrderHistoryModel)
-def update_current_history(sender, instance, created, **kwargs):
+def update_current_history(
+    sender: InternalOrderHistoryModel,
+    instance: InternalOrderHistoryModel,
+    created: bool,
+    **kwargs: Any,
+):
     if created:
         internal_order = instance.internal_order
         internal_order.current_history = instance
