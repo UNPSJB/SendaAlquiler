@@ -2,7 +2,6 @@
 from typing import List
 
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -19,9 +18,7 @@ class DjangoIntegrationMixin(models.Model):
     is_staff = models.BooleanField(
         _("staff status"),
         default=False,
-        help_text=_(
-            "Designates whether the user can log into the admin site."
-        ),
+        help_text=_("Designates whether the user can log into the admin site."),
     )
     date_joined = models.DateTimeField(default=timezone.now)
 
@@ -66,10 +63,6 @@ class EmailAuthMixin(models.Model):
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "email"
 
-    def email_user(self, subject, message, from_email=None, **kwargs):
-        """Send an email to this User."""
-        send_mail(subject, message, from_email, [self.email], **kwargs)
-
     def clean(self):
         """Override default clean method to normalize email.
         Call :code:`super().clean()` if overriding.
@@ -100,6 +93,7 @@ class AbstractUser(
     :class:`~django.contrib.auth.models.AbstractBaseUser` may be helpful
     in understanding this class.
     """
+
     id = models.AutoField(primary_key=True)
     is_active = models.BooleanField(
         _("active"),
@@ -110,8 +104,8 @@ class AbstractUser(
         ),
     )
 
-    objects = UserManager()
-   
+    objects = UserManager() # pyright: ignore
+
     # misnomer; fields Dj prompts for when user calls createsuperuser
     # https://docs.djangoproject.com/en/stable/topics/auth/customizing/#django.contrib.auth.models.CustomUser.REQUIRED_FIELDS
     REQUIRED_FIELDS: List[str] = []

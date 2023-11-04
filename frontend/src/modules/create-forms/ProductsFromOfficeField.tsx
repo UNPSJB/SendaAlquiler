@@ -51,13 +51,11 @@ const ProductsFromOfficeField: React.FC<Props> = ({ office }) => {
     const selectedProductIds = products
         .filter((x) => x.product)
         .map((x) => x.product?.value);
-    console.log(selectedProductIds);
 
     return (
         <div className="space-y-4">
             <div className="space-y-2">
                 {Array.from({ length: ordersToCreate }).map((_, index) => {
-                    console.log(products[index]);
                     const currentData = products[index]?.product?.data;
 
                     return (

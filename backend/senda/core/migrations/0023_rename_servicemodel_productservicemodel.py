@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0021_supplierordermodel_total_supplierorderproduct_price_and_more'),
+        ("core", "0022_remove_purchasehistorymodel_purchase_and_more"),
     ]
 
     operations = [
         migrations.RenameModel(
-            old_name='ServiceModel',
-            new_name='ProductServiceModel',
+            old_name="ServiceModel",
+            new_name="ProductServiceModel",
         ),
     ]

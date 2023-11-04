@@ -18,47 +18,42 @@ import { CreateProductMutationVariables } from '@/api/graphql';
 import { useCreateProduct } from '@/api/hooks';
 
 import BrandField from '@/modules/create-forms/BrandField';
-import ServiceField from '@/modules/create-forms/ServiceField';
 import { RHFFormField } from '@/modules/forms/FormField';
 import Input from '@/modules/forms/Input';
 
 import NavigationButtons, { NavigationButtonsCancelProps } from './NavigationButtons';
+import ProductServicesField, {
+    ProductsServicesFieldFormValues,
+} from './ProductServicesField';
+import ProductsStockField, { ProductsStockFieldFormValues } from './ProductsStockField';
+import ProductsSuppliersField, {
+    ProductsSuppliersFieldFormValues,
+} from './ProductsSuppliersField';
+import ProductTypeField from './ProductTypeField';
 
 type FormValues = CreateProductMutationVariables['productData'];
 
 type FieldsComponentProps = {
     formErrors: FormState<FormValues>['errors'];
     register: UseFormRegister<FormValues>;
-}
-
+};
 
 const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register }) => (
     <>
-        <RHFFormField
-            className="flex-1"
-            fieldID="sku"
-            label="Sku"
-            showRequired
-        >
+        <RHFFormField className="flex-1" fieldID="sku" label="Sku" showRequired>
             <Input
                 id="sku"
                 placeholder="XYZ12345"
-                hasError={!!formErrors.firstName}
+                hasError={!!formErrors.sku}
                 {...register('sku', { required: true })}
             />
         </RHFFormField>
 
-
-        <RHFFormField
-            className="flex-1"
-            fieldID="name"
-            label="Nombre"
-            showRequired
-        >
+        <RHFFormField className="flex-1" fieldID="name" label="Nombre" showRequired>
             <Input
                 id="name"
                 placeholder="Lavandina"
-                hasError={!!formErrors.lastName}
+                hasError={!!formErrors.name}
                 {...register('name', { required: true })}
             />
         </RHFFormField>
@@ -72,66 +67,58 @@ const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
             <Input
                 id="description"
                 placeholder="Descripción"
-                hasError={!!formErrors.lastName}
+                hasError={!!formErrors.description}
                 {...register('description', { required: true })}
             />
         </RHFFormField>
 
-        <RHFFormField
-            // className="flex-1"
-            fieldID="brand"
-            label="Marca"
-            showRequired
-        >
+        <RHFFormField fieldID="brand" label="Marca" showRequired>
             <BrandField />
         </RHFFormField>
 
-        <RHFFormField
-            className="flex-1"
-            fieldID="type"
-            label="Tipo"
-            showRequired
-        >
-            {/* <Input
-                id="type"
-                placeholder="Ayudin"
-                hasError={!!formErrors.lastName}
-                {...register('brand', { required: true })}
-            /> */}
-            <select id="type" {...register('type', { required: true })}>
-                <option value="ALQUILABLE">ALQUILABLE</option>
-                <option value="COMERCIABLE">COMERCIABLE</option>
-            </select>
+        <RHFFormField className="flex-1" fieldID="type" label="Tipo" showRequired>
+            <ProductTypeField />
         </RHFFormField>
 
-        <RHFFormField
-            //className="flex-1"
-            fieldID="price"
-            label="Precio"
-            showRequired
-        >
+        <RHFFormField fieldID="price" label="Precio" showRequired>
             <Input
-                type="number"
+                type="price"
                 id="price"
                 placeholder="0.00"
-                hasError={!!formErrors.lastName}
+                hasError={!!formErrors.price}
                 {...register('price', {
                     required: true,
-                    maxLength: 1000000,
+                    // maxLength: 7, // 1 million
+                    // minLength: 1,
+                    // max: 1000000,
+                    // min: 1,
                 })}
             />
         </RHFFormField>
     </>
 );
 
-const ProductExtraDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register }) => (
+const ProductServicesStep: React.FC = () => (
     <>
-        {/* Aca deberia ir algo de stock */}
-
-        <RHFFormField fieldID="services" label="Servicios" showRequired>
-            <ServiceField />
+        <RHFFormField fieldID="services" label="Servicios">
+            <ProductServicesField />
         </RHFFormField>
+    </>
+);
 
+const ProductSuppliersStep: React.FC = () => (
+    <>
+        <RHFFormField fieldID="suppliers" label="Proveedores">
+            <ProductsSuppliersField />
+        </RHFFormField>
+    </>
+);
+
+const ProductsStockStep: React.FC = () => (
+    <>
+        <RHFFormField fieldID="stock" label="Stock">
+            <ProductsStockField />
+        </RHFFormField>
     </>
 );
 
@@ -149,14 +136,28 @@ const STEPS: Step[] = [
         title: 'Información de Producto',
         description: 'Información basica del producto',
         Component: ProductDataStep,
-        fields: ['sku', 'name', 'description', 'brand', 'type', 'price'],
+        fields: ['sku', 'name', 'description', 'brandId', 'type', 'price'],
     },
     {
-        key: 'product-extra-data',
-        title: 'Información adicional',
-        description: 'Información del stock y servicios del producto',
-        Component: ProductExtraDataStep,
-        fields: ['services',],
+        key: 'product-services',
+        title: 'Servicios',
+        description: 'Crea los servicios asociados al producto si los tiene',
+        Component: ProductServicesStep,
+        fields: ['services'],
+    },
+    {
+        key: 'product-suppliers',
+        title: 'Proveedores',
+        description: 'Añade los proveedores del producto si los tiene',
+        Component: ProductSuppliersStep,
+        fields: ['suppliers'],
+    },
+    {
+        key: 'product-stock',
+        title: 'Stock',
+        description: 'Añade el stock del producto si es que tiene',
+        Component: ProductsStockStep,
+        fields: ['stock'],
     },
 ];
 
@@ -183,13 +184,37 @@ const CreateProductForm: React.FC<NavigationButtonsCancelProps> = (props) => {
         },
     });
 
-
-// en este ver lo de localityId
+    // en este ver lo de localityId
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         mutate({
             productData: {
                 ...data,
-                localityId: (data.localityId as any).value,
+                brandId: (data.brandId as any).value,
+                type: (data.type as any).value,
+                stock: (
+                    data.stock as unknown as ProductsStockFieldFormValues['stock']
+                ).map((stock) => {
+                    return {
+                        stock: parseInt(stock.stock as unknown as string, 10),
+                        officeId: stock.office.value,
+                    };
+                }),
+                services: (
+                    data.services as unknown as ProductsServicesFieldFormValues['services']
+                ).map((service) => {
+                    return {
+                        name: service.name,
+                        price: service.price,
+                    };
+                }),
+                suppliers: (
+                    data.stock as unknown as ProductsSuppliersFieldFormValues['suppliers']
+                ).map((service) => {
+                    return {
+                        supplierId: service.supplier.value,
+                        price: service.price.toString(),
+                    };
+                }),
             },
         });
     };

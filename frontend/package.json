@@ -8,7 +8,8 @@
         "lint": "next lint",
         "gen": "graphql-codegen --config codegen.ts",
         "lint:fix": "eslint --fix src",
-        "format:fix": "prettier --write 'src/**/*.ts' 'src/**/*.tsx' 'src/**/*.scss'"
+        "format:fix": "prettier --write 'src/**/*.ts' 'src/**/*.tsx' 'src/**/*.scss'",
+        "fix:all": "yarn lint:fix && yarn format:fix"
     },
     "dependencies": {
         "@tanstack/react-query": "^4.35.3",

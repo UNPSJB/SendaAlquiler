@@ -1,63 +1,24 @@
+from decimal import Decimal
+from typing import Any, Optional
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.core.exceptions import ValidationError
-
-from django.db import transaction
 from django.utils import timezone
+
+from extensions.db.models import TimeStampedModel
+from senda.core.managers import RentalContractManager
 
 from .clients import ClientModel
 from .localities import LocalityModel
 from .offices import OfficeModel
 from .products import ProductModel, ProductServiceModel, ProductTypeChoices
 
-from typing import List, TypedDict, Optional
 
-RentalContractProductsItemDict = TypedDict(
-    "Products", {"id": str, "quantity": int, "service": Optional[str]}
-)
-
-
-class RentalContractManager(models.Manager["RentalContractModel"]):
-    @transaction.atomic
-    def create_rental_contract(
-        self,
-        client: ClientModel,
-        products: List[RentalContractProductsItemDict],
-        office: OfficeModel,
-        locality: LocalityModel,
-        house_number: str,
-        street_number: str,
-        house_unit: str,
-        contract_start_datetime: str,
-        contract_end_datetime: str,
-    ):
-        rental_contract = self.create(
-            client=client,
-            office=office,
-            locality=locality,
-            house_number=house_number,
-            street_number=street_number,
-            house_unit=house_unit,
-            contract_start_datetime=contract_start_datetime,
-            contract_end_datetime=contract_end_datetime,
-        )
-
-        for product in products:
-            RentalContractItemModel.objects.create(
-                quantity=product["quantity"],
-                product_id=product["id"],
-                rental_contract=rental_contract,
-            )
-
-        RentalContractHistoryModel.objects.create(
-            status=RentalContractStatusChoices.PRESUPUESTADO,
-            rental_contract=rental_contract,
-        )
-
-class RentalContractModel(models.Model):
+class RentalContractModel(TimeStampedModel):
     rental_contract_items: models.QuerySet["RentalContractItemModel"]
+    rental_contract_history: models.QuerySet["RentalContractHistoryModel"]
 
     office = models.ForeignKey(
         OfficeModel,
@@ -67,7 +28,9 @@ class RentalContractModel(models.Model):
     client = models.ForeignKey(
         ClientModel, on_delete=models.CASCADE, related_name="rental_contracts"
     )
-    current_history: "RentalContractHistoryModel" = models.OneToOneField(
+    current_history: models.OneToOneField[
+        Optional["RentalContractHistoryModel"]
+    ] = models.OneToOneField(
         "RentalContractHistoryModel",
         on_delete=models.SET_NULL,
         related_name="current_rental_contract",
@@ -99,30 +62,30 @@ class RentalContractModel(models.Model):
         null=True,
     )
 
-    objects: RentalContractManager = RentalContractManager()
+    objects: RentalContractManager = RentalContractManager()  # pyright: ignore
 
     def __str__(self) -> str:
         return self.client.email
 
-    class Meta:
+    class Meta(TimeStampedModel.Meta):
         verbose_name = "Rental Contract"
         verbose_name_plural = "Rental Contracts"
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any):
         if not self.expiration_date:
             self.expiration_date = self.date_created + timezone.timedelta(days=14)
 
         super().save(*args, **kwargs)
 
-    def calculate_total(self):
-        total = 0
+    def calculate_total(self) -> Decimal:
+        total = Decimal(0)
         for item in self.rental_contract_items.all():
             total += item.total
 
         return total
 
 
-class RentalContractItemModel(models.Model):
+class RentalContractItemModel(TimeStampedModel):
     rental_contract = models.ForeignKey(
         RentalContractModel,
         on_delete=models.CASCADE,
@@ -134,8 +97,12 @@ class RentalContractItemModel(models.Model):
         related_name="rental_contract_items",
     )
     quantity = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
-    total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
+    price: models.DecimalField[Decimal] = models.DecimalField(
+        blank=True, decimal_places=2, max_digits=10
+    )
+    total: models.DecimalField[Decimal] = models.DecimalField(
+        blank=True, decimal_places=2, max_digits=10
+    )
     quantity_returned = models.PositiveIntegerField(default=0, blank=True, null=True)
     service = models.ForeignKey(
         ProductServiceModel,
@@ -144,17 +111,17 @@ class RentalContractItemModel(models.Model):
         null=True,
         blank=True,
     )
-    service_price = models.DecimalField(
+    service_price: models.DecimalField[Optional[Decimal]] = models.DecimalField(
         blank=True, null=True, decimal_places=2, max_digits=10
     )
-    service_total = models.DecimalField(
+    service_total: models.DecimalField[Optional[Decimal]] = models.DecimalField(
         null=True, blank=True, decimal_places=2, max_digits=10
     )
 
     def __str__(self) -> str:
         return f"{self.rental_contract} - {self.product}"
 
-    class Meta:
+    class Meta(TimeStampedModel.Meta):
         verbose_name = "Rental Contract Item"
         verbose_name_plural = "Rental Contract Items"
         constraints = [
@@ -177,17 +144,18 @@ class RentalContractItemModel(models.Model):
                 "No se puede agregar un producto que no sea ALQUILABLE a un contrato de alquiler"
             )
 
-    def save(self, *args, **kwargs):
-        if not self.price:
+    def save(self, *args: Any, **kwargs: Any):
+        if not self.price and self.product.price:
             self.price = self.product.price
 
-        if not self.service_price:
+        if not self.service_price and self.service:
             self.service_price = self.service.price
 
         if not self.total:
             self.total = self.price * self.quantity
 
         if self.service and not self.service_total:
+            self.service_total = Decimal(0)
             self.service_total += self.service.price * self.quantity
 
         self.clean()
@@ -207,7 +175,7 @@ class RentalContractStatusChoices(models.TextChoices):
     DEVOLUCION_FALLIDA = "DEVOLUCION_FALLIDA", "DEVOLUCION FALLIDA"
 
 
-class RentalContractHistoryModel(models.Model):
+class RentalContractHistoryModel(TimeStampedModel):
     rental_contract = models.ForeignKey(
         RentalContractModel,
         on_delete=models.CASCADE,
@@ -220,14 +188,17 @@ class RentalContractHistoryModel(models.Model):
     def __str__(self) -> str:
         return f"{self.rental_contract} - {self.status}"
 
-    class Meta:
+    class Meta(TimeStampedModel.Meta):
         verbose_name = "Rental Contract History"
         verbose_name_plural = "Rental Contract Histories"
 
 
 @receiver(post_save, sender=RentalContractHistoryModel)
 def update_current_history(
-    sender, instance: RentalContractHistoryModel, created, **kwargs
+    sender: RentalContractHistoryModel,
+    instance: RentalContractHistoryModel,
+    created: bool,
+    **kwargs: Any,
 ):
     if created:
         rental_contract = instance.rental_contract

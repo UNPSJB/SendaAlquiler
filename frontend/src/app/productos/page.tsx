@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import Skeleton from 'react-loading-skeleton';
 
-import { Product, ProductsQuery,  } from '@/api/graphql';
+import { Product, ProductsQuery } from '@/api/graphql';
 import { useProducts } from '@/api/hooks';
 
 import DashboardLayout, {
@@ -43,16 +43,12 @@ const ProductRowRenderer = (handleRemove: (id: Product['id']) => void) => {
         <TR key={product.id}>
             <TD>
                 <Link className="text-violet-600" href={`/productos/${product.id}`}>
-                    {product.name} 
+                    {product.name}
                 </Link>
             </TD>
-            <TD>{product.brand.name}</TD>
-            <TD>
-                {product.type}
-            </TD>
-            <TD>
-                $ {product.price} 
-            </TD>
+            <TD>{product.brand?.name || '-'}</TD>
+            <TD>{product.type}</TD>
+            <TD>$ {product.price}</TD>
             <TD>
                 <DataTableDropdown onRemove={() => handleRemove(product.id)} />
             </TD>
@@ -77,7 +73,6 @@ const Page = () => {
         console.log(`remove ${id}`);
     };
 
-
     return (
         <DashboardLayout
             header={
@@ -88,7 +83,7 @@ const Page = () => {
                 </div>
             }
         >
-        <FetchedDataRenderer
+            <FetchedDataRenderer
                 {...useProductsResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">

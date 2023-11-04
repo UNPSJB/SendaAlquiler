@@ -1,53 +1,20 @@
-from typing import List, TypedDict
+from decimal import Decimal
+from typing import Any, Optional
 
-from django.db import models, transaction
+from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from extensions.db.models import TimeStampedModel
+from senda.core.managers import SupplierOrderManager
 from senda.core.models.offices import OfficeModel
 from senda.core.models.products import ProductModel
 from senda.core.models.suppliers import SupplierModel
-from users.models import UserModel
-
-SupplierOrderProductsDict = TypedDict("Products", {"id": str, "quantity": int})
 
 
-class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
-    @transaction.atomic
-    def create_supplier_order(
-        self,
-        supplier: SupplierModel,
-        office_destination: OfficeModel,
-        user: UserModel,
-        products: List[SupplierOrderProductsDict],
-        total: float,
-    ):
-        supplier_order = self.create(
-            supplier=supplier, office_destination=office_destination
-        )
-        supplier_order.save()
-
-        SupplierOrderHistoryModel.objects.create(
-            status=SupplierOrderHistoryStatusChoices.PENDING,
-            supplier_order=supplier_order,
-            user=user,
-            total=total,
-        )
-
-        for product in products:
-            SupplierOrderProduct.objects.create(
-                product_id=product["id"],
-                quantity=product["quantity"],
-                supplier_order=supplier_order,
-            )
-
-        supplier_order.total = supplier_order.calculate_total()
-
-        return supplier_order
-
-
-class SupplierOrderModel(models.Model):
+class SupplierOrderModel(TimeStampedModel):
     orders: models.QuerySet["SupplierOrderProduct"]
+    history: models.QuerySet["SupplierOrderHistoryModel"]
 
     supplier = models.ForeignKey(
         SupplierModel, on_delete=models.CASCADE, related_name="supplier_orders_branch"
@@ -59,7 +26,9 @@ class SupplierOrderModel(models.Model):
     )
     date_created = models.DateTimeField(auto_now_add=True)
 
-    current_history = models.OneToOneField(
+    current_history: models.OneToOneField[
+        Optional["SupplierOrderHistoryModel"]
+    ] = models.OneToOneField(
         "SupplierOrderHistoryModel",
         on_delete=models.SET_NULL,
         related_name="current_order",
@@ -69,25 +38,29 @@ class SupplierOrderModel(models.Model):
 
     total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
 
-    objects: SupplierOrderManager = SupplierOrderManager()
+    objects: SupplierOrderManager = SupplierOrderManager() # pyright: ignore
 
     def __str__(self) -> str:
-        return str(self.id)
+        return str(self.pk)
 
-    def calculate_total(self):
-        total = 0
+    def calculate_total(self) -> Decimal:
+        total = Decimal(0)
         for order in self.orders.all():
             total += order.total
 
         return total
 
 
-class SupplierOrderProduct(models.Model):
+class SupplierOrderProduct(TimeStampedModel):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="related_supplier_orders"
     )
-    price = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
-    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
+    price: models.DecimalField[Decimal] = models.DecimalField(
+        decimal_places=2, max_digits=10, blank=True
+    )
+    total: models.DecimalField[Decimal] = models.DecimalField(
+        decimal_places=2, max_digits=10, blank=True
+    )
 
     quantity = models.PositiveIntegerField(default=0)
     quantity_received = models.PositiveIntegerField(default=0)
@@ -98,8 +71,8 @@ class SupplierOrderProduct(models.Model):
     def __str__(self) -> str:
         return f"{self.product.name} - {self.quantity}"
 
-    def save(self, *args, **kwargs):
-        if not self.price:
+    def save(self, *args: Any, **kwargs: Any):
+        if not self.price and self.product.price:
             self.price = self.product.price
 
         if not self.total:
@@ -107,7 +80,7 @@ class SupplierOrderProduct(models.Model):
 
         super().save(*args, **kwargs)
 
-    class Meta:
+    class Meta(TimeStampedModel.Meta):
         constraints = [
             models.UniqueConstraint(
                 fields=["product", "supplier_order"],
@@ -135,7 +108,7 @@ class SupplierOrderHistoryStatusChoices(models.TextChoices):
     CANCELED = "CANCELED", "Cancelado"
 
 
-class SupplierOrderHistoryModel(models.Model):
+class SupplierOrderHistoryModel(TimeStampedModel):
     status = models.CharField(
         max_length=20, choices=SupplierOrderHistoryStatusChoices.choices
     )
@@ -149,7 +122,12 @@ class SupplierOrderHistoryModel(models.Model):
 
 
 @receiver(post_save, sender=SupplierOrderHistoryModel)
-def update_current_history(sender, instance, created, **kwargs):
+def update_current_history(
+    sender: SupplierOrderHistoryModel,
+    instance: SupplierOrderHistoryModel,
+    created: bool,
+    **kwargs: Any,
+):
     if created:
         supplier_order = instance.supplier_order
         supplier_order.current_history = instance

@@ -13,7 +13,7 @@ from .models.products import (
     ProductServiceModel,
     ProductStockInOfficeModel,
 )
-from .models.purchases import PurchaseHistoryModel, PurchaseItemModel, PurchaseModel
+from .models.purchases import PurchaseItemModel, PurchaseModel
 from .models.rental_contracts import (
     RentalContractHistoryModel,
     RentalContractItemModel,
@@ -47,7 +47,7 @@ class OfficeModelAdmin(ImportExportModelAdmin):
     list_display = ("name",)
 
 
-class ServiceModelInline(admin.TabularInline):
+class ServiceModelInline(admin.TabularInline[ProductServiceModel]):
     model = ProductServiceModel
 
 
@@ -97,11 +97,6 @@ class RentalContractHistoryModelAdmin(ImportExportModelAdmin):
 
 @admin.register(ProductServiceModel)
 class ServiceModelAdmin(ImportExportModelAdmin):
-    pass
-
-
-@admin.register(PurchaseHistoryModel)
-class PurchaseHistoryModelAdmin(ImportExportModelAdmin):
     pass
 
 

@@ -1,4 +1,4 @@
-import graphene
+import graphene  # pyright: ignore
 
 from .clients import Mutation as ClientMutation
 from .internal_orders import Mutation as InternalOrdersMutation

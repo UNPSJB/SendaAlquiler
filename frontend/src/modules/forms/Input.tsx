@@ -11,13 +11,21 @@ export enum InputSize {
 
 type InputProps = Omit<
     InputHTMLAttributes<HTMLInputElement>,
-    'className' | 'ref' | 'aria-invalid' | 'aria-describedby' | 'name' | 'id' | 'size'
+    | 'className'
+    | 'ref'
+    | 'aria-invalid'
+    | 'aria-describedby'
+    | 'name'
+    | 'id'
+    | 'size'
+    | 'type'
 > & {
     hasError?: boolean;
     hasHelp?: boolean;
     size?: InputSize;
     name: string;
     id: string;
+    type?: InputHTMLAttributes<HTMLInputElement>['type'] | 'price';
 };
 
 /**
@@ -40,7 +48,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
             const valueWithRemovedNonDigits = value.replace(/\D/g, '');
             const valueInt = parseInt(valueWithRemovedNonDigits, 10);
 
-            console.log(min, max);
             let minInt: number | undefined = undefined;
             if (typeof min === 'number') {
                 minInt = min;
@@ -69,6 +76,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
             return;
         }
 
+        if (type === 'price' && value !== '') {
+            const valueWithRemovedNonDigits = value.replace(/\D/g, '');
+            const valueAsPriceFormatWithThousands = valueWithRemovedNonDigits.replace(
+                /\B(?=(\d{3})+(?!\d))/g,
+                '.',
+            );
+
+            setInputValue(valueAsPriceFormatWithThousands);
+            return;
+        }
+
         setInputValue(value);
 
         if (onChange) {
@@ -77,7 +95,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
     };
 
     let inputType = props.type;
-    if (inputType === 'number') {
+    if (inputType === 'number' || inputType === 'price') {
         inputType = 'text';
     }
 

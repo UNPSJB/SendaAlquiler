@@ -1,7 +1,10 @@
-from typing import List, TypedDict
+from decimal import Decimal
+from typing import Any, Optional
 
 from django.db import models
 
+from extensions.db.models import TimeStampedModel
+from senda.core.managers import ProductModelManager
 from senda.core.models.offices import OfficeModel
 from senda.core.models.suppliers import SupplierModel
 
@@ -11,76 +14,14 @@ class ProductTypeChoices(models.TextChoices):
     COMERCIABLE = "COMERCIABLE", "COMERCIABLE"
 
 
-class BrandModel(models.Model):
+class BrandModel(TimeStampedModel):
     name = models.CharField(max_length=50)
 
     def __str__(self) -> str:
         return self.name
 
 
-ProductStockInOfficeModelDict = TypedDict(
-    "ProductStockInOfficeModelDict", {"office_id": str, "stock": int}
-)
-
-ProductSupplierDict = TypedDict(
-    "ProductSupplierDict", {"supplier_id": str, "price": str}
-)
-
-ProductServiceDict = TypedDict("ProductServiceDict", {"name": str, "price": str})
-
-
-class ProductModelManager(models.Manager["ProductModel"]):
-    def create_product(
-        self,
-        sku: str,
-        name: str,
-        brand_id: str,
-        description: str,
-        type: ProductTypeChoices,
-        price: str,
-        stock: List[ProductStockInOfficeModelDict],
-        services: List[ProductServiceDict],
-        suppliers: List[ProductSupplierDict],
-    ):
-        if self.filter(sku=sku).exists():
-            raise ValueError("Ya existe un producto con ese sku")
-
-        product = self.create(
-            sku=sku,
-            name=name,
-            brand_id=brand_id,
-            description=description,
-            type=type,
-            price=price,
-        )
-
-        for stock_data in stock:
-            ProductStockInOfficeModel.objects.create(
-                office_id=stock_data["office_id"],
-                product=product,
-                stock=stock_data["stock"],
-            )
-
-        for service_data in services:
-            ProductServiceModel.objects.create(
-                product=product,
-                name=service_data["name"],
-                price=service_data["price"]
-            )
-
-        for supplier_data in suppliers:
-            ProductSupplierModel.objects.create(
-                product=product,
-                supplier_id=supplier_data["supplier_id"],
-                price=supplier_data["price"]
-            )
-
-        return product
-
-# falta update
-
-
-class ProductModel(models.Model):
+class ProductModel(TimeStampedModel):
     """
     Modelo que representa un producto en el sistema.
 
@@ -97,6 +38,10 @@ class ProductModel(models.Model):
     - save: Llama al método clean y luego guarda el producto.
     """
 
+    stock: models.QuerySet["ProductStockInOfficeModel"]
+    suppliers: models.QuerySet["ProductSupplierModel"]
+    services: models.QuerySet["ProductServiceModel"]
+
     sku = models.CharField(
         max_length=10, null=True, blank=True, unique=True, db_index=True
     )
@@ -110,32 +55,34 @@ class ProductModel(models.Model):
         blank=True,
     )
     type = models.CharField(max_length=50, choices=ProductTypeChoices.choices)
-    price = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
+    price: models.DecimalField[Optional[Decimal]] = models.DecimalField(
+        null=True, blank=True, decimal_places=2, max_digits=10
+    )
 
     def __str__(self) -> str:
         return self.name
 
-    def clean(self, *args, **kwargs):
+    def clean(self, *args: Any, **kwargs: Any):
         if not self.brand and self.type == ProductTypeChoices.COMERCIABLE:
             raise ValueError("Brand is required for COMERCIABLE products")
 
         return super().clean(*args, **kwargs)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Any, **kwargs: Any):
         self.clean()
         super().save(*args, **kwargs)
 
-    class Meta:
+    class Meta(TimeStampedModel.Meta):
         constraints = [
             models.CheckConstraint(
                 check=models.Q(price__gte=0), name="price_must_be_greater_than_0"
             ),
         ]
 
-    objects: ProductModelManager = ProductModelManager()
+    objects: ProductModelManager = ProductModelManager() # pyright: ignore
 
 
-class ProductStockInOfficeModel(models.Model):
+class ProductStockInOfficeModel(TimeStampedModel):
     """
     Modelo que representa el stock de un producto en una oficina específica.
 
@@ -156,13 +103,13 @@ class ProductStockInOfficeModel(models.Model):
     )
     stock = models.IntegerField()
 
-    class Meta:
+    class Meta(TimeStampedModel.Meta):
         constraints = [
             models.UniqueConstraint(fields=["office", "product"], name="unique_stock")
         ]
 
 
-class ProductSupplierModel(models.Model):
+class ProductSupplierModel(TimeStampedModel):
     """
     Modelo que representa la relación entre un producto y un proveedor.
 
@@ -184,18 +131,20 @@ class ProductSupplierModel(models.Model):
     price = models.DecimalField(decimal_places=2, max_digits=10)
 
 
-class ProductServiceModel(models.Model):
+class ProductServiceModel(TimeStampedModel):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="services"
     )
 
     name = models.CharField(max_length=100)
-    price = models.DecimalField(decimal_places=2, max_digits=10)
+    price: models.DecimalField[Decimal] = models.DecimalField(
+        decimal_places=2, max_digits=10
+    )
 
     def __str__(self) -> str:
         return f"{self.product} - {self.name}"
 
-    class Meta:
+    class Meta(TimeStampedModel.Meta):
         verbose_name = "Service"
         verbose_name_plural = "Services"
         constraints = [

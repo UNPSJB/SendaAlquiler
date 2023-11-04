@@ -37,13 +37,7 @@ query localities {
 
 query products {
     products {
-        id
-        name
-        price
-        type
-        brand {
-            name
-        }
+        ...ProductListItem
     }
 }
 
@@ -209,5 +203,41 @@ query productsStocksByOfficeId($officeId: ID!) {
             name
         }
         stock
+    }
+}
+
+mutation createProduct($productData: CreateProductInput!) {
+    createProduct(productData: $productData) {
+        product {
+            ...ProductListItem
+        }
+        error
+    }
+}
+
+mutation createBrand($name: String!) {
+    createBrand(name: $name) {
+        brand {
+            id
+            name
+        }
+        error
+    }
+}
+
+query brands {
+    brands {
+        id
+        name
+    }
+}
+
+fragment ProductListItem on Product {
+    id
+    name
+    price
+    type
+    brand {
+        name
     }
 }

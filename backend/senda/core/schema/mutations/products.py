@@ -1,7 +1,9 @@
-import graphene
+from typing import Any
 
-from senda.core.models.products import ProductModel
-from senda.core.schema.types import Product, ProductTypeChoicesEnum
+import graphene  # pyright: ignore
+
+from senda.core.models.products import BrandModel, ProductModel
+from senda.core.schema.types import Brand, Product, ProductTypeChoicesEnum
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
 
@@ -52,7 +54,7 @@ class CreateProduct(graphene.Mutation):
     class Arguments:
         product_data = CreateProductInput(required=True)
 
-    def mutate(self, info, product_data):
+    def mutate(self, info: Any, product_data: CreateProductInput):
         try:
             product_data_dict = input_object_type_to_dict(product_data)
             product = ProductModel.objects.create_product(**product_data_dict)
@@ -61,5 +63,21 @@ class CreateProduct(graphene.Mutation):
             return CreateProduct(error=e)
 
 
+class CreateBrand(graphene.Mutation):
+    brand = graphene.Field(Brand)
+    error = graphene.String()
+
+    class Arguments:
+        name = graphene.String(required=True)
+
+    def mutate(self, info: Any, name: str):
+        try:
+            brand = BrandModel.objects.create(name=name)
+            return CreateBrand(brand=brand)
+        except Exception as e:
+            return CreateBrand(error=e)
+
+
 class Mutation(graphene.ObjectType):
     create_product = CreateProduct.Field()
+    create_brand = CreateBrand.Field()
