@@ -12,6 +12,8 @@ import ProductsAndQuantityField from './fields/ProductsAndQuantityField';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
+import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
+import Spinner from '@/components/Spinner/Spinner';
 
 import { RHFCustomFlatpickr } from '../forms/Flatpickr';
 import { RHFFormField } from '../forms/FormField';
@@ -51,14 +53,16 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
         <>
             <header className="fixed inset-x-0 top-0 z-50 border-b border-black bg-white">
                 <div className="container flex justify-between">
-                    <div className="absolute inset-y-0 left-0 bg-black"></div>
+                    <div className="relative">
+                        <div className="absolute inset-0 left-[-999rem] bg-black"></div>
 
-                    <Link
-                        className="bg-black py-8 pl-4 pr-12 font-headings text-3xl font-black text-white"
-                        href="/"
-                    >
-                        SENDA
-                    </Link>
+                        <Link
+                            className="relative block bg-black py-8 pl-4 pr-12 font-headings text-3xl font-black text-white"
+                            href="/"
+                        >
+                            SENDA
+                        </Link>
+                    </div>
 
                     <div className="flex flex-1 items-center justify-between">
                         <h1 className="py-8 pl-10 text-3xl font-black">
@@ -83,8 +87,21 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
 
             <FetchedDataRenderer
                 {...clientsResult}
-                Loading={<p>Loading...</p>}
-                Error={<p>Error...</p>}
+                Loading={
+                    <main className="flex min-h-screen items-center justify-center pb-16 pt-36">
+                        <Spinner />
+                    </main>
+                }
+                Error={
+                    <main className="flex min-h-screen items-center pb-16 pt-36">
+                        <div className="container flex w-full justify-center">
+                            <FetchStatusMessageWithDescription
+                                title="No se pudo cargar la lista de clientes"
+                                line1="Por favor, intenta recargar la página."
+                            />
+                        </div>
+                    </main>
+                }
             >
                 {({ clients }) => (
                     <main className="container pb-16 pt-36">
