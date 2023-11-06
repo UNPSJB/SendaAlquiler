@@ -97,10 +97,10 @@ class RentalContractItemModel(TimeStampedModel):
         related_name="rental_contract_items",
     )
     quantity = models.PositiveIntegerField(default=1)
-    price: models.DecimalField[Decimal] = models.DecimalField(
+    price = models.DecimalField(
         blank=True, decimal_places=2, max_digits=10
     )
-    total: models.DecimalField[Decimal] = models.DecimalField(
+    total = models.DecimalField(
         blank=True, decimal_places=2, max_digits=10
     )
     quantity_returned = models.PositiveIntegerField(default=0, blank=True, null=True)
@@ -111,10 +111,10 @@ class RentalContractItemModel(TimeStampedModel):
         null=True,
         blank=True,
     )
-    service_price: models.DecimalField[Optional[Decimal]] = models.DecimalField(
+    service_price = models.DecimalField(
         blank=True, null=True, decimal_places=2, max_digits=10
     )
-    service_total: models.DecimalField[Optional[Decimal]] = models.DecimalField(
+    service_total = models.DecimalField(
         null=True, blank=True, decimal_places=2, max_digits=10
     )
 

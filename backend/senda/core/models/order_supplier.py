@@ -55,10 +55,10 @@ class SupplierOrderProduct(TimeStampedModel):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="related_supplier_orders"
     )
-    price: models.DecimalField[Decimal] = models.DecimalField(
+    price = models.DecimalField(
         decimal_places=2, max_digits=10, blank=True
     )
-    total: models.DecimalField[Decimal] = models.DecimalField(
+    total = models.DecimalField(
         decimal_places=2, max_digits=10, blank=True
     )
 

@@ -47,10 +47,10 @@ class PurchaseItemModel(TimeStampedModel):
         PurchaseModel, on_delete=models.CASCADE, related_name="purchase_items"
     )
     quantity = models.IntegerField()
-    price: models.DecimalField[Decimal] = models.DecimalField(
+    price = models.DecimalField(
         blank=True, decimal_places=2, max_digits=10
     )
-    total: models.DecimalField[Decimal] = models.DecimalField(
+    total = models.DecimalField(
         blank=True, decimal_places=2, max_digits=10
     )
 

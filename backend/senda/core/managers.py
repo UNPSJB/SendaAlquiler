@@ -68,7 +68,9 @@ class LocalityModelManager(models.Manager["LocalityModel"]):
 
         return self.create(name=name, postal_code=postal_code, state=state)
 
-    def get_or_create_locality(self, name: str, postal_code: int, state: StateChoices):
+    def get_or_create_locality(
+        self, name: str, postal_code: int, state: "StateChoices"
+    ):
         locality, _created = self.get_or_create(
             name=name, postal_code=postal_code, state=state
         )
@@ -82,9 +84,9 @@ class InternalOrderManager(models.Manager["InternalOrderModel"]):
     @transaction.atomic
     def create_internal_order(
         self,
-        office_branch: OfficeModel,
-        office_destination: OfficeModel,
-        user: UserModel,
+        office_branch: "OfficeModel",
+        office_destination: "OfficeModel",
+        user: "UserModel",
         products: List[InternalOrderProductsDict],
     ):
         from senda.core.models.order_internal import InternalOrderHistoryStatusChoices
@@ -116,8 +118,8 @@ class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
     def create_supplier_order(
         self,
         supplier: "SupplierModel",
-        office_destination: OfficeModel,
-        user: UserModel,
+        office_destination: "OfficeModel",
+        user: "UserModel",
         products: List[SupplierOrderProductsDict],
         total: float,
     ):
@@ -219,9 +221,9 @@ class PurchaseModelManager(models.Manager["PurchaseModel"]):
     @transaction.atomic
     def create_purchase(
         self,
-        client: ClientModel,
+        client: "ClientModel",
         products: List[PurchaseProductsItemDict],
-        office: OfficeModel,
+        office: "OfficeModel",
     ):
         purchase = self.create(
             client=client,
@@ -247,10 +249,10 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
     @transaction.atomic
     def create_rental_contract(
         self,
-        client: ClientModel,
+        client: "ClientModel",
         products: List[RentalContractProductsItemDict],
-        office: OfficeModel,
-        locality: LocalityModel,
+        office: "OfficeModel",
+        locality: "LocalityModel",
         house_number: str,
         street_number: str,
         house_unit: str,
