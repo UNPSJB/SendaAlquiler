@@ -10,6 +10,7 @@ import {
     BrandsQuery,
     ClientByIdDocument,
     ClientsDocument,
+    ContractsDocument,
     CreateBrandDocument,
     CreateBrandMutation,
     CreateBrandMutationVariables,
@@ -46,6 +47,8 @@ const queryKeys = {
     clientById: (id: string | undefined) => [...queryKeys.clients, id],
 
     brands: ['brands'],
+
+    contracts: ['contracts'],
 
     localities: ['localities'],
 
@@ -374,5 +377,11 @@ export const useCreateBrand = ({ onSuccess, ...options }: UseCreateBrandOptions 
 export const useBrands = () => {
     return useQuery(queryKeys.brands, () => {
         return clientGraphqlQuery(BrandsDocument, {});
+    });
+};
+
+export const useContracts = () => {
+    return useQuery(queryKeys.contracts, () => {
+        return clientGraphqlQuery(ContractsDocument, {});
     });
 };

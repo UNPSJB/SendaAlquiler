@@ -118,8 +118,8 @@ const ContactDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
 
 const LocationDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register }) => (
     <>
-        <RHFFormField fieldID="locality" label="Localidad" showRequired>
-            <LocalityField />
+        <RHFFormField fieldID="localityId" label="Localidad" showRequired>
+            <LocalityField name="localityId" />
         </RHFFormField>
 
         <div className="flex space-x-4">

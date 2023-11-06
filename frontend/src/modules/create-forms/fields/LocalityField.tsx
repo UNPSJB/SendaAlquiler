@@ -75,7 +75,11 @@ const customFilter: ReactSelectProps<
     }
 };
 
-const LocalityField: React.FC = () => {
+type Props = {
+    name: string;
+};
+
+const LocalityField: React.FC<Props> = ({ name }) => {
     const { control: contextControl, setValue: setContextValue } = useFormContext();
     const { data, isLoading } = useLocalities();
 
@@ -104,7 +108,7 @@ const LocalityField: React.FC = () => {
     return (
         <>
             <Controller
-                name="localityId"
+                name={name}
                 control={contextControl}
                 render={({ field: { onChange, value } }) => (
                     <CreatableSelect
@@ -141,6 +145,7 @@ const LocalityField: React.FC = () => {
                                 onChange({
                                     value: val.value,
                                     label: val.data.name,
+                                    data: val.data,
                                 });
                             } else {
                                 onChange(null);

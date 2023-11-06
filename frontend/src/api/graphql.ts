@@ -376,6 +376,7 @@ export type Query = {
     productById: Maybe<Product>;
     products: Array<Product>;
     productsStocksByOfficeId: Array<ProductStockInOffice>;
+    rentalContracts: Array<RentalContract>;
     supplierById: Maybe<Supplier>;
     suppliers: Array<Supplier>;
     users: Array<User>;
@@ -415,7 +416,6 @@ export type RentalContract = {
     contractStartDatetime: Scalars['DateTime']['output'];
     createdOn: Scalars['DateTime']['output'];
     currentHistory: Maybe<RentalContractHistory>;
-    dateCreated: Scalars['DateTime']['output'];
     expirationDate: Maybe<Scalars['DateTime']['output']>;
     hasPayedDeposit: Scalars['Boolean']['output'];
     hasPayedRemainingAmount: Scalars['Boolean']['output'];
@@ -590,7 +590,12 @@ export type ClientsQuery = {
         houseUnit: string | null;
         houseNumber: string;
         dni: string;
-        locality: { __typename?: 'Locality'; name: string };
+        locality: {
+            __typename?: 'Locality';
+            name: string;
+            state: StateChoices;
+            postalCode: string;
+        };
     }>;
 };
 
@@ -859,6 +864,25 @@ export type ProductListItemFragment = {
     brand: { __typename?: 'Brand'; name: string } | null;
 };
 
+export type ContractsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type ContractsQuery = {
+    __typename?: 'Query';
+    rentalContracts: Array<{
+        __typename?: 'RentalContract';
+        id: string;
+        createdOn: any;
+        contractStartDatetime: any;
+        contractEndDatetime: any;
+        client: { __typename?: 'Client'; firstName: string; lastName: string };
+        office: { __typename?: 'Office'; name: string };
+        currentHistory: {
+            __typename?: 'RentalContractHistory';
+            status: CoreRentalContractHistoryModelStatusChoices;
+        } | null;
+    }>;
+};
+
 export type UsersQueryVariables = Exact<{ [key: string]: never }>;
 
 export type UsersQuery = {
@@ -960,6 +984,17 @@ export const ClientsDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'state' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'postalCode',
+                                                },
                                             },
                                         ],
                                     },
@@ -2071,6 +2106,92 @@ export const BrandsDocument = {
         },
     ],
 } as unknown as DocumentNode<BrandsQuery, BrandsQueryVariables>;
+export const ContractsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'contracts' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'rentalContracts' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'client' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'firstName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'lastName' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'office' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'createdOn' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'contractStartDatetime',
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'contractEndDatetime' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'currentHistory' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<ContractsQuery, ContractsQueryVariables>;
 export const UsersDocument = {
     kind: 'Document',
     definitions: [

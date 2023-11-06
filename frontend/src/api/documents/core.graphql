@@ -8,6 +8,8 @@ query clients {
         phoneNumber
         locality {
             name
+            state
+            postalCode
         }
         streetName
         houseUnit
@@ -215,5 +217,24 @@ fragment ProductListItem on Product {
     type
     brand {
         name
+    }
+}
+
+query contracts {
+    rentalContracts {
+        id
+        client {
+            firstName
+            lastName
+        }
+        office {
+            name
+        }
+        createdOn
+        contractStartDatetime
+        contractEndDatetime
+        currentHistory {
+            status
+        }
     }
 }

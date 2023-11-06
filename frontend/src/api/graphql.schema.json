@@ -3506,6 +3506,30 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "rentalContracts",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "LIST",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "OBJECT",
+                                        "name": "RentalContract",
+                                        "ofType": null
+                                    }
+                                }
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "supplierById",
                         "description": null,
                         "args": [
@@ -3724,22 +3748,6 @@
                             "kind": "OBJECT",
                             "name": "RentalContractHistory",
                             "ofType": null
-                        },
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "dateCreated",
-                        "description": null,
-                        "args": [],
-                        "type": {
-                            "kind": "NON_NULL",
-                            "name": null,
-                            "ofType": {
-                                "kind": "SCALAR",
-                                "name": "DateTime",
-                                "ofType": null
-                            }
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
