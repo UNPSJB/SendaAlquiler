@@ -91,6 +91,31 @@ export const useEmployees = () => {
     });
 };
 
+export const useCreateEmployee = = ({
+    onSuccess,
+    ...options
+}: UseCreateOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<CreateClientMutation, Error, CreateClientMutationVariables>(
+        (data) => {
+            return clientGraphqlQuery(CreateClientDocument, data);
+        },
+        {
+            onSuccess: (data, context, variables) => {
+                if (data.createClient?.client) {
+                    client.invalidateQueries(queryKeys.clients);
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, context, variables);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
 export const useEmployeeById = (id: string | undefined) => {
     return useQuery(
         queryKeys.employeeById(id),

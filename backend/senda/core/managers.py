@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from senda.core.models.purchases import PurchaseModel
     from senda.core.models.rental_contracts import RentalContractModel
     from senda.core.models.suppliers import SupplierModel
+    from senda.core.models.employees import EmployeeModel
     from users.models import UserModel
 
 
@@ -282,3 +283,24 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
             status=RentalContractStatusChoices.PRESUPUESTADO,
             rental_contract=rental_contract,
         )
+
+class EmployeeModelManager(models.Manager["EmployeeModel"]):
+    def create_employee(
+        self,
+        user_id: "UserModel"
+    ):
+        if self.filter(user=user).exists():
+            raise  ValueError("Ya existe ese empleado")
+
+        return self.create(
+            user=user,
+    )
+
+    def update_employee(
+        self, employee: "EmployeeModel", user: "UserModel", **kwargs: Any
+    ):
+        employee.user = user
+        for field, value in kwargs.items():
+            setattr(employee, field, value)
+        employee.save()
+        return employee

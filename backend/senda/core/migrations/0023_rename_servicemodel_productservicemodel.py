@@ -9,8 +9,8 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # migrations.RenameModel(
-        #     old_name="ServiceModel",
-        #     new_name="ProductServiceModel",
-        # ),
+        migrations.RenameModel(
+            old_name="ServiceModel",
+            new_name="ProductServiceModel",
+        ),
     ]
