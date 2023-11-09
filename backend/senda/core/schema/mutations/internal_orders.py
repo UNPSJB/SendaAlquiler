@@ -2,11 +2,12 @@ from typing import Any, List
 
 import graphene  # pyright: ignore
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from typing import Optional
 
 from senda.core.managers import InternalOrderProductsDict
 from senda.core.models.offices import OfficeModel
 from senda.core.models.order_internal import InternalOrderModel
-from senda.core.schema.types import InternalOrder
+from senda.core.schema.custom_types import InternalOrder
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
 
@@ -26,7 +27,7 @@ class CreateInternalOrderInput(graphene.InputObjectType):
     products = non_null_list_of(CreateInternalOrderProductInput)
 
 
-def get_office(office_id: str):
+def get_office(office_id: str) -> Optional[OfficeModel]:
     if office_id:
         try:
             return OfficeModel.objects.get(id=office_id)

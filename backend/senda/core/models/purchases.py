@@ -24,15 +24,14 @@ class PurchaseModel(TimeStampedModel):
     client = models.ForeignKey(
         ClientModel, on_delete=models.CASCADE, related_name="purchases"
     )
-    purchase_items: models.QuerySet["PurchaseItemModel"]
 
-    objects: PurchaseModelManager = PurchaseModelManager() # pyright: ignore
+    objects: PurchaseModelManager = PurchaseModelManager()  # pyright: ignore
 
     def __str__(self) -> str:
         return f"{self.date} - {self.total}"
 
     @transaction.atomic
-    def save(self, *args: Any, **kwargs: Any):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.total:
             self.total = calculate_purchase_total(self)
 
@@ -47,12 +46,8 @@ class PurchaseItemModel(TimeStampedModel):
         PurchaseModel, on_delete=models.CASCADE, related_name="purchase_items"
     )
     quantity = models.IntegerField()
-    price = models.DecimalField(
-        blank=True, decimal_places=2, max_digits=10
-    )
-    total = models.DecimalField(
-        blank=True, decimal_places=2, max_digits=10
-    )
+    price = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
+    total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
 
     class Meta(TimeStampedModel.Meta):
         constraints = [
@@ -65,7 +60,7 @@ class PurchaseItemModel(TimeStampedModel):
             ),
         ]
 
-    def clean(self):
+    def clean(self) -> None:
         if self.product.type != ProductTypeChoices.COMERCIABLE:
             raise ValidationError(
                 "No se puede agregar un producto que no sea Comerciable a una venta en sucursal"
@@ -74,7 +69,7 @@ class PurchaseItemModel(TimeStampedModel):
     def __str__(self) -> str:
         return f"{self.product.name} - {self.quantity}"
 
-    def save(self, *args: Any, **kwargs: Any):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.price and self.product.price:
             self.price = self.product.price
 
