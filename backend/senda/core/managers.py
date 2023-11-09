@@ -287,17 +287,17 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
 class EmployeeModelManager(models.Manager["EmployeeModel"]):
     def create_employee(
         self,
-        user_id: "UserModel"
+        user: "UserModel",
     ):
-        if self.filter(user=user).exists():
-            raise  ValueError("Ya existe ese empleado")
+        if self.filter(user.email==user.email).exists():
+                raise  ValueError("Ya existe ese empleado")
 
         return self.create(
-            user=user,
+            user= user,
     )
 
     def update_employee(
-        self, employee: "EmployeeModel", user: "UserModel", **kwargs: Any
+        self, employee: "EmployeeModel", **kwargs: Any
     ):
         employee.user = user
         for field, value in kwargs.items():

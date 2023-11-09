@@ -40,6 +40,9 @@ import {
     ProductsStocksByOfficeIdDocument,
     SupplierByIdDocument,
     SuppliersDocument,
+    CreateEmployeeMutation,
+    CreateEmployeeMutationVariables,
+    CreateEmployeeDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -91,20 +94,26 @@ export const useEmployees = () => {
     });
 };
 
-export const useCreateEmployee = = ({
+type UseCreateEmployeeOptions = UseMutationOptions<
+    CreateEmployeeMutation,
+    Error,
+    CreateEmployeeMutationVariables
+>;
+
+export const useCreateEmployee = ({
     onSuccess,
     ...options
-}: UseCreateOptions = {}) => {
-    const client = useQueryClient();
+}: UseCreateEmployeeOptions = {}) => {
+    const employee = useQueryClient();
 
-    return useMutation<CreateClientMutation, Error, CreateClientMutationVariables>(
+    return useMutation<CreateEmployeeMutation, Error, CreateEmployeeMutationVariables>(
         (data) => {
-            return clientGraphqlQuery(CreateClientDocument, data);
+            return clientGraphqlQuery(CreateEmployeeDocument, data);
         },
         {
             onSuccess: (data, context, variables) => {
-                if (data.createClient?.client) {
-                    client.invalidateQueries(queryKeys.clients);
+                if (data.createEmployee?.employee) {
+                    employee.invalidateQueries(queryKeys.employees);
                 }
 
                 if (onSuccess) {

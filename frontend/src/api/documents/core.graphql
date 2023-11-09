@@ -26,6 +26,15 @@ query employees {
     }
 }
 
+mutation createEmployee($employeeData: CreateEmployeeInput!) {
+  createEmployee(employeeData: $employeeData) {
+    employee {
+      id
+    }
+    error
+  }
+}
+
 query localities {
     localities {
         id
