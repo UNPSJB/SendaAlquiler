@@ -17,9 +17,9 @@ import toast from 'react-hot-toast';
 
 import { useCreateInternalOrder } from '@/api/hooks';
 
+import OfficesField from './fields/OfficesField';
+import ProductsFromOfficeField from './fields/ProductsFromOfficeField';
 import NavigationButtons, { NavigationButtonsCancelProps } from './NavigationButtons';
-import OfficesField from './OfficesField';
-import ProductsFromOfficeField from './ProductsFromOfficeField';
 
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 
