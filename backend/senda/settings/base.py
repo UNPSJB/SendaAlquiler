@@ -42,8 +42,6 @@ class Common(Configuration):
 
     THIRD_PARTY_APPS: List[str] = [
         "import_export",
-        "rest_framework",
-        "rest_framework.authtoken",
         "corsheaders",
         "markdownx",
         "graphene_django",
@@ -153,12 +151,6 @@ class Common(Configuration):
     SITE_NAME = "Senda"
     ENVIRONMENT = "devel"
     SERVER_ADDRESS = "http://127.0.0.1:8000"
-
-    REST_FRAMEWORK = {
-        "DEFAULT_AUTHENTICATION_CLASSES": [
-            "rest_framework.authentication.TokenAuthentication",
-        ]
-    }
 
     EMAIL_HOST = config("EMAIL_HOST")
     EMAIL_HOST_USER = config("EMAIL_HOST_USER")
