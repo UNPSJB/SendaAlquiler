@@ -8,9 +8,9 @@ import { useOffices } from '@/api/hooks';
 import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 
-import { RHFFormField } from '../forms/FormField';
-import Input from '../forms/Input';
-import RHFSelect from '../forms/Select';
+import { RHFFormField } from '../../forms/FormField';
+import Input from '../../forms/Input';
+import RHFSelect from '../../forms/Select';
 
 export type ProductsStockFieldFormValues = {
     stock: {

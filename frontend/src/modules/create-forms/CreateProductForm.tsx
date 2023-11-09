@@ -17,19 +17,21 @@ import toast from 'react-hot-toast';
 import { CreateProductMutationVariables } from '@/api/graphql';
 import { useCreateProduct } from '@/api/hooks';
 
-import BrandField from '@/modules/create-forms/BrandField';
+import BrandField from '@/modules/create-forms/fields/BrandField';
 import { RHFFormField } from '@/modules/forms/FormField';
 import Input from '@/modules/forms/Input';
 
-import NavigationButtons, { NavigationButtonsCancelProps } from './NavigationButtons';
 import ProductServicesField, {
     ProductsServicesFieldFormValues,
-} from './ProductServicesField';
-import ProductsStockField, { ProductsStockFieldFormValues } from './ProductsStockField';
+} from './fields/ProductServicesField';
+import ProductsStockField, {
+    ProductsStockFieldFormValues,
+} from './fields/ProductsStockField';
 import ProductsSuppliersField, {
     ProductsSuppliersFieldFormValues,
-} from './ProductsSuppliersField';
-import ProductTypeField from './ProductTypeField';
+} from './fields/ProductsSuppliersField';
+import ProductTypeField from './fields/ProductTypeField';
+import NavigationButtons, { NavigationButtonsCancelProps } from './NavigationButtons';
 
 type FormValues = CreateProductMutationVariables['productData'];
 

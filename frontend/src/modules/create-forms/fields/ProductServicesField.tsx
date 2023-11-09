@@ -3,8 +3,8 @@ import { useFormContext } from 'react-hook-form';
 
 import Button, { ButtonVariant } from '@/components/Button';
 
-import { RHFFormField } from '../forms/FormField';
-import Input from '../forms/Input';
+import { RHFFormField } from '../../forms/FormField';
+import Input from '../../forms/Input';
 
 export type ProductsServicesFieldFormValues = {
     services: {
