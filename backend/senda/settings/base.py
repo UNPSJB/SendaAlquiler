@@ -1,16 +1,20 @@
 import os
 import sys
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 
-from configurations import Configuration
-from decouple import config
+from configurations import Configuration  # type: ignore
+from decouple import config  # type: ignore
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, subdir)
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class Common(Configuration):
+    import django_stubs_ext
+
+    django_stubs_ext.monkeypatch()
+
     TESTING = sys.argv[1:2] == ["test"]
 
     # Celery config for tests
@@ -42,8 +46,6 @@ class Common(Configuration):
 
     THIRD_PARTY_APPS: List[str] = [
         "import_export",
-        "rest_framework",
-        "rest_framework.authtoken",
         "corsheaders",
         "markdownx",
         "graphene_django",
@@ -70,7 +72,7 @@ class Common(Configuration):
 
     ROOT_URLCONF: str = "senda.urls"
 
-    TEMPLATES: List[dict] = [
+    TEMPLATES = [
         {
             "BACKEND": "django.template.backends.django.DjangoTemplates",
             "DIRS": [os.path.join(BASE_DIR, "templates")],
@@ -101,7 +103,7 @@ class Common(Configuration):
     # }
 
     # Password validation
-    AUTH_PASSWORD_VALIDATORS: List[dict] = [
+    AUTH_PASSWORD_VALIDATORS = [
         {
             "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
         },
@@ -154,18 +156,12 @@ class Common(Configuration):
     ENVIRONMENT = "devel"
     SERVER_ADDRESS = "http://127.0.0.1:8000"
 
-    REST_FRAMEWORK = {
-        "DEFAULT_AUTHENTICATION_CLASSES": [
-            "rest_framework.authentication.TokenAuthentication",
-        ]
-    }
-
-    EMAIL_HOST = config("EMAIL_HOST")
-    EMAIL_HOST_USER = config("EMAIL_HOST_USER")
-    EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
-    DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
-    EMAIL_PORT = config("EMAIL_PORT")
-    EMAIL_USE_TLS = config("EMAIL_USE_TLS") == "True"
+    EMAIL_HOST = config("EMAIL_HOST", default="localhost")
+    EMAIL_PORT = config("EMAIL_PORT", default=25, cast=int)
+    EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+    EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+    EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool)
+    DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", cast=str)
 
     AUTHENTICATION_BACKENDS = [
         "graphql_jwt.backends.JSONWebTokenBackend",

@@ -4,7 +4,7 @@ import graphene  # pyright: ignore
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from senda.core.models.clients import ClientModel, LocalityModel
-from senda.core.schema.types import Client
+from senda.core.schema.custom_types import Client
 from utils.graphene import input_object_type_to_dict
 
 

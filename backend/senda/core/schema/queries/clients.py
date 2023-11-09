@@ -3,7 +3,7 @@ from typing import Any
 import graphene  # pyright: ignore
 
 from senda.core.models.clients import ClientModel
-from senda.core.schema.types import Client
+from senda.core.schema.custom_types import Client
 from utils.graphene import non_null_list_of
 
 

@@ -3,7 +3,7 @@ from typing import Any
 import graphene  # pyright: ignore
 
 from senda.core.models.products import BrandModel, ProductModel
-from senda.core.schema.types import Brand, Product, ProductTypeChoicesEnum
+from senda.core.schema.custom_types import Brand, Product, ProductTypeChoicesEnum
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
 
