@@ -27,10 +27,7 @@ class SupplierOrderModel(TimeStampedModel):
     )
     date_created = models.DateTimeField(auto_now_add=True)
 
-    current_history: models.OneToOneField[
-        "SupplierOrderHistoryModel" | models.Combinable | None,
-        "SupplierOrderHistoryModel" | None,
-    ] = models.OneToOneField(
+    current_history = models.OneToOneField(
         "SupplierOrderHistoryModel",
         on_delete=models.SET_NULL,
         related_name="current_order",

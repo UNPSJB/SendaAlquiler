@@ -29,10 +29,7 @@ class RentalContractModel(TimeStampedModel):
     client = models.ForeignKey(
         ClientModel, on_delete=models.CASCADE, related_name="rental_contracts"
     )
-    current_history: models.OneToOneField[
-        "RentalContractHistoryModel" | models.Combinable | None,
-        "RentalContractHistoryModel" | None,
-    ] = models.OneToOneField(
+    current_history = models.OneToOneField(
         "RentalContractHistoryModel",
         on_delete=models.SET_NULL,
         related_name="current_rental_contract",
