@@ -1,4 +1,4 @@
-import graphene  # pyright: ignore
+import graphene
 from graphene_django import DjangoObjectType
 
 from senda.core.models.clients import ClientModel

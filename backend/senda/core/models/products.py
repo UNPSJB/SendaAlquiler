@@ -1,5 +1,4 @@
-from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 
 from django.db import models
 
@@ -55,20 +54,18 @@ class ProductModel(TimeStampedModel):
         blank=True,
     )
     type = models.CharField(max_length=50, choices=ProductTypeChoices.choices)
-    price = models.DecimalField(
-        null=True, blank=True, decimal_places=2, max_digits=10
-    )
+    price = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
 
     def __str__(self) -> str:
         return self.name
 
-    def clean(self, *args: Any, **kwargs: Any):
+    def clean(self, *args: Any, **kwargs: Any) -> None:
         if not self.brand and self.type == ProductTypeChoices.COMERCIABLE:
             raise ValueError("Brand is required for COMERCIABLE products")
 
         return super().clean(*args, **kwargs)
 
-    def save(self, *args: Any, **kwargs: Any):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
         super().save(*args, **kwargs)
 
@@ -79,7 +76,7 @@ class ProductModel(TimeStampedModel):
             ),
         ]
 
-    objects: ProductModelManager = ProductModelManager() # pyright: ignore
+    objects: ProductModelManager = ProductModelManager()  # pyright: ignore
 
 
 class ProductStockInOfficeModel(TimeStampedModel):
@@ -137,9 +134,7 @@ class ProductServiceModel(TimeStampedModel):
     )
 
     name = models.CharField(max_length=100)
-    price = models.DecimalField(
-        decimal_places=2, max_digits=10
-    )
+    price = models.DecimalField(decimal_places=2, max_digits=10)
 
     def __str__(self) -> str:
         return f"{self.product} - {self.name}"

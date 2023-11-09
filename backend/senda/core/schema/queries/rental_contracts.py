@@ -3,7 +3,7 @@ from typing import Any
 import graphene  # pyright: ignore
 
 from senda.core.models.rental_contracts import RentalContractModel
-from senda.core.schema.types import RentalContract
+from senda.core.schema.custom_types import RentalContract
 from utils.graphene import non_null_list_of
 
 

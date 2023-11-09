@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import Any, Optional
 
+
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -27,7 +28,8 @@ class SupplierOrderModel(TimeStampedModel):
     date_created = models.DateTimeField(auto_now_add=True)
 
     current_history: models.OneToOneField[
-        Optional["SupplierOrderHistoryModel"]
+        "SupplierOrderHistoryModel" | models.Combinable | None,
+        "SupplierOrderHistoryModel" | None,
     ] = models.OneToOneField(
         "SupplierOrderHistoryModel",
         on_delete=models.SET_NULL,
@@ -38,7 +40,7 @@ class SupplierOrderModel(TimeStampedModel):
 
     total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
 
-    objects: SupplierOrderManager = SupplierOrderManager() # pyright: ignore
+    objects: SupplierOrderManager = SupplierOrderManager()  # pyright: ignore
 
     def __str__(self) -> str:
         return str(self.pk)
@@ -55,12 +57,8 @@ class SupplierOrderProduct(TimeStampedModel):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="related_supplier_orders"
     )
-    price = models.DecimalField(
-        decimal_places=2, max_digits=10, blank=True
-    )
-    total = models.DecimalField(
-        decimal_places=2, max_digits=10, blank=True
-    )
+    price = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
+    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
 
     quantity = models.PositiveIntegerField(default=0)
     quantity_received = models.PositiveIntegerField(default=0)
@@ -71,7 +69,7 @@ class SupplierOrderProduct(TimeStampedModel):
     def __str__(self) -> str:
         return f"{self.product.name} - {self.quantity}"
 
-    def save(self, *args: Any, **kwargs: Any):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.price and self.product.price:
             self.price = self.product.price
 
@@ -127,7 +125,7 @@ def update_current_history(
     instance: SupplierOrderHistoryModel,
     created: bool,
     **kwargs: Any,
-):
+) -> None:
     if created:
         supplier_order = instance.supplier_order
         supplier_order.current_history = instance
