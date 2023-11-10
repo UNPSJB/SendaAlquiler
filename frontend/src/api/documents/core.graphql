@@ -16,6 +16,25 @@ query clients {
     }
 }
 
+query employees {
+    users {
+        id
+        firstName
+        lastName
+        email
+        isActive
+    }
+}
+
+mutation createEmployee($employeeData: CreateEmployeeInput!) {
+  createEmployee(employeeData: $employeeData) {
+    employee {
+      id
+    }
+    error
+  }
+}
+
 query localities {
     localities {
         id
@@ -83,6 +102,20 @@ query clientById($id: ID!) {
             name
             state
             postalCode
+        }
+    }
+}
+
+query employeeById($id: ID!) {
+    employeeById(id: $id) {
+        id
+        user {
+            firstName
+            lastName
+            email
+            isActive
+            dateJoined
+            lastLogin
         }
     }
 }

@@ -23,9 +23,10 @@ export const getReactHookFormFieldError = (
     }
 
     const { type, message } = fieldError;
-    console.log('fieldError', fieldError);
-    console.log('type', type);
-    console.log('message', message);
+
+    if (type === 'minLength') {
+        return 'El valor del campo es demasiado corto';
+    }
 
     if (message && typeof message === 'string') {
         return message;
