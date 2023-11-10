@@ -2,7 +2,13 @@ import 'flatpickr/dist/flatpickr.min.css';
 
 import { Spanish } from 'flatpickr/dist/l10n/es';
 import Flatpickr, { DateTimePickerProps } from 'react-flatpickr';
-import { Control, Controller, FieldValues, Path, RegisterOptions } from 'react-hook-form';
+import {
+    Control,
+    Controller,
+    FieldPath,
+    FieldValues,
+    RegisterOptions,
+} from 'react-hook-form';
 
 type FlatpickrProps = Omit<DateTimePickerProps, 'className' | 'options'>;
 
@@ -21,22 +27,25 @@ export const CustomFlatpickr: React.FC<FlatpickrProps> = (props) => {
     );
 };
 
-type Props<TFieldValues extends FieldValues> = {
-    id: Path<TFieldValues>;
-    rules: RegisterOptions;
+type Props<TFieldValues extends FieldValues, TName extends FieldPath<TFieldValues>> = {
+    name: TName;
     control: Control<TFieldValues>;
-} & Omit<FlatpickrProps, 'onChange' | 'id'>;
+    rules: RegisterOptions<TFieldValues, TName>;
+} & Omit<FlatpickrProps, 'onChange' | 'id' | 'name'> &
+    (TFieldValues[Extract<keyof TFieldValues, TName>] extends Date[] ? object : never);
 
-export const RHFCustomFlatpickr = <TFieldValues extends FieldValues>({
-    id,
-    control,
-    rules,
-    ...rest
-}: Props<TFieldValues>) => {
+export const RHFCustomFlatpickr = <
+    TFieldValues extends FieldValues,
+    TName extends FieldPath<TFieldValues>,
+>(
+    props: Props<TFieldValues, TName>,
+) => {
+    const { name, control, rules, ...rest } = props;
+
     return (
-        <Controller<TFieldValues>
+        <Controller<TFieldValues, TName>
+            name={name}
             control={control}
-            name={id}
             rules={rules}
             render={({ field: { onChange, value } }) => (
                 <CustomFlatpickr value={value} onChange={onChange} {...rest} />

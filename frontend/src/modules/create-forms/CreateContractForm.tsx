@@ -8,7 +8,9 @@ import { ClientsQuery } from '@/api/graphql';
 import { useClients } from '@/api/hooks';
 
 import LocalityField from './fields/LocalityField';
-import ProductsAndQuantityField from './fields/ProductsAndQuantityField';
+import ProductsAndQuantityField, {
+    ProductQuantityPair,
+} from './fields/ProductOrderField';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
@@ -31,6 +33,10 @@ type FormValues = {
         value: string;
         data: ClientsQuery['clients'][0];
     };
+    test: string;
+    productsAndQuantity: ProductQuantityPair[];
+    contractStartDatetime: Date[];
+    contractEndDatetime: Date[];
 };
 
 const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) => {
@@ -104,14 +110,14 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                 }
             >
                 {({ clients }) => (
-                    <main className="container pb-16 pt-36">
-                        <section className="flex pb-8">
-                            <h2 className="w-3/12 text-xl font-bold">
-                                Detalles de facturación
-                            </h2>
+                    <FormProvider {...formMethods}>
+                        <main className="container pb-16 pt-36">
+                            <section className="flex pb-8">
+                                <h2 className="w-3/12 text-xl font-bold">
+                                    Detalles de facturación
+                                </h2>
 
-                            <div className="w-9/12 space-y-6">
-                                <FormProvider {...formMethods}>
+                                <div className="w-9/12 space-y-6">
                                     <RHFFormField label="Cliente" fieldID="client">
                                         <RHFSelect
                                             placeholder="Selecciona un cliente"
@@ -138,7 +144,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                     name="billingFirstName"
                                                     type="text"
                                                     placeholder="Nombre"
-                                                    value={client?.firstName}
+                                                    value={client?.firstName || ''}
                                                     readOnly
                                                 />
                                             </Label>
@@ -155,7 +161,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                     name="billingLastName"
                                                     type="text"
                                                     placeholder="Apellido"
-                                                    value={client?.lastName}
+                                                    value={client?.lastName || ''}
                                                     readOnly
                                                 />
                                             </Label>
@@ -195,7 +201,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                     name="billingEmail"
                                                     type="text"
                                                     placeholder="Correo"
-                                                    value={client?.email}
+                                                    value={client?.email || ''}
                                                     readOnly
                                                 />
                                             </Label>
@@ -208,7 +214,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             name="billingDni"
                                             type="text"
                                             placeholder="DNI"
-                                            value={client?.dni}
+                                            value={client?.dni || ''}
                                             readOnly
                                         />
                                     </Label>
@@ -223,7 +229,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             name="billingState"
                                             type="text"
                                             placeholder="Provincia"
-                                            value={client?.locality.state}
+                                            value={client?.locality.state || ''}
                                             readOnly
                                         />
                                     </Label>
@@ -240,7 +246,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                     name="billingLocality"
                                                     type="text"
                                                     placeholder="Ciudad"
-                                                    value={client?.locality.name}
+                                                    value={client?.locality.name || ''}
                                                     readOnly
                                                 />
                                             </Label>
@@ -257,7 +263,9 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                     name="billingPostalCode"
                                                     type="text"
                                                     placeholder="Código Postal"
-                                                    value={client?.locality.postalCode}
+                                                    value={
+                                                        client?.locality.postalCode || ''
+                                                    }
                                                     readOnly
                                                 />
                                             </Label>
@@ -276,7 +284,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                     name="billingStreetName"
                                                     type="text"
                                                     placeholder="Calle"
-                                                    value={client?.streetName}
+                                                    value={client?.streetName || ''}
                                                     readOnly
                                                 />
                                             </Label>
@@ -293,7 +301,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                     name="billingHouseNumber"
                                                     type="text"
                                                     placeholder="N° de casa"
-                                                    value={client?.houseNumber}
+                                                    value={client?.houseNumber || ''}
                                                     readOnly
                                                 />
                                             </Label>
@@ -310,7 +318,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             name="billingHouseUnit"
                                             type="text"
                                             placeholder="Apartamento, habitación, unidad, etc"
-                                            value={client?.houseUnit || undefined}
+                                            value={client?.houseUnit || ''}
                                             readOnly
                                         />
                                     </Label>
@@ -329,24 +337,22 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             readOnly
                                         />
                                     </Label>
-                                </FormProvider>
-                            </div>
-                        </section>
+                                </div>
+                            </section>
 
-                        <section className="flex border-t border-gray-200 py-8">
-                            <h2 className="w-3/12 text-xl font-bold">
-                                Detalles de contrato
-                            </h2>
+                            <section className="flex border-t border-gray-200 py-8">
+                                <h2 className="w-3/12 text-xl font-bold">
+                                    Detalles de contrato
+                                </h2>
 
-                            <div className="w-9/12 space-y-6">
-                                <FormProvider {...formMethods}>
+                                <div className="w-9/12 space-y-6">
                                     <Label
                                         label="Fecha y hora de inicio"
                                         htmlFor="contractStartDatetime"
                                     >
                                         <RHFCustomFlatpickr
                                             data-enable-time
-                                            id="contractStartDatetime"
+                                            name="contractStartDatetime"
                                             control={control}
                                             rules={{ required: true }}
                                             placeholder="Fecha y hora de inicio"
@@ -359,7 +365,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                     >
                                         <RHFCustomFlatpickr
                                             data-enable-time
-                                            id="contractEndDatetime"
+                                            name="contractEndDatetime"
                                             control={control}
                                             rules={{ required: true }}
                                             placeholder="Fecha y hora de finalización"
@@ -428,41 +434,42 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             placeholder="Nota/aclaración"
                                         />
                                     </Label>
-                                </FormProvider>
-                            </div>
-                        </section>
+                                </div>
+                            </section>
 
-                        <section className="flex border-t border-gray-200 py-8">
-                            <h2 className="w-3/12 text-xl font-bold">
-                                Productos alquilados
-                            </h2>
+                            <section className="flex border-t border-gray-200 py-8">
+                                <h2 className="w-3/12 text-xl font-bold">
+                                    Productos alquilados
+                                </h2>
 
-                            <div className="w-9/12 space-y-6">
-                                <FormProvider {...formMethods}>
-                                    <ProductsAndQuantityField />
-                                </FormProvider>
-                            </div>
-                        </section>
+                                <div className="w-9/12 space-y-6">
+                                    <ProductsAndQuantityField
+                                        control={control}
+                                        name="productsAndQuantity"
+                                    />
+                                </div>
+                            </section>
 
-                        <div className="flex justify-end">
-                            <div className="w-1/2 rounded border border-gray-200 p-6">
-                                <table className="w-full font-headings">
-                                    <thead>
-                                        <tr></tr>
-                                        <tr></tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr className="align-bottom">
-                                            <td className="font-bold">TOTAL ARS</td>
-                                            <td className="text-right text-4xl font-bold">
-                                                {subtotal}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div className="flex justify-end">
+                                <div className="w-1/2 rounded border border-gray-200 p-6">
+                                    <table className="w-full font-headings">
+                                        <thead>
+                                            <tr></tr>
+                                            <tr></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr className="align-bottom">
+                                                <td className="font-bold">TOTAL ARS</td>
+                                                <td className="text-right text-4xl font-bold">
+                                                    {subtotal}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                    </main>
+                        </main>
+                    </FormProvider>
                 )}
             </FetchedDataRenderer>
         </>

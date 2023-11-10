@@ -7,6 +7,10 @@ type Props<TFieldValues extends FieldValues> = {
     control: Control<TFieldValues>;
 } & Omit<ReactSelectProps, 'onChange' | 'id'>;
 
+export const CustomSelect = (props: any) => (
+    <ReactSelect classNamePrefix="react-select" {...props} />
+);
+
 const RHFSelect = <TFieldValues extends FieldValues>({
     id,
     control,
@@ -18,13 +22,7 @@ const RHFSelect = <TFieldValues extends FieldValues>({
         name={id}
         rules={rules}
         render={({ field: { onChange, value } }) => (
-            <ReactSelect
-                classNamePrefix="react-select"
-                id={id}
-                value={value}
-                onChange={onChange}
-                {...rest}
-            />
+            <CustomSelect id={id} value={value} onChange={onChange} {...rest} />
         )}
     />
 );

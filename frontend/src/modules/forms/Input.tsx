@@ -73,6 +73,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
             }
 
             setInputValue(valueWithRemovedNonDigits);
+            onChange?.(e);
             return;
         }
 
@@ -84,14 +85,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
             );
 
             setInputValue(valueAsPriceFormatWithThousands);
+            onChange?.(e);
             return;
         }
 
         setInputValue(value);
-
-        if (onChange) {
-            onChange(e);
-        }
+        onChange?.(e);
     };
 
     let inputType = props.type;
