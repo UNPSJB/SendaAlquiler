@@ -6,7 +6,11 @@ from typing import Optional
 
 from senda.core.managers import InternalOrderProductsDict
 from senda.core.models.offices import OfficeModel
-from senda.core.models.order_internal import InternalOrderModel
+from senda.core.models.order_internal import (
+    InternalOrderModel,
+    InternalOrderHistoryModel,
+    InternalOrderHistoryStatusChoices,
+)
 from senda.core.schema.custom_types import InternalOrder
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
@@ -75,5 +79,89 @@ class CreateInternalOrder(graphene.Mutation):
         return CreateInternalOrder(internal_order=internal_order)
 
 
+class BaseChangeOrderInternalStatus(graphene.Mutation):
+    internal_order = graphene.ID(InternalOrder)
+    error = graphene.String()
+
+    class Arguments:
+        internal_order_id =graphene.ID(required=True)
+
+    @classmethod
+    def get_internal_order(cls, id: str):
+        internal_order = InternalOrderModel.objects.filter(id=id).first()
+        if internal_order is None:
+            raise Exception("No existe un pedido con ese ID")
+
+        return internal_order
+    
+    @classmethod
+    def check_internal_order_status_is_one_of_and_update_status(
+        cls,
+        order:InternalOrderModel,
+        status: List[InternalOrderHistoryStatusChoices],
+        new_status: InternalOrderHistoryStatusChoices,
+    ):
+        if (
+            not order.current_history
+            or order.current_history.status not in status
+        ):
+            raise Exception("La orden no esta en un estado valido")
+
+        InternalOrderHistoryModel.objects.create(
+            internal_order=order, status=new_status
+        )
+
+
+class InProgressInternalOrder(BaseChangeOrderInternalStatus):
+    @classmethod
+    def mutate (cls, self: "InProgressInternalOrder", info: Any, internal_order_id: str):
+        try:
+            order = cls.get_internal_order(internal_order_id)
+            cls.check_internal_order_status_is_one_of_and_update_status(
+                order,
+                [InternalOrderHistoryStatusChoices.PENDING],
+                InternalOrderHistoryStatusChoices.IN_PROGRESS,
+            )
+
+            return BaseChangeOrderInternalStatus(internal_order=order)
+        except Exception as e:
+            return BaseChangeOrderInternalStatus(error=str(e))
+
+class ReceiveInternalOrder(BaseChangeOrderInternalStatus):
+    @classmethod
+    def mutate (cls, self: "ReceiveInternalOrder", info: Any, internal_order_id: str):
+        try:
+            order = cls.get_internal_order(internal_order_id)
+            cls.check_internal_order_status_is_one_of_and_update_status(
+                order,
+                [InternalOrderHistoryStatusChoices.IN_PROGRESS],
+                InternalOrderHistoryStatusChoices.COMPLETED,
+            )
+
+            return BaseChangeOrderInternalStatus(internal_order=order)
+        except Exception as e:
+            return BaseChangeOrderInternalStatus(error=str(e))
+
+
+class CancelInternalOrder(BaseChangeOrderInternalStatus):
+    @classmethod
+    def mutate (cls, self: "CancelInternalOrder", info: Any, internal_order_id: str):
+        try:
+            order = cls.get_internal_order(internal_order_id)
+            cls.check_internal_order_status_is_one_of_and_update_status(
+                order,
+                [InternalOrderHistoryStatusChoices.PENDING],
+                InternalOrderHistoryStatusChoices.CANCELED,
+            )
+
+            return BaseChangeOrderInternalStatus(internal_order=order)
+        except Exception as e:
+            return BaseChangeOrderInternalStatus(error=str(e))
+
+
 class Mutation(graphene.ObjectType):
     create_internal_order = CreateInternalOrder.Field()
+    in_progress_internal_order = InProgressInternalOrder.Field()
+    receive_internal_order = ReceiveInternalOrder.Field()
+    cancel_internal_order = CancelInternalOrder.Field()
+
