@@ -112,9 +112,6 @@ class CreateRentalContract(graphene.Mutation):
         return CreateRentalContract(rental_contract=rental_contract)
 
 
-class Mutation(graphene.ObjectType):
-    CreateRentalContract = CreateRentalContract.Field()
-
 
 class BaseChangeContractStatus(graphene.Mutation):
     rental_contract = graphene.Field(RentalContract)
@@ -284,3 +281,14 @@ class SuccessfulReturnContract(BaseChangeContractStatus):
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:
             return BaseChangeContractStatus(error=str(e))
+
+class Mutation(graphene.ObjectType):
+    create_rental_contract = CreateRentalContract.Field()
+    pay_contract_deposit = PayContractDeposit.Field()
+    pay_total_contract = PayTotalContract.Field()
+    cancel_contract = CancelContract.Field()
+    start_contract = StartContract.Field()
+    expired_contract = ExpiredContract.Field()
+    finish_contract = FinishContract.Field()
+    failed_return_contract = FailedReturnContract.Field()
+    successful_return_contract = SuccessfulReturnContract.Field()
