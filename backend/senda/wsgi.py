@@ -1,7 +1,6 @@
 import os
 
 from decouple import config
-from typing import Union
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "senda.settings")
 

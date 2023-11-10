@@ -4,7 +4,7 @@ import graphene  # pyright: ignore
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from senda.core.models.localities import LocalityModel
-from senda.core.schema.types import Locality, StateChoicesEnum
+from senda.core.schema.custom_types import Locality, StateChoicesEnum
 
 
 class CreateLocality(graphene.Mutation):

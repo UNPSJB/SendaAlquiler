@@ -30,7 +30,7 @@ class ClientModelManager(models.Manager["ClientModel"]):
         dni: str,
         phone_code: str,
         phone_number: str,
-    ):
+    ) -> "ClientModel":
         if self.filter(email=email).exists():
             raise ValueError("Ya existe un cliente con ese email")
 
@@ -52,7 +52,7 @@ class ClientModelManager(models.Manager["ClientModel"]):
 
     def update_client(
         self, client: "ClientModel", locality: "LocalityModel", **kwargs: Any
-    ):
+    ) -> "ClientModel":
         client.locality = locality
         for field, value in kwargs.items():
             setattr(client, field, value)
@@ -61,7 +61,9 @@ class ClientModelManager(models.Manager["ClientModel"]):
 
 
 class LocalityModelManager(models.Manager["LocalityModel"]):
-    def create_locality(self, name: str, postal_code: str, state: "StateChoices"):
+    def create_locality(
+        self, name: str, postal_code: str, state: "StateChoices"
+    ) -> "LocalityModel":
         name = name.strip().lower().title()
 
         if self.filter(name=name, postal_code=postal_code, state=state).exists():
@@ -71,14 +73,16 @@ class LocalityModelManager(models.Manager["LocalityModel"]):
 
     def get_or_create_locality(
         self, name: str, postal_code: int, state: "StateChoices"
-    ):
+    ) -> "LocalityModel":
         locality, _created = self.get_or_create(
             name=name, postal_code=postal_code, state=state
         )
         return locality
 
 
-InternalOrderProductsDict = TypedDict("Products", {"id": str, "quantity": int})
+InternalOrderProductsDict = TypedDict(
+    "InternalOrderProductsDict", {"id": str, "quantity": int}
+)
 
 
 class InternalOrderManager(models.Manager["InternalOrderModel"]):
@@ -89,7 +93,7 @@ class InternalOrderManager(models.Manager["InternalOrderModel"]):
         office_destination: "OfficeModel",
         user: "UserModel",
         products: List[InternalOrderProductsDict],
-    ):
+    ) -> "InternalOrderModel":
         from senda.core.models.order_internal import InternalOrderHistoryStatusChoices
 
         internal_order = self.create(
@@ -111,7 +115,9 @@ class InternalOrderManager(models.Manager["InternalOrderModel"]):
         return internal_order
 
 
-SupplierOrderProductsDict = TypedDict("Products", {"id": str, "quantity": int})
+SupplierOrderProductsDict = TypedDict(
+    "SupplierOrderProductsDict", {"id": str, "quantity": int}
+)
 
 
 class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
@@ -123,7 +129,7 @@ class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
         user: "UserModel",
         products: List[SupplierOrderProductsDict],
         total: float,
-    ):
+    ) -> "SupplierOrderModel":
         from senda.core.models.order_supplier import SupplierOrderHistoryStatusChoices
 
         supplier_order = self.create(
@@ -160,7 +166,7 @@ ProductSupplierDict = TypedDict(
 ProductServiceDict = TypedDict("ProductServiceDict", {"name": str, "price": str})
 
 
-def parse_price(price_str: str):
+def parse_price(price_str: str) -> Decimal:
     # Replace dots with nothing and commas with dots
     standard_format_str = price_str.replace(".", "").replace(",", ".")
     try:
@@ -181,7 +187,7 @@ class ProductModelManager(models.Manager["ProductModel"]):
         stock: List[ProductStockInOfficeModelDict],
         services: List[ProductServiceDict],
         suppliers: List[ProductSupplierDict],
-    ):
+    ) -> "ProductModel":
         if self.filter(sku=sku).exists():
             raise ValueError("Ya existe un producto con ese sku")
 
@@ -215,7 +221,9 @@ class ProductModelManager(models.Manager["ProductModel"]):
         return product
 
 
-PurchaseProductsItemDict = TypedDict("Products", {"id": str, "quantity": int})
+PurchaseProductsItemDict = TypedDict(
+    "PurchaseProductsItemDict", {"id": str, "quantity": int}
+)
 
 
 class PurchaseModelManager(models.Manager["PurchaseModel"]):
@@ -225,7 +233,7 @@ class PurchaseModelManager(models.Manager["PurchaseModel"]):
         client: "ClientModel",
         products: List[PurchaseProductsItemDict],
         office: "OfficeModel",
-    ):
+    ) -> "PurchaseModel":
         purchase = self.create(
             client=client,
             office=office,
@@ -242,7 +250,8 @@ class PurchaseModelManager(models.Manager["PurchaseModel"]):
 
 
 RentalContractProductsItemDict = TypedDict(
-    "Products", {"id": str, "quantity": int, "service": Optional[str]}
+    "RentalContractProductsItemDict",
+    {"id": str, "quantity": int, "service": Optional[str]},
 )
 
 
@@ -259,7 +268,7 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
         house_unit: str,
         contract_start_datetime: str,
         contract_end_datetime: str,
-    ):
+    ) -> "RentalContractModel":
         from senda.core.models.rental_contracts import RentalContractStatusChoices
 
         rental_contract = self.create(
@@ -284,22 +293,17 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
             rental_contract=rental_contract,
         )
 
+
 class EmployeeModelManager(models.Manager["EmployeeModel"]):
-    def create_employee(
-        self,
-        user_id: "UserModel"
-    ):
+    def create_employee(self, user: "UserModel"):
         if self.filter(user=user).exists():
-            raise  ValueError("Ya existe ese empleado")
+            raise ValueError("Ya existe ese empleado")
 
         return self.create(
             user=user,
-    )
+        )
 
-    def update_employee(
-        self, employee: "EmployeeModel", user: "UserModel", **kwargs: Any
-    ):
-        employee.user = user
+    def update_employee(self, employee: "EmployeeModel", **kwargs: Any):
         for field, value in kwargs.items():
             setattr(employee, field, value)
         employee.save()

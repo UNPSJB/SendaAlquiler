@@ -1,9 +1,9 @@
 from typing import Any
 
 import graphene  # pyright: ignore
-from core.models.purchases import PurchaseItemModel, PurchaseModel
-from core.schema.types import Purchase, PurchaseItem
 
+from senda.core.models.purchases import PurchaseItemModel, PurchaseModel
+from senda.core.schema.custom_types import Purchase, PurchaseItem
 from utils.graphene import non_null_list_of
 
 

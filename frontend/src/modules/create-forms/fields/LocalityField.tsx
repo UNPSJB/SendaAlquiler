@@ -8,7 +8,7 @@ import { useLocalities } from '@/api/hooks';
 
 import CreateLocalityForm from '@/modules/create-forms/CreateLocalityForm';
 
-import ModalWithBox from './ModalWithBox';
+import ModalWithBox from '../ModalWithBox';
 
 type LocalityOptionProps = {
     locality: Pick<Locality, 'id' | 'name' | 'postalCode' | 'state'>;
