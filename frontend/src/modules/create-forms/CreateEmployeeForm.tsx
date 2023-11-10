@@ -71,29 +71,24 @@ const PersonalDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register
             />
         </RHFFormField>
 
-        <RHFFormField fieldID="" label="Activo" showRequired>
-            {/* <Input
-                type="checkbox"
-                id="isActive"
-                {...register('isActive', {
-                    required: true,
-                    maxLength: 10,
-                })}
-            /> */}
-            <input
-                type="checkbox"
-                id="isActive"
-                className='appearance-none border rounded w-7 h-7 checked:bg-gray-200 transition-all duration-300'
-                {...register('isActive', {
-                    required: true,
-                })}
-            />
-        </RHFFormField>
-
         <RHFFormField fieldID="password" label="Contraseña" showRequired>
             <Input
                 type="password"
                 id="password"
+                placeholder="**********"
+                hasError={!!formErrors.password}
+                maxLength={10}
+                {...register('password', {
+                    required: true,
+                    maxLength: 10,
+                })}
+            />
+        </RHFFormField>
+
+        <RHFFormField fieldID="confirm-password" label="Confirme contraseña" showRequired>
+            <Input
+                type="password"
+                id="confirm-password"
                 placeholder="**********"
                 hasError={!!formErrors.password}
                 maxLength={10}
