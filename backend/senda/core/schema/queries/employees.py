@@ -1,7 +1,7 @@
 import graphene
 
 from senda.core.models.employees import EmployeeModel
-from senda.core.schema.types import Employee
+from senda.core.schema.custom_types import Employee
 from utils.graphene import non_null_list_of
 
 class Query(graphene.ObjectType):
@@ -9,7 +9,7 @@ class Query(graphene.ObjectType):
 
     def resolve_employees(self, info):
         return EmployeeModel.objects.all()
-    
+
     employee_by_id = graphene.Field(Employee, id=graphene.ID(required=True))
 
     def resolve_employee_by_id(self, info, id: str):

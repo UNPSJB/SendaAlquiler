@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 import clsx from 'clsx';
-import { useState } from 'react';
 import {
     FormProvider,
     FormState,
     SubmitHandler,
+    UseFormGetValues,
     UseFormRegister,
     useForm,
 } from 'react-hook-form';
@@ -22,14 +22,21 @@ import Input from '@/modules/forms/Input';
 
 import NavigationButtons, { NavigationButtonsCancelProps } from './NavigationButtons';
 
-type FormValues = CreateEmployeeMutationVariables['employeeData'];
+type FormValues = CreateEmployeeMutationVariables['employeeData'] & {
+    confirmPassword: string;
+};
 
 type FieldsComponentProps = {
     formErrors: FormState<FormValues>['errors'];
     register: UseFormRegister<FormValues>;
+    getValues: UseFormGetValues<FormValues>;
 };
 
-const PersonalDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register }) => (
+const PersonalDataStep: React.FC<FieldsComponentProps> = ({
+    formErrors,
+    register,
+    getValues,
+}) => (
     <>
         <div className="flex space-x-4">
             <RHFFormField
@@ -77,24 +84,29 @@ const PersonalDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register
                 id="password"
                 placeholder="**********"
                 hasError={!!formErrors.password}
-                maxLength={10}
+                minLength={8}
                 {...register('password', {
                     required: true,
-                    maxLength: 10,
+                    minLength: 8,
                 })}
             />
         </RHFFormField>
 
-        <RHFFormField fieldID="confirm-password" label="Confirme contraseña" showRequired>
+        <RHFFormField fieldID="confirmPassword" label="Confirme contraseña" showRequired>
             <Input
                 type="password"
-                id="confirm-password"
+                id="confirmPassword"
                 placeholder="**********"
-                hasError={!!formErrors.password}
-                maxLength={10}
-                {...register('password', {
+                hasError={!!formErrors.confirmPassword}
+                minLength={8}
+                {...register('confirmPassword', {
                     required: true,
-                    maxLength: 10,
+                    minLength: 8,
+                    validate: (value) => {
+                        const isValid = value === getValues('password');
+
+                        return isValid || 'Las contraseñas no coinciden';
+                    },
                 })}
             />
         </RHFFormField>
@@ -116,16 +128,17 @@ const STEPS: Step[] = [
         description: 'Información personal del empleado',
         Component: PersonalDataStep,
         fields: ['firstName', 'lastName', 'email'],
-    }
+    },
 ];
 
 const CreateEmployeeForm: React.FC<NavigationButtonsCancelProps> = (props) => {
-    const useFormMethods = useForm<FormValues>();
-    const { register, handleSubmit, formState, trigger } = useFormMethods;
+    const useFormMethods = useForm<FormValues>({
+        reValidateMode: 'onChange',
+    });
+    const { register, handleSubmit, formState, getValues } = useFormMethods;
     const formErrors = formState.errors;
 
     const router = useRouter();
-    const [activeStep, setActiveStep] = useState(0);
 
     const { mutate } = useCreateEmployee({
         onSuccess: (data) => {
@@ -143,9 +156,19 @@ const CreateEmployeeForm: React.FC<NavigationButtonsCancelProps> = (props) => {
     });
 
     const onSubmit: SubmitHandler<FormValues> = (data) => {
+        const password = data.password;
+        const confirmPassword = data['confirmPassword'];
+        if (password !== confirmPassword) {
+            toast.error('Las contraseñas no coinciden');
+            return;
+        }
+
         mutate({
             employeeData: {
-                ...data,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                email: data.email,
+                password: data.password,
             },
         });
     };
@@ -164,32 +187,21 @@ const CreateEmployeeForm: React.FC<NavigationButtonsCancelProps> = (props) => {
                 <div className="flex w-9/12 flex-col rounded-r-xl bg-white px-14 pt-6">
                     <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-4">
                         <h1 className="text-2xl font-bold">Crea un empleado</h1>
-
-                        <span className="text-xs text-gray-500">
-                            Paso {activeStep + 1} de {STEPS.length}
-                        </span>
                     </div>
 
                     <FormProvider {...useFormMethods}>
-                        {STEPS.map(({ title, description, Component, key }, index) => (
-                            <div
-                                className={clsx(
-                                    'mb-20 w-9/12',
-                                    activeStep !== index && 'hidden',
-                                )}
-                                key={key}
-                            >
-                                <h2 className="text-lg font-bold">{title}</h2>
-                                <p className="mb-6 text-gray-600">{description}</p>
+                        <div className={clsx('mb-20 w-9/12')}>
+                            <h2 className="text-lg font-bold">{STEPS[0].title}</h2>
+                            <p className="mb-6 text-gray-600">{STEPS[0].description}</p>
 
-                                <form className="space-y-4">
-                                    <Component
-                                        formErrors={formErrors}
-                                        register={register}
-                                    />
-                                </form>
-                            </div>
-                        ))}
+                            <form className="space-y-4">
+                                <PersonalDataStep
+                                    formErrors={formErrors}
+                                    register={register}
+                                    getValues={getValues}
+                                />
+                            </form>
+                        </div>
                     </FormProvider>
 
                     <NavigationButtons

@@ -116,7 +116,6 @@ export type CreateEmployee = {
 export type CreateEmployeeInput = {
     email: Scalars['String']['input'];
     firstName: Scalars['String']['input'];
-    isActive: InputMaybe<Scalars['Boolean']['input']>;
     lastName: Scalars['String']['input'];
     password: Scalars['String']['input'];
 };
@@ -397,6 +396,7 @@ export type Query = {
     productById: Maybe<Product>;
     products: Array<Product>;
     productsStocksByOfficeId: Array<ProductStockInOffice>;
+    rentalContracts: Array<RentalContract>;
     supplierById: Maybe<Supplier>;
     suppliers: Array<Supplier>;
     users: Array<User>;
@@ -440,7 +440,6 @@ export type RentalContract = {
     contractStartDatetime: Scalars['DateTime']['output'];
     createdOn: Scalars['DateTime']['output'];
     currentHistory: Maybe<RentalContractHistory>;
-    dateCreated: Scalars['DateTime']['output'];
     expirationDate: Maybe<Scalars['DateTime']['output']>;
     hasPayedDeposit: Scalars['Boolean']['output'];
     hasPayedRemainingAmount: Scalars['Boolean']['output'];

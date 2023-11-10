@@ -43,7 +43,7 @@ class CreateEmployee(graphene.Mutation):
 
     def mutate(self, info: Any, employee_data: CreateEmployeeInput):
         try:
-            user = UserModel.objects.create(
+            user = UserModel.objects.create_user(
                 first_name=employee_data.first_name,
                 last_name=employee_data.last_name,
                 email=employee_data.email,
