@@ -15,7 +15,6 @@ class CreateEmployeeInput(graphene.InputObjectType):
     first_name = graphene.String(required=True)
     last_name = graphene.String(required=True)
     email = graphene.String(required=True)
-    is_active = graphene.Boolean()
     password = graphene.String(required=True) 
 
 class UpdateEmployeeInput(graphene.InputObjectType):

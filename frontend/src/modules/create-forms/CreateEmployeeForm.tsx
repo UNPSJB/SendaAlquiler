@@ -115,7 +115,7 @@ const STEPS: Step[] = [
         title: 'Información personal',
         description: 'Información personal del empleado',
         Component: PersonalDataStep,
-        fields: ['firstName', 'lastName', 'email', 'isActive'],
+        fields: ['firstName', 'lastName', 'email'],
     }
 ];
 
@@ -148,27 +148,6 @@ const CreateEmployeeForm: React.FC<NavigationButtonsCancelProps> = (props) => {
                 ...data,
             },
         });
-    };
-
-    const handlePreviousStep = () => {
-        if (activeStep === 0) {
-            return;
-        }
-
-        setActiveStep(activeStep - 1);
-    };
-
-    const handleNextStep = async () => {
-        if (activeStep === STEPS.length - 1) {
-            return;
-        }
-
-        const currentStepFields = STEPS[activeStep].fields;
-        const stepFieldsAreValid = await trigger(currentStepFields);
-
-        if (stepFieldsAreValid) {
-            setActiveStep(activeStep + 1);
-        }
     };
 
     return (
@@ -214,9 +193,7 @@ const CreateEmployeeForm: React.FC<NavigationButtonsCancelProps> = (props) => {
                     </FormProvider>
 
                     <NavigationButtons
-                        isLastStep={activeStep === STEPS.length - 1}
-                        onPrevious={handlePreviousStep}
-                        onNext={handleNextStep}
+                        isUniqueStep
                         onSubmit={handleSubmit(onSubmit)}
                         {...props}
                     />
