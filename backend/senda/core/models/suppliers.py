@@ -42,5 +42,5 @@ class SupplierModel(TimeStampedModel):
 
     note = models.TextField(null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name

@@ -3,7 +3,7 @@ from typing import Any
 import graphene  # pyright: ignore
 
 from senda.core.models.localities import LocalityModel
-from senda.core.schema.types import Locality
+from senda.core.schema.custom_types import Locality
 
 
 class Query(graphene.ObjectType):

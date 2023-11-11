@@ -73,6 +73,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
             }
 
             setInputValue(valueWithRemovedNonDigits);
+            onChange?.(e);
             return;
         }
 
@@ -84,14 +85,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
             );
 
             setInputValue(valueAsPriceFormatWithThousands);
+            onChange?.(e);
             return;
         }
 
         setInputValue(value);
-
-        if (onChange) {
-            onChange(e);
-        }
+        onChange?.(e);
     };
 
     let inputType = props.type;
@@ -105,11 +104,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>((props, ref) => {
             className={clsx(
                 'block w-full rounded border border-gray-200 p-4',
                 size === InputSize.SMALL && 'text-sm',
+                rest.readOnly ? 'pointer-events-none bg-gray-100' : 'bg-white',
             )}
             onChange={handleInputChange}
             value={inputValue}
             min={min}
             max={max}
+            type={inputType}
             {...ariaProps}
             {...rest}
         />

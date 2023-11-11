@@ -3,7 +3,7 @@ from typing import Any
 import graphene  # pyright: ignore
 
 from senda.core.models.offices import OfficeModel
-from senda.core.schema.types import Office
+from senda.core.schema.custom_types import Office
 from utils.graphene import non_null_list_of
 
 

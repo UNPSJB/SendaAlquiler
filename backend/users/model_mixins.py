@@ -104,11 +104,11 @@ class AbstractUser(
         ),
     )
 
-    objects = UserManager() # pyright: ignore
+    objects: UserManager = UserManager()  # pyright: ignore
 
     # misnomer; fields Dj prompts for when user calls createsuperuser
     # https://docs.djangoproject.com/en/stable/topics/auth/customizing/#django.contrib.auth.models.CustomUser.REQUIRED_FIELDS
-    REQUIRED_FIELDS: List[str] = []
+    REQUIRED_FIELDS = []
 
     class Meta:
         abstract = True

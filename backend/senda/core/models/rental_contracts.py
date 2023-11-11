@@ -1,11 +1,10 @@
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.utils import timezone
 
 from extensions.db.models import TimeStampedModel
 from senda.core.managers import RentalContractManager
@@ -14,6 +13,8 @@ from .clients import ClientModel
 from .localities import LocalityModel
 from .offices import OfficeModel
 from .products import ProductModel, ProductServiceModel, ProductTypeChoices
+
+from datetime import timedelta
 
 
 class RentalContractModel(TimeStampedModel):
@@ -28,9 +29,7 @@ class RentalContractModel(TimeStampedModel):
     client = models.ForeignKey(
         ClientModel, on_delete=models.CASCADE, related_name="rental_contracts"
     )
-    current_history: models.OneToOneField[
-        Optional["RentalContractHistoryModel"]
-    ] = models.OneToOneField(
+    current_history = models.OneToOneField(
         "RentalContractHistoryModel",
         on_delete=models.SET_NULL,
         related_name="current_rental_contract",
@@ -70,9 +69,9 @@ class RentalContractModel(TimeStampedModel):
         verbose_name = "Rental Contract"
         verbose_name_plural = "Rental Contracts"
 
-    def save(self, *args: Any, **kwargs: Any):
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.expiration_date:
-            self.expiration_date = self.date_created + timezone.timedelta(days=14)
+            self.expiration_date = self.created_on + timedelta(days=14)
 
         super().save(*args, **kwargs)
 
@@ -96,12 +95,8 @@ class RentalContractItemModel(TimeStampedModel):
         related_name="rental_contract_items",
     )
     quantity = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(
-        blank=True, decimal_places=2, max_digits=10
-    )
-    total = models.DecimalField(
-        blank=True, decimal_places=2, max_digits=10
-    )
+    price = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
+    total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
     quantity_returned = models.PositiveIntegerField(default=0, blank=True, null=True)
     service = models.ForeignKey(
         ProductServiceModel,
@@ -137,13 +132,15 @@ class RentalContractItemModel(TimeStampedModel):
             ),
         ]
 
-    def clean(self):
+    def clean(self) -> None:
         if self.product.type != ProductTypeChoices.ALQUILABLE:
             raise ValidationError(
                 "No se puede agregar un producto que no sea ALQUILABLE a un contrato de alquiler"
             )
 
-    def save(self, *args: Any, **kwargs: Any):
+        return super().clean()
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.price and self.product.price:
             self.price = self.product.price
 
@@ -198,7 +195,7 @@ def update_current_history(
     instance: RentalContractHistoryModel,
     created: bool,
     **kwargs: Any,
-):
+) -> None:
     if created:
         rental_contract = instance.rental_contract
         rental_contract.current_history = instance

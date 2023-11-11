@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.db import models
 from django.db.models.signals import post_save
@@ -24,9 +24,7 @@ class InternalOrderModel(TimeStampedModel):
     )
     date_created = models.DateTimeField(auto_now_add=True)
 
-    current_history: models.OneToOneField[
-        Optional["InternalOrderHistoryModel"]
-    ] = models.OneToOneField(
+    current_history = models.OneToOneField(
         "InternalOrderHistoryModel",
         on_delete=models.SET_NULL,
         related_name="current_order",
@@ -102,7 +100,7 @@ def update_current_history(
     instance: InternalOrderHistoryModel,
     created: bool,
     **kwargs: Any,
-):
+) -> None:
     if created:
         internal_order = instance.internal_order
         internal_order.current_history = instance

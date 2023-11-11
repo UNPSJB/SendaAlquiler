@@ -10,7 +10,7 @@ from senda.core.models.rental_contracts import (
     RentalContractModel,
     RentalContractStatusChoices,
 )
-from senda.core.schema.types import RentalContract
+from senda.core.schema.custom_types import RentalContract
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
 
@@ -111,9 +111,6 @@ class CreateRentalContract(graphene.Mutation):
 
         return CreateRentalContract(rental_contract=rental_contract)
 
-
-class Mutation(graphene.ObjectType):
-    CreateRentalContract = CreateRentalContract.Field()
 
 
 class BaseChangeContractStatus(graphene.Mutation):
@@ -284,3 +281,14 @@ class SuccessfulReturnContract(BaseChangeContractStatus):
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:
             return BaseChangeContractStatus(error=str(e))
+
+class Mutation(graphene.ObjectType):
+    create_rental_contract = CreateRentalContract.Field()
+    pay_contract_deposit = PayContractDeposit.Field()
+    pay_total_contract = PayTotalContract.Field()
+    cancel_contract = CancelContract.Field()
+    start_contract = StartContract.Field()
+    expired_contract = ExpiredContract.Field()
+    finish_contract = FinishContract.Field()
+    failed_return_contract = FailedReturnContract.Field()
+    successful_return_contract = SuccessfulReturnContract.Field()

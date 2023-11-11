@@ -7,7 +7,7 @@ from senda.core.models.products import (
     ProductModel,
     ProductStockInOfficeModel,
 )
-from senda.core.schema.types import Brand, Product, ProductStockInOffice
+from senda.core.schema.custom_types import Brand, Product, ProductStockInOffice
 from utils.graphene import non_null_list_of
 
 

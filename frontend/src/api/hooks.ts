@@ -22,6 +22,8 @@ import {
     CreateLocalityDocument,
     CreateLocalityMutation,
     CreateLocalityMutationVariables,
+    EmployeesDocument,
+    EmployeeByIdDocument,
     CreateProductDocument,
     CreateProductMutation,
     CreateProductMutationVariables,
@@ -38,12 +40,18 @@ import {
     ProductsStocksByOfficeIdDocument,
     SupplierByIdDocument,
     SuppliersDocument,
+    CreateEmployeeMutation,
+    CreateEmployeeMutationVariables,
+    CreateEmployeeDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
 const queryKeys = {
     clients: ['clients'],
     clientById: (id: string | undefined) => [...queryKeys.clients, id],
+
+    employees: ['employees'],
+    employeeById: (id: string | undefined) => [...queryKeys.employees, id],
 
     brands: ['brands'],
 
@@ -78,6 +86,57 @@ export const useLogin = (options: UseLoginOptions = {}) => {
     return useMutation<LoginMutation, Error, LoginMutationVariables>((data) => {
         return clientGraphqlQuery(LoginDocument, data);
     }, options);
+};
+
+export const useEmployees = () => {
+    return useQuery(queryKeys.employees, () => {
+        return clientGraphqlQuery(EmployeesDocument, {});
+    });
+};
+
+type UseCreateEmployeeOptions = UseMutationOptions<
+    CreateEmployeeMutation,
+    Error,
+    CreateEmployeeMutationVariables
+>;
+
+export const useCreateEmployee = ({
+    onSuccess,
+    ...options
+}: UseCreateEmployeeOptions = {}) => {
+    const employee = useQueryClient();
+
+    return useMutation<CreateEmployeeMutation, Error, CreateEmployeeMutationVariables>(
+        (data) => {
+            return clientGraphqlQuery(CreateEmployeeDocument, data);
+        },
+        {
+            onSuccess: (data, context, variables) => {
+                if (data.createEmployee?.employee) {
+                    employee.invalidateQueries(queryKeys.employees);
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, context, variables);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useEmployeeById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.employeeById(id),
+        () => {
+            return clientGraphqlQuery(EmployeeByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
 };
 
 export const useClients = () => {

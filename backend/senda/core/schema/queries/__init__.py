@@ -8,10 +8,11 @@ from .products import Query as ProductQuery
 from .purchases import Query as PurchaseQuery
 from .rental_contracts import Query as RentalContractQuery
 from .suppliers import Query as SupplierQuery
-
+from .employees import Query as EmployeeQuery
 
 class Query(
     ClientQuery,
+    EmployeeQuery,
     LocalityQuery,
     OfficeQuery,
     ProductQuery,
