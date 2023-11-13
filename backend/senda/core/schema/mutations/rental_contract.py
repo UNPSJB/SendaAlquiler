@@ -35,8 +35,8 @@ class CreateRentalContractInput(graphene.InputObjectType):
     client_id = graphene.ID(required=True)
     locality_id = graphene.ID(required=True)
     house_number = graphene.String(required=True)
-    street_number = graphene.String(required=True)
-    house_unit = graphene.String(required=True)
+    street_name = graphene.String(required=True)
+    house_unit = graphene.String(required=False)
     contract_start_datetime = graphene.DateTime(required=True)
     contract_end_datetime = graphene.DateTime(required=True)
     products = non_null_list_of(RentalContractProductsItemInput)
@@ -73,7 +73,7 @@ def get_locality(locality_id: str):
 
 
 class CreateRentalContract(graphene.Mutation):
-    rental_contract = graphene.Field(RentalContractModel)
+    rental_contract = graphene.Field(RentalContract)
     error = graphene.String()
 
     class Arguments:
@@ -109,13 +109,10 @@ class CreateRentalContract(graphene.Mutation):
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
             return CreateRentalContract(error=str(e))
         except Exception as e:
+            print(e)
             return CreateRentalContract(error="Error desconocido")
 
         return CreateRentalContract(rental_contract=rental_contract)
-
-
-class Mutation(graphene.ObjectType):
-    CreateRentalContract = CreateRentalContract.Field()
 
 
 class BaseChangeContractStatus(graphene.Mutation):
@@ -150,6 +147,12 @@ class BaseChangeContractStatus(graphene.Mutation):
         RentalContractHistoryModel.objects.create(
             rental_contract=contract, status=new_status
         )
+
+    @classmethod
+    def mutate(
+        cls, self: "BaseChangeContractStatus", info: Any, rental_contract_id: str
+    ):
+        raise NotImplementedError()
 
 
 class PayContractDeposit(BaseChangeContractStatus):
@@ -300,3 +303,8 @@ class SuccessfulReturnContract(BaseChangeContractStatus):
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:
             return BaseChangeContractStatus(error=str(e))
+
+
+class Mutation(graphene.ObjectType):
+    create_rental_contract = CreateRentalContract.Field()
+    successful_return_contract = SuccessfulReturnContract.Field()
