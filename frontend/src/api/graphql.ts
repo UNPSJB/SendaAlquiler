@@ -107,6 +107,19 @@ export type CreateClientInput = {
     streetName: Scalars['String']['input'];
 };
 
+export type CreateEmployee = {
+    __typename?: 'CreateEmployee';
+    employee: Maybe<Employee>;
+    error: Maybe<Scalars['String']['output']>;
+};
+
+export type CreateEmployeeInput = {
+    email: Scalars['String']['input'];
+    firstName: Scalars['String']['input'];
+    lastName: Scalars['String']['input'];
+    password: Scalars['String']['input'];
+};
+
 export type CreateInternalOrder = {
     __typename?: 'CreateInternalOrder';
     error: Maybe<Scalars['String']['output']>;
@@ -230,6 +243,7 @@ export type Mutation = {
     __typename?: 'Mutation';
     createBrand: Maybe<CreateBrand>;
     createClient: Maybe<CreateClient>;
+    createEmployee: Maybe<CreateEmployee>;
     createInternalOrder: Maybe<CreateInternalOrder>;
     createLocality: Maybe<CreateLocality>;
     createProduct: Maybe<CreateProduct>;
@@ -249,6 +263,10 @@ export type MutationCreateBrandArgs = {
 
 export type MutationCreateClientArgs = {
     clientData: CreateClientInput;
+};
+
+export type MutationCreateEmployeeArgs = {
+    employeeData: CreateEmployeeInput;
 };
 
 export type MutationCreateInternalOrderArgs = {
@@ -408,6 +426,8 @@ export type Query = {
     brands: Array<Brand>;
     clientById: Maybe<Client>;
     clients: Array<Client>;
+    employeeById: Maybe<Employee>;
+    employees: Array<Employee>;
     internalOrders: Array<InternalOrder>;
     localities: Array<Locality>;
     officeById: Maybe<Office>;
@@ -422,6 +442,10 @@ export type Query = {
 };
 
 export type QueryClientByIdArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type QueryEmployeeByIdArgs = {
     id: Scalars['ID']['input'];
 };
 
@@ -640,6 +664,33 @@ export type ClientsQuery = {
     }>;
 };
 
+export type EmployeesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type EmployeesQuery = {
+    __typename?: 'Query';
+    users: Array<{
+        __typename?: 'User';
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        isActive: boolean;
+    }>;
+};
+
+export type CreateEmployeeMutationVariables = Exact<{
+    employeeData: CreateEmployeeInput;
+}>;
+
+export type CreateEmployeeMutation = {
+    __typename?: 'Mutation';
+    createEmployee: {
+        __typename?: 'CreateEmployee';
+        error: string | null;
+        employee: { __typename?: 'Employee'; id: string } | null;
+    } | null;
+};
+
 export type LocalitiesQueryVariables = Exact<{ [key: string]: never }>;
 
 export type LocalitiesQuery = {
@@ -744,6 +795,27 @@ export type ClientByIdQuery = {
             name: string;
             state: StateChoices;
             postalCode: string;
+        };
+    } | null;
+};
+
+export type EmployeeByIdQueryVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type EmployeeByIdQuery = {
+    __typename?: 'Query';
+    employeeById: {
+        __typename?: 'Employee';
+        id: string;
+        user: {
+            __typename?: 'User';
+            firstName: string;
+            lastName: string;
+            email: string;
+            isActive: boolean;
+            dateJoined: any;
+            lastLogin: any | null;
         };
     } | null;
 };
@@ -1110,6 +1182,108 @@ export const ClientsDocument = {
         },
     ],
 } as unknown as DocumentNode<ClientsQuery, ClientsQueryVariables>;
+export const EmployeesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'employees' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'users' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'firstName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'lastName' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'isActive' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<EmployeesQuery, EmployeesQueryVariables>;
+export const CreateEmployeeDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'createEmployee' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'employeeData' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreateEmployeeInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'createEmployee' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'employeeData' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'employeeData' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'employee' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<CreateEmployeeMutation, CreateEmployeeMutationVariables>;
 export const LocalitiesDocument = {
     kind: 'Document',
     definitions: [
@@ -1551,6 +1725,93 @@ export const ClientByIdDocument = {
         },
     ],
 } as unknown as DocumentNode<ClientByIdQuery, ClientByIdQueryVariables>;
+export const EmployeeByIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'employeeById' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'employeeById' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'user' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'firstName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'lastName' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'email' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'isActive' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'dateJoined',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'lastLogin',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<EmployeeByIdQuery, EmployeeByIdQueryVariables>;
 export const SupplierByIdDocument = {
     kind: 'Document',
     definitions: [

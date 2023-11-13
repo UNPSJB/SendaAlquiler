@@ -307,4 +307,11 @@ class SuccessfulReturnContract(BaseChangeContractStatus):
 
 class Mutation(graphene.ObjectType):
     create_rental_contract = CreateRentalContract.Field()
+    pay_contract_deposit = PayContractDeposit.Field()
+    pay_total_contract = PayTotalContract.Field()
+    cancel_contract = CancelContract.Field()
+    start_contract = StartContract.Field()
+    expired_contract = ExpiredContract.Field()
+    finish_contract = FinishContract.Field()
+    failed_return_contract = FailedReturnContract.Field()
     successful_return_contract = SuccessfulReturnContract.Field()

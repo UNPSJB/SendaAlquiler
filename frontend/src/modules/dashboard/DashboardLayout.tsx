@@ -15,6 +15,7 @@ import Gear from './Icons/Gear';
 import House from './Icons/House';
 import LocationDot from './Icons/LocationDot';
 import User from './Icons/User';
+import UserTie from './Icons/UserTie'
 
 export type DashboardIconProps = {
     isActive: boolean;
@@ -30,6 +31,7 @@ const MAIN_LINKS: NavLink[] = [
     { href: '/', label: 'Dashboard', Icon: House },
     { href: '/productos', label: 'Productos', Icon: BagShopping },
     { href: '/clientes', label: 'Clientes', Icon: User },
+    { href: '/empleados', label: 'Empleados', Icon: UserTie },
     { href: '/proveedores', label: 'Proveedores', Icon: ClipBoard },
     { href: '/localidades', label: 'Localidades', Icon: LocationDot },
     {

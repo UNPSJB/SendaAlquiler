@@ -30,7 +30,8 @@ class Login(graphene.Mutation):
 
             token = get_token(user)
             return Login(user=user, token=token)
-        except:
+        except Exception as e:
+            print(e)
             raise GraphQLError(
                 "Ocurrió un error al iniciar sesión. Por favor intentalo más tarde."
             )
