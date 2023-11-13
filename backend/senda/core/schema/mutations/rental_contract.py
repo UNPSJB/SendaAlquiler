@@ -35,8 +35,8 @@ class CreateRentalContractInput(graphene.InputObjectType):
     client_id = graphene.ID(required=True)
     locality_id = graphene.ID(required=True)
     house_number = graphene.String(required=True)
-    street_number = graphene.String(required=True)
-    house_unit = graphene.String(required=True)
+    street_name = graphene.String(required=True)
+    house_unit = graphene.String(required=False)
     contract_start_datetime = graphene.DateTime(required=True)
     contract_end_datetime = graphene.DateTime(required=True)
     products = non_null_list_of(RentalContractProductsItemInput)
@@ -73,13 +73,15 @@ def get_locality(locality_id: str):
 
 
 class CreateRentalContract(graphene.Mutation):
-    rental_contract = graphene.Field(RentalContractModel)
+    rental_contract = graphene.Field(RentalContract)
     error = graphene.String()
 
     class Arguments:
         data = CreateRentalContractInput(required=True)
 
-    def mutate(self, info: Any, data: CreateRentalContractInput):
+    def mutate(
+        self, info: Any, data: CreateRentalContractInput
+    ) -> "CreateRentalContract":
         data_dict = input_object_type_to_dict(data)
 
         try:
@@ -107,10 +109,10 @@ class CreateRentalContract(graphene.Mutation):
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
             return CreateRentalContract(error=str(e))
         except Exception as e:
+            print(e)
             return CreateRentalContract(error="Error desconocido")
 
         return CreateRentalContract(rental_contract=rental_contract)
-
 
 
 class BaseChangeContractStatus(graphene.Mutation):
@@ -121,7 +123,7 @@ class BaseChangeContractStatus(graphene.Mutation):
         rental_contract_id = graphene.ID(required=True)
 
     @classmethod
-    def get_contract(cls, id: str):
+    def get_contract(cls, id: str) -> RentalContractModel:
         rental_contract = RentalContractModel.objects.filter(id=id).first()
 
         if rental_contract is None:
@@ -135,7 +137,7 @@ class BaseChangeContractStatus(graphene.Mutation):
         contract: RentalContractModel,
         status: List[RentalContractStatusChoices],
         new_status: RentalContractStatusChoices,
-    ):
+    ) -> None:
         if (
             not contract.current_history
             or contract.current_history.status not in status
@@ -146,10 +148,18 @@ class BaseChangeContractStatus(graphene.Mutation):
             rental_contract=contract, status=new_status
         )
 
+    @classmethod
+    def mutate(
+        cls, self: "BaseChangeContractStatus", info: Any, rental_contract_id: str
+    ):
+        raise NotImplementedError()
+
 
 class PayContractDeposit(BaseChangeContractStatus):
     @classmethod
-    def mutate(cls, self: "PayContractDeposit", info: Any, rental_contract_id: str):
+    def mutate(
+        cls, self: "PayContractDeposit", info: Any, rental_contract_id: str
+    ) -> BaseChangeContractStatus:
         try:
             contract = cls.get_contract(rental_contract_id)
             cls.check_contract_status_is_one_of_and_update_status(
@@ -165,7 +175,9 @@ class PayContractDeposit(BaseChangeContractStatus):
 
 class PayTotalContract(BaseChangeContractStatus):
     @classmethod
-    def mutate(cls, self: "PayTotalContract", info: Any, rental_contract_id: str):
+    def mutate(
+        cls, self: "PayTotalContract", info: Any, rental_contract_id: str
+    ) -> BaseChangeContractStatus:
         try:
             contract = cls.get_contract(rental_contract_id)
             cls.check_contract_status_is_one_of_and_update_status(
@@ -181,7 +193,9 @@ class PayTotalContract(BaseChangeContractStatus):
 
 class CancelContract(BaseChangeContractStatus):
     @classmethod
-    def mutate(cls, self: "CancelContract", info: Any, rental_contract_id: str):
+    def mutate(
+        cls, self: "CancelContract", info: Any, rental_contract_id: str
+    ) -> BaseChangeContractStatus:
         try:
             contract = cls.get_contract(rental_contract_id)
             cls.check_contract_status_is_one_of_and_update_status(
@@ -200,7 +214,9 @@ class CancelContract(BaseChangeContractStatus):
 
 class StartContract(BaseChangeContractStatus):
     @classmethod
-    def mutate(cls, self: "StartContract", info: Any, rental_contract_id: str):
+    def mutate(
+        cls, self: "StartContract", info: Any, rental_contract_id: str
+    ) -> BaseChangeContractStatus:
         try:
             contract = cls.get_contract(rental_contract_id)
             cls.check_contract_status_is_one_of_and_update_status(
@@ -216,7 +232,9 @@ class StartContract(BaseChangeContractStatus):
 
 class ExpiredContract(BaseChangeContractStatus):
     @classmethod
-    def mutate(cls, self: "ExpiredContract", info: Any, rental_contract_id: str):
+    def mutate(
+        cls, self: "ExpiredContract", info: Any, rental_contract_id: str
+    ) -> BaseChangeContractStatus:
         try:
             contract = cls.get_contract(rental_contract_id)
             cls.check_contract_status_is_one_of_and_update_status(
@@ -235,7 +253,9 @@ class ExpiredContract(BaseChangeContractStatus):
 
 class FinishContract(BaseChangeContractStatus):
     @classmethod
-    def mutate(cls, self: "FinishContract", info: Any, rental_contract_id: str):
+    def mutate(
+        cls, self: "FinishContract", info: Any, rental_contract_id: str
+    ) -> BaseChangeContractStatus:
         try:
             contract = cls.get_contract(rental_contract_id)
             cls.check_contract_status_is_one_of_and_update_status(
@@ -251,7 +271,9 @@ class FinishContract(BaseChangeContractStatus):
 
 class FailedReturnContract(BaseChangeContractStatus):
     @classmethod
-    def mutate(cls, self: "FailedReturnContract", info: Any, rental_contract_id: str):
+    def mutate(
+        cls, self: "FailedReturnContract", info: Any, rental_contract_id: str
+    ) -> BaseChangeContractStatus:
         try:
             contract = cls.get_contract(rental_contract_id)
             cls.check_contract_status_is_one_of_and_update_status(
@@ -269,7 +291,7 @@ class SuccessfulReturnContract(BaseChangeContractStatus):
     @classmethod
     def mutate(
         cls, self: "SuccessfulReturnContract", info: Any, rental_contract_id: str
-    ):
+    ) -> BaseChangeContractStatus:
         try:
             contract = cls.get_contract(rental_contract_id)
             cls.check_contract_status_is_one_of_and_update_status(
@@ -281,6 +303,7 @@ class SuccessfulReturnContract(BaseChangeContractStatus):
             return BaseChangeContractStatus(rental_contract=contract)
         except Exception as e:
             return BaseChangeContractStatus(error=str(e))
+
 
 class Mutation(graphene.ObjectType):
     create_rental_contract = CreateRentalContract.Field()

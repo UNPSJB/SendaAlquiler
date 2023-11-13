@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import { useState } from 'react';
 import {
+    Control,
     FormProvider,
     FormState,
     SubmitHandler,
@@ -38,25 +39,30 @@ type FormValues = CreateProductMutationVariables['productData'];
 type FieldsComponentProps = {
     formErrors: FormState<FormValues>['errors'];
     register: UseFormRegister<FormValues>;
+    control: Control<FormValues>;
 };
 
-const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register }) => (
+const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, control }) => (
     <>
         <RHFFormField className="flex-1" fieldID="sku" label="Sku" showRequired>
             <Input
                 id="sku"
+                name="sku"
                 placeholder="XYZ12345"
                 hasError={!!formErrors.sku}
-                {...register('sku', { required: true })}
+                control={control}
+                rules={{ required: true }}
             />
         </RHFFormField>
 
         <RHFFormField className="flex-1" fieldID="name" label="Nombre" showRequired>
             <Input
                 id="name"
+                name="name"
                 placeholder="Lavandina"
                 hasError={!!formErrors.name}
-                {...register('name', { required: true })}
+                control={control}
+                rules={{ required: true }}
             />
         </RHFFormField>
 
@@ -68,9 +74,11 @@ const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
         >
             <Input
                 id="description"
+                name="description"
                 placeholder="Descripción"
                 hasError={!!formErrors.description}
-                {...register('description', { required: true })}
+                control={control}
+                rules={{ required: true }}
             />
         </RHFFormField>
 
@@ -86,15 +94,11 @@ const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
             <Input
                 type="price"
                 id="price"
+                name="price"
                 placeholder="0.00"
                 hasError={!!formErrors.price}
-                {...register('price', {
-                    required: true,
-                    // maxLength: 7, // 1 million
-                    // minLength: 1,
-                    // max: 1000000,
-                    // min: 1,
-                })}
+                control={control}
+                rules={{ required: true }}
             />
         </RHFFormField>
     </>
@@ -165,7 +169,7 @@ const STEPS: Step[] = [
 
 const CreateProductForm: React.FC<NavigationButtonsCancelProps> = (props) => {
     const useFormMethods = useForm<FormValues>();
-    const { register, handleSubmit, formState, trigger } = useFormMethods;
+    const { register, handleSubmit, formState, trigger, control } = useFormMethods;
     const formErrors = formState.errors;
 
     const router = useRouter();
@@ -210,11 +214,11 @@ const CreateProductForm: React.FC<NavigationButtonsCancelProps> = (props) => {
                     };
                 }),
                 suppliers: (
-                    data.stock as unknown as ProductsSuppliersFieldFormValues['suppliers']
-                ).map((service) => {
+                    data.suppliers as unknown as ProductsSuppliersFieldFormValues['suppliers']
+                ).map((data) => {
                     return {
-                        supplierId: service.supplier.value,
-                        price: service.price.toString(),
+                        supplierId: data.supplier.value,
+                        price: data.price.toString(),
                     };
                 }),
             },
@@ -278,6 +282,7 @@ const CreateProductForm: React.FC<NavigationButtonsCancelProps> = (props) => {
                                     <Component
                                         formErrors={formErrors}
                                         register={register}
+                                        control={control}
                                     />
                                 </form>
                             </div>

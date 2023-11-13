@@ -12,7 +12,7 @@ export type LoginFormValues = {
 
 const LoginForm = ({ onSubmit }: { onSubmit: SubmitHandler<LoginFormValues> }) => {
     const useFormMethods = useForm<LoginFormValues>();
-    const { register, handleSubmit } = useFormMethods;
+    const { control, handleSubmit } = useFormMethods;
 
     return (
         <FormProvider {...useFormMethods}>
@@ -22,9 +22,11 @@ const LoginForm = ({ onSubmit }: { onSubmit: SubmitHandler<LoginFormValues> }) =
                         <Input
                             type="email"
                             id="email"
+                            name="email"
                             placeholder="brunodiaz@gmail.com"
                             hasError={!!useFormMethods.formState.errors.email}
-                            {...register('email', { required: true })}
+                            control={control}
+                            rules={{ required: true }}
                         />
                     </RHFFormField>
 
@@ -32,9 +34,11 @@ const LoginForm = ({ onSubmit }: { onSubmit: SubmitHandler<LoginFormValues> }) =
                         <Input
                             type="password"
                             id="password"
+                            name="password"
                             placeholder="********"
                             hasError={!!useFormMethods.formState.errors.password}
-                            {...register('password', { required: true })}
+                            control={control}
+                            rules={{ required: true }}
                         />
                     </RHFFormField>
                 </div>

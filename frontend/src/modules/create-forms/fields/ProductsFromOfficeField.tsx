@@ -28,7 +28,7 @@ type FormValues = {
 };
 
 const ProductsFromOfficeField: React.FC<Props> = ({ office }) => {
-    const { register, control, getValues, watch } = useFormContext<FormValues>();
+    const { control, getValues, watch } = useFormContext<FormValues>();
     const useProductsStocksByOfficeIdResult = useProductsStocksByOfficeId(office);
     const { data, isLoading } = useProductsStocksByOfficeIdResult;
 
@@ -69,7 +69,7 @@ const ProductsFromOfficeField: React.FC<Props> = ({ office }) => {
                                 className="flex-1"
                                 showRequired
                             >
-                                <RHFSelect
+                                <RHFSelect<FormValues, `products.${number}.product`>
                                     options={(data?.productsStocksByOfficeId || [])
                                         .filter((x) => {
                                             const isSelected =
@@ -89,7 +89,7 @@ const ProductsFromOfficeField: React.FC<Props> = ({ office }) => {
                                             data: stock,
                                         }))}
                                     control={control}
-                                    id={`products.${index}.product`}
+                                    name={`products.${index}.product`}
                                     rules={{
                                         required: true,
                                     }}
@@ -110,16 +110,18 @@ const ProductsFromOfficeField: React.FC<Props> = ({ office }) => {
                             >
                                 <Input
                                     id={`products-${index}-quantity`}
+                                    name={`products.${index}.quantity`}
                                     type="number"
                                     placeholder="1"
                                     min={1}
                                     max={currentData?.stock}
-                                    {...register(`products.${index}.quantity`, {
+                                    control={control}
+                                    rules={{
                                         required: true,
                                         min: 1,
                                         max: currentData?.stock,
                                         valueAsNumber: true,
-                                    })}
+                                    }}
                                 />
                             </RHFFormField>
                         </div>

@@ -14,7 +14,7 @@ export type ProductsServicesFieldFormValues = {
 };
 
 const ProductServicesField: React.FC = () => {
-    const { register } = useFormContext<ProductsServicesFieldFormValues>();
+    const { control } = useFormContext<ProductsServicesFieldFormValues>();
 
     const [servicesToCreate, setServicesToCreate] = useState(1);
 
@@ -32,18 +32,20 @@ const ProductServicesField: React.FC = () => {
                             key={index}
                         >
                             <RHFFormField
-                                fieldID={`service-${index}-name`}
+                                fieldID={`service.${index}.name`}
                                 label="Nombre"
                                 className="flex-1"
                             >
                                 <Input
-                                    id={`service-${index}-name`}
+                                    id={`services.${index}.name`}
+                                    name={`services.${index}.name`}
                                     type="name"
                                     placeholder="1"
                                     min={1}
-                                    {...register(`services.${index}.name`, {
+                                    control={control}
+                                    rules={{
                                         required: false,
-                                    })}
+                                    }}
                                 />
                             </RHFFormField>
 
@@ -52,14 +54,16 @@ const ProductServicesField: React.FC = () => {
                                 label="Precio"
                             >
                                 <Input
-                                    id={`service-${index}-price`}
+                                    id={`services.${index}.price`}
+                                    name={`services.${index}.price`}
                                     type="price"
                                     placeholder="1"
                                     min={1}
-                                    {...register(`services.${index}.price`, {
+                                    control={control}
+                                    rules={{
                                         required: false,
                                         min: 1,
-                                    })}
+                                    }}
                                 />
                             </RHFFormField>
                         </div>

@@ -40,6 +40,7 @@ const MAIN_LINKS: NavLink[] = [
         Icon: ClipBoardList,
     },
     { href: '/pedidos-internos', label: 'Pedidos internos', Icon: ClipBoardUser },
+    { href: '/contratos', label: 'Contratos', Icon: () => null },
 ];
 
 type NavigationLinkProps = PropsWithChildren<{

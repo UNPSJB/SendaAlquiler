@@ -51,7 +51,6 @@ const CreateLocalityForm: React.FC<Props> = ({
 
     const {
         handleSubmit,
-        register,
         formState: { errors },
         control: modalControl,
     } = useFormMethods;
@@ -106,10 +105,10 @@ const CreateLocalityForm: React.FC<Props> = ({
                                 <RHFFormField fieldID="name" label="Nombre" showRequired>
                                     <Input
                                         id="name"
+                                        name="name"
+                                        control={modalControl}
                                         hasError={!!errors.name}
-                                        {...register('name', {
-                                            required: true,
-                                        })}
+                                        rules={{ required: true }}
                                     />
                                 </RHFFormField>
 
@@ -120,10 +119,10 @@ const CreateLocalityForm: React.FC<Props> = ({
                                 >
                                     <Input
                                         id="postalCode"
+                                        name="postalCode"
                                         hasError={!!errors.postalCode}
-                                        {...register('postalCode', {
-                                            required: true,
-                                        })}
+                                        control={modalControl}
+                                        rules={{ required: true }}
                                     />
                                 </RHFFormField>
 
@@ -132,15 +131,12 @@ const CreateLocalityForm: React.FC<Props> = ({
                                     label="Provincia"
                                     showRequired
                                 >
-                                    <RHFSelect<CreateLocalityFormValues>
-                                        id="state"
+                                    <RHFSelect<CreateLocalityFormValues, 'state'>
                                         name="state"
                                         control={modalControl}
                                         options={STATES_OPTIONS}
                                         placeholder="Selecciona una provincia"
-                                        rules={{
-                                            required: true,
-                                        }}
+                                        rules={{ required: true }}
                                     />
                                 </RHFFormField>
                             </form>

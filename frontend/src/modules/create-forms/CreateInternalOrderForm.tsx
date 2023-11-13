@@ -17,7 +17,7 @@ import toast from 'react-hot-toast';
 
 import { useCreateInternalOrder } from '@/api/hooks';
 
-import OfficesField from './fields/OfficesField';
+import RHFOfficesField, { OfficesFieldValue } from './fields/OfficesField';
 import ProductsFromOfficeField from './fields/ProductsFromOfficeField';
 import NavigationButtons, { NavigationButtonsCancelProps } from './NavigationButtons';
 
@@ -25,9 +25,9 @@ import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWi
 
 import { RHFFormField } from '../forms/FormField';
 
-type FormValues = Partial<{
-    officeBranch: { value: string; label: string };
-    officeDestination: { value: string; label: string };
+type FormValues = {
+    officeBranch: OfficesFieldValue;
+    officeDestination: OfficesFieldValue;
     products: {
         product: {
             value: string;
@@ -35,7 +35,7 @@ type FormValues = Partial<{
         };
         quantity: number;
     }[];
-}>;
+};
 
 type FieldsComponentProps = {
     formErrors: FormState<FormValues>['errors'];
@@ -43,14 +43,15 @@ type FieldsComponentProps = {
 };
 
 const OfficesDataStep: React.FC<FieldsComponentProps> = () => {
-    const { watch } = useFormContext<FormValues>();
+    const { watch, control } = useFormContext<FormValues>();
     const officeBranch = watch('officeBranch');
     const officeDestination = watch('officeDestination');
 
     return (
         <>
             <RHFFormField fieldID="officeBranch" label="Sucursal de origen" showRequired>
-                <OfficesField
+                <RHFOfficesField<FormValues, 'officeBranch'>
+                    control={control}
                     placeholder="Selecciona una sucursal"
                     name="officeBranch"
                     officeToExclude={officeDestination?.value}
@@ -62,7 +63,8 @@ const OfficesDataStep: React.FC<FieldsComponentProps> = () => {
                 label="Sucursal de destino"
                 showRequired
             >
-                <OfficesField
+                <RHFOfficesField
+                    control={control}
                     placeholder="Selecciona una sucursal"
                     name="officeDestination"
                     officeToExclude={officeBranch?.value}
@@ -142,8 +144,7 @@ const CreateInternalOrderForm: React.FC<NavigationButtonsCancelProps> = (props) 
     const [activeStep, setActiveStep] = useState(0);
 
     useEffect(() => {
-        const subscription = watch((value, { name, type }) => {
-            console.log(value, name, type);
+        const subscription = watch((value, { name }) => {
             if (name === 'officeBranch') {
                 setValue('products', []);
             }

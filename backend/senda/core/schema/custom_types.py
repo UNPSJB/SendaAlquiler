@@ -23,6 +23,7 @@ from senda.core.models.rental_contracts import (
     RentalContractHistoryModel,
     RentalContractItemModel,
     RentalContractModel,
+    RentalContractStatusChoices,
 )
 from senda.core.models.suppliers import SupplierModel
 
@@ -31,6 +32,7 @@ InternalOrderHistoryStatusEnum = graphene.Enum.from_enum(
     InternalOrderHistoryStatusChoices
 )
 ProductTypeChoicesEnum = graphene.Enum.from_enum(ProductTypeChoices)
+RentalContractStatusChoicesEnum = graphene.Enum.from_enum(RentalContractStatusChoices)
 
 
 class Brand(DjangoObjectType):
@@ -115,10 +117,12 @@ class RentalContractItem(DjangoObjectType):
 
 
 class RentalContractHistory(DjangoObjectType):
+    status = RentalContractStatusChoicesEnum(required=True)
+
     class Meta:
         model = RentalContractHistoryModel
 
 
-class Service(DjangoObjectType):
+class ProductService(DjangoObjectType):
     class Meta:
         model = ProductServiceModel

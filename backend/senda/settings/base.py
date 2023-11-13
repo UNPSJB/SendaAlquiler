@@ -163,7 +163,6 @@ class Common(Configuration):
     EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=False, cast=bool)
     DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", cast=str)
 
-
     AUTHENTICATION_BACKENDS = [
         "graphql_jwt.backends.JSONWebTokenBackend",
         "django.contrib.auth.backends.ModelBackend",

@@ -6,31 +6,39 @@ import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import { useState } from 'react';
 import {
+    Control,
     FormProvider,
     FormState,
     SubmitHandler,
     UseFormRegister,
+    UseFormSetValue,
     useForm,
 } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { CreateClientMutationVariables } from '@/api/graphql';
+import { CreateClientInput } from '@/api/graphql';
 import { useCreateClient } from '@/api/hooks';
 
-import LocalityField from '@/modules/create-forms/fields/LocalityField';
+import LocalityField, {
+    LocalityFieldValue,
+} from '@/modules/create-forms/fields/LocalityField';
 import { RHFFormField } from '@/modules/forms/FormField';
 import Input from '@/modules/forms/Input';
 
 import NavigationButtons, { NavigationButtonsCancelProps } from './NavigationButtons';
 
-type FormValues = CreateClientMutationVariables['clientData'];
+type FormValues = Omit<CreateClientInput, 'localityId'> & {
+    locality: LocalityFieldValue;
+};
 
 type FieldsComponentProps = {
     formErrors: FormState<FormValues>['errors'];
     register: UseFormRegister<FormValues>;
+    control: Control<FormValues>;
+    setValue: UseFormSetValue<FormValues>;
 };
 
-const ContactDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register }) => (
+const ContactDataStep: React.FC<FieldsComponentProps> = ({ formErrors, control }) => (
     <>
         <div className="flex space-x-4">
             <RHFFormField
@@ -41,9 +49,11 @@ const ContactDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
             >
                 <Input
                     id="firstName"
+                    name="firstName"
                     placeholder="Bruno"
                     hasError={!!formErrors.firstName}
-                    {...register('firstName', { required: true })}
+                    control={control}
+                    rules={{ required: true }}
                 />
             </RHFFormField>
 
@@ -55,9 +65,11 @@ const ContactDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
             >
                 <Input
                     id="lastName"
+                    name="lastName"
                     placeholder="Díaz"
                     hasError={!!formErrors.lastName}
-                    {...register('lastName', { required: true })}
+                    control={control}
+                    rules={{ required: true }}
                 />
             </RHFFormField>
         </div>
@@ -66,9 +78,11 @@ const ContactDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
             <Input
                 type="email"
                 id="email"
+                name="email"
                 placeholder="brunodiaz@gmail.com"
                 hasError={!!formErrors.email}
-                {...register('email', { required: true })}
+                control={control}
+                rules={{ required: true }}
             />
         </RHFFormField>
 
@@ -76,13 +90,15 @@ const ContactDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
             <Input
                 type="number"
                 id="dni"
+                name="dni"
                 placeholder="DNI del cliente"
                 hasError={!!formErrors.dni}
                 maxLength={10}
-                {...register('dni', {
+                control={control}
+                rules={{
                     required: true,
                     maxLength: 10,
-                })}
+                }}
             />
         </RHFFormField>
 
@@ -90,13 +106,12 @@ const ContactDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
             <Input
                 type="number"
                 id="phoneCode"
+                name="phoneCode"
                 placeholder="549"
                 hasError={!!formErrors.phoneCode}
                 maxLength={4}
-                {...register('phoneCode', {
-                    required: true,
-                    maxLength: 4,
-                })}
+                control={control}
+                rules={{ required: true, maxLength: 4 }}
             />
         </RHFFormField>
 
@@ -104,22 +119,28 @@ const ContactDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register 
             <Input
                 type="number"
                 id="phoneNumber"
+                name="phoneNumber"
                 placeholder="2804123456"
                 hasError={!!formErrors.phoneNumber}
                 maxLength={10}
-                {...register('phoneNumber', {
+                control={control}
+                rules={{
                     required: true,
                     maxLength: 10,
-                })}
+                }}
             />
         </RHFFormField>
     </>
 );
 
-const LocationDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register }) => (
+const LocationDataStep: React.FC<FieldsComponentProps> = ({
+    formErrors,
+    control,
+    setValue,
+}) => (
     <>
         <RHFFormField fieldID="locality" label="Localidad" showRequired>
-            <LocalityField />
+            <LocalityField name="locality" control={control} setValue={setValue} />
         </RHFFormField>
 
         <div className="flex space-x-4">
@@ -131,8 +152,10 @@ const LocationDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register
             >
                 <Input
                     id="streetName"
+                    name="streetName"
                     hasError={!!formErrors.streetName}
-                    {...register('streetName', { required: true })}
+                    control={control}
+                    rules={{ required: true }}
                 />
             </RHFFormField>
 
@@ -144,8 +167,10 @@ const LocationDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register
             >
                 <Input
                     id="houseNumber"
+                    name="houseNumber"
                     hasError={!!formErrors.houseNumber}
-                    {...register('houseNumber', { required: true })}
+                    control={control}
+                    rules={{ required: true }}
                 />
             </RHFFormField>
         </div>
@@ -153,8 +178,10 @@ const LocationDataStep: React.FC<FieldsComponentProps> = ({ formErrors, register
         <RHFFormField fieldID="houseUnit" label="Apartamento, habitación, unidad, etc">
             <Input
                 id="houseUnit"
+                name="houseUnit"
                 hasError={!!formErrors.houseUnit}
-                {...register('houseUnit')}
+                control={control}
+                rules={{ required: false }}
             />
         </RHFFormField>
     </>
@@ -187,7 +214,8 @@ const STEPS: Step[] = [
 
 const CreateClientForm: React.FC<NavigationButtonsCancelProps> = (props) => {
     const useFormMethods = useForm<FormValues>();
-    const { register, handleSubmit, formState, trigger } = useFormMethods;
+    const { register, handleSubmit, formState, trigger, setValue, control } =
+        useFormMethods;
     const formErrors = formState.errors;
 
     const router = useRouter();
@@ -211,8 +239,16 @@ const CreateClientForm: React.FC<NavigationButtonsCancelProps> = (props) => {
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         mutate({
             clientData: {
-                ...data,
-                localityId: (data.localityId as any).value,
+                dni: data.dni,
+                email: data.email,
+                firstName: data.firstName,
+                houseNumber: data.houseNumber,
+                houseUnit: data.houseUnit,
+                lastName: data.lastName,
+                phoneCode: data.phoneCode,
+                phoneNumber: data.phoneNumber,
+                streetName: data.streetName,
+                localityId: data.locality.value,
             },
         });
     };
@@ -274,6 +310,8 @@ const CreateClientForm: React.FC<NavigationButtonsCancelProps> = (props) => {
                                     <Component
                                         formErrors={formErrors}
                                         register={register}
+                                        control={control}
+                                        setValue={setValue}
                                     />
                                 </form>
                             </div>

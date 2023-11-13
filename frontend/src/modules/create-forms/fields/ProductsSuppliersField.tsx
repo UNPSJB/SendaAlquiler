@@ -24,7 +24,7 @@ export type ProductsSuppliersFieldFormValues = {
 };
 
 const ProductsSuppliersField: React.FC = () => {
-    const { register, control, getValues, watch } =
+    const { control, getValues, watch } =
         useFormContext<ProductsSuppliersFieldFormValues>();
     const suppliersResult = useSuppliers();
     const { data, isLoading } = suppliersResult;
@@ -77,7 +77,7 @@ const ProductsSuppliersField: React.FC = () => {
                                         data: stock,
                                     }))}
                                 control={control}
-                                id={`suppliers.${index}.supplier`}
+                                name={`suppliers.${index}.supplier`}
                                 rules={{
                                     required: true,
                                 }}
@@ -93,11 +93,11 @@ const ProductsSuppliersField: React.FC = () => {
                         >
                             <Input
                                 id={`stock-${index}-price`}
+                                name={`suppliers.${index}.price`}
                                 type="price"
                                 placeholder="1"
-                                {...register(`suppliers.${index}.price`, {
-                                    required: true,
-                                })}
+                                control={control}
+                                rules={{ required: true }}
                             />
                         </RHFFormField>
                     </div>
