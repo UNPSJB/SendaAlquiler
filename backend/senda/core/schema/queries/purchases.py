@@ -2,7 +2,7 @@ from typing import Any
 
 import graphene  # pyright: ignore
 from senda.core.models.purchases import PurchaseItemModel, PurchaseModel
-from senda.core.schema.types import Purchase, PurchaseItem
+from senda.core.schema.custom_types import Purchase, PurchaseItem
 
 from senda.core.models.purchases import PurchaseItemModel, PurchaseModel
 from senda.core.schema.custom_types import Purchase, PurchaseItem
