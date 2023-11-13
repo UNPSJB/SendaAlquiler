@@ -11,15 +11,20 @@ import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 
 import { FormField } from '../../forms/FormField';
-import Input from '../../forms/Input';
+import { Input } from '../../forms/Input';
 import { CustomSelect } from '../../forms/Select';
 
 type ProductDetails = ProductsQuery['products'][0];
+
 export type ProductQuantityPair = {
     product: {
         value: string;
         label: string;
         data: ProductDetails;
+    } | null;
+    service: {
+        value: string;
+        label: string;
     } | null;
     quantity: number | null;
 };
@@ -31,6 +36,7 @@ type Props = {
 
 const DEFAULT_PRODUCT_QUANTITY_PAIR: ProductQuantityPair = {
     product: null,
+    service: null,
     quantity: null,
 };
 
@@ -58,6 +64,18 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
                 value: product.id,
                 label: product.name,
                 data: product,
+            };
+            onChange(newProductsAndQuantity);
+        },
+        [orderedProducts, onChange],
+    );
+
+    const updateSelectedService = useCallback(
+        (service: { label: string; value: string }, index: number) => {
+            const newProductsAndQuantity = [...orderedProducts];
+            newProductsAndQuantity[index].service = {
+                value: service.value,
+                label: service.label,
             };
             onChange(newProductsAndQuantity);
         },
@@ -101,6 +119,17 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
                             subtotal = item.product.data.price * item.quantity;
                         }
 
+                        const services = item.product?.data.services;
+                        const servicesOptions =
+                            services && services.length
+                                ? services.map((service) => {
+                                      return {
+                                          value: service.id,
+                                          label: service.name,
+                                      };
+                                  })
+                                : null;
+
                         return (
                             <div
                                 className="flex space-x-4 rounded border border-gray-200 bg-gray-100 p-4"
@@ -114,14 +143,12 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
                                 >
                                     <CustomSelect
                                         options={selectableProductOptions}
-                                        id={`productsAndQuantity.${index}.product`}
-                                        rules={{
-                                            required: true,
-                                        }}
+                                        name={`productsAndQuantity.${index}.product`}
                                         placeholder="Selecciona un producto"
-                                        onChange={({ data }: { data: ProductDetails }) =>
-                                            updateSelectedProduct(data, index)
-                                        }
+                                        onChange={({ data }: any) => {
+                                            if (!data) return;
+                                            updateSelectedProduct(data, index);
+                                        }}
                                     />
                                 </FormField>
 
@@ -135,12 +162,27 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
                                         id={`productsAndQuantity-${index}-quantity`}
                                         type="number"
                                         placeholder="1"
-                                        onChange={(e) =>
+                                        onChange={(value) => {
                                             handleQuantityChange(
-                                                parseInt(e.target.value, 10),
+                                                parseInt(value, 10),
                                                 index,
-                                            )
-                                        }
+                                            );
+                                        }}
+                                    />
+                                </FormField>
+
+                                <FormField
+                                    fieldID={`productsAndQuantity-${index}-service`}
+                                    label="Servicio"
+                                >
+                                    <CustomSelect<{ label: string; value: string }, false>
+                                        options={servicesOptions || []}
+                                        name={`productsAndQuantity.${index}.service`}
+                                        placeholder="Selecciona un servicio"
+                                        onChange={(next) => {
+                                            if (!next) return;
+                                            updateSelectedService(next, index);
+                                        }}
                                     />
                                 </FormField>
 
@@ -154,7 +196,7 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
                                         name={`productsAndQuantity-${index}-subtotal`}
                                         type="price"
                                         placeholder="-"
-                                        value={subtotal ?? '-'}
+                                        value={subtotal?.toString() ?? '-'}
                                         readOnly
                                     />
                                 </Label>
@@ -184,7 +226,7 @@ type RHFProps<TFieldValues extends FieldValues, TName extends Path<TFieldValues>
     ? object
     : never);
 
-const RHFProductsAndQuantityField = <
+const RHFProductOrderField = <
     TFieldValues extends FieldValues,
     TName extends Path<TFieldValues>,
 >(
@@ -206,4 +248,4 @@ const RHFProductsAndQuantityField = <
     );
 };
 
-export default RHFProductsAndQuantityField;
+export default RHFProductOrderField;

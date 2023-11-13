@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import { Props as ReactSelectProps } from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 
@@ -28,7 +28,7 @@ const LocalityOption: React.FC<LocalityOptionProps> = ({ locality }) => (
     </div>
 );
 
-type LocalitiesSelectOption = {
+type LocalityFieldSelectOption = {
     label: React.ReactNode;
     value: Locality['id'];
     data: LocalityOptionProps['locality'];
@@ -39,7 +39,7 @@ const removeAccents = (str: string) => {
 };
 
 const customFilter: ReactSelectProps<
-    | LocalitiesSelectOption
+    | LocalityFieldSelectOption
     | {
           __isNew__: boolean;
           label: string;
@@ -75,12 +75,33 @@ const customFilter: ReactSelectProps<
     }
 };
 
-type Props = {
-    name: string;
+export type LocalityFieldValue = {
+    value: Locality['id'];
+    label: Locality['name'];
+    data: LocalityOptionProps['locality'];
 };
 
-const LocalityField: React.FC<Props> = ({ name }) => {
-    const { control: contextControl, setValue: setContextValue } = useFormContext();
+// Define a custom SetValue type that allows setting a LocalityFieldValue
+type CustomSetValue<
+    TFieldValues extends FieldValues,
+    TName extends Path<TFieldValues>,
+> = (name: TName, value: LocalityFieldValue) => void;
+
+type RHFProps<TFieldValues extends FieldValues, TName extends Path<TFieldValues>> = {
+    name: TName;
+    control: Control<TFieldValues>;
+    setValue: CustomSetValue<TFieldValues, TName>;
+} & (TFieldValues[Extract<keyof TFieldValues, TName>] extends LocalityFieldValue
+    ? object
+    : never);
+
+const LocalityField = <
+    TFieldValues extends FieldValues,
+    TName extends Path<TFieldValues>,
+>(
+    props: RHFProps<TFieldValues, TName>,
+) => {
+    const { name, control, setValue } = props;
     const { data, isLoading } = useLocalities();
 
     const [localityToCreate, setLocalityToCreate] = useState<string | null>(null);
@@ -98,61 +119,72 @@ const LocalityField: React.FC<Props> = ({ name }) => {
             NonNullable<CreateLocalityMutation['createLocality']>['locality']
         >,
     ) => {
-        setContextValue('localityId', {
+        const nextValue: LocalityFieldValue = {
             label: locality.name,
             value: locality.id,
-        });
+            data: locality,
+        };
+
+        setValue(name, nextValue);
         setLocalityToCreate(null);
+    };
+
+    const getOptions = (): LocalityFieldValue[] => {
+        if (!data) {
+            return [];
+        }
+
+        return data.localities.map((locality) => ({
+            label: locality.name,
+            value: locality.id,
+            data: locality,
+        }));
     };
 
     return (
         <>
             <Controller
                 name={name}
-                control={contextControl}
-                render={({ field: { onChange, value } }) => (
-                    <CreatableSelect
-                        classNamePrefix="react-select"
-                        isDisabled={!!localityToCreate}
-                        isLoading={!!localityToCreate || isLoading}
-                        options={(data ? data.localities : []).map((locality) => {
-                            return {
-                                label: <LocalityOption locality={locality} />,
-                                value: locality.id,
-                                data: locality,
-                            } as LocalitiesSelectOption;
-                        })}
-                        filterOption={customFilter}
-                        placeholder="Selecciona una localidad"
-                        formatCreateLabel={(input) => {
-                            return (
-                                <span className="font-headings">
-                                    Crea la localidad <b>&quot;{input}&quot;</b>
-                                </span>
-                            );
-                        }}
-                        formatOptionLabel={(val) => {
-                            if ('data' in val) {
-                                return <LocalityOption locality={val.data} />;
-                            }
+                control={control}
+                render={({ field: { onChange, value, ref, onBlur, disabled } }) => {
+                    return (
+                        <CreatableSelect<
+                            | LocalityFieldValue
+                            | {
+                                  __isNew__: boolean;
+                                  label: string;
+                                  value: string;
+                              }
+                        >
+                            ref={ref}
+                            value={value}
+                            onBlur={onBlur}
+                            onChange={onChange}
+                            name={name}
+                            classNamePrefix="react-select"
+                            isDisabled={!!localityToCreate || disabled}
+                            isLoading={!!localityToCreate || isLoading}
+                            options={getOptions()}
+                            filterOption={customFilter}
+                            placeholder="Selecciona una localidad"
+                            formatCreateLabel={(input) => {
+                                return (
+                                    <span className="font-headings">
+                                        Crea la localidad <b>&quot;{input}&quot;</b>
+                                    </span>
+                                );
+                            }}
+                            formatOptionLabel={(val) => {
+                                if ('data' in val) {
+                                    return <LocalityOption locality={val.data} />;
+                                }
 
-                            return <span>{val.label}</span>;
-                        }}
-                        onCreateOption={onCreateOption}
-                        value={value}
-                        onChange={(val) => {
-                            if (val && 'data' in val) {
-                                onChange({
-                                    value: val.value,
-                                    label: val.data.name,
-                                    data: val.data,
-                                });
-                            } else {
-                                onChange(null);
-                            }
-                        }}
-                    />
-                )}
+                                return <span>{val.label}</span>;
+                            }}
+                            onCreateOption={onCreateOption}
+                        />
+                    );
+                }}
             />
 
             <ModalWithBox

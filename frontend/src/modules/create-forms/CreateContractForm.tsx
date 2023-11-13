@@ -1,25 +1,32 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-import { FormProvider, useForm } from 'react-hook-form';
+import {
+    FormProvider,
+    SubmitErrorHandler,
+    SubmitHandler,
+    useForm,
+} from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 import { ClientsQuery } from '@/api/graphql';
-import { useClients } from '@/api/hooks';
+import { useClients, useCreateRentalContract } from '@/api/hooks';
 
-import LocalityField from './fields/LocalityField';
-import ProductsAndQuantityField, {
-    ProductQuantityPair,
-} from './fields/ProductOrderField';
+import LocalityField, { LocalityFieldValue } from './fields/LocalityField';
+import RHFOfficesField, { OfficesFieldValue } from './fields/OfficesField';
+import RHFProductOrderField, { ProductQuantityPair } from './fields/ProductOrderField';
 
 import Button, { ButtonVariant } from '@/components/Button';
+import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
 
 import { RHFCustomFlatpickr } from '../forms/Flatpickr';
 import { RHFFormField } from '../forms/FormField';
-import Input from '../forms/Input';
+import RHFInput, { Input } from '../forms/Input';
 import Label from '../forms/Label';
 import RHFSelect from '../forms/Select';
 
@@ -33,7 +40,28 @@ type FormValues = {
         value: string;
         data: ClientsQuery['clients'][0];
     };
-    test: string;
+    billing: {
+        firstName: string;
+        lastName: string;
+        phone: string;
+        email: string;
+        dni: string;
+        state: string;
+        locality: string;
+        postalCode: string;
+        streetName: string;
+        houseNumber: string;
+        houseUnit: string | null;
+        note: string;
+    };
+    details: {
+        locality?: LocalityFieldValue;
+        streetName: string;
+        houseNumber: string;
+        houseUnit: string | null;
+        note?: string;
+        office?: OfficesFieldValue;
+    };
     productsAndQuantity: ProductQuantityPair[];
     contractStartDatetime: Date[];
     contractEndDatetime: Date[];
@@ -42,7 +70,23 @@ type FormValues = {
 const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) => {
     const clientsResult = useClients();
     const formMethods = useForm<FormValues>();
-    const { watch, control } = formMethods;
+    const { watch, control, setValue } = formMethods;
+    const router = useRouter();
+
+    const { mutate, isLoading: isMutating } = useCreateRentalContract({
+        onSuccess: (data) => {
+            const error = data.createRentalContract?.error;
+            if (error || !data.createRentalContract) {
+                toast.error(error || 'No se pudo crear el contrato');
+            }
+
+            const contract = data.createRentalContract?.rentalContract;
+            if (contract) {
+                toast.success('Contrato creado exitosamente');
+                router.push('/contratos');
+            }
+        },
+    });
 
     const client = watch('client')?.data;
     const productsAndQuantity = watch('productsAndQuantity');
@@ -54,6 +98,72 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
         }
         return acc;
     }, 0);
+
+    const copyClientDetailsOnDetails = () => {
+        if (client) {
+            formMethods.setValue('details', {
+                streetName: client.streetName,
+                houseNumber: client.houseNumber,
+                houseUnit: client.houseUnit,
+            });
+
+            formMethods.setValue('details.locality', {
+                value: client.locality.id,
+                label: client.locality.name,
+                data: client.locality,
+            });
+        }
+    };
+
+    const formIsValid = formMethods.formState.isValid;
+
+    const onSubmit: SubmitHandler<FormValues> = (data) => {
+        const clientId = data.client?.data.id;
+        const contractStartDatetime = data.contractStartDatetime[0];
+        const contractEndDatetime = data.contractEndDatetime[0];
+        const houseNumber = data.details.houseNumber;
+        const houseUnit = data.details.houseUnit;
+        const localityId = data.details.locality?.data.id;
+        const officeId = data.details.office?.data.id;
+        const products = data.productsAndQuantity
+            ? data.productsAndQuantity.map((productAndQuantity) => ({
+                  id: productAndQuantity.product?.data.id as string,
+                  quantity: productAndQuantity.quantity as number,
+                  service: productAndQuantity.service?.value.toString() || null,
+              }))
+            : null;
+        const streetName = data.details.streetName;
+
+        if (
+            !clientId ||
+            !contractStartDatetime ||
+            !products ||
+            products.length === 0 ||
+            !localityId ||
+            !officeId ||
+            !streetName
+        ) {
+            return;
+        }
+
+        mutate({
+            data: {
+                clientId: clientId,
+                contractStartDatetime: contractStartDatetime,
+                contractEndDatetime: contractEndDatetime,
+                houseNumber: houseNumber,
+                houseUnit: houseUnit,
+                streetName: streetName,
+                localityId: localityId,
+                officeId: officeId,
+                products: products,
+            },
+        });
+    };
+
+    const onError: SubmitErrorHandler<FormValues> = (errors) => {
+        console.log('errors', errors);
+    };
 
     return (
         <>
@@ -83,9 +193,15 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                 Cancelar
                             </Button>
 
-                            <Button variant={ButtonVariant.BLACK} href={cancelHref}>
+                            <ButtonWithSpinner
+                                onClick={formMethods.handleSubmit(onSubmit, onError)}
+                                variant={ButtonVariant.BLACK}
+                                href={cancelHref}
+                                disabled={formIsValid}
+                                isLoading={isMutating}
+                            >
                                 Guardar
-                            </Button>
+                            </ButtonWithSpinner>
                         </div>
                     </div>
                 </div>
@@ -113,15 +229,17 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                     <FormProvider {...formMethods}>
                         <main className="container pb-16 pt-36">
                             <section className="flex pb-8">
-                                <h2 className="w-3/12 text-xl font-bold">
-                                    Detalles de facturación
-                                </h2>
+                                <div className="w-3/12">
+                                    <h2 className="text-xl font-bold">
+                                        Detalles de facturación
+                                    </h2>
+                                </div>
 
                                 <div className="w-9/12 space-y-6">
                                     <RHFFormField label="Cliente" fieldID="client">
                                         <RHFSelect
                                             placeholder="Selecciona un cliente"
-                                            id="client"
+                                            name="client"
                                             control={control}
                                             rules={{ required: true }}
                                             options={clients.map((client) => ({
@@ -136,12 +254,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         <div className="w-1/2">
                                             <Label
                                                 label="Nombre"
-                                                htmlFor="billingFirstName"
+                                                htmlFor="client.firstName"
                                                 readOnly
                                             >
                                                 <Input
-                                                    id="billingFirstName"
-                                                    name="billingFirstName"
+                                                    id="client.firstName"
+                                                    name="client.firstName"
                                                     type="text"
                                                     placeholder="Nombre"
                                                     value={client?.firstName || ''}
@@ -153,12 +271,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         <div className="w-1/2">
                                             <Label
                                                 label="Apellido"
-                                                htmlFor="billingLastName"
+                                                htmlFor="client.lastName"
                                                 readOnly
                                             >
                                                 <Input
-                                                    id="billingLastName"
-                                                    name="billingLastName"
+                                                    id="client.lastName"
+                                                    name="client.lastName"
                                                     type="text"
                                                     placeholder="Apellido"
                                                     value={client?.lastName || ''}
@@ -172,12 +290,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         <div className="w-1/2">
                                             <Label
                                                 label="Teléfono"
-                                                htmlFor="billingPhone"
+                                                htmlFor="client.phone"
                                                 readOnly
                                             >
                                                 <Input
-                                                    id="billingPhone"
-                                                    name="billingPhone"
+                                                    id="client.phone"
+                                                    name="client.phone"
                                                     type="text"
                                                     placeholder="Teléfono"
                                                     value={
@@ -193,12 +311,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         <div className="w-1/2">
                                             <Label
                                                 label="Correo"
-                                                htmlFor="billingEmail"
+                                                htmlFor="client.email"
                                                 readOnly
                                             >
                                                 <Input
-                                                    id="billingEmail"
-                                                    name="billingEmail"
+                                                    id="client.email"
+                                                    name="client.email"
                                                     type="text"
                                                     placeholder="Correo"
                                                     value={client?.email || ''}
@@ -208,10 +326,10 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         </div>
                                     </div>
 
-                                    <Label label="DNI" htmlFor="billingDni" readOnly>
+                                    <Label label="DNI" htmlFor="client.dni" readOnly>
                                         <Input
-                                            id="billingDni"
-                                            name="billingDni"
+                                            id="client.dni"
+                                            name="client.dni"
                                             type="text"
                                             placeholder="DNI"
                                             value={client?.dni || ''}
@@ -221,12 +339,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
 
                                     <Label
                                         label="Provincia"
-                                        htmlFor="billingState"
+                                        htmlFor="client.state"
                                         readOnly
                                     >
                                         <Input
-                                            id="billingState"
-                                            name="billingState"
+                                            id="client.state"
+                                            name="client.state"
                                             type="text"
                                             placeholder="Provincia"
                                             value={client?.locality.state || ''}
@@ -238,12 +356,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         <div className="w-1/2">
                                             <Label
                                                 label="Ciudad"
-                                                htmlFor="billingLocality"
+                                                htmlFor="client.locality"
                                                 readOnly
                                             >
                                                 <Input
-                                                    id="billingLocality"
-                                                    name="billingLocality"
+                                                    id="client.locality"
+                                                    name="client.locality"
                                                     type="text"
                                                     placeholder="Ciudad"
                                                     value={client?.locality.name || ''}
@@ -255,12 +373,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         <div className="w-1/2">
                                             <Label
                                                 label="Código Postal"
-                                                htmlFor="billingPostalCode"
+                                                htmlFor="client.postalCode"
                                                 readOnly
                                             >
                                                 <Input
-                                                    id="billingPostalCode"
-                                                    name="billingPostalCode"
+                                                    id="client.postalCode"
+                                                    name="client.postalCode"
                                                     type="text"
                                                     placeholder="Código Postal"
                                                     value={
@@ -276,12 +394,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         <div className="w-1/2">
                                             <Label
                                                 label="Calle"
-                                                htmlFor="billingStreetName"
+                                                htmlFor="client.streetName"
                                                 readOnly
                                             >
                                                 <Input
-                                                    id="billingStreetName"
-                                                    name="billingStreetName"
+                                                    id="client.streetName"
+                                                    name="client.streetName"
                                                     type="text"
                                                     placeholder="Calle"
                                                     value={client?.streetName || ''}
@@ -293,12 +411,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         <div className="w-1/2">
                                             <Label
                                                 label="N° de casa"
-                                                htmlFor="billingHouseNumber"
+                                                htmlFor="client.houseNumber"
                                                 readOnly
                                             >
                                                 <Input
-                                                    id="billingHouseNumber"
-                                                    name="billingHouseNumber"
+                                                    id="client.houseNumber"
+                                                    name="client.houseNumber"
                                                     type="text"
                                                     placeholder="N° de casa"
                                                     value={client?.houseNumber || ''}
@@ -310,12 +428,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
 
                                     <Label
                                         label="Apartamento, habitación, unidad, etc"
-                                        htmlFor="billingHouseUnit"
+                                        htmlFor="client.houseUnit"
                                         readOnly
                                     >
                                         <Input
-                                            id="billingHouseUnit"
-                                            name="billingHouseUnit"
+                                            id="client.houseUnit"
+                                            name="client.houseUnit"
                                             type="text"
                                             placeholder="Apartamento, habitación, unidad, etc"
                                             value={client?.houseUnit || ''}
@@ -325,12 +443,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
 
                                     <Label
                                         label="Nota/Aclaración"
-                                        htmlFor="billingNote"
+                                        htmlFor="client.note"
                                         readOnly
                                     >
                                         <Input
-                                            id="billingNote"
-                                            name="billingNote"
+                                            id="client.note"
+                                            name="client.note"
                                             type="text"
                                             placeholder="Nota/aclaración"
                                             value={undefined}
@@ -341,14 +459,36 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                             </section>
 
                             <section className="flex border-t border-gray-200 py-8">
-                                <h2 className="w-3/12 text-xl font-bold">
-                                    Detalles de contrato
-                                </h2>
+                                <div className="w-3/12">
+                                    <h2 className="mb-4 text-xl font-bold">
+                                        Detalles de contrato
+                                    </h2>
+
+                                    <Button
+                                        variant={ButtonVariant.OUTLINE_WHITE}
+                                        onClick={copyClientDetailsOnDetails}
+                                        disabled={!client}
+                                    >
+                                        Copiar detalles de cliente
+                                    </Button>
+                                </div>
 
                                 <div className="w-9/12 space-y-6">
-                                    <Label
+                                    <RHFFormField
+                                        label="Sucursal"
+                                        fieldID="details.office"
+                                    >
+                                        <RHFOfficesField<FormValues, 'details.office'>
+                                            name="details.office"
+                                            control={control}
+                                            placeholder="Selecciona una oficina"
+                                            officeToExclude={undefined}
+                                        />
+                                    </RHFFormField>
+
+                                    <RHFFormField
                                         label="Fecha y hora de inicio"
-                                        htmlFor="contractStartDatetime"
+                                        fieldID="contractStartDatetime"
                                     >
                                         <RHFCustomFlatpickr
                                             data-enable-time
@@ -357,11 +497,11 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             rules={{ required: true }}
                                             placeholder="Fecha y hora de inicio"
                                         />
-                                    </Label>
+                                    </RHFFormField>
 
-                                    <Label
+                                    <RHFFormField
                                         label="Fecha y hora de finalización"
-                                        htmlFor="contractEndDatetime"
+                                        fieldID="contractEndDatetime"
                                     >
                                         <RHFCustomFlatpickr
                                             data-enable-time
@@ -370,70 +510,88 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             rules={{ required: true }}
                                             placeholder="Fecha y hora de finalización"
                                         />
-                                    </Label>
+                                    </RHFFormField>
 
                                     <RHFFormField
                                         label="Localidad"
-                                        fieldID="contractLocality"
+                                        fieldID="details.locality"
                                     >
-                                        <LocalityField name="contractLocality" />
+                                        <LocalityField
+                                            name="details.locality"
+                                            control={control}
+                                            setValue={setValue}
+                                        />
                                     </RHFFormField>
 
                                     <div className="flex space-x-8">
                                         <div className="w-1/2">
-                                            <Label
+                                            <RHFFormField
                                                 label="Calle"
-                                                htmlFor="contractStreetName"
+                                                fieldID="details.streetName"
                                             >
-                                                <Input
-                                                    id="contractStreetName"
-                                                    name="contractStreetName"
+                                                <RHFInput
+                                                    id="details.streetName"
+                                                    name="details.streetName"
                                                     type="text"
                                                     placeholder="Calle"
+                                                    control={control}
+                                                    rules={{
+                                                        required: true,
+                                                    }}
                                                 />
-                                            </Label>
+                                            </RHFFormField>
                                         </div>
 
                                         <div className="w-1/2">
-                                            <Label
+                                            <RHFFormField
                                                 label="N° de casa"
-                                                htmlFor="contractHouseNumber"
+                                                fieldID="details.houseNumber"
                                             >
-                                                <Input
-                                                    id="contractHouseNumber"
-                                                    name="contractHouseNumber"
+                                                <RHFInput
+                                                    id="details.houseNumber"
+                                                    name="details.houseNumber"
                                                     type="text"
                                                     placeholder="N° de casa"
+                                                    control={control}
+                                                    rules={{
+                                                        required: true,
+                                                    }}
                                                 />
-                                            </Label>
+                                            </RHFFormField>
                                         </div>
                                     </div>
 
-                                    <Label
+                                    <RHFFormField
                                         label="Apartamento, habitación, unidad, etc"
-                                        htmlFor="contractHouseUnit"
-                                        readOnly
+                                        fieldID="details.houseUnit"
                                     >
-                                        <Input
-                                            id="contractHouseUnit"
-                                            name="contractHouseUnit"
+                                        <RHFInput
+                                            id="details.houseUnit"
+                                            name="details.houseUnit"
                                             type="text"
                                             placeholder="Apartamento, habitación, unidad, etc"
+                                            control={control}
+                                            rules={{
+                                                required: true,
+                                            }}
                                         />
-                                    </Label>
+                                    </RHFFormField>
 
-                                    <Label
+                                    <RHFFormField
                                         label="Nota/Aclaración"
-                                        htmlFor="contractNote"
-                                        readOnly
+                                        fieldID="details.note"
                                     >
-                                        <Input
-                                            id="contractNote"
-                                            name="contractNote"
+                                        <RHFInput
+                                            id="details.note"
+                                            name="details.note"
                                             type="text"
                                             placeholder="Nota/aclaración"
+                                            control={control}
+                                            rules={{
+                                                required: true,
+                                            }}
                                         />
-                                    </Label>
+                                    </RHFFormField>
                                 </div>
                             </section>
 
@@ -443,7 +601,10 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                 </h2>
 
                                 <div className="w-9/12 space-y-6">
-                                    <ProductsAndQuantityField
+                                    <RHFProductOrderField<
+                                        FormValues,
+                                        'productsAndQuantity'
+                                    >
                                         control={control}
                                         name="productsAndQuantity"
                                     />

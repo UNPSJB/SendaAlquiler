@@ -18,7 +18,7 @@ export const CustomFlatpickr: React.FC<FlatpickrProps> = (props) => {
         <Flatpickr
             {...props}
             className="block w-full rounded border border-gray-200 p-4"
-            onChange={(date) => console.log(date)}
+            onChange={props.onChange}
             options={{
                 dateFormat: enableTime ? 'd/m/Y H:i' : 'd/m/Y',
                 locale: Spanish,
