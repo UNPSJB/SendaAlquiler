@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import Skeleton from 'react-loading-skeleton';
 
-import { Client, Query } from '@/api/graphql';
+import { Purchase, PurchasesQuery } from '@/api/graphql';
 import { usePurchases } from '@/api/hooks';
 
 import DashboardLayout, {
@@ -19,13 +19,12 @@ import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import { TD, TR } from '@/components/Table';
+import { use } from 'react';
 
 const columns = [
     { key: 'name', label: 'Nombre' },
-    { key: 'email', label: 'Correo' },
-    { key: 'phone', label: 'Celular' },
-    { key: 'address', label: 'Domicilio' },
-    { key: 'locality', label: 'Localidad' },
+    { key: 'date', label: 'Fecha' },
+    { key: 'totalPrice', label: 'Total' },
     { key: 'dropdown', label: '' },
 ];
 
@@ -39,25 +38,21 @@ const SkeletonRowRenderer = (key: number) => (
     </TR>
 );
 
-const ClientRowRenderer = (handleRemove: (id: Client['id']) => void) => {
-    const renderer = (client: ArrayElement<ClientsQuery['clients']>) => (
-        <TR key={client.id}>
+const PurchaseRowRenderer = (handleRemove: (id: Purchase['id']) => void) => {
+    const renderer = (purchase: ArrayElement<PurchasesQuery['purchases']>) => (
+        <TR key={purchase.id}>
             <TD>
-                <Link className="text-violet-600" href={`/clientes/${client.id}`}>
-                    {client.firstName} {client.lastName}
+                <Link className="text-violet-600" href={`/ventas/${purchase.id}`}>
+                    {purchase.client.firstName} {purchase.client.lastName}
                 </Link>
             </TD>
-            <TD>{client.email}</TD>
             <TD>
-                {client.phoneCode}
-                {client.phoneNumber}
+                {new Date(purchase.date).toLocaleDateString('es-ES')}</TD>
+            <TD>
+                ${purchase.total}
             </TD>
             <TD>
-                {client.streetName} {client.houseNumber}
-            </TD>
-            <TD>{client.locality.name}</TD>
-            <TD>
-                <DataTableDropdown onRemove={() => handleRemove(client.id)} />
+                <DataTableDropdown onRemove={() => handleRemove(purchase.id)} />
             </TD>
         </TR>
     );
@@ -66,7 +61,7 @@ const ClientRowRenderer = (handleRemove: (id: Client['id']) => void) => {
 };
 
 const Page = () => {
-    const useClientsResult = useClients();
+    const usePurchasesResult = usePurchases();
 
     const handlePrevious = () => {
         console.log('previous');
@@ -76,7 +71,7 @@ const Page = () => {
         console.log('next');
     };
 
-    const handleRemove = (id: Client['id']) => {
+    const handleRemove = (id: Purchase['id']) => {
         console.log(`remove ${id}`);
     };
 
@@ -84,14 +79,14 @@ const Page = () => {
         <DashboardLayout
             header={
                 <div className="flex items-center justify-between">
-                    <DashboardLayoutBigTitle>Clientes</DashboardLayoutBigTitle>
+                    <DashboardLayoutBigTitle>Ventas</DashboardLayoutBigTitle>
 
-                    <Button href="/clientes/add">+ Añadir cliente</Button>
+                    <Button href="/ventas/add">+ Realizar venta</Button>
                 </div>
             }
         >
             <FetchedDataRenderer
-                {...useClientsResult}
+                {...usePurchasesResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
                         <DataTable
@@ -105,19 +100,19 @@ const Page = () => {
                     <div className="flex w-full flex-1 items-center justify-center">
                         <FetchStatusMessageWithDescription
                             title="Ha ocurrido un error"
-                            line1="Hubo un error al cargar los clientes."
+                            line1="Hubo un error al cargar las ventas."
                             line2="Prueba de nuevo más tarde."
                         />
                     </div>
                 }
             >
-                {({ clients }) => {
-                    if (clients.length === 0) {
+                {({ purchases }) => {
+                    if (purchases.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
-                                message="Aún no hay clientes"
-                                btnHref="/clientes/add"
-                                btnText="Agrega tu primer cliente"
+                                message="Aún no hay ventas"
+                                btnHref="/ventas/add"
+                                btnText="Agrega tu primer venta"
                             />
                         );
                     }
@@ -126,8 +121,8 @@ const Page = () => {
                         <div className="pr-container flex-1 py-5 pl-10">
                             <DataTable
                                 columns={columns}
-                                data={clients}
-                                rowRenderer={ClientRowRenderer(handleRemove)}
+                                data={purchases}
+                                rowRenderer={PurchaseRowRenderer(handleRemove)}
                             />
 
                             <DataTablePagination

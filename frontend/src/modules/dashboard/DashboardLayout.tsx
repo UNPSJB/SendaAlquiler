@@ -16,6 +16,7 @@ import House from './Icons/House';
 import LocationDot from './Icons/LocationDot';
 import User from './Icons/User';
 import UserTie from './Icons/UserTie'
+import MoneyCheckDollar from './Icons/MoneyCheckDollar';
 
 export type DashboardIconProps = {
     isActive: boolean;
@@ -34,6 +35,7 @@ const MAIN_LINKS: NavLink[] = [
     { href: '/empleados', label: 'Empleados', Icon: UserTie },
     { href: '/proveedores', label: 'Proveedores', Icon: ClipBoard },
     { href: '/localidades', label: 'Localidades', Icon: LocationDot },
+    { href: '/ventas', label: 'Ventas', Icon: MoneyCheckDollar},
     {
         href: '/pedidos-a-proveedores',
         label: 'Pedidos a proveedores',

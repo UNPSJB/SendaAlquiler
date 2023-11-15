@@ -19,3 +19,10 @@ class Query(graphene.ObjectType):
 
     def resolve_purchase_items(self, info: Any):
         return PurchaseItemModel.objects.all()
+
+    purchase_by_id = graphene.Field(Purchase, id=graphene.ID(required=True))
+
+    def resolve_purchase_by_id(self, info: Any, id: str):
+        return PurchaseModel.objects.filter(id=id).first()
+    
+    

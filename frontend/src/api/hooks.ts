@@ -34,6 +34,7 @@ import {
     LoginMutation,
     LoginMutationVariables,
     OfficesDocument,
+    PurchasesDocument,
     ProductByIdDocument,
     ProductsDocument,
     ProductsQuery,
@@ -43,6 +44,7 @@ import {
     CreateEmployeeMutation,
     CreateEmployeeMutationVariables,
     CreateEmployeeDocument,
+    PurchaseByIdDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -56,6 +58,9 @@ const queryKeys = {
     brands: ['brands'],
 
     localities: ['localities'],
+
+    purcheses: ['purchases'],
+    purchaseById: (id: string | undefined) => [...queryKeys.purcheses, id],
 
     suppliers: ['suppliers'],
     supplierById: (id: string | undefined) => [...queryKeys.suppliers, id],
@@ -434,4 +439,24 @@ export const useBrands = () => {
     return useQuery(queryKeys.brands, () => {
         return clientGraphqlQuery(BrandsDocument, {});
     });
+};
+
+export const usePurchases = () => {
+    return useQuery(queryKeys.purcheses,() => {
+       return clientGraphqlQuery(PurchasesDocument, {});
+    });
+};
+
+export const usePurchaseById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.purchaseById(id),
+        () => {
+            return clientGraphqlQuery(PurchaseByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
 };

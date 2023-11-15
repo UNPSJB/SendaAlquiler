@@ -27,11 +27,49 @@ query employees {
 }
 
 mutation createEmployee($employeeData: CreateEmployeeInput!) {
-  createEmployee(employeeData: $employeeData) {
-    employee {
-      id
+    createEmployee(employeeData: $employeeData) {
+        employee {
+            id
+        }
+        error
     }
-    error
+}
+
+query purchases {
+  purchases {
+    id
+    date
+    total
+    client {
+      firstName
+      lastName
+    }
+  }
+}
+
+query purchaseById($id: ID!) {
+  purchaseById(id: $id) {
+    id
+    date
+    total
+    purchaseItems {
+      product {
+        name
+        brand {
+          name
+        }
+        price
+      }
+      quantity
+      total
+    }
+    client {
+      firstName
+      lastName
+      email
+      phoneCode
+      phoneNumber
+    }
   }
 }
 

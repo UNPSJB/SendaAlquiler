@@ -110,19 +110,11 @@ class BaseChangeOrderInternalStatus(graphene.Mutation):
         InternalOrderHistoryModel.objects.create(
             internal_order=order, status=new_status
         )
-    def mutate(self, info: Any, internal_order_id: str):
-        try:
-            order = self.get_internal_order(internal_order_id)
-            self.check_internal_order_status_is_one_of_and_update_status(
-                order,
-                [InternalOrderHistoryStatusChoices.PENDING],
-                InternalOrderHistoryStatusChoices.IN_PROGRESS,
-            )
-
-            return BaseChangeOrderInternalStatus(internal_order=order)
-        except Exception as e:
-            return BaseChangeOrderInternalStatus(error=str(e))
-            
+    @classmethod
+    def mutate(
+        cls, self, info: Any, internal_order_id: str
+    ):
+        raise NotImplementedError()
 
 class InProgressInternalOrder(BaseChangeOrderInternalStatus):
     @classmethod
