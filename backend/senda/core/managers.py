@@ -242,7 +242,7 @@ class PurchaseModelManager(models.Manager["PurchaseModel"]):
         for product in products:
             purchase.purchase_items.create(
                 quantity=product["quantity"],
-                product_id=product["id"],
+                product_id=product["product"],
                 purchase_Products=purchase,
             )
 
