@@ -35,6 +35,18 @@ export type Brand = {
     products: Array<Product>;
 };
 
+export type CancelContract = {
+    __typename?: 'CancelContract';
+    error: Maybe<Scalars['String']['output']>;
+    rentalContract: Maybe<RentalContract>;
+};
+
+export type CancelInternalOrder = {
+    __typename?: 'CancelInternalOrder';
+    error: Maybe<Scalars['String']['output']>;
+    internalOrder: Maybe<InternalOrder>;
+};
+
 export type Client = {
     __typename?: 'Client';
     createdOn: Scalars['DateTime']['output'];
@@ -59,28 +71,6 @@ export type Client = {
     /** Nombre de la calle donde vive el cliente */
     streetName: Scalars['String']['output'];
 };
-
-/** An enumeration. */
-export enum CoreRentalContractHistoryModelStatusChoices {
-    /** ACTIVO */
-    Activo = 'ACTIVO',
-    /** CANCELADO */
-    Cancelado = 'CANCELADO',
-    /** SEÑADO */
-    ConDeposito = 'CON_DEPOSITO',
-    /** DEVOLUCION EXITOSA */
-    DevolucionExitosa = 'DEVOLUCION_EXITOSA',
-    /** DEVOLUCION FALLIDA */
-    DevolucionFallida = 'DEVOLUCION_FALLIDA',
-    /** FINALIZADO */
-    Finalizado = 'FINALIZADO',
-    /** PAGADO */
-    Pagado = 'PAGADO',
-    /** PRESUPUESTADO */
-    Presupuestado = 'PRESUPUESTADO',
-    /** VENCIDO */
-    Vencido = 'VENCIDO',
-}
 
 export type CreateBrand = {
     __typename?: 'CreateBrand';
@@ -172,7 +162,7 @@ export type CreateRentalContractInput = {
     contractEndDatetime: Scalars['DateTime']['input'];
     contractStartDatetime: Scalars['DateTime']['input'];
     houseNumber: Scalars['String']['input'];
-    houseUnit: Scalars['String']['input'];
+    houseUnit: InputMaybe<Scalars['String']['input']>;
     localityId: Scalars['ID']['input'];
     officeId: Scalars['ID']['input'];
     products: Array<RentalContractProductsItemInput>;
@@ -185,6 +175,30 @@ export type Employee = {
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     user: User;
+};
+
+export type ExpiredContract = {
+    __typename?: 'ExpiredContract';
+    error: Maybe<Scalars['String']['output']>;
+    rentalContract: Maybe<RentalContract>;
+};
+
+export type FailedReturnContract = {
+    __typename?: 'FailedReturnContract';
+    error: Maybe<Scalars['String']['output']>;
+    rentalContract: Maybe<RentalContract>;
+};
+
+export type FinishContract = {
+    __typename?: 'FinishContract';
+    error: Maybe<Scalars['String']['output']>;
+    rentalContract: Maybe<RentalContract>;
+};
+
+export type InProgressInternalOrder = {
+    __typename?: 'InProgressInternalOrder';
+    error: Maybe<Scalars['String']['output']>;
+    internalOrder: Maybe<InternalOrder>;
 };
 
 export type InternalOrder = {
@@ -241,6 +255,8 @@ export type Login = {
 
 export type Mutation = {
     __typename?: 'Mutation';
+    cancelContract: Maybe<CancelContract>;
+    cancelInternalOrder: Maybe<CancelInternalOrder>;
     createBrand: Maybe<CreateBrand>;
     createClient: Maybe<CreateClient>;
     createEmployee: Maybe<CreateEmployee>;
@@ -248,13 +264,29 @@ export type Mutation = {
     createLocality: Maybe<CreateLocality>;
     createProduct: Maybe<CreateProduct>;
     createRentalContract: Maybe<CreateRentalContract>;
+    expiredContract: Maybe<ExpiredContract>;
+    failedReturnContract: Maybe<FailedReturnContract>;
+    finishContract: Maybe<FinishContract>;
+    inProgressInternalOrder: Maybe<InProgressInternalOrder>;
     login: Maybe<Login>;
+    payContractDeposit: Maybe<PayContractDeposit>;
+    payTotalContract: Maybe<PayTotalContract>;
+    receiveInternalOrder: Maybe<ReceiveInternalOrder>;
     refreshToken: Maybe<Refresh>;
+    startContract: Maybe<StartContract>;
     successfulReturnContract: Maybe<SuccessfulReturnContract>;
     /** Obtain JSON Web Token mutation */
     tokenAuth: Maybe<ObtainJsonWebToken>;
     updateClient: Maybe<UpdateClient>;
     verifyToken: Maybe<Verify>;
+};
+
+export type MutationCancelContractArgs = {
+    rentalContractId: Scalars['ID']['input'];
+};
+
+export type MutationCancelInternalOrderArgs = {
+    internalOrderId: Scalars['ID']['input'];
 };
 
 export type MutationCreateBrandArgs = {
@@ -287,13 +319,45 @@ export type MutationCreateRentalContractArgs = {
     data: CreateRentalContractInput;
 };
 
+export type MutationExpiredContractArgs = {
+    rentalContractId: Scalars['ID']['input'];
+};
+
+export type MutationFailedReturnContractArgs = {
+    rentalContractId: Scalars['ID']['input'];
+};
+
+export type MutationFinishContractArgs = {
+    rentalContractId: Scalars['ID']['input'];
+};
+
+export type MutationInProgressInternalOrderArgs = {
+    internalOrderId: Scalars['ID']['input'];
+};
+
 export type MutationLoginArgs = {
     email: Scalars['String']['input'];
     password: Scalars['String']['input'];
 };
 
+export type MutationPayContractDepositArgs = {
+    rentalContractId: Scalars['ID']['input'];
+};
+
+export type MutationPayTotalContractArgs = {
+    rentalContractId: Scalars['ID']['input'];
+};
+
+export type MutationReceiveInternalOrderArgs = {
+    internalOrderId: Scalars['ID']['input'];
+};
+
 export type MutationRefreshTokenArgs = {
     token: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationStartContractArgs = {
+    rentalContractId: Scalars['ID']['input'];
 };
 
 export type MutationSuccessfulReturnContractArgs = {
@@ -347,6 +411,18 @@ export type OrderSupplier = {
     officeDestination: Office;
     supplier: Supplier;
     total: Scalars['Decimal']['output'];
+};
+
+export type PayContractDeposit = {
+    __typename?: 'PayContractDeposit';
+    error: Maybe<Scalars['String']['output']>;
+    rentalContract: Maybe<RentalContract>;
+};
+
+export type PayTotalContract = {
+    __typename?: 'PayTotalContract';
+    error: Maybe<Scalars['String']['output']>;
+    rentalContract: Maybe<RentalContract>;
 };
 
 export type Product = {
@@ -465,6 +541,12 @@ export type QuerySupplierByIdArgs = {
     id: Scalars['ID']['input'];
 };
 
+export type ReceiveInternalOrder = {
+    __typename?: 'ReceiveInternalOrder';
+    error: Maybe<Scalars['String']['output']>;
+    internalOrder: Maybe<InternalOrder>;
+};
+
 export type Refresh = {
     __typename?: 'Refresh';
     payload: Scalars['GenericScalar']['output'];
@@ -494,7 +576,7 @@ export type RentalContract = {
     rentalContractItems: Array<RentalContractItem>;
     /** Nombre de la calle donde vive el cliente */
     streetName: Scalars['String']['output'];
-    total: Scalars['Decimal']['output'];
+    total: Maybe<Scalars['Decimal']['output']>;
 };
 
 export type RentalContractHistory = {
@@ -504,7 +586,7 @@ export type RentalContractHistory = {
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     rentalContract: RentalContract;
-    status: CoreRentalContractHistoryModelStatusChoices;
+    status: RentalContractStatusChoices;
 };
 
 export type RentalContractItem = {
@@ -529,9 +611,28 @@ export type RentalContractProductsItemInput = {
     service: InputMaybe<Scalars['String']['input']>;
 };
 
+/** An enumeration. */
+export enum RentalContractStatusChoices {
+    Activo = 'ACTIVO',
+    Cancelado = 'CANCELADO',
+    ConDeposito = 'CON_DEPOSITO',
+    DevolucionExitosa = 'DEVOLUCION_EXITOSA',
+    DevolucionFallida = 'DEVOLUCION_FALLIDA',
+    Finalizado = 'FINALIZADO',
+    Pagado = 'PAGADO',
+    Presupuestado = 'PRESUPUESTADO',
+    Vencido = 'VENCIDO',
+}
+
 export type ServiceInput = {
     name: Scalars['String']['input'];
     price: Scalars['String']['input'];
+};
+
+export type StartContract = {
+    __typename?: 'StartContract';
+    error: Maybe<Scalars['String']['output']>;
+    rentalContract: Maybe<RentalContract>;
 };
 
 /** An enumeration. */
@@ -668,13 +769,16 @@ export type EmployeesQueryVariables = Exact<{ [key: string]: never }>;
 
 export type EmployeesQuery = {
     __typename?: 'Query';
-    users: Array<{
-        __typename?: 'User';
+    employees: Array<{
+        __typename?: 'Employee';
         id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        isActive: boolean;
+        user: {
+            __typename?: 'User';
+            firstName: string;
+            lastName: string;
+            email: string;
+            isActive: boolean;
+        };
     }>;
 };
 
@@ -1000,7 +1104,7 @@ export type ContractsQuery = {
         office: { __typename?: 'Office'; name: string };
         currentHistory: {
             __typename?: 'RentalContractHistory';
-            status: CoreRentalContractHistoryModelStatusChoices;
+            status: RentalContractStatusChoices;
         } | null;
     }>;
 };
@@ -1024,7 +1128,7 @@ export type CreateRentalContractMutation = {
             office: { __typename?: 'Office'; name: string };
             currentHistory: {
                 __typename?: 'RentalContractHistory';
-                status: CoreRentalContractHistoryModelStatusChoices;
+                status: RentalContractStatusChoices;
             } | null;
         } | null;
     } | null;
@@ -1194,23 +1298,38 @@ export const EmployeesDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'users' },
+                        name: { kind: 'Name', value: 'employees' },
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'firstName' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'lastName' },
-                                },
-                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'isActive' },
+                                    name: { kind: 'Name', value: 'user' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'firstName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'lastName' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'email' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'isActive' },
+                                            },
+                                        ],
+                                    },
                                 },
                             ],
                         },
