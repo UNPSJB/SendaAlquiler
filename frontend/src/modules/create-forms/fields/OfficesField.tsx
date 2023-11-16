@@ -1,8 +1,10 @@
-import { Controller, useFormContext } from 'react-hook-form';
-import ReactSelect, { Props as ReactSelectProps } from 'react-select';
+import { Control, Controller, FieldValues, Path } from 'react-hook-form';
+import { Props as ReactSelectProps } from 'react-select';
 
 import { Office, OfficesQuery } from '@/api/graphql';
 import { useOffices } from '@/api/hooks';
+
+import { CustomSelect } from '@/modules/forms/Select';
 
 type OfficeOptionProps = {
     office: OfficesQuery['offices'][0];
@@ -72,36 +74,53 @@ const customFilter: ReactSelectProps<
     }
 };
 
-type Props = {
-    name: string;
-    placeholder: string;
-    officeToExclude: Office['id'] | undefined;
+export type OfficesFieldValue = {
+    label: string;
+    value: Office['id'];
+    data: OfficeOptionProps['office'];
 };
 
-const OfficesField: React.FC<Props> = ({ name, placeholder, officeToExclude }) => {
-    const { control: contextControl } = useFormContext();
+type Props<TFieldValues extends FieldValues, TName extends Path<TFieldValues>> = {
+    name: TName;
+    control: Control<TFieldValues>;
+    placeholder: string;
+    officeToExclude: Office['id'] | undefined;
+} & (TFieldValues[Extract<keyof TFieldValues, TName>] extends OfficesFieldValue
+    ? object
+    : never);
+
+const RHFOfficesField = <
+    TFieldValues extends FieldValues,
+    TName extends Path<TFieldValues>,
+>({
+    name,
+    control,
+    placeholder,
+    officeToExclude,
+}: Props<TFieldValues, TName>) => {
     const { data, isLoading } = useOffices();
 
     return (
         <Controller
             name={name}
-            control={contextControl}
+            control={control}
             render={({ field: { onChange, value } }) => (
-                <ReactSelect
+                <CustomSelect
                     isClearable
                     isLoading={isLoading}
-                    classNamePrefix="react-select"
-                    options={(data ? data.offices : [])
-                        .filter((office) => {
-                            return office.id !== officeToExclude;
-                        })
-                        .map((office) => {
-                            return {
-                                label: <OfficeOption office={office} />,
-                                value: office.id,
-                                data: office,
-                            } as OfficesSelectOption;
-                        })}
+                    options={
+                        (data ? data.offices : [])
+                            .filter((office) => {
+                                return office.id !== officeToExclude;
+                            })
+                            .map((office) => {
+                                return {
+                                    label: office.name,
+                                    value: office.id,
+                                    data: office,
+                                } as OfficesFieldValue;
+                            }) as any
+                    }
                     filterOption={customFilter}
                     placeholder={placeholder}
                     formatOptionLabel={(val) => {
@@ -114,10 +133,7 @@ const OfficesField: React.FC<Props> = ({ name, placeholder, officeToExclude }) =
                     value={value}
                     onChange={(val) => {
                         if (val && 'data' in val) {
-                            onChange({
-                                value: val.value,
-                                label: val.data.name,
-                            });
+                            onChange(val);
                         } else {
                             onChange(null);
                         }
@@ -128,4 +144,4 @@ const OfficesField: React.FC<Props> = ({ name, placeholder, officeToExclude }) =
     );
 };
 
-export default OfficesField;
+export default RHFOfficesField;

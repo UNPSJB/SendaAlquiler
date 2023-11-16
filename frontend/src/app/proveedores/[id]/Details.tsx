@@ -30,7 +30,7 @@ const ClientByIdDetailsTab: React.FC<SupplierByIdTabComponentProps> = ({ client 
                 </LI>
                 <LI>
                     <SN>Dni: </SN>
-                    {client.dni}
+                    {client.cuit}
                 </LI>
             </UL>
             <UL>

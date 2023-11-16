@@ -38,7 +38,7 @@ class RentalContractModel(TimeStampedModel):
     )
     has_payed_deposit = models.BooleanField(default=False)
     has_payed_remaining_amount = models.BooleanField(default=False)
-    total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
+    total = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
     expiration_date = models.DateTimeField(blank=True, null=True)
 
     contract_start_datetime = models.DateTimeField()

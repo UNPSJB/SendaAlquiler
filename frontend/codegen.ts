@@ -13,6 +13,9 @@ const config: CodegenConfig = {
                 // skipTypename: true,
                 // preResolveTypes: false,
                 maybeValue: 'T | null',
+                scalars: {
+                    Date: 'string',
+                },
             },
         },
         './src/api/graphql.schema.json': {

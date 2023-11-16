@@ -7,7 +7,10 @@ query clients {
         phoneCode
         phoneNumber
         locality {
+            id
             name
+            state
+            postalCode
         }
         streetName
         houseUnit
@@ -120,6 +123,8 @@ mutation createLocality($name: String!, $state: StateChoices!, $postalCode: Stri
         locality {
             id
             name
+            state
+            postalCode
         }
         error
     }
@@ -286,5 +291,50 @@ fragment ProductListItem on Product {
     type
     brand {
         name
+    }
+    services {
+        id
+        name
+    }
+}
+
+query contracts {
+    rentalContracts {
+        id
+        client {
+            firstName
+            lastName
+        }
+        office {
+            name
+        }
+        createdOn
+        contractStartDatetime
+        contractEndDatetime
+        currentHistory {
+            status
+        }
+    }
+}
+
+mutation CreateRentalContract($data: CreateRentalContractInput!) {
+    createRentalContract(data: $data) {
+        rentalContract {
+            id
+            client {
+                firstName
+                lastName
+            }
+            office {
+                name
+            }
+            createdOn
+            contractStartDatetime
+            contractEndDatetime
+            currentHistory {
+                status
+            }
+        }
+        error
     }
 }

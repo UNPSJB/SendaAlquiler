@@ -26,7 +26,7 @@ class Query(graphene.ObjectType):
         non_null_list_of(ProductStockInOffice), office_id=graphene.ID(required=True)
     )
 
-    def resolve_products_stocks_by_office_id(self, info: Any, office_id: str):
+    def resolve_products_stocks_by_office_id(self, info: Any, office_id: int):
         return ProductStockInOfficeModel.objects.filter(office=office_id)
 
     product_by_id = graphene.Field(Product, id=graphene.ID(required=True))

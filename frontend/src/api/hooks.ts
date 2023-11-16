@@ -10,6 +10,8 @@ import {
     BrandsQuery,
     ClientByIdDocument,
     ClientsDocument,
+    ContractsDocument,
+    ContractsQuery,
     CreateBrandDocument,
     CreateBrandMutation,
     CreateBrandMutationVariables,
@@ -27,6 +29,9 @@ import {
     CreateProductDocument,
     CreateProductMutation,
     CreateProductMutationVariables,
+    CreateRentalContractDocument,
+    CreateRentalContractMutation,
+    CreateRentalContractMutationVariables,
     InternalOrdersDocument,
     LocalitiesDocument,
     LocalitiesQuery,
@@ -56,6 +61,8 @@ const queryKeys = {
     employeeById: (id: string | undefined) => [...queryKeys.employees, id],
 
     brands: ['brands'],
+
+    contracts: ['contracts'],
 
     localities: ['localities'],
 
@@ -439,6 +446,62 @@ export const useBrands = () => {
     return useQuery(queryKeys.brands, () => {
         return clientGraphqlQuery(BrandsDocument, {});
     });
+};
+
+export const useContracts = () => {
+    return useQuery(queryKeys.contracts, () => {
+        return clientGraphqlQuery(ContractsDocument, {});
+    });
+};
+
+type UseCreateRentalContractOptions = UseMutationOptions<
+    CreateRentalContractMutation,
+    Error,
+    CreateRentalContractMutationVariables
+>;
+
+export const useCreateRentalContract = ({
+    onSuccess,
+    ...options
+}: UseCreateRentalContractOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<
+        CreateRentalContractMutation,
+        Error,
+        CreateRentalContractMutationVariables
+    >(
+        (data) => {
+            return clientGraphqlQuery(CreateRentalContractDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                const rentalContract = data.createRentalContract?.rentalContract;
+
+                if (rentalContract) {
+                    client.setQueryData<ContractsQuery>(queryKeys.contracts, (prev) => {
+                        const rentalContracts = prev?.rentalContracts;
+
+                        if (!rentalContracts) {
+                            return prev;
+                        }
+
+                        const next: ContractsQuery = {
+                            ...prev,
+                            rentalContracts: [...rentalContracts, rentalContract],
+                        };
+
+                        return next;
+                    });
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
 };
 
 export const usePurchases = () => {
