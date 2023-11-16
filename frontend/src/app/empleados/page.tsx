@@ -38,15 +38,15 @@ const SkeletonRowRenderer = (key: number) => (
 );
 
 const EmployeeRowRenderer = (handleRemove: (id: Employee['id']) => void) => {
-    const renderer = (employee: ArrayElement<EmployeesQuery['users']>) => (
+    const renderer = (employee: ArrayElement<EmployeesQuery['employees']>) => (
         <TR key={employee.id}>
             <TD>
                 <Link className="text-violet-600" href={`/empleados/${employee.id}`}>
-                    {employee.firstName} {employee.lastName}
+                    {employee.user.firstName} {employee.user.lastName}
                 </Link>
             </TD>
-            <TD>{employee.email}</TD>
-            <TD>{employee.isActive ? 'Sí' : 'No'}</TD>
+            <TD>{employee.user.email}</TD>
+            <TD>{employee.user.isActive ? 'Sí' : 'No'}</TD>
             <TD>
                 <DataTableDropdown onRemove={() => handleRemove(employee.id)} />
             </TD>
@@ -101,8 +101,8 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ users }) => {
-                    if (users.length === 0) {
+                {({ employees }) => {
+                    if (employees.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay empleados"
@@ -116,7 +116,7 @@ const Page = () => {
                         <div className="pr-container flex-1 py-5 pl-10">
                             <DataTable
                                 columns={columns}
-                                data={users}
+                                data={employees}
                                 rowRenderer={EmployeeRowRenderer(handleRemove)}
                             />
 

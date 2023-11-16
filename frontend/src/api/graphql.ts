@@ -797,13 +797,16 @@ export type EmployeesQueryVariables = Exact<{ [key: string]: never }>;
 
 export type EmployeesQuery = {
     __typename?: 'Query';
-    users: Array<{
-        __typename?: 'User';
+    employees: Array<{
+        __typename?: 'Employee';
         id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        isActive: boolean;
+        user: {
+            __typename?: 'User';
+            firstName: string;
+            lastName: string;
+            email: string;
+            isActive: boolean;
+        };
     }>;
 };
 
@@ -1369,23 +1372,38 @@ export const EmployeesDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'users' },
+                        name: { kind: 'Name', value: 'employees' },
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'firstName' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'lastName' },
-                                },
-                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'isActive' },
+                                    name: { kind: 'Name', value: 'user' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'firstName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'lastName' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'email' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'isActive' },
+                                            },
+                                        ],
+                                    },
                                 },
                             ],
                         },

@@ -20,12 +20,14 @@ query clients {
 }
 
 query employees {
-    users {
+    employees {
         id
-        firstName
-        lastName
-        email
-        isActive
+        user {
+            firstName
+            lastName
+            email
+            isActive
+        }
     }
 }
 
@@ -39,41 +41,41 @@ mutation createEmployee($employeeData: CreateEmployeeInput!) {
 }
 
 query purchases {
-  purchases {
-    id
-    date
-    total
-    client {
-      firstName
-      lastName
+    purchases {
+        id
+        date
+        total
+        client {
+            firstName
+            lastName
+        }
     }
-  }
 }
 
 query purchaseById($id: ID!) {
-  purchaseById(id: $id) {
-    id
-    date
-    total
-    purchaseItems {
-      product {
-        name
-        brand {
-          name
+    purchaseById(id: $id) {
+        id
+        date
+        total
+        purchaseItems {
+            product {
+                name
+                brand {
+                    name
+                }
+                price
+            }
+            quantity
+            total
         }
-        price
-      }
-      quantity
-      total
+        client {
+            firstName
+            lastName
+            email
+            phoneCode
+            phoneNumber
+        }
     }
-    client {
-      firstName
-      lastName
-      email
-      phoneCode
-      phoneNumber
-    }
-  }
 }
 
 query localities {
