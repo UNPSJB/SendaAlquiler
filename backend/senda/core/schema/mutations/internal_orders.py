@@ -108,6 +108,11 @@ class BaseChangeOrderInternalStatus(graphene.Mutation):
             internal_order=order, status=new_status
         )
 
+    @classmethod
+    def mutate(
+        cls, self: "BaseChangeOrderInternalStatus", info: Any, rental_contract_id: str
+    ):
+        raise NotImplementedError()
 
 class InProgressInternalOrder(BaseChangeOrderInternalStatus):
     @classmethod
