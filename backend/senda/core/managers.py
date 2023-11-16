@@ -232,13 +232,13 @@ class PurchaseModelManager(models.Manager["PurchaseModel"]):
         self,
         client: "ClientModel",
         products: List[PurchaseProductsItemDict],
-        office: "OfficeModel",
+        # office: "OfficeModel",
     ) -> "PurchaseModel":
         purchase = self.create(
-            client=client,
-            office=office,
+            client=client
+            # office=office,
         )
-
+        
         for product in products:
             purchase.purchase_items.create(
                 quantity=product["quantity"],
