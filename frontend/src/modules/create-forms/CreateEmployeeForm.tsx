@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 
 import clsx from 'clsx';
 import {
+    Control,
     FormProvider,
     FormState,
     SubmitHandler,
+    UseFormSetValue,
     UseFormGetValues,
     UseFormRegister,
     useForm,
@@ -29,13 +31,13 @@ type FormValues = CreateEmployeeMutationVariables['employeeData'] & {
 type FieldsComponentProps = {
     formErrors: FormState<FormValues>['errors'];
     register: UseFormRegister<FormValues>;
+    control: Control<FormValues>;
+    setValue: UseFormSetValue<FormValues>;
     getValues: UseFormGetValues<FormValues>;
 };
 
 const PersonalDataStep: React.FC<FieldsComponentProps> = ({
-    formErrors,
-    register,
-    getValues,
+    formErrors, control, getValues
 }) => (
     <>
         <div className="flex space-x-4">
@@ -47,9 +49,11 @@ const PersonalDataStep: React.FC<FieldsComponentProps> = ({
             >
                 <Input
                     id="firstName"
+                    name="firstName"
                     placeholder="Bruno"
                     hasError={!!formErrors.firstName}
-                    {...register('firstName', { required: true })}
+                    control={control}
+                    rules={{ required: true }}
                 />
             </RHFFormField>
 
@@ -61,9 +65,11 @@ const PersonalDataStep: React.FC<FieldsComponentProps> = ({
             >
                 <Input
                     id="lastName"
+                    name="lastName"
                     placeholder="Díaz"
                     hasError={!!formErrors.lastName}
-                    {...register('lastName', { required: true })}
+                    control={control}
+                    rules={{ required: true }}
                 />
             </RHFFormField>
         </div>
@@ -72,9 +78,11 @@ const PersonalDataStep: React.FC<FieldsComponentProps> = ({
             <Input
                 type="email"
                 id="email"
+                name="email"
                 placeholder="brunodiaz@gmail.com"
                 hasError={!!formErrors.email}
-                {...register('email', { required: true })}
+                control={control}
+                rules={{ required: true }}
             />
         </RHFFormField>
 
@@ -82,13 +90,12 @@ const PersonalDataStep: React.FC<FieldsComponentProps> = ({
             <Input
                 type="password"
                 id="password"
+                name="password"
                 placeholder="**********"
                 hasError={!!formErrors.password}
                 minLength={8}
-                {...register('password', {
-                    required: true,
-                    minLength: 8,
-                })}
+                control={control}
+                rules={{ required: true }}
             />
         </RHFFormField>
 
@@ -96,18 +103,18 @@ const PersonalDataStep: React.FC<FieldsComponentProps> = ({
             <Input
                 type="password"
                 id="confirmPassword"
+                name="confirmPassword"
                 placeholder="**********"
                 hasError={!!formErrors.confirmPassword}
-                minLength={8}
-                {...register('confirmPassword', {
+                control={control}
+                rules={{
                     required: true,
                     minLength: 8,
                     validate: (value) => {
                         const isValid = value === getValues('password');
-
                         return isValid || 'Las contraseñas no coinciden';
                     },
-                })}
+                }}
             />
         </RHFFormField>
     </>
@@ -135,7 +142,7 @@ const CreateEmployeeForm: React.FC<NavigationButtonsCancelProps> = (props) => {
     const useFormMethods = useForm<FormValues>({
         reValidateMode: 'onChange',
     });
-    const { register, handleSubmit, formState, getValues } = useFormMethods;
+    const { register, handleSubmit, formState, getValues, setValue, control } = useFormMethods;
     const formErrors = formState.errors;
 
     const router = useRouter();
@@ -197,8 +204,10 @@ const CreateEmployeeForm: React.FC<NavigationButtonsCancelProps> = (props) => {
                             <form className="space-y-4">
                                 <PersonalDataStep
                                     formErrors={formErrors}
-                                    register={register}
+                                    register={register}                                 
+                                    control={control}
                                     getValues={getValues}
+                                    setValue={setValue}
                                 />
                             </form>
                         </div>

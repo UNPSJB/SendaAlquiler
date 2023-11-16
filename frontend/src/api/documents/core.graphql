@@ -20,22 +20,24 @@ query clients {
 }
 
 query employees {
-    users {
+    employees {
         id
-        firstName
-        lastName
-        email
-        isActive
+        user {
+            firstName
+            lastName
+            email
+            isActive
+        }
     }
 }
 
 mutation createEmployee($employeeData: CreateEmployeeInput!) {
-  createEmployee(employeeData: $employeeData) {
-    employee {
-      id
+    createEmployee(employeeData: $employeeData) {
+        employee {
+            id
+        }
+        error
     }
-    error
-  }
 }
 
 query localities {
