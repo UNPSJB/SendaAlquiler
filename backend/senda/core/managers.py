@@ -222,7 +222,7 @@ class ProductModelManager(models.Manager["ProductModel"]):
 
 
 PurchaseProductsItemDict = TypedDict(
-    "PurchaseProductsItemDict", {"id": str, "quantity": int}
+    "PurchaseProductsItemDict", {"product": str, "quantity": int}
 )
 
 
@@ -232,19 +232,17 @@ class PurchaseModelManager(models.Manager["PurchaseModel"]):
         self,
         client: "ClientModel",
         products: List[PurchaseProductsItemDict],
-        # office: "OfficeModel",
     ) -> "PurchaseModel":
-        purchase = self.create(
-            client=client
-            # office=office,
-        )
-        
+        purchase = self.create(client=client)
+        purchase.save()
+
         for product in products:
             purchase.purchase_items.create(
                 quantity=product["quantity"],
                 product_id=product["product"],
-                purchase_Products=purchase,
             )
+
+        purchase.recalculate_total()
 
         return purchase
 
@@ -292,6 +290,8 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
             status=RentalContractStatusChoices.PRESUPUESTADO,
             rental_contract=rental_contract,
         )
+
+        return rental_contract
 
 
 class EmployeeModelManager(models.Manager["EmployeeModel"]):
