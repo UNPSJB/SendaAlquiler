@@ -46,10 +46,14 @@ import {
     ProductsStocksByOfficeIdDocument,
     SupplierByIdDocument,
     SuppliersDocument,
+    CreatePurchaseMutation,
+    CreatePurchaseMutationVariables,
     CreateEmployeeMutation,
     CreateEmployeeMutationVariables,
     CreateEmployeeDocument,
     PurchaseByIdDocument,
+    PurchasesQuery,
+    CreatePurchaseDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -66,8 +70,8 @@ const queryKeys = {
 
     localities: ['localities'],
 
-    purcheses: ['purchases'],
-    purchaseById: (id: string | undefined) => [...queryKeys.purcheses, id],
+    purchases: ['purchases'],
+    purchaseById: (id: string | undefined) => [...queryKeys.purchases, id],
 
     suppliers: ['suppliers'],
     supplierById: (id: string | undefined) => [...queryKeys.suppliers, id],
@@ -505,7 +509,7 @@ export const useCreateRentalContract = ({
 };
 
 export const usePurchases = () => {
-    return useQuery(queryKeys.purcheses,() => {
+    return useQuery(queryKeys.purchases,() => {
        return clientGraphqlQuery(PurchasesDocument, {});
     });
 };
@@ -520,6 +524,49 @@ export const usePurchaseById = (id: string | undefined) => {
         },
         {
             enabled: typeof id === 'string',
+        },
+    );
+};
+
+type UseCreatePurchaseOptions = UseMutationOptions<
+    CreatePurchaseMutation,
+    Error,
+    CreatePurchaseMutationVariables
+>;
+
+export const useCreatePurchase = ({ onSuccess, ...options }: UseCreatePurchaseOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<CreatePurchaseMutation, Error, CreatePurchaseMutationVariables>(
+        (data) => {
+            return clientGraphqlQuery(CreatePurchaseDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                const purchase = data.createPurchase?.purchase;
+
+                if (purchase) {
+                    client.setQueryData<PurchasesQuery>(queryKeys.purchases, (prev) => {
+                        const purchases = prev?.purchases;
+
+                        if (!purchases) {
+                            return prev;
+                        }
+
+                        const next: PurchasesQuery = {
+                            ...prev,
+                            purchases: [...purchases, purchase],
+                        };
+
+                        return next;
+                    });
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
         },
     );
 };

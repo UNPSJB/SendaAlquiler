@@ -498,7 +498,7 @@ export type Purchase = {
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     purchaseItems: Array<PurchaseItem>;
-    total: Scalars['Decimal']['output'];
+    total: Maybe<Scalars['Decimal']['output']>;
 };
 
 export type PurchaseItem = {
@@ -510,7 +510,7 @@ export type PurchaseItem = {
     product: Product;
     purchase: Purchase;
     quantity: Scalars['Int']['output'];
-    total: Scalars['Decimal']['output'];
+    total: Maybe<Scalars['Decimal']['output']>;
 };
 
 export type PurchaseItemsInput = {
@@ -831,7 +831,7 @@ export type PurchasesQuery = {
         __typename?: 'Purchase';
         id: string;
         date: any;
-        total: any;
+        total: any | null;
         client: { __typename?: 'Client'; firstName: string; lastName: string };
     }>;
 };
@@ -846,11 +846,11 @@ export type PurchaseByIdQuery = {
         __typename?: 'Purchase';
         id: string;
         date: any;
-        total: any;
+        total: any | null;
         purchaseItems: Array<{
             __typename?: 'PurchaseItem';
             quantity: number;
-            total: any;
+            total: any | null;
             product: {
                 __typename?: 'Product';
                 name: string;
@@ -866,6 +866,19 @@ export type PurchaseByIdQuery = {
             phoneCode: string;
             phoneNumber: string;
         };
+    } | null;
+};
+
+export type CreatePurchaseMutationVariables = Exact<{
+    purchaseData: CreatePurchaseInput;
+}>;
+
+export type CreatePurchaseMutation = {
+    __typename?: 'Mutation';
+    createPurchase: {
+        __typename?: 'CreatePurchase';
+        error: string | null;
+        purchase: { __typename?: 'Purchase'; id: string } | null;
     } | null;
 };
 
@@ -1668,6 +1681,70 @@ export const PurchaseByIdDocument = {
         },
     ],
 } as unknown as DocumentNode<PurchaseByIdQuery, PurchaseByIdQueryVariables>;
+export const CreatePurchaseDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'createPurchase' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'purchaseData' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreatePurchaseInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'createPurchase' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'data' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'purchaseData' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'purchase' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<CreatePurchaseMutation, CreatePurchaseMutationVariables>;
 export const LocalitiesDocument = {
     kind: 'Document',
     definitions: [

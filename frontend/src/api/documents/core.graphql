@@ -78,6 +78,15 @@ query purchaseById($id: ID!) {
     }
 }
 
+mutation createPurchase($purchaseData: CreatePurchaseInput!) {
+  createPurchase(data: $purchaseData) {
+    purchase {
+      id
+    }
+    error
+  }
+}
+
 query localities {
     localities {
         id
