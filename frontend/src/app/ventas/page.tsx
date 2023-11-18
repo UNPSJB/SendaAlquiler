@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 
+import { use } from 'react';
 import Skeleton from 'react-loading-skeleton';
 
 import { Purchase, PurchasesQuery } from '@/api/graphql';
@@ -19,7 +20,6 @@ import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import { TD, TR } from '@/components/Table';
-import { use } from 'react';
 
 const columns = [
     { key: 'name', label: 'Nombre' },
@@ -46,11 +46,8 @@ const PurchaseRowRenderer = (handleRemove: (id: Purchase['id']) => void) => {
                     {purchase.client.firstName} {purchase.client.lastName}
                 </Link>
             </TD>
-            <TD>
-                {new Date(purchase.date).toLocaleDateString('es-ES')}</TD>
-            <TD>
-                ${purchase.total}
-            </TD>
+            <TD>{new Date(purchase.date).toLocaleDateString('es-ES')}</TD>
+            <TD>${purchase.total}</TD>
             <TD>
                 <DataTableDropdown onRemove={() => handleRemove(purchase.id)} />
             </TD>

@@ -42,13 +42,7 @@ mutation createEmployee($employeeData: CreateEmployeeInput!) {
 
 query purchases {
     purchases {
-        id
-        date
-        total
-        client {
-            firstName
-            lastName
-        }
+        ...PurchaseListItem
     }
 }
 
@@ -79,12 +73,22 @@ query purchaseById($id: ID!) {
 }
 
 mutation createPurchase($purchaseData: CreatePurchaseInput!) {
-  createPurchase(data: $purchaseData) {
-    purchase {
-      id
+    createPurchase(data: $purchaseData) {
+        purchase {
+            ...PurchaseListItem
+        }
+        error
     }
-    error
-  }
+}
+
+fragment PurchaseListItem on Purchase {
+    id
+    date
+    total
+    client {
+        firstName
+        lastName
+    }
 }
 
 query localities {

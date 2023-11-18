@@ -4,5 +4,6 @@
     "useTabs": false,
     "printWidth": 90,
     "plugins": ["prettier-plugin-tailwindcss"],
-    "tailwindFunctions": ["clsx"]
+    "tailwindFunctions": ["clsx"],
+    "endOfLine": "auto"
 }

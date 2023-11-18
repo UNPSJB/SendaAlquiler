@@ -11,10 +11,12 @@ import {
 } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-// import { CreatePurchaseMutationVariables} from '@/api/graphql';
-
 import { ClientsQuery } from '@/api/graphql';
 import { useCreatePurchase, useClients } from '@/api/hooks';
+
+import ProductPurchaseOrderField, {
+    ProductQuantityPair,
+} from './fields/ProductPurchaseOrderField';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import ButtonWithSpinner from '@/components/ButtonWithSpinner';
@@ -22,9 +24,8 @@ import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
 
-import { RHFCustomFlatpickr } from '../forms/Flatpickr';
 import { RHFFormField } from '../forms/FormField';
-import RHFInput, { Input } from '../forms/Input';
+import { Input } from '../forms/Input';
 import Label from '../forms/Label';
 import RHFSelect from '../forms/Select';
 
@@ -38,14 +39,13 @@ type FormValues = {
         value: string;
         data: ClientsQuery['clients'][0];
     };
-    // productsAndQuantity: ProductQuantityPair[];
-    date: Date[];
+    productsAndQuantity: ProductQuantityPair[];
 };
 
 const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) => {
     const clientsResult = useClients();
     const formMethods = useForm<FormValues>();
-    const { watch, control, setValue } = formMethods;
+    const { watch, control } = formMethods;
     const router = useRouter();
 
     const { mutate, isLoading: isMutating } = useCreatePurchase({
@@ -74,25 +74,18 @@ const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) =
         return acc;
     }, 0);
 
-
     const formIsValid = formMethods.formState.isValid;
 
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         const client = data.client?.data.id;
-        const purchaseDatetime = data.date[0];
         const products = data.productsAndQuantity
             ? data.productsAndQuantity.map((productAndQuantity) => ({
-                  id: productAndQuantity.product?.data.id as string,
+                  product: productAndQuantity.product?.data.id as string,
                   quantity: productAndQuantity.quantity as number,
-                  service: productAndQuantity.service?.value.toString() || null,
               }))
             : null;
 
-        if (
-            !client||
-            !products ||
-            products.length === 0
-        ) {
+        if (!client || !products || products.length === 0) {
             return;
         }
 
@@ -100,7 +93,6 @@ const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) =
             purchaseData: {
                 client: client,
                 products: products,
-                //TODO 
             },
         });
     };
@@ -125,9 +117,7 @@ const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) =
                     </div>
 
                     <div className="flex flex-1 items-center justify-between">
-                        <h1 className="py-8 pl-10 text-3xl font-black">
-                            Venta
-                        </h1>
+                        <h1 className="py-8 pl-10 text-3xl font-black">Venta</h1>
 
                         <div className="space-x-4">
                             <Button
@@ -404,11 +394,11 @@ const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) =
 
                             <section className="flex border-t border-gray-200 py-8">
                                 <h2 className="w-3/12 text-xl font-bold">
-                                    Productos alquilados
+                                    Productos comprados
                                 </h2>
 
                                 <div className="w-9/12 space-y-6">
-                                    <RHFProductOrderField<
+                                    <ProductPurchaseOrderField<
                                         FormValues,
                                         'productsAndQuantity'
                                     >
@@ -444,4 +434,4 @@ const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) =
     );
 };
 
-export default CreatePurchaseForm
+export default CreatePurchaseForm;

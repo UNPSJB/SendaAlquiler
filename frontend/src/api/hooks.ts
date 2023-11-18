@@ -120,7 +120,7 @@ export const useCreateEmployee = ({
     onSuccess,
     ...options
 }: UseCreateEmployeeOptions = {}) => {
-    const employee = useQueryClient();
+    const client = useQueryClient();
 
     return useMutation<CreateEmployeeMutation, Error, CreateEmployeeMutationVariables>(
         (data) => {
@@ -129,7 +129,7 @@ export const useCreateEmployee = ({
         {
             onSuccess: (data, context, variables) => {
                 if (data.createEmployee?.employee) {
-                    employee.invalidateQueries(queryKeys.employees);
+                    client.invalidateQueries(queryKeys.employees);
                 }
 
                 if (onSuccess) {

@@ -16,7 +16,9 @@ import { useClients, useCreateRentalContract } from '@/api/hooks';
 
 import LocalityField, { LocalityFieldValue } from './fields/LocalityField';
 import RHFOfficesField, { OfficesFieldValue } from './fields/OfficesField';
-import RHFProductOrderField, { ProductQuantityPair } from './fields/ProductOrderField';
+import RHFProductOrderField, {
+    ProductQuantityAndService,
+} from './fields/ProductOrderField';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import ButtonWithSpinner from '@/components/ButtonWithSpinner';
@@ -62,7 +64,7 @@ type FormValues = {
         note?: string;
         office?: OfficesFieldValue;
     };
-    productsAndQuantity: ProductQuantityPair[];
+    productsAndQuantity: ProductQuantityAndService[];
     contractStartDatetime: Date[];
     contractEndDatetime: Date[];
 };

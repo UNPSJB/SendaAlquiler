@@ -1,6 +1,6 @@
 'use client';
 
-import CreatePurchaseForm from '@/modules/create-forms/CreatePurchaseForm';
+import CreatePurchaseForm from '@/modules/create-forms/CreatePurchase';
 
 const Page = () => {
     return <CreatePurchaseForm cancelHref="/ventas" />;
