@@ -10,5 +10,7 @@ from utils.graphene import non_null_list_of
 class Query(graphene.ObjectType):
     rental_contracts = non_null_list_of(RentalContract)
 
+    contract_by_id = graphene.Field(RentalContract, id=graphene.ID(required=True))
+
     def resolve_rental_contracts(self, info: Any):
         return RentalContractModel.objects.all()

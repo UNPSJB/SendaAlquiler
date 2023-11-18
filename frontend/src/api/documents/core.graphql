@@ -281,6 +281,62 @@ query contracts {
     }
 }
 
+query contractById($id: ID!) {
+    contractById(id: $id) {
+        client {
+            firstName
+            dni
+            email
+            houseNumber
+            houseUnit
+            lastName
+            locality {
+                name
+                state
+            }
+            phoneNumber
+            phoneCode
+            streetName
+        }
+        contractEndDatetime
+        contractStartDatetime
+        currentHistory {
+            status
+        }
+        expirationDate
+        hasPayedDeposit
+        hasPayedRemainingAmount
+        houseNumber
+        houseUnit
+        office {
+            name
+            street
+            houseNumber
+        }
+        streetName
+        total
+        rentalContractItems {
+            serviceTotal
+            servicePrice
+            total
+            price
+            product {
+                brand {
+                    name
+                }
+                name
+                price
+                sku
+                services {
+                    name
+                    price
+                }
+            }
+            quantity
+        }
+    }
+}
+
 mutation CreateRentalContract($data: CreateRentalContractInput!) {
     createRentalContract(data: $data) {
         rentalContract {
