@@ -1,4 +1,5 @@
 import { PropsWithChildren } from 'react';
+
 import { EmployeeByIdTabComponentProps } from './page';
 
 const UL: React.FC<PropsWithChildren> = ({ children }) => {
@@ -9,7 +10,9 @@ const LI: React.FC<PropsWithChildren> = ({ children }) => {
     return <li className="my-2">{children}</li>;
 };
 
-const EmployeeByIdDetailsTab: React.FC<EmployeeByIdTabComponentProps> = ({ employee }) => {
+const EmployeeByIdDetailsTab: React.FC<EmployeeByIdTabComponentProps> = ({
+    employee,
+}) => {
     return (
         <>
             <UL>

@@ -99,11 +99,15 @@ const Page = () => {
                             <header className="border-b pl-10">
                                 <div className="mb-10 flex items-center">
                                     <Avatar>
-                                        {getAvatarText(employee.user.firstName, employee.user.lastName)}
+                                        {getAvatarText(
+                                            employee.user.firstName,
+                                            employee.user.lastName,
+                                        )}
                                     </Avatar>
                                     <div className="pl-6">
                                         <h1 className="my-2 mt-10 text-xl font-bold">
-                                        {employee.user.firstName} {employee.user.lastName}
+                                            {employee.user.firstName}{' '}
+                                            {employee.user.lastName}
                                         </h1>
                                         <p>{employee.user.email}</p>
                                     </div>

@@ -1142,7 +1142,12 @@ export type ContractByIdQuery = {
             phoneNumber: string;
             phoneCode: string;
             streetName: string;
-            locality: { __typename?: 'Locality'; name: string; state: StateChoices };
+            locality: {
+                __typename?: 'Locality';
+                name: string;
+                state: StateChoices;
+                postalCode: string;
+            };
         };
         currentHistory: {
             __typename?: 'RentalContractHistory';
@@ -2856,6 +2861,13 @@ export const ContractByIdDocument = {
                                                             name: {
                                                                 kind: 'Name',
                                                                 value: 'state',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'postalCode',
                                                             },
                                                         },
                                                     ],
