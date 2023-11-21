@@ -10,26 +10,11 @@ const LI: React.FC<PropsWithChildren> = ({ children }) => {
     return <li className="my-2">{children}</li>;
 };
 
-const ScrollableContainer: React.FC<PropsWithChildren> = ({ children }) => {
-    return (
-        <div
-            className="h-full overflow-y-auto" // Estilo para permitir desplazamiento vertical y altura máxima
-            style={{
-                maxHeight: 'calc(70vh - 10px)',
-                scrollbarWidth: 'thin', // Para navegadores que admiten el modelo de scrollbar antiguo
-                scrollbarColor: 'dark',
-            }}
-        >
-            {children}
-        </div>
-    );
-};
-
 const ContractsByIdDetailsTab: React.FC<ContractByIdTabComponentProps> = ({
     contract,
 }) => {
     return (
-        <ScrollableContainer>
+        <>
             <UL>
                 <h1 className="mb-3 text-xl font-bold">Información Básica</h1>
                 <LI>
@@ -104,7 +89,7 @@ const ContractsByIdDetailsTab: React.FC<ContractByIdTabComponentProps> = ({
                     {contract.office.houseNumber}
                 </LI>
             </UL>
-        </ScrollableContainer>
+        </>
     );
 };
 

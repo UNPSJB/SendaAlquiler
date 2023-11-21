@@ -101,7 +101,7 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="flex  flex-1 flex-col">
+                        <div className="flex flex-1 flex-col">
                             <header className="border-b pl-10">
                                 <div className="mb-10 flex items-center">
                                     <Avatar>
@@ -131,7 +131,7 @@ const Page = () => {
                             </header>
 
                             <div className="flex-1 bg-gray-100 px-0">
-                                <section className="pl-10 ">
+                                <section className="pl-10">
                                     <Component contract={contract} />
                                 </section>
                             </div>
