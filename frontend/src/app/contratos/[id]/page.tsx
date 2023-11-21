@@ -53,8 +53,8 @@ const tabs = [
         Component: ContractsByIdDetailsTab,
     },
     {
-        label: 'Compras',
-        key: 'purchases',
+        label: 'Productos',
+        key: 'products',
         Component: ContractsByIdProductsTab,
     },
 ];
@@ -93,7 +93,7 @@ const Page = () => {
                             <div className="flex w-full flex-1 items-center justify-center">
                                 <FetchStatusMessageWithButton
                                     message="Parece que el contrato que buscas no existe."
-                                    btnHref="/contrato"
+                                    btnHref="/contratos"
                                     btnText='Volver a "Contratos"'
                                 />
                             </div>

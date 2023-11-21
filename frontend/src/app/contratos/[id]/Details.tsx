@@ -10,11 +10,26 @@ const LI: React.FC<PropsWithChildren> = ({ children }) => {
     return <li className="my-2">{children}</li>;
 };
 
+const ScrollableContainer: React.FC<PropsWithChildren> = ({ children }) => {
+    return (
+        <div
+            className="h-full overflow-y-auto" // Estilo para permitir desplazamiento vertical y altura máxima
+            style={{
+                maxHeight: 'calc(70vh - 10px)',
+                scrollbarWidth: 'thin', // Para navegadores que admiten el modelo de scrollbar antiguo
+                scrollbarColor: 'dark',
+            }}
+        >
+            {children}
+        </div>
+    );
+};
+
 const ContractsByIdDetailsTab: React.FC<ContractByIdTabComponentProps> = ({
     contract,
 }) => {
     return (
-        <>
+        <ScrollableContainer>
             <UL>
                 <h1 className="mb-3 text-xl font-bold">Información Básica</h1>
                 <LI>
@@ -71,10 +86,12 @@ const ContractsByIdDetailsTab: React.FC<ContractByIdTabComponentProps> = ({
                     <b>Cancelado: </b> {contract.hasPayedRemainingAmount ? 'Sí' : 'No'}
                 </LI>
                 <LI>
-                    <b>Fecha Inicio del Evento: </b> {contract.contractStartDatetime}
+                    <b>Fecha Inicio del Evento: </b>{' '}
+                    {new Date(contract.contractStartDatetime).toLocaleDateString('es-ES')}
                 </LI>
                 <LI>
-                    <b>Fecha Fin del Evento: </b> {contract.contractEndDatetime}
+                    <b>Fecha Fin del Evento: </b>{' '}
+                    {new Date(contract.contractEndDatetime).toLocaleDateString('es-ES')}
                 </LI>
                 <LI>
                     <b>N° de Locacion: </b> {contract.houseNumber}
@@ -83,11 +100,11 @@ const ContractsByIdDetailsTab: React.FC<ContractByIdTabComponentProps> = ({
                     <b>N° de Unidad: </b> {contract.houseUnit}
                 </LI>
                 <LI>
-                    <b>Sucursal: </b> {contract.office.name} {contract.office.street}{' '}
+                    <b>Sucursal: </b> {contract.office.name} - {contract.office.street}{' '}
                     {contract.office.houseNumber}
                 </LI>
             </UL>
-        </>
+        </ScrollableContainer>
     );
 };
 
