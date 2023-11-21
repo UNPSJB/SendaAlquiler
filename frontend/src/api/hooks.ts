@@ -39,15 +39,21 @@ import {
     LoginMutation,
     LoginMutationVariables,
     OfficesDocument,
+    PurchasesDocument,
     ProductByIdDocument,
     ProductsDocument,
     ProductsQuery,
     ProductsStocksByOfficeIdDocument,
     SupplierByIdDocument,
     SuppliersDocument,
+    CreatePurchaseMutation,
+    CreatePurchaseMutationVariables,
     CreateEmployeeMutation,
     CreateEmployeeMutationVariables,
     CreateEmployeeDocument,
+    PurchaseByIdDocument,
+    PurchasesQuery,
+    CreatePurchaseDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -63,6 +69,9 @@ const queryKeys = {
     contracts: ['contracts'],
 
     localities: ['localities'],
+
+    purchases: ['purchases'],
+    purchaseById: (id: string | undefined) => [...queryKeys.purchases, id],
 
     suppliers: ['suppliers'],
     supplierById: (id: string | undefined) => [...queryKeys.suppliers, id],
@@ -111,7 +120,7 @@ export const useCreateEmployee = ({
     onSuccess,
     ...options
 }: UseCreateEmployeeOptions = {}) => {
-    const employee = useQueryClient();
+    const client = useQueryClient();
 
     return useMutation<CreateEmployeeMutation, Error, CreateEmployeeMutationVariables>(
         (data) => {
@@ -120,7 +129,7 @@ export const useCreateEmployee = ({
         {
             onSuccess: (data, context, variables) => {
                 if (data.createEmployee?.employee) {
-                    employee.invalidateQueries(queryKeys.employees);
+                    client.invalidateQueries(queryKeys.employees);
                 }
 
                 if (onSuccess) {
@@ -484,6 +493,69 @@ export const useCreateRentalContract = ({
                         const next: ContractsQuery = {
                             ...prev,
                             rentalContracts: [...rentalContracts, rentalContract],
+                        };
+
+                        return next;
+                    });
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const usePurchases = () => {
+    return useQuery(queryKeys.purchases,() => {
+       return clientGraphqlQuery(PurchasesDocument, {});
+    });
+};
+
+export const usePurchaseById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.purchaseById(id),
+        () => {
+            return clientGraphqlQuery(PurchaseByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
+};
+
+type UseCreatePurchaseOptions = UseMutationOptions<
+    CreatePurchaseMutation,
+    Error,
+    CreatePurchaseMutationVariables
+>;
+
+export const useCreatePurchase = ({ onSuccess, ...options }: UseCreatePurchaseOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<CreatePurchaseMutation, Error, CreatePurchaseMutationVariables>(
+        (data) => {
+            return clientGraphqlQuery(CreatePurchaseDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                const purchase = data.createPurchase?.purchase;
+
+                if (purchase) {
+                    client.setQueryData<PurchasesQuery>(queryKeys.purchases, (prev) => {
+                        const purchases = prev?.purchases;
+
+                        if (!purchases) {
+                            return prev;
+                        }
+
+                        const next: PurchasesQuery = {
+                            ...prev,
+                            purchases: [...purchases, purchase],
                         };
 
                         return next;

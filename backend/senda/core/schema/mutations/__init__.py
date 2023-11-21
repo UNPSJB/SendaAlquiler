@@ -6,6 +6,7 @@ from .localities import Mutation as LocalitiesMutation
 from .products import Mutation as ProductMutation
 from .rental_contract import Mutation as RentalContractMutation
 from .employees import Mutation as EmployeeMutation
+from .purchases import Mutation as PurchaseMutation
 
 
 class Mutation(
@@ -14,6 +15,7 @@ class Mutation(
     LocalitiesMutation,
     InternalOrdersMutation,
     ProductMutation,
+    PurchaseMutation,
     RentalContractMutation,
     graphene.ObjectType,
 ):

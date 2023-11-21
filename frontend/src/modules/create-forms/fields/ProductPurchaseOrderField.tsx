@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
-import { ProductsQuery } from '@/api/graphql';
+import { ProductsQuery, ProductTypeChoices } from '@/api/graphql';
 import { useProducts } from '@/api/hooks';
 
 import Label from '@/modules/forms/Label';
@@ -16,27 +16,22 @@ import { CustomSelect } from '../../forms/Select';
 
 type ProductDetails = ProductsQuery['products'][0];
 
-export type ProductQuantityAndService = {
+export type ProductQuantityPair = {
     product: {
         value: string;
         label: string;
         data: ProductDetails;
     } | null;
-    service: {
-        value: string;
-        label: string;
-    } | null;
     quantity: number | null;
 };
 
 type Props = {
-    value?: ProductQuantityAndService[];
-    onChange: (val: ProductQuantityAndService[] | null) => void;
+    value?: ProductQuantityPair[];
+    onChange: (val: ProductQuantityPair[] | null) => void;
 };
 
-const DEFAULT_PRODUCT_QUANTITY_PAIR: ProductQuantityAndService = {
+const DEFAULT_PRODUCT_QUANTITY_PAIR: ProductQuantityPair = {
     product: null,
-    service: null,
     quantity: null,
 };
 
@@ -70,18 +65,6 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
         [orderedProducts, onChange],
     );
 
-    const updateSelectedService = useCallback(
-        (service: { label: string; value: string }, index: number) => {
-            const newProductsAndQuantity = [...orderedProducts];
-            newProductsAndQuantity[index].service = {
-                value: service.value,
-                label: service.label,
-            };
-            onChange(newProductsAndQuantity);
-        },
-        [orderedProducts, onChange],
-    );
-
     const handleQuantityChange = useCallback(
         (quantity: number, index: number) => {
             const newProductsAndQuantity = [...orderedProducts];
@@ -94,11 +77,15 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
     // Products options for Select
     const selectableProductOptions = useMemo(() => {
         return (
-            productsData?.products.map((product) => ({
-                value: product.id,
-                label: product.name,
-                data: product,
-            })) || []
+            productsData?.products
+                .filter((product) => {
+                    return product.type === ProductTypeChoices.Comerciable;
+                })
+                .map((product) => ({
+                    value: product.id,
+                    label: product.name,
+                    data: product,
+                })) || []
         );
     }, [productsData]);
 
@@ -118,17 +105,6 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
                         if (item.product && item.quantity) {
                             subtotal = item.product.data.price * item.quantity;
                         }
-
-                        const services = item.product?.data.services;
-                        const servicesOptions =
-                            services && services.length
-                                ? services.map((service) => {
-                                      return {
-                                          value: service.id,
-                                          label: service.name,
-                                      };
-                                  })
-                                : null;
 
                         return (
                             <div
@@ -171,21 +147,6 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
                                     />
                                 </FormField>
 
-                                <FormField
-                                    fieldID={`productsAndQuantity-${index}-service`}
-                                    label="Servicio"
-                                >
-                                    <CustomSelect<{ label: string; value: string }, false>
-                                        options={servicesOptions || []}
-                                        name={`productsAndQuantity.${index}.service`}
-                                        placeholder="Selecciona un servicio"
-                                        onChange={(next) => {
-                                            if (!next) return;
-                                            updateSelectedService(next, index);
-                                        }}
-                                    />
-                                </FormField>
-
                                 <Label
                                     htmlFor={`productsAndQuantity-${index}-subtotal`}
                                     label="Subtotal"
@@ -222,11 +183,11 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
 type RHFProps<TFieldValues extends FieldValues, TName extends Path<TFieldValues>> = {
     name: TName;
     control: Control<TFieldValues>;
-} & (TFieldValues[Extract<keyof TFieldValues, TName>] extends ProductQuantityAndService[]
+} & (TFieldValues[Extract<keyof TFieldValues, TName>] extends ProductQuantityPair[]
     ? object
     : never);
 
-const RHFProductOrderField = <
+const ProductPurchaseOrderField = <
     TFieldValues extends FieldValues,
     TName extends Path<TFieldValues>,
 >(
@@ -240,7 +201,7 @@ const RHFProductOrderField = <
             control={control}
             render={({ field: { onChange, value } }) => (
                 <ProductOrderField
-                    value={value as ProductQuantityAndService[]}
+                    value={value as ProductQuantityPair[]}
                     onChange={onChange}
                 />
             )}
@@ -248,4 +209,4 @@ const RHFProductOrderField = <
     );
 };
 
-export default RHFProductOrderField;
+export default ProductPurchaseOrderField;

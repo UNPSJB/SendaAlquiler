@@ -37,7 +37,9 @@ type FieldsComponentProps = {
 };
 
 const PersonalDataStep: React.FC<FieldsComponentProps> = ({
-    formErrors, control, getValues
+    formErrors,
+    control,
+    getValues,
 }) => (
     <>
         <div className="flex space-x-4">
@@ -142,7 +144,8 @@ const CreateEmployeeForm: React.FC<NavigationButtonsCancelProps> = (props) => {
     const useFormMethods = useForm<FormValues>({
         reValidateMode: 'onChange',
     });
-    const { register, handleSubmit, formState, getValues, setValue, control } = useFormMethods;
+    const { register, handleSubmit, formState, getValues, setValue, control } =
+        useFormMethods;
     const formErrors = formState.errors;
 
     const router = useRouter();
@@ -204,7 +207,7 @@ const CreateEmployeeForm: React.FC<NavigationButtonsCancelProps> = (props) => {
                             <form className="space-y-4">
                                 <PersonalDataStep
                                     formErrors={formErrors}
-                                    register={register}                                 
+                                    register={register}
                                     control={control}
                                     getValues={getValues}
                                     setValue={setValue}

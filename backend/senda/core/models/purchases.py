@@ -1,5 +1,7 @@
 from decimal import Decimal
 from typing import Any
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
@@ -11,16 +13,11 @@ from .clients import ClientModel
 from .products import ProductModel, ProductTypeChoices
 
 
-def calculate_purchase_total(purchase: "PurchaseModel") -> Decimal:
-    total = sum([item.quantity * item.price for item in purchase.purchase_items.all()])
-    return Decimal(total)
-
-
 class PurchaseModel(TimeStampedModel):
     purchase_items: models.QuerySet["PurchaseItemModel"]
 
     date = models.DateTimeField(auto_now_add=True)
-    total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
+    total = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
     client = models.ForeignKey(
         ClientModel, on_delete=models.CASCADE, related_name="purchases"
     )
@@ -30,12 +27,11 @@ class PurchaseModel(TimeStampedModel):
     def __str__(self) -> str:
         return f"{self.date} - {self.total}"
 
-    @transaction.atomic
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        if not self.total:
-            self.total = calculate_purchase_total(self)
-
-        super().save(*args, **kwargs)
+    def recalculate_total(self) -> None:
+        self.total = self.purchase_items.aggregate(
+            total=models.Sum(models.F("price") * models.F("quantity"))
+        )["total"]
+        self.save()
 
 
 class PurchaseItemModel(TimeStampedModel):
@@ -47,7 +43,7 @@ class PurchaseItemModel(TimeStampedModel):
     )
     quantity = models.IntegerField()
     price = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
-    total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
+    total = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
 
     class Meta(TimeStampedModel.Meta):
         constraints = [
@@ -74,3 +70,14 @@ class PurchaseItemModel(TimeStampedModel):
             self.price = self.product.price
 
         super().save(*args, **kwargs)
+
+
+@receiver(post_save, sender=PurchaseItemModel)
+def update_purchase_total(
+    sender: Any, instance: PurchaseItemModel, **kwargs: Any
+) -> None:
+    new_total = instance.quantity * instance.price
+    if instance.total != new_total:
+        instance.total = new_total
+        instance.save()
+        instance.purchase.recalculate_total()

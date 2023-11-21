@@ -11,11 +11,13 @@ import BagShopping from './Icons/BagShopping';
 import ClipBoard from './Icons/ClipBoard';
 import ClipBoardList from './Icons/ClipBoardList';
 import ClipBoardUser from './Icons/ClipBoardUser';
+import FileLines from './Icons/FileLines';
 import Gear from './Icons/Gear';
 import House from './Icons/House';
 import LocationDot from './Icons/LocationDot';
+import MoneyCheckDollar from './Icons/MoneyCheckDollar';
 import User from './Icons/User';
-import UserTie from './Icons/UserTie'
+import UserTie from './Icons/UserTie';
 
 export type DashboardIconProps = {
     isActive: boolean;
@@ -34,13 +36,14 @@ const MAIN_LINKS: NavLink[] = [
     { href: '/empleados', label: 'Empleados', Icon: UserTie },
     { href: '/proveedores', label: 'Proveedores', Icon: ClipBoard },
     { href: '/localidades', label: 'Localidades', Icon: LocationDot },
+    { href: '/ventas', label: 'Ventas', Icon: MoneyCheckDollar },
     {
         href: '/pedidos-a-proveedores',
         label: 'Pedidos a proveedores',
         Icon: ClipBoardList,
     },
     { href: '/pedidos-internos', label: 'Pedidos internos', Icon: ClipBoardUser },
-    { href: '/contratos', label: 'Contratos', Icon: () => null },
+    { href: '/contratos', label: 'Contratos', Icon: FileLines },
 ];
 
 type NavigationLinkProps = PropsWithChildren<{

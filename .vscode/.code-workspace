@@ -1,0 +1,16 @@
+{
+    "folders": [
+        {
+            "path": "frontend"
+        },
+        {
+            "path": "backend"
+        }
+    ],
+    "settings": {
+        "typescript.tsdk": "frontend/node_modules/typescript/lib",
+        "[typescript]": {
+            "editor.defaultFormatter": "vscode.typescript-language-features"
+        }
+    }
+}

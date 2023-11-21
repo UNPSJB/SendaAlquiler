@@ -12,13 +12,11 @@ import {
 import toast from 'react-hot-toast';
 
 import { ClientsQuery } from '@/api/graphql';
-import { useClients, useCreateRentalContract } from '@/api/hooks';
+import { useCreatePurchase, useClients } from '@/api/hooks';
 
-import LocalityField, { LocalityFieldValue } from './fields/LocalityField';
-import RHFOfficesField, { OfficesFieldValue } from './fields/OfficesField';
-import RHFProductOrderField, {
-    ProductQuantityAndService,
-} from './fields/ProductOrderField';
+import ProductPurchaseOrderField, {
+    ProductQuantityPair,
+} from './fields/ProductPurchaseOrderField';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import ButtonWithSpinner from '@/components/ButtonWithSpinner';
@@ -26,13 +24,12 @@ import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
 
-import { RHFCustomFlatpickr } from '../forms/Flatpickr';
 import { RHFFormField } from '../forms/FormField';
-import RHFInput, { Input } from '../forms/Input';
+import { Input } from '../forms/Input';
 import Label from '../forms/Label';
 import RHFSelect from '../forms/Select';
 
-type CreateContractFormProps = {
+type CreatePurchaseFormProps = {
     cancelHref: string;
 };
 
@@ -42,50 +39,26 @@ type FormValues = {
         value: string;
         data: ClientsQuery['clients'][0];
     };
-    billing: {
-        firstName: string;
-        lastName: string;
-        phone: string;
-        email: string;
-        dni: string;
-        state: string;
-        locality: string;
-        postalCode: string;
-        streetName: string;
-        houseNumber: string;
-        houseUnit: string | null;
-        note: string;
-    };
-    details: {
-        locality?: LocalityFieldValue;
-        streetName: string;
-        houseNumber: string;
-        houseUnit: string | null;
-        note?: string;
-        office?: OfficesFieldValue;
-    };
-    productsAndQuantity: ProductQuantityAndService[];
-    contractStartDatetime: Date[];
-    contractEndDatetime: Date[];
+    productsAndQuantity: ProductQuantityPair[];
 };
 
-const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) => {
+const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) => {
     const clientsResult = useClients();
     const formMethods = useForm<FormValues>();
-    const { watch, control, setValue } = formMethods;
+    const { watch, control } = formMethods;
     const router = useRouter();
 
-    const { mutate, isLoading: isMutating } = useCreateRentalContract({
+    const { mutate, isLoading: isMutating } = useCreatePurchase({
         onSuccess: (data) => {
-            const error = data.createRentalContract?.error;
-            if (error || !data.createRentalContract) {
-                toast.error(error || 'No se pudo crear el contrato');
+            const error = data.createPurchase?.error;
+            if (error || !data.createPurchase) {
+                toast.error(error || 'No se pudo crear la venta');
             }
 
-            const contract = data.createRentalContract?.rentalContract;
-            if (contract) {
-                toast.success('Contrato creado exitosamente');
-                router.push('/contratos');
+            const purchase = data.createPurchase?.purchase;
+            if (purchase) {
+                toast.success('Venta creada exitosamente');
+                router.push('/ventas');
             }
         },
     });
@@ -101,63 +74,24 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
         return acc;
     }, 0);
 
-    const copyClientDetailsOnDetails = () => {
-        if (client) {
-            formMethods.setValue('details', {
-                streetName: client.streetName,
-                houseNumber: client.houseNumber,
-                houseUnit: client.houseUnit,
-            });
-
-            formMethods.setValue('details.locality', {
-                value: client.locality.id,
-                label: client.locality.name,
-                data: client.locality,
-            });
-        }
-    };
-
     const formIsValid = formMethods.formState.isValid;
 
     const onSubmit: SubmitHandler<FormValues> = (data) => {
-        const clientId = data.client?.data.id;
-        const contractStartDatetime = data.contractStartDatetime[0];
-        const contractEndDatetime = data.contractEndDatetime[0];
-        const houseNumber = data.details.houseNumber;
-        const houseUnit = data.details.houseUnit;
-        const localityId = data.details.locality?.data.id;
-        const officeId = data.details.office?.data.id;
+        const client = data.client?.data.id;
         const products = data.productsAndQuantity
             ? data.productsAndQuantity.map((productAndQuantity) => ({
-                  id: productAndQuantity.product?.data.id as string,
+                  product: productAndQuantity.product?.data.id as string,
                   quantity: productAndQuantity.quantity as number,
-                  service: productAndQuantity.service?.value.toString() || null,
               }))
             : null;
-        const streetName = data.details.streetName;
 
-        if (
-            !clientId ||
-            !contractStartDatetime ||
-            !products ||
-            products.length === 0 ||
-            !localityId ||
-            !officeId ||
-            !streetName
-        ) {
+        if (!client || !products || products.length === 0) {
             return;
         }
 
         mutate({
-            data: {
-                clientId: clientId,
-                contractStartDatetime: contractStartDatetime,
-                contractEndDatetime: contractEndDatetime,
-                houseNumber: houseNumber,
-                houseUnit: houseUnit,
-                streetName: streetName,
-                localityId: localityId,
-                officeId: officeId,
+            purchaseData: {
+                client: client,
                 products: products,
             },
         });
@@ -183,9 +117,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                     </div>
 
                     <div className="flex flex-1 items-center justify-between">
-                        <h1 className="py-8 pl-10 text-3xl font-black">
-                            Presupuestar contrato
-                        </h1>
+                        <h1 className="py-8 pl-10 text-3xl font-black">Venta</h1>
 
                         <div className="space-x-4">
                             <Button
@@ -461,149 +393,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                             </section>
 
                             <section className="flex border-t border-gray-200 py-8">
-                                <div className="w-3/12">
-                                    <h2 className="mb-4 text-xl font-bold">
-                                        Detalles de contrato
-                                    </h2>
-
-                                    <Button
-                                        variant={ButtonVariant.OUTLINE_WHITE}
-                                        onClick={copyClientDetailsOnDetails}
-                                        disabled={!client}
-                                    >
-                                        Copiar detalles de cliente
-                                    </Button>
-                                </div>
-
-                                <div className="w-9/12 space-y-6">
-                                    <RHFFormField
-                                        label="Sucursal"
-                                        fieldID="details.office"
-                                    >
-                                        <RHFOfficesField<FormValues, 'details.office'>
-                                            name="details.office"
-                                            control={control}
-                                            placeholder="Selecciona una oficina"
-                                            officeToExclude={undefined}
-                                        />
-                                    </RHFFormField>
-
-                                    <RHFFormField
-                                        label="Fecha y hora de inicio"
-                                        fieldID="contractStartDatetime"
-                                    >
-                                        <RHFCustomFlatpickr
-                                            data-enable-time
-                                            name="contractStartDatetime"
-                                            control={control}
-                                            rules={{ required: true }}
-                                            placeholder="Fecha y hora de inicio"
-                                        />
-                                    </RHFFormField>
-
-                                    <RHFFormField
-                                        label="Fecha y hora de finalización"
-                                        fieldID="contractEndDatetime"
-                                    >
-                                        <RHFCustomFlatpickr
-                                            data-enable-time
-                                            name="contractEndDatetime"
-                                            control={control}
-                                            rules={{ required: true }}
-                                            placeholder="Fecha y hora de finalización"
-                                        />
-                                    </RHFFormField>
-
-                                    <RHFFormField
-                                        label="Localidad"
-                                        fieldID="details.locality"
-                                    >
-                                        <LocalityField
-                                            name="details.locality"
-                                            control={control}
-                                            setValue={setValue}
-                                        />
-                                    </RHFFormField>
-
-                                    <div className="flex space-x-8">
-                                        <div className="w-1/2">
-                                            <RHFFormField
-                                                label="Calle"
-                                                fieldID="details.streetName"
-                                            >
-                                                <RHFInput
-                                                    id="details.streetName"
-                                                    name="details.streetName"
-                                                    type="text"
-                                                    placeholder="Calle"
-                                                    control={control}
-                                                    rules={{
-                                                        required: true,
-                                                    }}
-                                                />
-                                            </RHFFormField>
-                                        </div>
-
-                                        <div className="w-1/2">
-                                            <RHFFormField
-                                                label="N° de casa"
-                                                fieldID="details.houseNumber"
-                                            >
-                                                <RHFInput
-                                                    id="details.houseNumber"
-                                                    name="details.houseNumber"
-                                                    type="text"
-                                                    placeholder="N° de casa"
-                                                    control={control}
-                                                    rules={{
-                                                        required: true,
-                                                    }}
-                                                />
-                                            </RHFFormField>
-                                        </div>
-                                    </div>
-
-                                    <RHFFormField
-                                        label="Apartamento, habitación, unidad, etc"
-                                        fieldID="details.houseUnit"
-                                    >
-                                        <RHFInput
-                                            id="details.houseUnit"
-                                            name="details.houseUnit"
-                                            type="text"
-                                            placeholder="Apartamento, habitación, unidad, etc"
-                                            control={control}
-                                            rules={{
-                                                required: true,
-                                            }}
-                                        />
-                                    </RHFFormField>
-
-                                    <RHFFormField
-                                        label="Nota/Aclaración"
-                                        fieldID="details.note"
-                                    >
-                                        <RHFInput
-                                            id="details.note"
-                                            name="details.note"
-                                            type="text"
-                                            placeholder="Nota/aclaración"
-                                            control={control}
-                                            rules={{
-                                                required: true,
-                                            }}
-                                        />
-                                    </RHFFormField>
-                                </div>
-                            </section>
-
-                            <section className="flex border-t border-gray-200 py-8">
                                 <h2 className="w-3/12 text-xl font-bold">
-                                    Productos alquilados
+                                    Productos comprados
                                 </h2>
 
                                 <div className="w-9/12 space-y-6">
-                                    <RHFProductOrderField<
+                                    <ProductPurchaseOrderField<
                                         FormValues,
                                         'productsAndQuantity'
                                     >
@@ -639,4 +434,4 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
     );
 };
 
-export default CreateContractForm;
+export default CreatePurchaseForm;
