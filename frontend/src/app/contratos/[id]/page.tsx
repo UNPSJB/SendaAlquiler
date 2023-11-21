@@ -4,8 +4,8 @@ import { useParams } from 'next/navigation';
 
 import { useState } from 'react';
 
-import { EmployeeByIdQuery } from '@/api/graphql';
-import { useEmployeeById } from '@/api/hooks';
+import { ContractByIdQuery } from '@/api/graphql';
+import { useContractById } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -13,7 +13,8 @@ import DashboardLayout, {
 import Tabs from '@/modules/details-page/Tabs';
 import ChevronRight from '@/modules/icons/ChevronRight';
 
-import EmployeeByIdDetailsTab from './Details';
+import ContractsByIdDetailsTab from './Details';
+import ContractsByIdProductsTab from './Products';
 
 import Avatar from '@/components/Avatar';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
@@ -25,47 +26,52 @@ const getAvatarText = (firstName: string, lastName: string) => {
     return (firstName[0] + lastName[0]).toUpperCase();
 };
 
-const getDasboardTitle = (employee: EmployeeByIdQuery['employeeById'] | undefined) => {
-    if (!employee) {
-        return <DashboardLayoutBigTitle>Empleados</DashboardLayoutBigTitle>;
+const getDashboardTitle = (contract: ContractByIdQuery['contractById'] | undefined) => {
+    if (!contract) {
+        return <DashboardLayoutBigTitle>Contratos</DashboardLayoutBigTitle>;
     }
 
     return (
         <div className="flex items-center space-x-4">
-            <DashboardLayoutBigTitle>Empleados</DashboardLayoutBigTitle>
+            <DashboardLayoutBigTitle>Contratos</DashboardLayoutBigTitle>
             <ChevronRight />
             <span className="font-headings text-sm">
-                {employee.user.firstName} {employee.user.lastName}
+                {contract.client.firstName} {contract.client.lastName}
             </span>
         </div>
     );
 };
 
-export type EmployeeByIdTabComponentProps = {
-    employee: NonNullable<EmployeeByIdQuery['employeeById']>;
+export type ContractByIdTabComponentProps = {
+    contract: NonNullable<ContractByIdQuery['contractById']>;
 };
 
 const tabs = [
     {
         label: 'Detalles',
         key: 'details',
-        Component: EmployeeByIdDetailsTab,
+        Component: ContractsByIdDetailsTab,
+    },
+    {
+        label: 'Productos',
+        key: 'products',
+        Component: ContractsByIdProductsTab,
     },
 ];
 
 const Page = () => {
     const { id } = useParams();
-    const useEmployeeByIdResult = useEmployeeById(id as string);
+    const useContractByIdResult = useContractById(id as string);
 
     const [activeTab, setActiveTab] = useState(tabs[0].key);
 
-    const employee = useEmployeeByIdResult.data?.employeeById;
+    const contract = useContractByIdResult.data?.contractById;
     const Component = tabs.find((tab) => tab.key === activeTab)!.Component;
 
     return (
-        <DashboardLayout header={getDasboardTitle(employee)}>
+        <DashboardLayout header={getDashboardTitle(contract)}>
             <FetchedDataRenderer
-                {...useEmployeeByIdResult}
+                {...useContractByIdResult}
                 Loading={
                     <div className="flex w-full flex-1 items-center justify-center">
                         <Spinner />
@@ -75,41 +81,41 @@ const Page = () => {
                     <div className="flex w-full flex-1 items-center justify-center">
                         <FetchStatusMessageWithDescription
                             title="Ha ocurrido un error"
-                            line1="Hubo un error al cargar el empleado."
+                            line1="Hubo un error al cargar el contrato."
                             line2="Prueba de nuevo más tarde."
                         />
                     </div>
                 }
             >
-                {({ employeeById: employee }) => {
-                    if (!employee) {
+                {({ contractById: contract }) => {
+                    if (!contract) {
                         return (
                             <div className="flex w-full flex-1 items-center justify-center">
                                 <FetchStatusMessageWithButton
-                                    message="Parece que el empleado que buscas no existe."
-                                    btnHref="/empleados"
-                                    btnText='Volver a "Empleados"'
+                                    message="Parece que el contrato que buscas no existe."
+                                    btnHref="/contratos"
+                                    btnText='Volver a "Contratos"'
                                 />
                             </div>
                         );
                     }
 
                     return (
-                        <div className="flex  flex-1 flex-col">
+                        <div className="flex flex-1 flex-col">
                             <header className="border-b pl-10">
                                 <div className="mb-10 flex items-center">
                                     <Avatar>
                                         {getAvatarText(
-                                            employee.user.firstName,
-                                            employee.user.lastName,
+                                            contract.client.firstName,
+                                            contract.client.lastName,
                                         )}
                                     </Avatar>
                                     <div className="pl-6">
                                         <h1 className="my-2 mt-10 text-xl font-bold">
-                                            {employee.user.firstName}{' '}
-                                            {employee.user.lastName}
+                                            {contract.client.firstName}{' '}
+                                            {contract.client.lastName}
                                         </h1>
-                                        <p>{employee.user.email}</p>
+                                        <p>{contract.client.email}</p>
                                     </div>
                                 </div>
 
@@ -125,8 +131,8 @@ const Page = () => {
                             </header>
 
                             <div className="flex-1 bg-gray-100 px-0">
-                                <section className="pl-10 ">
-                                    <Component employee={employee} />
+                                <section className="pl-10">
+                                    <Component contract={contract} />
                                 </section>
                             </div>
                         </div>

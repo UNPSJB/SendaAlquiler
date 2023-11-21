@@ -10,6 +10,7 @@ import {
     BrandsQuery,
     ClientByIdDocument,
     ClientsDocument,
+    ContractByIdDocument,
     ContractsDocument,
     ContractsQuery,
     CreateBrandDocument,
@@ -67,6 +68,7 @@ const queryKeys = {
     brands: ['brands'],
 
     contracts: ['contracts'],
+    contractsById: (id: string | undefined) => [...queryKeys.contracts, id],
 
     localities: ['localities'],
 
@@ -456,6 +458,20 @@ export const useContracts = () => {
     return useQuery(queryKeys.contracts, () => {
         return clientGraphqlQuery(ContractsDocument, {});
     });
+};
+
+export const useContractById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.contractsById(id),
+        () => {
+            return clientGraphqlQuery(ContractByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
 };
 
 type UseCreateRentalContractOptions = UseMutationOptions<
