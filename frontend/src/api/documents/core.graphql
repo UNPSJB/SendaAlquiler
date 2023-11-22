@@ -106,6 +106,29 @@ query products {
     }
 }
 
+mutation CreateSupplier($data: CreateSupplierInput!) {
+    createSupplier(data: $data) {
+        supplier {
+            id
+            cuit
+            email
+            houseNumber
+            houseUnit
+            name
+            note
+            phoneCode
+            phoneNumber
+            streetName
+            locality {
+                name
+                postalCode
+                state
+            }
+        }
+        error
+    }
+}
+
 query suppliers {
     suppliers {
         id

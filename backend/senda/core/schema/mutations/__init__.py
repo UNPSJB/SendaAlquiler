@@ -7,6 +7,7 @@ from .products import Mutation as ProductMutation
 from .rental_contract import Mutation as RentalContractMutation
 from .employees import Mutation as EmployeeMutation
 from .purchases import Mutation as PurchaseMutation
+from .suppliers import Mutation as SupplierMutation
 
 
 class Mutation(
@@ -17,6 +18,7 @@ class Mutation(
     ProductMutation,
     PurchaseMutation,
     RentalContractMutation,
+    SupplierMutation,
     graphene.ObjectType,
 ):
     pass

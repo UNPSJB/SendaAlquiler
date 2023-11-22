@@ -25,6 +25,9 @@ import {
     CreateLocalityDocument,
     CreateLocalityMutation,
     CreateLocalityMutationVariables,
+    CreateSupplierDocument,
+    CreateSupplierMutation,
+    CreateSupplierMutationVariables,
     EmployeesDocument,
     EmployeeByIdDocument,
     CreateProductDocument,
@@ -219,6 +222,37 @@ export const useSupplierById = (id: string | undefined) => {
         },
         {
             enabled: typeof id === 'string',
+        },
+    );
+};
+
+type UseCreateSupplierOptions = UseMutationOptions<
+    CreateSupplierMutation,
+    Error,
+    CreateSupplierMutationVariables
+>;
+
+export const useCreateSupplier = ({
+    onSuccess,
+    ...options
+}: UseCreateSupplierOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<CreateSupplierMutation, Error, CreateSupplierMutationVariables>(
+        (data) => {
+            return clientGraphqlQuery(CreateSupplierDocument, data);
+        },
+        {
+            onSuccess: (data, context, variables) => {
+                if (data.createSupplier?.supplier) {
+                    client.invalidateQueries(queryKeys.suppliers);
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, context, variables);
+                }
+            },
+            ...options,
         },
     );
 };
@@ -525,8 +559,8 @@ export const useCreateRentalContract = ({
 };
 
 export const usePurchases = () => {
-    return useQuery(queryKeys.purchases,() => {
-       return clientGraphqlQuery(PurchasesDocument, {});
+    return useQuery(queryKeys.purchases, () => {
+        return clientGraphqlQuery(PurchasesDocument, {});
     });
 };
 
@@ -550,7 +584,10 @@ type UseCreatePurchaseOptions = UseMutationOptions<
     CreatePurchaseMutationVariables
 >;
 
-export const useCreatePurchase = ({ onSuccess, ...options }: UseCreatePurchaseOptions = {}) => {
+export const useCreatePurchase = ({
+    onSuccess,
+    ...options
+}: UseCreatePurchaseOptions = {}) => {
     const client = useQueryClient();
 
     return useMutation<CreatePurchaseMutation, Error, CreatePurchaseMutationVariables>(

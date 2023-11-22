@@ -1,5 +1,6 @@
+import CreateSupplierForm from '@/modules/create-forms/CreateSupplierForm';
 const Page = () => {
-    return <div>crear localidad</div>;
+    return <CreateSupplierForm cancelHref="/proveedores" />;
 };
 
 export default Page;
