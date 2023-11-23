@@ -48,8 +48,10 @@ import {
     ProductsDocument,
     ProductsQuery,
     ProductsStocksByOfficeIdDocument,
+    SupplierOrderBySupplierIdDocument,
     SupplierByIdDocument,
     SuppliersDocument,
+    SupplierOrdersDocument,
     CreatePurchaseMutation,
     CreatePurchaseMutationVariables,
     CreateEmployeeMutation,
@@ -58,6 +60,7 @@ import {
     PurchaseByIdDocument,
     PurchasesQuery,
     CreatePurchaseDocument,
+    SupplierOrderByIdDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -80,6 +83,15 @@ const queryKeys = {
 
     suppliers: ['suppliers'],
     supplierById: (id: string | undefined) => [...queryKeys.suppliers, id],
+
+    supplierOrdersBySupplier: ['supplier-orders-by-supplier'],
+    supplierOrderBySupplierId: (id: string | undefined) => [
+        ...queryKeys.supplierOrdersBySupplier,
+        id,
+    ],
+
+    supplierOrders: ['supplier-orders'],
+    supplierOrderById: (id: string | undefined) => [...queryKeys.supplierOrders, id],
 
     internalOrders: ['internal-orders'],
     internalOrderById: (id: string | undefined) => [...queryKeys.internalOrders, id],
@@ -179,6 +191,48 @@ export const useClientById = (id: string | undefined) => {
         },
     );
 };
+
+export const useSupplierOrders = () => {
+    return useQuery(queryKeys.supplierOrders, () => {
+        return clientGraphqlQuery(SupplierOrdersDocument, {});
+    });
+};
+
+export const useSupplierOrderById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.supplierById(id),
+        () => {
+            return clientGraphqlQuery(SupplierOrderByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
+};
+
+export const useSupplierOrdersBySupplierId = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.supplierOrderBySupplierId(id),
+        () => {
+            return clientGraphqlQuery(SupplierOrderBySupplierIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
+};
+
+// export const useProductsStocksByOfficeId = (officeId: string) => {
+//     return useQuery(queryKeys.productsStocksByOfficeId(officeId), () => {
+//         return clientGraphqlQuery(ProductsStocksByOfficeIdDocument, {
+//             officeId,
+//         });
+//     });
+// };
 
 export const useLocalities = () => {
     return useQuery(queryKeys.localities, () => {

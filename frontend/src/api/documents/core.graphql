@@ -106,6 +106,70 @@ query products {
     }
 }
 
+query supplierOrders {
+    supplierOrders {
+        id
+        supplier {
+            name
+        }
+        dateCreated
+        currentHistory {
+            status
+        }
+        officeDestination {
+            name
+        }
+    }
+}
+
+query supplierOrderById($id: ID!) {
+    supplierOrderById(id: $id) {
+        id
+        supplier {
+            cuit
+            name
+            email
+            locality {
+                name
+                postalCode
+                state
+            }
+            houseNumber
+            streetName
+            phoneCode
+            phoneNumber
+        }
+        officeDestination {
+            name
+            street
+            houseNumber
+            locality {
+                name
+            }
+        }
+        currentHistory {
+            status
+            user {
+                firstName
+                lastName
+                email
+            }
+            supplierOrder {
+                orders {
+                    product {
+                        brand {
+                            name
+                        }
+                        type
+                    }
+                    quantity
+                    quantityReceived
+                }
+            }
+        }
+    }
+}
+
 mutation CreateSupplier($data: CreateSupplierInput!) {
     createSupplier(data: $data) {
         supplier {
@@ -144,6 +208,38 @@ query suppliers {
         houseNumber
         houseUnit
         note
+    }
+}
+
+query supplierOrderBySupplierId($id: ID!) {
+    supplierOrderBySupplierId(id: $id) {
+        id
+        dateCreated
+        officeDestination {
+            name
+            street
+            houseNumber
+        }
+        currentHistory {
+            status
+            user {
+                email
+                firstName
+                lastName
+            }
+        }
+        orders {
+            product {
+                brand {
+                    name
+                }
+                name
+                price
+                type
+            }
+            quantity
+            quantityReceived
+        }
     }
 }
 

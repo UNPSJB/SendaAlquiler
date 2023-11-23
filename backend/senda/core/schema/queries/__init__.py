@@ -9,6 +9,7 @@ from .purchases import Query as PurchaseQuery
 from .rental_contracts import Query as RentalContractQuery
 from .suppliers import Query as SupplierQuery
 from .employees import Query as EmployeeQuery
+from .supplier_orders import Query as SupplierOrderQuery
 
 class Query(
     ClientQuery,
@@ -18,6 +19,7 @@ class Query(
     ProductQuery,
     PurchaseQuery,
     SupplierQuery,
+    SupplierOrderQuery,
     InteralOrderQuery,
     RentalContractQuery,
     graphene.ObjectType,

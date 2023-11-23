@@ -35,27 +35,16 @@ class SupplierOrderModel(TimeStampedModel):
         null=True,
     )
 
-    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
-
     objects: SupplierOrderManager = SupplierOrderManager()  # pyright: ignore
 
     def __str__(self) -> str:
         return str(self.pk)
-
-    def calculate_total(self) -> Decimal:
-        total = Decimal(0)
-        for order in self.orders.all():
-            total += order.total
-
-        return total
 
 
 class SupplierOrderProduct(TimeStampedModel):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="related_supplier_orders"
     )
-    price = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
-    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
 
     quantity = models.PositiveIntegerField(default=0)
     quantity_received = models.PositiveIntegerField(default=0)
@@ -65,13 +54,6 @@ class SupplierOrderProduct(TimeStampedModel):
 
     def __str__(self) -> str:
         return f"{self.product.name} - {self.quantity}"
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        if not self.price and self.product.price:
-            self.price = self.product.price
-
-        if not self.total:
-            self.total = self.price * self.quantity
 
         super().save(*args, **kwargs)
 
