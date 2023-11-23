@@ -113,7 +113,7 @@ class BaseChangeOrderSupplierStatus(graphene.Mutation):
             raise Exception("La orden no esta en un estado valido")
 
         SupplierOrderHistoryModel.objects.create(
-            order_supplier=order, status=new_status
+            supplier_order=order, status=new_status
         )
 
 
