@@ -1,12 +1,12 @@
-from typing import Any,List
+from typing import Any, List
 
 import graphene  # pyright: ignore
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from senda.core.models.offices import OfficeModel
 from senda.core.models.order_supplier import (
-    SupplierOrderModel, 
-    SupplierOrderHistoryModel, 
+    SupplierOrderModel,
+    SupplierOrderHistoryModel,
     SupplierOrderHistoryStatusChoices,
 )
 from senda.core.schema.custom_types import OrderSupplier
@@ -87,13 +87,12 @@ class CreateSupplierOrder(graphene.Mutation):
         return CreateSupplierOrder(order_supplier=order_supplier)
 
 
-
 class BaseChangeOrderSupplierStatus(graphene.Mutation):
     order_supplier = graphene.ID(OrderSupplier)
     error = graphene.String()
 
     class Arguments:
-        order_supplier_id =graphene.ID(required=True)
+        order_supplier_id = graphene.ID(required=True)
 
     @classmethod
     def get_order_supplier(cls, id: str):
@@ -102,27 +101,25 @@ class BaseChangeOrderSupplierStatus(graphene.Mutation):
             raise Exception("No existe un pedido con ese ID")
 
         return order_supplier
-    
+
     @classmethod
     def check_order_supplier_status_is_one_of_and_update_status(
         cls,
-        order:SupplierOrderModel,
+        order: SupplierOrderModel,
         status: List[SupplierOrderHistoryStatusChoices],
         new_status: SupplierOrderHistoryStatusChoices,
     ):
-        if (
-            not order.current_history
-            or order.current_history.status not in status
-        ):
+        if not order.current_history or order.current_history.status not in status:
             raise Exception("La orden no esta en un estado valido")
 
         SupplierOrderHistoryModel.objects.create(
             order_supplier=order, status=new_status
         )
 
+
 class ReceiveOrderSupplier(BaseChangeOrderSupplierStatus):
     @classmethod
-    def mutate (cls, self: "ReceiveOrderSupplier", info: Any, order_supplier_id: str):
+    def mutate(cls, self: "ReceiveOrderSupplier", info: Any, order_supplier_id: str):
         try:
             order = cls.get_order_supplier(order_supplier_id)
             cls.check_order_supplier_status_is_one_of_and_update_status(
@@ -138,7 +135,7 @@ class ReceiveOrderSupplier(BaseChangeOrderSupplierStatus):
 
 class CancelOrderSupplier(BaseChangeOrderSupplierStatus):
     @classmethod
-    def mutate (cls, self: "CancelOrderSupplier", info: Any, order_supplier_id: str):
+    def mutate(cls, self: "CancelOrderSupplier", info: Any, order_supplier_id: str):
         try:
             order = cls.get_order_supplier(order_supplier_id)
             cls.check_order_supplier_status_is_one_of_and_update_status(
@@ -150,6 +147,7 @@ class CancelOrderSupplier(BaseChangeOrderSupplierStatus):
             return BaseChangeOrderSupplierStatus(order_supplier=order)
         except Exception as e:
             return BaseChangeOrderSupplierStatus(error=str(e))
+
 
 class Mutation(graphene.ObjectType):
     create_supplier_order = CreateSupplierOrder.Field()
