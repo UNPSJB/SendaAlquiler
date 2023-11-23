@@ -18,6 +18,10 @@ if TYPE_CHECKING:
 
 
 class ClientModelManager(models.Manager["ClientModel"]):
+    """
+    Custom manager for the ClientModel, providing methods to create and update client instances.
+    """
+
     def create_client(
         self,
         email: str,
@@ -31,6 +35,10 @@ class ClientModelManager(models.Manager["ClientModel"]):
         phone_code: str,
         phone_number: str,
     ) -> "ClientModel":
+        """
+        Creates a new client instance with the given details. Validates to ensure the email and DNI are unique.
+        """
+
         if self.filter(email=email).exists():
             raise ValueError("Ya existe un cliente con ese email")
 
@@ -53,6 +61,10 @@ class ClientModelManager(models.Manager["ClientModel"]):
     def update_client(
         self, client: "ClientModel", locality: "LocalityModel", **kwargs: Any
     ) -> "ClientModel":
+        """
+        Updates an existing client instance with the provided details.
+        """
+
         client.locality = locality
         for field, value in kwargs.items():
             setattr(client, field, value)
@@ -61,9 +73,16 @@ class ClientModelManager(models.Manager["ClientModel"]):
 
 
 class LocalityModelManager(models.Manager["LocalityModel"]):
+    """
+    Custom manager for the LocalityModel, providing methods to create and retrieve locality instances.
+    """
+
     def create_locality(
         self, name: str, postal_code: str, state: "StateChoices"
     ) -> "LocalityModel":
+        """
+        Creates a new locality instance with the given details. Ensures the locality's uniqueness.
+        """
         name = name.strip().lower().title()
 
         if self.filter(name=name, postal_code=postal_code, state=state).exists():
@@ -74,6 +93,9 @@ class LocalityModelManager(models.Manager["LocalityModel"]):
     def get_or_create_locality(
         self, name: str, postal_code: int, state: "StateChoices"
     ) -> "LocalityModel":
+        """
+        Retrieves or creates a locality instance based on the provided details.
+        """
         locality, _created = self.get_or_create(
             name=name, postal_code=postal_code, state=state
         )
@@ -86,6 +108,10 @@ InternalOrderProductsDict = TypedDict(
 
 
 class InternalOrderManager(models.Manager["InternalOrderModel"]):
+    """
+    Custom manager for the InternalOrderModel, handling the creation of internal orders.
+    """
+
     @transaction.atomic
     def create_internal_order(
         self,
@@ -94,6 +120,9 @@ class InternalOrderManager(models.Manager["InternalOrderModel"]):
         user: "UserModel",
         products: List[InternalOrderProductsDict],
     ) -> "InternalOrderModel":
+        """
+        Creates a new internal order with associated products and history. This process is atomic.
+        """
         from senda.core.models.order_internal import InternalOrderHistoryStatusChoices
 
         internal_order = self.create(
@@ -121,6 +150,10 @@ SupplierOrderProductsDict = TypedDict(
 
 
 class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
+    """
+    Custom manager for the SupplierOrderModel, handling the creation of supplier orders.
+    """
+
     @transaction.atomic
     def create_supplier_order(
         self,
@@ -130,6 +163,9 @@ class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
         products: List[SupplierOrderProductsDict],
         total: float,
     ) -> "SupplierOrderModel":
+        """
+        Creates a new supplier order with associated products, history, and total cost calculation. This process is atomic.
+        """
         from senda.core.models.order_supplier import SupplierOrderHistoryStatusChoices
 
         supplier_order = self.create(
@@ -167,7 +203,10 @@ ProductServiceDict = TypedDict("ProductServiceDict", {"name": str, "price": str}
 
 
 def parse_price(price_str: str) -> Decimal:
-    # Replace dots with nothing and commas with dots
+    """
+    Parses a price string into a Decimal object, handling different formatting conventions.
+    """
+
     standard_format_str = price_str.replace(".", "").replace(",", ".")
     try:
         return Decimal(standard_format_str)
@@ -176,6 +215,10 @@ def parse_price(price_str: str) -> Decimal:
 
 
 class ProductModelManager(models.Manager["ProductModel"]):
+    """
+    Custom manager for the ProductModel, providing methods to create product instances with associated details.
+    """
+
     def create_product(
         self,
         sku: str,
@@ -188,6 +231,9 @@ class ProductModelManager(models.Manager["ProductModel"]):
         services: List[ProductServiceDict],
         suppliers: List[ProductSupplierDict],
     ) -> "ProductModel":
+        """
+        Creates a new product instance with various associated data like stock, services, and suppliers.
+        """
         if self.filter(sku=sku).exists():
             raise ValueError("Ya existe un producto con ese sku")
 
@@ -227,12 +273,19 @@ PurchaseProductsItemDict = TypedDict(
 
 
 class PurchaseModelManager(models.Manager["PurchaseModel"]):
+    """
+    Custom manager for the PurchaseModel, handling the creation of purchase instances.
+    """
+
     @transaction.atomic
     def create_purchase(
         self,
         client: "ClientModel",
         products: List[PurchaseProductsItemDict],
     ) -> "PurchaseModel":
+        """
+        Creates a new purchase instance with associated purchase items. This process is atomic.
+        """
         purchase = self.create(client=client)
         purchase.save()
 
@@ -254,6 +307,10 @@ RentalContractProductsItemDict = TypedDict(
 
 
 class RentalContractManager(models.Manager["RentalContractModel"]):
+    """
+    Custom manager for the RentalContractModel, handling the creation of rental contract instances.
+    """
+
     @transaction.atomic
     def create_rental_contract(
         self,
@@ -267,6 +324,9 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
         contract_start_datetime: str,
         contract_end_datetime: str,
     ) -> "RentalContractModel":
+        """
+        Creates a new rental contract with associated items and history. This process is atomic.
+        """
         from senda.core.models.rental_contracts import RentalContractStatusChoices
 
         rental_contract = self.create(
@@ -295,7 +355,14 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
 
 
 class EmployeeModelManager(models.Manager["EmployeeModel"]):
+    """
+    Custom manager for the EmployeeModel, providing methods to create and update employee instances.
+    """
+
     def create_employee(self, user: "UserModel"):
+        """
+        Creates a new employee instance, ensuring the user does not already have an associated employee.
+        """
         if self.filter(user=user).exists():
             raise ValueError("Ya existe ese empleado")
 
@@ -304,6 +371,9 @@ class EmployeeModelManager(models.Manager["EmployeeModel"]):
         )
 
     def update_employee(self, employee: "EmployeeModel", **kwargs: Any):
+        """
+        Updates an existing employee instance with the provided details.
+        """
         for field, value in kwargs.items():
             setattr(employee, field, value)
         employee.save()

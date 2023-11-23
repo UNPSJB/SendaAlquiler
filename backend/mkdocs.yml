@@ -1,0 +1,15 @@
+site_name: Senda Docs
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.instant
+plugins:
+- mkdocstrings:
+    default_handler: python
+    handlers:
+      python:
+        options:
+          show_root_heading: true
+
