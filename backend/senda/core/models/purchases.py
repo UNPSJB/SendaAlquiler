@@ -14,6 +14,22 @@ from .products import ProductModel, ProductTypeChoices
 
 
 class PurchaseModel(TimeStampedModel):
+    """
+    Represents a purchase in the Senda system. Inherits from TimeStampedModel for creation and modification timestamps.
+
+    Attributes:
+        purchase_items (models.QuerySet["PurchaseItemModel"]): A queryset for accessing the items included in the purchase.
+        date (models.DateTimeField): The date and time when the purchase was made.
+        total (models.DecimalField): The total cost of the purchase.
+        client (models.ForeignKey): A foreign key to ClientModel, linking to the client who made the purchase.
+
+    Methods:
+        __str__: Returns a string representation of the purchase, showing the date and total cost.
+        recalculate_total: Recalculates the total cost of the purchase based on its items.
+
+    objects (PurchaseModelManager): Custom manager providing additional functionalities.
+    """
+
     purchase_items: models.QuerySet["PurchaseItemModel"]
 
     date = models.DateTimeField(auto_now_add=True)
@@ -35,6 +51,25 @@ class PurchaseModel(TimeStampedModel):
 
 
 class PurchaseItemModel(TimeStampedModel):
+    """
+    Represents an item in a purchase. Inherits from TimeStampedModel.
+
+    Attributes:
+        product (models.ForeignKey): A foreign key to ProductModel, linking to the product purchased.
+        purchase (models.ForeignKey): A foreign key to PurchaseModel, linking to the purchase the item belongs to.
+        quantity (models.IntegerField): The quantity of the product purchased.
+        price (models.DecimalField): The price of the product at the time of purchase.
+        total (models.DecimalField): The total cost for this product in the purchase.
+
+    Meta:
+        Defines constraints, including uniqueness of product per purchase and validation check on quantity.
+
+    Methods:
+        clean: Custom validation logic to ensure the product is commerciable.
+        __str__: Returns a string representation of the purchase item, showing product name and quantity.
+        save: Overridden save method to include custom logic for setting price and total.
+    """
+
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="purchase_items"
     )
@@ -76,6 +111,14 @@ class PurchaseItemModel(TimeStampedModel):
 def update_purchase_total(
     sender: Any, instance: PurchaseItemModel, **kwargs: Any
 ) -> None:
+    """
+    Signal receiver that updates the total field of a PurchaseItemModel instance and recalculates the total cost of the associated PurchaseModel.
+
+    Parameters:
+        sender (Any): The model class sending the signal.
+        instance (PurchaseItemModel): The instance of the model that was saved.
+        kwargs (Any): Additional keyword arguments.
+    """
     new_total = instance.quantity * instance.price
     if instance.total != new_total:
         instance.total = new_total

@@ -5,6 +5,12 @@ from senda.core.managers import LocalityModelManager
 
 
 class StateChoices(models.TextChoices):
+    """
+    Enum-like class representing choices for states. Inherits from models.TextChoices.
+
+    It provides a set of predefined choices for Argentine states, each choice being a tuple where the first value is the internal identifier and the second value is the human-readable name.
+    """
+
     BUENOS_AIRES = "BUENOS_AIRES", "BUENOS_AIRES"
     CATAMARCA = "CATAMARCA", "CATAMARCA"
     CHACO = "CHACO", "CHACO"
@@ -31,11 +37,26 @@ class StateChoices(models.TextChoices):
 
 
 class LocalityModel(TimeStampedModel):
+    """
+    Represents a locality within a state, extending the TimeStampedModel to include timestamps for creation and modification.
+
+    Attributes:
+        name (models.CharField): The name of the locality.
+        postal_code (models.CharField): The postal code of the locality.
+        state (models.CharField): The state in which the locality is located. The choices for this field are defined by the StateChoices class.
+        objects (LocalityModelManager): Custom manager for LocalityModel providing additional functionalities like creating and retrieving locality instances.
+
+    Meta:
+        Defines a unique constraint combining 'name', 'postal_code', and 'state' to ensure the uniqueness of a locality.
+
+    Methods:
+        __str__: Returns a string representation of the LocalityModel instance, which is the name of the locality.
+    """
     name = models.CharField(max_length=255)
     postal_code = models.CharField(max_length=10)
     state = models.CharField(choices=StateChoices.choices, max_length=30)
 
-    objects: LocalityModelManager = LocalityModelManager() # pyright: ignore
+    objects: LocalityModelManager = LocalityModelManager()  # pyright: ignore
 
     class Meta(TimeStampedModel.Meta):
         constraints = [
