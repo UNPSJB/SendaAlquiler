@@ -18,6 +18,35 @@ from datetime import timedelta
 
 
 class RentalContractModel(TimeStampedModel):
+    """
+    Represents a rental contract in the Senda system. Inherits from TimeStampedModel for creation and modification timestamps.
+
+    Attributes:
+        rental_contract_items (models.QuerySet["RentalContractItemModel"]): A queryset for accessing the items included in the rental contract.
+        rental_contract_history (models.QuerySet["RentalContractHistoryModel"]): A queryset for accessing the contract's history.
+        office (models.ForeignKey): A foreign key to OfficeModel, linking to the office where the contract is held.
+        client (models.ForeignKey): A foreign key to ClientModel, linking to the client involved in the rental contract.
+        current_history (models.OneToOneField): A one-to-one relationship to the most current history item of the rental contract.
+        has_payed_deposit (models.BooleanField): Flag to indicate if the deposit has been paid.
+        has_payed_remaining_amount (models.BooleanField): Flag to indicate if the remaining amount has been paid.
+        total (models.DecimalField): The total cost of the rental contract.
+        expiration_date (models.DateTimeField): The expiration date of the contract.
+        contract_start_datetime (models.DateTimeField): The start datetime of the contract.
+        contract_end_datetime (models.DateTimeField): The end datetime of the contract.
+        locality (models.ForeignKey): A foreign key to LocalityModel, representing the locality of the client.
+        house_number (models.CharField): The house number of the client's address.
+        street_name (models.CharField): The street name of the client's address.
+        house_unit (models.CharField): The house unit number of the client's address.
+
+    Meta:
+        Defines verbose names for the model.
+
+    Methods:
+        __str__: Returns a string representation of the rental contract, showing the client's email.
+        save: Overridden save method to include logic for setting expiration date.
+        calculate_total: Calculates and returns the total cost of the rental contract based on its items.
+    """
+
     rental_contract_items: models.QuerySet["RentalContractItemModel"]
     rental_contract_history: models.QuerySet["RentalContractHistoryModel"]
 
@@ -84,6 +113,29 @@ class RentalContractModel(TimeStampedModel):
 
 
 class RentalContractItemModel(TimeStampedModel):
+    """
+    Represents an item in a rental contract. Inherits from TimeStampedModel.
+
+    Attributes:
+        rental_contract (models.ForeignKey): A foreign key to RentalContractModel, linking to the rental contract the item belongs to.
+        product (models.ForeignKey): A foreign key to ProductModel, linking to the product rented.
+        quantity (models.PositiveIntegerField): The quantity of the product rented.
+        price (models.DecimalField): The price of the product at the time of rental.
+        total (models.DecimalField): The total cost for this product in the rental contract.
+        quantity_returned (models.PositiveIntegerField): The quantity of the product that has been returned.
+        service (models.ForeignKey): An optional foreign key to ProductServiceModel, linking to an associated service.
+        service_price (models.DecimalField): The price of the associated service.
+        service_total (models.DecimalField): The total cost for the service in the rental contract.
+
+    Meta:
+        Defines constraints, including uniqueness of product per rental contract and validation checks on quantities.
+
+    Methods:
+        clean: Custom validation logic to ensure the product is rentable.
+        __str__: Returns a string representation of the rental contract item, showing the contract and product.
+        save: Overridden save method to include custom logic for setting price, total, and service total.
+    """
+
     rental_contract = models.ForeignKey(
         RentalContractModel,
         on_delete=models.CASCADE,
@@ -160,6 +212,12 @@ class RentalContractItemModel(TimeStampedModel):
 
 
 class RentalContractStatusChoices(models.TextChoices):
+    """
+    Enum-like class representing status choices for rental contract history. Inherits from models.TextChoices.
+
+    Provides predefined status choices like PRESUPUESTADO, CON_DEPOSITO, PAGADO, CANCELADO, etc.
+    """
+
     PRESUPUESTADO = "PRESUPUESTADO", "PRESUPUESTADO"
     CON_DEPOSITO = "CON_DEPOSITO", "SEÑADO"
     PAGADO = "PAGADO", "PAGADO"
@@ -172,6 +230,20 @@ class RentalContractStatusChoices(models.TextChoices):
 
 
 class RentalContractHistoryModel(TimeStampedModel):
+    """
+    Represents the history of a rental contract, tracking its status changes. Inherits from TimeStampedModel.
+
+    Attributes:
+        rental_contract (models.ForeignKey): A foreign key to RentalContractModel, linking to the related rental contract.
+        status (models.CharField): The current status of the contract, using choices from RentalContractStatusChoices.
+
+    Meta:
+        Defines verbose names for the model.
+
+    Methods:
+        __str__: Returns a string representation of the rental contract history, showing the contract and status.
+    """
+
     rental_contract = models.ForeignKey(
         RentalContractModel,
         on_delete=models.CASCADE,
@@ -196,6 +268,15 @@ def update_current_history(
     created: bool,
     **kwargs: Any,
 ) -> None:
+    """
+    Signal receiver that updates the current history of a RentalContractModel when a new RentalContractHistoryModel instance is created.
+
+    Parameters:
+        sender (RentalContractHistoryModel): The model class sending the signal.
+        instance (RentalContractHistoryModel): The instance of the model that was saved.
+        created (bool): A boolean flag indicating whether this instance is newly created.
+        kwargs (Any): Additional keyword arguments.
+    """
     if created:
         rental_contract = instance.rental_contract
         rental_contract.current_history = instance
