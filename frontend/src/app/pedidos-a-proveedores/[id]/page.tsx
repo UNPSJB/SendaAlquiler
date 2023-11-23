@@ -37,7 +37,7 @@ const getDashboardTitle = (
         <div className="flex items-center space-x-4">
             <DashboardLayoutBigTitle>Pedidos a Proveedores</DashboardLayoutBigTitle>
             <ChevronRight />
-            <span className="font-headings text-sm">{supplierOrder.supplier.name}</span>
+            <span className="font-headings text-sm">Pedido #{supplierOrder.id}</span>
         </div>
     );
 };

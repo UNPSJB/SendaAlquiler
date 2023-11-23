@@ -1069,6 +1069,7 @@ export type SupplierOrderByIdQuery = {
                     quantityReceived: number;
                     product: {
                         __typename?: 'Product';
+                        name: string;
                         type: ProductTypeChoices;
                         brand: { __typename?: 'Brand'; name: string } | null;
                     };
@@ -2529,6 +2530,13 @@ export const SupplierOrderByIdDocument = {
                                                                         selectionSet: {
                                                                             kind: 'SelectionSet',
                                                                             selections: [
+                                                                                {
+                                                                                    kind: 'Field',
+                                                                                    name: {
+                                                                                        kind: 'Name',
+                                                                                        value: 'name',
+                                                                                    },
+                                                                                },
                                                                                 {
                                                                                     kind: 'Field',
                                                                                     name: {

@@ -157,6 +157,7 @@ query supplierOrderById($id: ID!) {
             supplierOrder {
                 orders {
                     product {
+                        name
                         brand {
                             name
                         }
