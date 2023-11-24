@@ -15,6 +15,7 @@ from .models.products import (
     ProductModel,
     ProductServiceModel,
     ProductStockInOfficeModel,
+    ProductSupplierModel,
 )
 from .models.purchases import PurchaseItemModel, PurchaseModel
 from .models.rental_contracts import (
@@ -112,10 +113,17 @@ class PurchaseItemModelAdmin(admin.ModelAdmin[PurchaseItemModel]):
 class PurchaseModelAdmin(admin.ModelAdmin[PurchaseModel]):
     pass
 
+
 @admin.register(SupplierOrderProduct)
 class SupplierOrderProductAdmin(admin.ModelAdmin[SupplierOrderProduct]):
     pass
 
+
 @admin.register(SupplierOrderHistoryModel)
 class SupplierOrderHistoryModelAdmin(admin.ModelAdmin[SupplierOrderHistoryModel]):
+    pass
+
+
+@admin.register(ProductSupplierModel)
+class ProductSupplierModelAdmin(admin.ModelAdmin[ProductSupplierModel]):
     pass

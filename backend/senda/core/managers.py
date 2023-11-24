@@ -143,6 +143,7 @@ class InternalOrderManager(models.Manager["InternalOrderModel"]):
 
         return internal_order
 
+
 class SupplierModelManager(models.Manager["SupplierModel"]):
     @transaction.atomic
     def create_supplier(
@@ -158,7 +159,6 @@ class SupplierModelManager(models.Manager["SupplierModel"]):
         phone_number: str,
         note: str,
     ) -> "SupplierModel":
-
         if self.filter(email=email).exists():
             raise ValueError("Ya existe un proveedor con ese email")
 
@@ -167,17 +167,16 @@ class SupplierModelManager(models.Manager["SupplierModel"]):
 
         return self.create(
             cuit=cuit,
-            name=name, 
-            email=email, 
+            name=name,
+            email=email,
             locality=locality,
             house_number=house_number,
             street_name=street_name,
             house_unit=house_unit,
             phone_code=phone_code,
-            phone_number=phone_number, 
+            phone_number=phone_number,
             note=note,
         )
-
 
 
 SupplierOrderProductsDict = TypedDict(
@@ -197,7 +196,6 @@ class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
         office_destination: "OfficeModel",
         user: "UserModel",
         products: List[SupplierOrderProductsDict],
-        total: float,
     ) -> "SupplierOrderModel":
         """
         Creates a new supplier order with associated products, history, and total cost calculation. This process is atomic.
@@ -212,8 +210,6 @@ class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
         supplier_order.history.create(
             status=SupplierOrderHistoryStatusChoices.PENDING,
             supplier_order=supplier_order,
-            user=user,
-            total=total,
         )
 
         for product in products:

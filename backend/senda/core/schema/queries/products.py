@@ -6,6 +6,7 @@ from senda.core.models.products import (
     BrandModel,
     ProductModel,
     ProductStockInOfficeModel,
+    ProductSupplierModel,
 )
 from senda.core.schema.custom_types import (
     Brand,
@@ -46,3 +47,14 @@ class Query(graphene.ObjectType):
 
     def resolve_product_by_id(self, info: Any, id: str):
         return ProductModel.objects.filter(id=id).first()
+
+    products_supplied_by_supplier_id = graphene.Field(
+        non_null_list_of(Product), supplier_id=graphene.ID(required=True)
+    )
+
+    def resolve_products_supplied_by_supplier_id(self, info: Any, supplier_id: int):
+        result = ProductSupplierModel.objects.filter(supplier_id=supplier_id).values_list(
+            "product", flat=True
+        )
+        products = ProductModel.objects.filter(id__in=result)
+        return products

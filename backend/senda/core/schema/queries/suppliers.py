@@ -13,6 +13,11 @@ from utils.graphene import get_paginated_model, non_null_list_of
 
 
 class Query(graphene.ObjectType):
+    all_suppliers = non_null_list_of(Supplier)
+
+    def resolve_all_suppliers(self, info: Any):
+        return SupplierModel.objects.all()
+
     suppliers = graphene.NonNull(PaginatedSupplierQueryResult, page=graphene.Int())
 
     def resolve_suppliers(self, info: Any, page: int):
@@ -30,10 +35,6 @@ class Query(graphene.ObjectType):
 
     def resolve_supplier_by_id(self, info: Any, id: str):
         return SupplierModel.objects.filter(id=id).first()
-
-    # supplier_orders_by_supplier_id = non_null_list_of(
-    #     OrderSupplier, id=graphene.ID(required=True)
-    # )
 
     supplier_orders_by_supplier_id = non_null_list_of(
         OrderSupplier, id=graphene.ID(required=True)

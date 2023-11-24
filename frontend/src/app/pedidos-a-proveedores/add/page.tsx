@@ -1,9 +1,7 @@
+import CreateSupplierOrderForm from '@/modules/create-forms/CreateSupplierOrderForm';
+
 const Page = () => {
-    return (
-        <div>
-            <h1>Page</h1>
-        </div>
-    );
+    return <CreateSupplierOrderForm cancelHref="/pedidos-a-proveedores" />;
 };
 
 export default Page;

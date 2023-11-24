@@ -47,6 +47,12 @@ export type CancelInternalOrder = {
     internalOrder: Maybe<InternalOrder>;
 };
 
+export type CancelOrderSupplier = {
+    __typename?: 'CancelOrderSupplier';
+    error: Maybe<Scalars['String']['output']>;
+    orderSupplier: Scalars['ID']['output'];
+};
+
 export type Client = {
     __typename?: 'Client';
     createdOn: Scalars['DateTime']['output'];
@@ -211,6 +217,23 @@ export type CreateSupplierInput = {
     streetName: Scalars['String']['input'];
 };
 
+export type CreateSupplierOrder = {
+    __typename?: 'CreateSupplierOrder';
+    error: Maybe<Scalars['String']['output']>;
+    supplierOrder: Maybe<OrderSupplier>;
+};
+
+export type CreateSupplierOrderInput = {
+    officeDestinationId: Scalars['ID']['input'];
+    products: Array<CreateSupplierOrderProductInput>;
+    supplierId: Scalars['ID']['input'];
+};
+
+export type CreateSupplierOrderProductInput = {
+    id: Scalars['ID']['input'];
+    quantity: Scalars['Int']['input'];
+};
+
 export type Employee = {
     __typename?: 'Employee';
     createdOn: Scalars['DateTime']['output'];
@@ -305,6 +328,7 @@ export type Mutation = {
     __typename?: 'Mutation';
     cancelContract: Maybe<CancelContract>;
     cancelInternalOrder: Maybe<CancelInternalOrder>;
+    cancelOrderSupplier: Maybe<CancelOrderSupplier>;
     createBrand: Maybe<CreateBrand>;
     createClient: Maybe<CreateClient>;
     createEmployee: Maybe<CreateEmployee>;
@@ -314,6 +338,7 @@ export type Mutation = {
     createPurchase: Maybe<CreatePurchase>;
     createRentalContract: Maybe<CreateRentalContract>;
     createSupplier: Maybe<CreateSupplier>;
+    createSupplierOrder: Maybe<CreateSupplierOrder>;
     expiredContract: Maybe<ExpiredContract>;
     failedReturnContract: Maybe<FailedReturnContract>;
     finishContract: Maybe<FinishContract>;
@@ -322,6 +347,7 @@ export type Mutation = {
     payContractDeposit: Maybe<PayContractDeposit>;
     payTotalContract: Maybe<PayTotalContract>;
     receiveInternalOrder: Maybe<ReceiveInternalOrder>;
+    receiveOrderSupplier: Maybe<ReceiveOrderSupplier>;
     refreshToken: Maybe<Refresh>;
     startContract: Maybe<StartContract>;
     successfulReturnContract: Maybe<SuccessfulReturnContract>;
@@ -337,6 +363,10 @@ export type MutationCancelContractArgs = {
 
 export type MutationCancelInternalOrderArgs = {
     internalOrderId: Scalars['ID']['input'];
+};
+
+export type MutationCancelOrderSupplierArgs = {
+    orderSupplierId: Scalars['ID']['input'];
 };
 
 export type MutationCreateBrandArgs = {
@@ -377,6 +407,10 @@ export type MutationCreateSupplierArgs = {
     data: CreateSupplierInput;
 };
 
+export type MutationCreateSupplierOrderArgs = {
+    data: CreateSupplierOrderInput;
+};
+
 export type MutationExpiredContractArgs = {
     rentalContractId: Scalars['ID']['input'];
 };
@@ -408,6 +442,10 @@ export type MutationPayTotalContractArgs = {
 
 export type MutationReceiveInternalOrderArgs = {
     internalOrderId: Scalars['ID']['input'];
+};
+
+export type MutationReceiveOrderSupplierArgs = {
+    orderSupplierId: Scalars['ID']['input'];
 };
 
 export type MutationRefreshTokenArgs = {
@@ -634,6 +672,7 @@ export type PurchaseItemsInput = {
 
 export type Query = {
     __typename?: 'Query';
+    allSuppliers: Array<Supplier>;
     brands: Array<Brand>;
     clientById: Maybe<Client>;
     clients: PaginatedClientQueryResult;
@@ -647,6 +686,7 @@ export type Query = {
     productById: Maybe<Product>;
     products: PaginatedProductQueryResult;
     productsStocksByOfficeId: Array<ProductStockInOffice>;
+    productsSuppliedBySupplierId: Array<Product>;
     purchaseById: Maybe<Purchase>;
     purchaseItems: Array<PurchaseItem>;
     purchases: PaginatedPurchaseQueryResult;
@@ -703,6 +743,10 @@ export type QueryProductsStocksByOfficeIdArgs = {
     officeId: Scalars['ID']['input'];
 };
 
+export type QueryProductsSuppliedBySupplierIdArgs = {
+    supplierId: Scalars['ID']['input'];
+};
+
 export type QueryPurchaseByIdArgs = {
     id: Scalars['ID']['input'];
 };
@@ -739,6 +783,12 @@ export type ReceiveInternalOrder = {
     __typename?: 'ReceiveInternalOrder';
     error: Maybe<Scalars['String']['output']>;
     internalOrder: Maybe<InternalOrder>;
+};
+
+export type ReceiveOrderSupplier = {
+    __typename?: 'ReceiveOrderSupplier';
+    error: Maybe<Scalars['String']['output']>;
+    orderSupplier: Scalars['ID']['output'];
 };
 
 export type Refresh = {
@@ -1337,6 +1387,19 @@ export type CreateInternalOrderMutation = {
     } | null;
 };
 
+export type CreateSupplierOrderMutationVariables = Exact<{
+    data: CreateSupplierOrderInput;
+}>;
+
+export type CreateSupplierOrderMutation = {
+    __typename?: 'Mutation';
+    createSupplierOrder: {
+        __typename?: 'CreateSupplierOrder';
+        error: string | null;
+        supplierOrder: { __typename?: 'OrderSupplier'; id: string } | null;
+    } | null;
+};
+
 export type SupplierOrdersQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -1587,6 +1650,20 @@ export type ProductsStocksByOfficeIdQuery = {
     }>;
 };
 
+export type ProductsSuppliedBySupplierIdQueryVariables = Exact<{
+    supplierId: Scalars['ID']['input'];
+}>;
+
+export type ProductsSuppliedBySupplierIdQuery = {
+    __typename?: 'Query';
+    productsSuppliedBySupplierId: Array<{
+        __typename?: 'Product';
+        id: string;
+        name: string;
+        price: any | null;
+    }>;
+};
+
 export type PurchasesQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -1665,6 +1742,13 @@ export type PurchaseListItemFragment = {
     date: any;
     total: any | null;
     client: { __typename?: 'Client'; firstName: string; lastName: string };
+};
+
+export type AllSuppliersQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AllSuppliersQuery = {
+    __typename?: 'Query';
+    allSuppliers: Array<{ __typename?: 'Supplier'; id: string; name: string }>;
 };
 
 export type SuppliersQueryVariables = Exact<{
@@ -3532,6 +3616,70 @@ export const CreateInternalOrderDocument = {
     CreateInternalOrderMutation,
     CreateInternalOrderMutationVariables
 >;
+export const CreateSupplierOrderDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'createSupplierOrder' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'data' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreateSupplierOrderInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'createSupplierOrder' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'data' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'data' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'supplierOrder' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    CreateSupplierOrderMutation,
+    CreateSupplierOrderMutationVariables
+>;
 export const SupplierOrdersDocument = {
     kind: 'Document',
     definitions: [
@@ -4680,6 +4828,59 @@ export const ProductsStocksByOfficeIdDocument = {
     ProductsStocksByOfficeIdQuery,
     ProductsStocksByOfficeIdQueryVariables
 >;
+export const ProductsSuppliedBySupplierIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'productsSuppliedBySupplierId' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'supplierId' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'productsSuppliedBySupplierId' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'supplierId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'supplierId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    ProductsSuppliedBySupplierIdQuery,
+    ProductsSuppliedBySupplierIdQueryVariables
+>;
 export const PurchasesDocument = {
     kind: 'Document',
     definitions: [
@@ -5019,6 +5220,32 @@ export const CreatePurchaseDocument = {
         },
     ],
 } as unknown as DocumentNode<CreatePurchaseMutation, CreatePurchaseMutationVariables>;
+export const AllSuppliersDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'allSuppliers' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'allSuppliers' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<AllSuppliersQuery, AllSuppliersQueryVariables>;
 export const SuppliersDocument = {
     kind: 'Document',
     definitions: [

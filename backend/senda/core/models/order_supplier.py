@@ -52,7 +52,7 @@ class SupplierOrderModel(TimeStampedModel):
         null=True,
     )
 
-    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
+    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True)
 
     objects: SupplierOrderManager = SupplierOrderManager()  # pyright: ignore
 

@@ -53,7 +53,7 @@ def get_supplier(supplier_id: str):
 
 
 class CreateSupplierOrder(graphene.Mutation):
-    supplier_order = graphene.Field(SupplierOrderModel)
+    supplier_order = graphene.Field(OrderSupplier)
     error = graphene.String()
 
     class Arguments:
@@ -84,11 +84,11 @@ class CreateSupplierOrder(graphene.Mutation):
         except Exception as e:
             return CreateSupplierOrder(error="Error desconocido")
 
-        return CreateSupplierOrder(order_supplier=order_supplier)
+        return CreateSupplierOrder(supplier_order=order_supplier)
 
 
 class BaseChangeOrderSupplierStatus(graphene.Mutation):
-    order_supplier = graphene.ID(OrderSupplier)
+    order_supplier = graphene.ID(required=True)
     error = graphene.String()
 
     class Arguments:
@@ -115,6 +115,10 @@ class BaseChangeOrderSupplierStatus(graphene.Mutation):
         SupplierOrderHistoryModel.objects.create(
             supplier_order=order, status=new_status
         )
+
+    @classmethod
+    def mutate(cls, self, info):
+        raise NotImplementedError()
 
 
 class ReceiveOrderSupplier(BaseChangeOrderSupplierStatus):

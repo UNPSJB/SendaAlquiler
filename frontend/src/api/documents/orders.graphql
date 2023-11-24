@@ -27,6 +27,15 @@ mutation createInternalOrder($data: CreateInternalOrderInput!) {
     }
 }
 
+mutation createSupplierOrder($data: CreateSupplierOrderInput!) {
+    createSupplierOrder(data: $data) {
+        supplierOrder {
+            id
+        }
+        error
+    }
+}
+
 query supplierOrders($page: Int) {
     supplierOrders(page: $page) {
         count
