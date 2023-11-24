@@ -5,7 +5,7 @@
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint",
+        "lint": "next lint && tsc --noEmit",
         "gen": "graphql-codegen --config codegen.ts",
         "lint:fix": "eslint --fix src",
         "format:fix": "prettier --write 'src/**/*.ts' 'src/**/*.tsx' 'src/**/*.scss'",

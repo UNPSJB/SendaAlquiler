@@ -9,11 +9,27 @@ from senda.core.models.suppliers import SupplierModel
 
 
 class ProductTypeChoices(models.TextChoices):
+    """
+    Enum-like class representing choices for product types. Inherits from models.TextChoices.
+
+    Provides predefined choices like ALQUILABLE and COMERCIABLE, each being a tuple with the internal identifier and the human-readable name.
+    """
+
     ALQUILABLE = "ALQUILABLE", "ALQUILABLE"
     COMERCIABLE = "COMERCIABLE", "COMERCIABLE"
 
 
 class BrandModel(TimeStampedModel):
+    """
+    Represents a brand in the Senda system. Inherits from TimeStampedModel for creation and modification timestamps.
+
+    Attributes:
+        name (models.CharField): The name of the brand.
+
+    Methods:
+        __str__: Returns the string representation of the brand, which is its name.
+    """
+
     name = models.CharField(max_length=50)
 
     def __str__(self) -> str:
@@ -22,19 +38,28 @@ class BrandModel(TimeStampedModel):
 
 class ProductModel(TimeStampedModel):
     """
-    Modelo que representa un producto en el sistema.
+    Represents a product in the Senda system. Inherits from TimeStampedModel for timestamps.
 
-    Atributos:
-    - sku: Código único del producto.
-    - name: Nombre del producto.
-    - description: Descripción detallada del producto.
-    - brand: Marca asociada al producto.
-    - type: Tipo de producto (por ejemplo, COMERCIABLE).
-    - price: Precio del producto.
+    Attributes:
+        stock (models.QuerySet["ProductStockInOfficeModel"]): A queryset for accessing the product's stock in different offices.
+        suppliers (models.QuerySet["ProductSupplierModel"]): A queryset for accessing the product's suppliers.
+        services (models.QuerySet["ProductServiceModel"]): A queryset for accessing the services related to the product.
+        sku (models.CharField): The unique SKU of the product.
+        name (models.CharField): The name of the product.
+        description (models.TextField): The description of the product.
+        brand (models.ForeignKey): A foreign key to BrandModel, representing the product's brand.
+        type (models.CharField): The type of the product, using choices from ProductTypeChoices.
+        price (models.DecimalField): The price of the product.
 
-    Métodos:
-    - clean: Valida que los productos COMERCIABLES tengan una marca asociada.
-    - save: Llama al método clean y luego guarda el producto.
+    Meta:
+        Defines a check constraint to ensure the price is greater than or equal to 0.
+
+    Methods:
+        __str__: Returns the string representation of the product, which is its name.
+        clean: Custom validation logic before saving the product.
+        save: Overridden save method to include custom validation.
+
+    objects (ProductModelManager): Custom manager for additional functionalities.
     """
 
     stock: models.QuerySet["ProductStockInOfficeModel"]
@@ -81,15 +106,15 @@ class ProductModel(TimeStampedModel):
 
 class ProductStockInOfficeModel(TimeStampedModel):
     """
-    Modelo que representa el stock de un producto en una oficina específica.
+    Represents the stock of a specific product in a specific office. Inherits from TimeStampedModel.
 
-    Atributos:
-    - office: Oficina donde se encuentra el stock del producto.
-    - product: Producto del cual se está llevando el registro de stock.
-    - stock: Cantidad de stock del producto en la oficina.
+    Attributes:
+        office (models.ForeignKey): A foreign key to OfficeModel, representing the office where the stock is located.
+        product (models.ForeignKey): A foreign key to ProductModel, linking to the specific product.
+        stock (models.IntegerField): The quantity of the product in stock at the specified office.
 
-    Restricciones:
-    - La combinación de oficina y producto debe ser única.
+    Meta:
+        Defines a unique constraint to ensure uniqueness of the product-office combination.
     """
 
     office = models.ForeignKey(
@@ -108,15 +133,12 @@ class ProductStockInOfficeModel(TimeStampedModel):
 
 class ProductSupplierModel(TimeStampedModel):
     """
-    Modelo que representa la relación entre un producto y un proveedor.
+    Represents a supplier's offering for a specific product. Inherits from TimeStampedModel.
 
-    Atributos:
-    - product: Producto que es suministrado.
-    - supplier: Proveedor que suministra el producto.
-    - price: Precio al que el proveedor suministra el producto.
-
-    Nota:
-    - Un producto puede tener múltiples proveedores y un proveedor puede suministrar múltiples productos.
+    Attributes:
+        product (models.ForeignKey): A foreign key to ProductModel, linking to the product.
+        supplier (models.ForeignKey): A foreign key to SupplierModel, linking to the supplier.
+        price (models.DecimalField): The price at which the supplier offers the product.
     """
 
     product = models.ForeignKey(
@@ -129,6 +151,21 @@ class ProductSupplierModel(TimeStampedModel):
 
 
 class ProductServiceModel(TimeStampedModel):
+    """
+    Represents a service associated with a product. Inherits from TimeStampedModel.
+
+    Attributes:
+        product (models.ForeignKey): A foreign key to ProductModel, linking to the product.
+        name (models.CharField): The name of the service.
+        price (models.DecimalField): The price of the service.
+
+    Meta:
+        Defines unique constraint for the combination of product and service name, and a check constraint to ensure the price is greater than or equal to 0.
+
+    Methods:
+        __str__: Returns a string representation of the service, showing the product and service name.
+    """
+
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="services"
     )

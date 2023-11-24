@@ -38,7 +38,9 @@ const SkeletonRowRenderer = (key: number) => (
 );
 
 const RowRenderer = (handleRemove: (id: RentalContract['id']) => void) => {
-    const renderer = (contract: ArrayElement<ContractsQuery['rentalContracts']>) => {
+    const renderer = (
+        contract: ArrayElement<ContractsQuery['rentalContracts']['results']>,
+    ) => {
         const humanReadableDate = new Date(contract.createdOn).toLocaleDateString();
 
         return (
@@ -61,15 +63,8 @@ const RowRenderer = (handleRemove: (id: RentalContract['id']) => void) => {
 };
 
 const Page = () => {
-    const useContractsResult = useContracts();
-
-    const handlePrevious = () => {
-        console.log('previous');
-    };
-
-    const handleNext = () => {
-        console.log('next');
-    };
+    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
+        useContracts();
 
     const handleRemove = (id: Supplier['id']) => {
         console.log(`remove ${id}`);
@@ -86,7 +81,7 @@ const Page = () => {
             }
         >
             <FetchedDataRenderer
-                {...useContractsResult}
+                {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
                         <DataTable
@@ -107,7 +102,7 @@ const Page = () => {
                 }
             >
                 {({ rentalContracts }) => {
-                    if (rentalContracts.length === 0) {
+                    if (rentalContracts.results.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay contratos"
@@ -121,13 +116,15 @@ const Page = () => {
                         <div className="pr-container flex-1 py-5 pl-10">
                             <DataTable
                                 columns={columns}
-                                data={rentalContracts}
+                                data={rentalContracts.results}
                                 rowRenderer={RowRenderer(handleRemove)}
                             />
 
                             <DataTablePagination
-                                onPrevious={handlePrevious}
-                                onNext={handleNext}
+                                currentPage={activePage}
+                                hasPrevious={hasPreviousPage}
+                                hasNext={hasNextPage}
+                                totalPages={noPages}
                             />
                         </div>
                     );

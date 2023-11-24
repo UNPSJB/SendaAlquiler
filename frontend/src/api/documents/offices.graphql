@@ -1,0 +1,16 @@
+query offices {
+    offices {
+        id
+        name
+        street
+        houseNumber
+        locality {
+            state
+            postalCode
+            name
+        }
+        stock {
+            stock
+        }
+    }
+}

@@ -1,0 +1,39 @@
+query suppliers($page: Int) {
+    suppliers(page: $page) {
+        count
+        numPages
+        results {
+            id
+            cuit
+            name
+            phoneCode
+            phoneNumber
+            email
+            locality {
+                name
+            }
+            streetName
+            houseNumber
+            houseUnit
+            note
+        }
+    }
+}
+
+query supplierById($id: ID!) {
+    supplierById(id: $id) {
+        name
+        email
+        cuit
+        phoneCode
+        phoneNumber
+        houseNumber
+        houseUnit
+        streetName
+        locality {
+            name
+            state
+            postalCode
+        }
+    }
+}

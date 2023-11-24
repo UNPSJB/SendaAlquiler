@@ -1,6 +1,6 @@
 from typing import Any
 
-import graphene  # pyright: ignore
+import graphene
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 from senda.core.models.employees import EmployeeModel

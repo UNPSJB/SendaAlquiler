@@ -38,7 +38,7 @@ const SkeletonRowRenderer = (key: number) => (
 );
 
 const EmployeeRowRenderer = (handleRemove: (id: Employee['id']) => void) => {
-    const renderer = (employee: ArrayElement<EmployeesQuery['employees']>) => (
+    const renderer = (employee: ArrayElement<EmployeesQuery['employees']['results']>) => (
         <TR key={employee.id}>
             <TD>
                 <Link className="text-violet-600" href={`/empleados/${employee.id}`}>
@@ -56,15 +56,8 @@ const EmployeeRowRenderer = (handleRemove: (id: Employee['id']) => void) => {
 };
 
 const Page = () => {
-    const useEmployeesResult = useEmployees();
-
-    const handlePrevious = () => {
-        console.log('previous');
-    };
-
-    const handleNext = () => {
-        console.log('next');
-    };
+    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
+        useEmployees();
 
     const handleRemove = (id: Employee['id']) => {
         console.log(`remove ${id}`);
@@ -81,7 +74,7 @@ const Page = () => {
             }
         >
             <FetchedDataRenderer
-                {...useEmployeesResult}
+                {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
                         <DataTable
@@ -101,7 +94,7 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ employees }) => {
+                {({ employees: { results: employees } }) => {
                     if (employees.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
@@ -121,8 +114,10 @@ const Page = () => {
                             />
 
                             <DataTablePagination
-                                onPrevious={handlePrevious}
-                                onNext={handleNext}
+                                currentPage={activePage}
+                                hasPrevious={hasPreviousPage}
+                                hasNext={hasNextPage}
+                                totalPages={noPages}
                             />
                         </div>
                     );

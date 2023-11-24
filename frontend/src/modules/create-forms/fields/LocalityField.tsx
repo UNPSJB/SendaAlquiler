@@ -102,7 +102,9 @@ const LocalityField = <
     props: RHFProps<TFieldValues, TName>,
 ) => {
     const { name, control, setValue } = props;
-    const { data, isLoading } = useLocalities();
+    const {
+        queryResult: { data, isLoading },
+    } = useLocalities();
 
     const [localityToCreate, setLocalityToCreate] = useState<string | null>(null);
 
@@ -134,7 +136,7 @@ const LocalityField = <
             return [];
         }
 
-        return data.localities.map((locality) => ({
+        return data.localities.results.map((locality) => ({
             label: locality.name,
             value: locality.id,
             data: locality,

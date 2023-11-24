@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 import { useState } from 'react';
@@ -32,7 +33,9 @@ const getDasboardTitle = (product: ProductByIdQuery['productById'] | undefined) 
 
     return (
         <div className="flex items-center space-x-4">
-            <DashboardLayoutBigTitle>Productos</DashboardLayoutBigTitle>
+            <DashboardLayoutBigTitle>
+                <Link href="/productos">Productos</Link>
+            </DashboardLayoutBigTitle>
             <ChevronRight />
             <span className="font-headings text-sm">{product.name}</span>
         </div>

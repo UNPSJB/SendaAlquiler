@@ -1,6 +1,6 @@
 from typing import Any
 
-import graphene  # pyright: ignore
+import graphene
 import graphql_jwt
 from django.contrib.auth import authenticate
 from graphql import GraphQLError

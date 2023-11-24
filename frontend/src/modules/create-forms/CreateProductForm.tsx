@@ -188,6 +188,9 @@ const CreateProductForm: React.FC<NavigationButtonsCancelProps> = (props) => {
                 router.push('/productos');
             }
         },
+        onError: () => {
+            toast.error('Ocurrio un error al crear el producto');
+        },
     });
 
     // en este ver lo de localityId

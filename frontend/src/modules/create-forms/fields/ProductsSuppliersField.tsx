@@ -3,7 +3,7 @@ import { useFormContext } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
 import { SuppliersQuery } from '@/api/graphql';
-import { useSuppliers } from '@/api/hooks';
+import { usePaginatedSuppliers } from '@/api/hooks';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
@@ -17,7 +17,7 @@ export type ProductsSuppliersFieldFormValues = {
         supplier: {
             value: string;
             label: string;
-            data: SuppliersQuery['suppliers'][0];
+            data: SuppliersQuery['suppliers']['results'][0];
         };
         price: number;
     }[];
@@ -26,13 +26,13 @@ export type ProductsSuppliersFieldFormValues = {
 const ProductsSuppliersField: React.FC = () => {
     const { control, getValues, watch } =
         useFormContext<ProductsSuppliersFieldFormValues>();
-    const suppliersResult = useSuppliers();
+    const { queryResult: suppliersResult } = usePaginatedSuppliers();
     const { data, isLoading } = suppliersResult;
 
     const [suppliersToCreate, setOrdersToCreate] = useState(1);
 
     const handleAddOrder = () => {
-        const suppliers = data?.suppliers;
+        const suppliers = data?.suppliers.results;
         if (!suppliers) return;
 
         const createdStocks = getValues('suppliers') || [];
@@ -61,7 +61,7 @@ const ProductsSuppliersField: React.FC = () => {
                             showRequired
                         >
                             <RHFSelect
-                                options={(data?.suppliers || [])
+                                options={(data?.suppliers.results || [])
                                     .filter((x) => {
                                         const isSelected = selectedProductIds.includes(
                                             x.id,
@@ -110,7 +110,7 @@ const ProductsSuppliersField: React.FC = () => {
                 Error={null}
             >
                 {({ suppliers }) => {
-                    if (suppliersToCreate < suppliers.length) {
+                    if (suppliersToCreate < suppliers.results.length) {
                         return (
                             <Button
                                 fullWidth

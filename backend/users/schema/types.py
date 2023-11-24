@@ -1,4 +1,4 @@
-import graphene  # pyright: ignore
+import graphene
 from graphene import InputObjectType
 from graphene_django.types import DjangoObjectType
 

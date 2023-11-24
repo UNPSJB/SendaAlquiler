@@ -40,7 +40,7 @@ const SkeletonRowRenderer = (key: number) => (
 );
 
 const ClientRowRenderer = (handleRemove: (id: Client['id']) => void) => {
-    const renderer = (client: ArrayElement<ClientsQuery['clients']>) => (
+    const renderer = (client: ArrayElement<ClientsQuery['clients']['results']>) => (
         <TR key={client.id}>
             <TD>
                 <Link className="text-violet-600" href={`/clientes/${client.id}`}>
@@ -66,15 +66,8 @@ const ClientRowRenderer = (handleRemove: (id: Client['id']) => void) => {
 };
 
 const Page = () => {
-    const useClientsResult = useClients();
-
-    const handlePrevious = () => {
-        console.log('previous');
-    };
-
-    const handleNext = () => {
-        console.log('next');
-    };
+    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
+        useClients();
 
     const handleRemove = (id: Client['id']) => {
         console.log(`remove ${id}`);
@@ -91,7 +84,7 @@ const Page = () => {
             }
         >
             <FetchedDataRenderer
-                {...useClientsResult}
+                {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
                         <DataTable
@@ -111,8 +104,8 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ clients }) => {
-                    if (clients.length === 0) {
+                {({ clients: { results } }) => {
+                    if (results.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay clientes"
@@ -126,13 +119,15 @@ const Page = () => {
                         <div className="pr-container flex-1 py-5 pl-10">
                             <DataTable
                                 columns={columns}
-                                data={clients}
+                                data={results}
                                 rowRenderer={ClientRowRenderer(handleRemove)}
                             />
 
                             <DataTablePagination
-                                onPrevious={handlePrevious}
-                                onNext={handleNext}
+                                currentPage={activePage}
+                                hasPrevious={hasPreviousPage}
+                                hasNext={hasNextPage}
+                                totalPages={noPages}
                             />
                         </div>
                     );

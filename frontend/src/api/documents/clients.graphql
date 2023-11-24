@@ -1,0 +1,52 @@
+query clients($page: Int) {
+    clients(page: $page) {
+        count
+        numPages
+        results {
+            id
+            email
+            firstName
+            lastName
+            phoneCode
+            phoneNumber
+            locality {
+                id
+                name
+                state
+                postalCode
+            }
+            streetName
+            houseUnit
+            houseNumber
+            dni
+        }
+    }
+}
+
+query clientById($id: ID!) {
+    clientById(id: $id) {
+        firstName
+        lastName
+        email
+        dni
+        phoneCode
+        phoneNumber
+        houseNumber
+        houseUnit
+        streetName
+        locality {
+            name
+            state
+            postalCode
+        }
+    }
+}
+
+mutation createClient($clientData: CreateClientInput!) {
+    createClient(clientData: $clientData) {
+        client {
+            id
+        }
+        error
+    }
+}

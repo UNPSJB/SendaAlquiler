@@ -1,12 +1,11 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+const Page = () => {
+    return (
+        <div>
+            <h1>Create Supplier Order Form</h1>
+        </div>
+    );
+};
 
-import {
-    FormProvider,
-    SubmitErrorHandler,
-    SubmitHandler,
-    useForm,
-} from 'react-hook-form';
-import toast from 'react-hot-toast';
+export default Page;
