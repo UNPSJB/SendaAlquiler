@@ -124,11 +124,8 @@ const Page = () => {
                                                         {item.product.brand?.name}
                                                     </h2>
                                                     <p className=" text-gray-500">
-                                                        {item.quantity}{' '}
-                                                        {item.quantity > 1
-                                                            ? 'unidad/es'
-                                                            : 'unidad'}{' '}
-                                                        x ${item.product.price}
+                                                        {item.quantity} u. x $
+                                                        {item.product.price}
                                                     </p>
                                                 </div>
                                                 <div className="mt-4 flex justify-between">

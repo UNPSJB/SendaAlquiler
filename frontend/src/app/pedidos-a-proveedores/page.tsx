@@ -4,8 +4,8 @@ import Link from 'next/link';
 
 import Skeleton from 'react-loading-skeleton';
 
-import { Supplier, SuppliersQuery } from '@/api/graphql';
-import { usePaginatedSuppliers } from '@/api/hooks';
+import { OrderSupplier, SupplierOrdersQuery } from '@/api/graphql';
+import { useSupplierOrders } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -21,11 +21,10 @@ import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWi
 import { TD, TR } from '@/components/Table';
 
 const columns = [
-    { key: 'name', label: 'Nombre' },
-    { key: 'email', label: 'Correo' },
-    { key: 'phone', label: 'Celular' },
-    { key: 'address', label: 'Domicilio' },
-    { key: 'locality', label: 'Localidad' },
+    { key: 'date', label: 'Fecha creado' },
+    { key: 'supplier', label: 'Proveedor' },
+    { key: 'office', label: 'Sucursal' },
+    { key: 'status', label: 'Estado' },
     { key: 'dropdown', label: '' },
 ];
 
@@ -39,25 +38,24 @@ const SkeletonRowRenderer = (key: number) => (
     </TR>
 );
 
-const SupplierRowRenderer = (handleRemove: (id: Supplier['id']) => void) => {
-    const renderer = (supplier: ArrayElement<SuppliersQuery['suppliers']['results']>) => (
-        <TR key={supplier.id}>
+const SupplierOrderRowRenderer = (handleRemove: (id: OrderSupplier['id']) => void) => {
+    const renderer = (
+        supplierOrder: ArrayElement<SupplierOrdersQuery['supplierOrders']['results']>,
+    ) => (
+        <TR key={supplierOrder.id}>
             <TD>
-                <Link className="text-violet-600" href={`/proveedores/${supplier.id}`}>
-                    {supplier.name}
+                <Link
+                    className="text-violet-600"
+                    href={`/pedidos-a-proveedores/${supplierOrder.id}`}
+                >
+                    {new Date(supplierOrder.createdOn).toLocaleDateString('es-ES')}
                 </Link>
             </TD>
-            <TD>{supplier.email}</TD>
+            <TD>{supplierOrder.supplier.name}</TD>
+            <TD>{supplierOrder.officeDestination.name}</TD>
+            <TD>{supplierOrder.currentHistory?.status}</TD>
             <TD>
-                {supplier.phoneCode}
-                {supplier.phoneNumber}
-            </TD>
-            <TD>
-                {supplier.streetName} {supplier.houseNumber}
-            </TD>
-            <TD>{supplier.locality.name}</TD>
-            <TD>
-                <DataTableDropdown onRemove={() => handleRemove(supplier.id)} />
+                <DataTableDropdown onRemove={() => handleRemove(supplierOrder.id)} />
             </TD>
         </TR>
     );
@@ -67,9 +65,9 @@ const SupplierRowRenderer = (handleRemove: (id: Supplier['id']) => void) => {
 
 const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
-        usePaginatedSuppliers();
+        useSupplierOrders();
 
-    const handleRemove = (id: Supplier['id']) => {
+    const handleRemove = (id: OrderSupplier['id']) => {
         console.log(`remove ${id}`);
     };
 
@@ -106,8 +104,8 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ suppliers: { results: suppliers } }) => {
-                    if (suppliers.length === 0) {
+                {({ supplierOrders: { results: supplierOrders } }) => {
+                    if (supplierOrders.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay pedidos a proveedores"
@@ -121,8 +119,8 @@ const Page = () => {
                         <div className="pr-container flex-1 py-5 pl-10">
                             <DataTable
                                 columns={columns}
-                                data={suppliers}
-                                rowRenderer={SupplierRowRenderer(handleRemove)}
+                                data={supplierOrders}
+                                rowRenderer={SupplierOrderRowRenderer(handleRemove)}
                             />
 
                             <DataTablePagination

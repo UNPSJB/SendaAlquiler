@@ -4,8 +4,8 @@ import { useParams } from 'next/navigation';
 
 import { useState } from 'react';
 
-import { SupplierByIdQuery } from '@/api/graphql';
-import { useSupplierById } from '@/api/hooks';
+import { SupplierOrderByIdQuery } from '@/api/graphql';
+import { useSupplierOrderById } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -13,8 +13,8 @@ import DashboardLayout, {
 import Tabs from '@/modules/details-page/Tabs';
 import ChevronRight from '@/modules/icons/ChevronRight';
 
-import SupplierByIdDetailsTab from './Details';
-import SupplierByIdOrdersTab from './Orders';
+import SupplierOrderByIddDetailsTab from './Details';
+import SupplierOrderByIdProductsTab from './Products';
 
 import Avatar from '@/components/Avatar';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
@@ -26,54 +26,52 @@ const getAvatarText = (firstName: string) => {
     return firstName[0].toUpperCase();
 };
 
-const getDasboardTitle = (supplier: SupplierByIdQuery['supplierById'] | undefined) => {
-    if (!supplier) {
-        return <DashboardLayoutBigTitle>Proveedores</DashboardLayoutBigTitle>;
+const getDashboardTitle = (
+    supplierOrder: SupplierOrderByIdQuery['supplierOrderById'] | undefined,
+) => {
+    if (!supplierOrder) {
+        return <DashboardLayoutBigTitle>Pedidos a Proveedores</DashboardLayoutBigTitle>;
     }
 
     return (
         <div className="flex items-center space-x-4">
-            <DashboardLayoutBigTitle>Proveedores</DashboardLayoutBigTitle>
+            <DashboardLayoutBigTitle>Pedidos a Proveedores</DashboardLayoutBigTitle>
             <ChevronRight />
-            <span className="font-headings text-sm">{supplier.name}</span>
+            <span className="font-headings text-sm">Pedido #{supplierOrder.id}</span>
         </div>
     );
 };
 
-export type SupplierByIdTabComponentProps = {
-    supplier: NonNullable<SupplierByIdQuery['supplierById']>;
-};
-
-export type SupplierOrderBySupplierIdTabComponentProps = {
-    id: string;
+export type SupplierOrderByIdTabComponentProps = {
+    supplierOrder: NonNullable<SupplierOrderByIdQuery['supplierOrderById']>;
 };
 
 const tabs = [
     {
         label: 'Detalles',
         key: 'details',
-        Component: SupplierByIdDetailsTab,
+        Component: SupplierOrderByIddDetailsTab,
     },
     {
-        label: 'Pedidos realizados',
-        key: 'contracts',
-        Component: SupplierByIdOrdersTab,
+        label: 'Productos',
+        key: 'products',
+        Component: SupplierOrderByIdProductsTab,
     },
 ];
 
 const Page = () => {
     const { id } = useParams();
-    const useSupplierByIdResult = useSupplierById(id as string);
+    const useSupplierOrderByIdResult = useSupplierOrderById(id as string);
 
     const [activeTab, setActiveTab] = useState(tabs[0].key);
 
-    const supplier = useSupplierByIdResult.data?.supplierById;
+    const supplierOrder = useSupplierOrderByIdResult.data?.supplierOrderById;
     const Component = tabs.find((tab) => tab.key === activeTab)!.Component;
 
     return (
-        <DashboardLayout header={getDasboardTitle(supplier)}>
+        <DashboardLayout header={getDashboardTitle(supplierOrder)}>
             <FetchedDataRenderer
-                {...useSupplierByIdResult}
+                {...useSupplierOrderByIdResult}
                 Loading={
                     <div className="flex w-full flex-1 items-center justify-center">
                         <Spinner />
@@ -83,35 +81,37 @@ const Page = () => {
                     <div className="flex w-full flex-1 items-center justify-center">
                         <FetchStatusMessageWithDescription
                             title="Ha ocurrido un error"
-                            line1="Hubo un error al cargar al cliente."
+                            line1="Hubo un error al cargar el pedidos."
                             line2="Prueba de nuevo más tarde."
                         />
                     </div>
                 }
             >
-                {({ supplierById: supplier }) => {
-                    if (!supplier) {
+                {({ supplierOrderById: supplierOrder }) => {
+                    if (!supplierOrder) {
                         return (
                             <div className="flex w-full flex-1 items-center justify-center">
                                 <FetchStatusMessageWithButton
-                                    message="Parece que el proveedor que buscas no existe."
-                                    btnHref="/proveedor"
-                                    btnText='Volver a "Proveedores"'
+                                    message="Parece que el pedido que buscas no existe."
+                                    btnHref="/pedidos-a-proveedores"
+                                    btnText='Volver a "Pedido a Proveedores"'
                                 />
                             </div>
                         );
                     }
 
                     return (
-                        <div className="flex  flex-1 flex-col">
+                        <div className="flex flex-1 flex-col">
                             <header className="border-b pl-10">
                                 <div className="mb-10 flex items-center">
-                                    <Avatar>{getAvatarText(supplier.name)}</Avatar>
+                                    <Avatar>
+                                        {getAvatarText(supplierOrder.supplier.name)}
+                                    </Avatar>
                                     <div className="pl-6">
                                         <h1 className="my-2 mt-10 text-xl font-bold">
-                                            {supplier.name}
+                                            {supplierOrder.supplier.name}
                                         </h1>
-                                        <p>{supplier.email}</p>
+                                        <p>{supplierOrder.supplier.email}</p>
                                     </div>
                                 </div>
 
@@ -127,8 +127,8 @@ const Page = () => {
                             </header>
 
                             <div className="flex-1 bg-gray-100 px-0">
-                                <section className="pl-10 ">
-                                    <Component id={id as string} supplier={supplier} />
+                                <section className="pl-10">
+                                    <Component supplierOrder={supplierOrder} />
                                 </section>
                             </div>
                         </div>

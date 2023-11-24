@@ -47,6 +47,12 @@ export type CancelInternalOrder = {
     internalOrder: Maybe<InternalOrder>;
 };
 
+export type CancelOrderSupplier = {
+    __typename?: 'CancelOrderSupplier';
+    error: Maybe<Scalars['String']['output']>;
+    orderSupplier: Scalars['ID']['output'];
+};
+
 export type Client = {
     __typename?: 'Client';
     createdOn: Scalars['DateTime']['output'];
@@ -71,6 +77,18 @@ export type Client = {
     /** Nombre de la calle donde vive el cliente */
     streetName: Scalars['String']['output'];
 };
+
+/** An enumeration. */
+export enum CoreSupplierOrderHistoryModelStatusChoices {
+    /** Cancelado */
+    Canceled = 'CANCELED',
+    /** Completado */
+    Completed = 'COMPLETED',
+    /** En progreso */
+    InProgress = 'IN_PROGRESS',
+    /** Pendiente */
+    Pending = 'PENDING',
+}
 
 export type CreateBrand = {
     __typename?: 'CreateBrand';
@@ -180,6 +198,42 @@ export type CreateRentalContractInput = {
     streetName: Scalars['String']['input'];
 };
 
+export type CreateSupplier = {
+    __typename?: 'CreateSupplier';
+    error: Maybe<Scalars['String']['output']>;
+    supplier: Maybe<Supplier>;
+};
+
+export type CreateSupplierInput = {
+    cuit: Scalars['String']['input'];
+    email: Scalars['String']['input'];
+    houseNumber: Scalars['String']['input'];
+    houseUnit: InputMaybe<Scalars['String']['input']>;
+    locality: Scalars['ID']['input'];
+    name: Scalars['String']['input'];
+    note: InputMaybe<Scalars['String']['input']>;
+    phoneCode: Scalars['String']['input'];
+    phoneNumber: Scalars['String']['input'];
+    streetName: Scalars['String']['input'];
+};
+
+export type CreateSupplierOrder = {
+    __typename?: 'CreateSupplierOrder';
+    error: Maybe<Scalars['String']['output']>;
+    supplierOrder: Maybe<OrderSupplier>;
+};
+
+export type CreateSupplierOrderInput = {
+    officeDestinationId: Scalars['ID']['input'];
+    products: Array<CreateSupplierOrderProductInput>;
+    supplierId: Scalars['ID']['input'];
+};
+
+export type CreateSupplierOrderProductInput = {
+    id: Scalars['ID']['input'];
+    quantity: Scalars['Int']['input'];
+};
+
 export type Employee = {
     __typename?: 'Employee';
     createdOn: Scalars['DateTime']['output'];
@@ -274,6 +328,7 @@ export type Mutation = {
     __typename?: 'Mutation';
     cancelContract: Maybe<CancelContract>;
     cancelInternalOrder: Maybe<CancelInternalOrder>;
+    cancelOrderSupplier: Maybe<CancelOrderSupplier>;
     createBrand: Maybe<CreateBrand>;
     createClient: Maybe<CreateClient>;
     createEmployee: Maybe<CreateEmployee>;
@@ -282,6 +337,8 @@ export type Mutation = {
     createProduct: Maybe<CreateProduct>;
     createPurchase: Maybe<CreatePurchase>;
     createRentalContract: Maybe<CreateRentalContract>;
+    createSupplier: Maybe<CreateSupplier>;
+    createSupplierOrder: Maybe<CreateSupplierOrder>;
     expiredContract: Maybe<ExpiredContract>;
     failedReturnContract: Maybe<FailedReturnContract>;
     finishContract: Maybe<FinishContract>;
@@ -290,6 +347,7 @@ export type Mutation = {
     payContractDeposit: Maybe<PayContractDeposit>;
     payTotalContract: Maybe<PayTotalContract>;
     receiveInternalOrder: Maybe<ReceiveInternalOrder>;
+    receiveOrderSupplier: Maybe<ReceiveOrderSupplier>;
     refreshToken: Maybe<Refresh>;
     startContract: Maybe<StartContract>;
     successfulReturnContract: Maybe<SuccessfulReturnContract>;
@@ -305,6 +363,10 @@ export type MutationCancelContractArgs = {
 
 export type MutationCancelInternalOrderArgs = {
     internalOrderId: Scalars['ID']['input'];
+};
+
+export type MutationCancelOrderSupplierArgs = {
+    orderSupplierId: Scalars['ID']['input'];
 };
 
 export type MutationCreateBrandArgs = {
@@ -341,6 +403,14 @@ export type MutationCreateRentalContractArgs = {
     data: CreateRentalContractInput;
 };
 
+export type MutationCreateSupplierArgs = {
+    data: CreateSupplierInput;
+};
+
+export type MutationCreateSupplierOrderArgs = {
+    data: CreateSupplierOrderInput;
+};
+
 export type MutationExpiredContractArgs = {
     rentalContractId: Scalars['ID']['input'];
 };
@@ -372,6 +442,10 @@ export type MutationPayTotalContractArgs = {
 
 export type MutationReceiveInternalOrderArgs = {
     internalOrderId: Scalars['ID']['input'];
+};
+
+export type MutationReceiveOrderSupplierArgs = {
+    orderSupplierId: Scalars['ID']['input'];
 };
 
 export type MutationRefreshTokenArgs = {
@@ -427,10 +501,12 @@ export type Office = {
 export type OrderSupplier = {
     __typename?: 'OrderSupplier';
     createdOn: Scalars['DateTime']['output'];
-    dateCreated: Scalars['DateTime']['output'];
+    currentHistory: Maybe<SupplierOrderHistory>;
+    history: Array<SupplierOrderHistory>;
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     officeDestination: Office;
+    orders: Array<SupplierOrderProdu>;
     supplier: Supplier;
     total: Scalars['Decimal']['output'];
 };
@@ -461,6 +537,13 @@ export type PaginatedLocalityQueryResult = {
     count: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<Locality>;
+};
+
+export type PaginatedOrderSupplierQueryResult = {
+    __typename?: 'PaginatedOrderSupplierQueryResult';
+    count: Scalars['Int']['output'];
+    numPages: Scalars['Int']['output'];
+    results: Array<OrderSupplier>;
 };
 
 export type PaginatedProductQueryResult = {
@@ -513,6 +596,7 @@ export type Product = {
     name: Scalars['String']['output'];
     price: Maybe<Scalars['Decimal']['output']>;
     purchaseItems: Array<PurchaseItem>;
+    relatedSupplierOrders: Array<SupplierOrderProdu>;
     rentalContractItems: Array<RentalContractItem>;
     services: Array<ProductService>;
     sku: Maybe<Scalars['String']['output']>;
@@ -588,6 +672,7 @@ export type PurchaseItemsInput = {
 
 export type Query = {
     __typename?: 'Query';
+    allSuppliers: Array<Supplier>;
     brands: Array<Brand>;
     clientById: Maybe<Client>;
     clients: PaginatedClientQueryResult;
@@ -601,11 +686,15 @@ export type Query = {
     productById: Maybe<Product>;
     products: PaginatedProductQueryResult;
     productsStocksByOfficeId: Array<ProductStockInOffice>;
+    productsSuppliedBySupplierId: Array<Product>;
     purchaseById: Maybe<Purchase>;
     purchaseItems: Array<PurchaseItem>;
     purchases: PaginatedPurchaseQueryResult;
     rentalContracts: PaginatedRentalContractQueryResult;
     supplierById: Maybe<Supplier>;
+    supplierOrderById: Maybe<OrderSupplier>;
+    supplierOrders: PaginatedOrderSupplierQueryResult;
+    supplierOrdersBySupplierId: Array<OrderSupplier>;
     suppliers: PaginatedSupplierQueryResult;
     users: Array<User>;
 };
@@ -654,6 +743,10 @@ export type QueryProductsStocksByOfficeIdArgs = {
     officeId: Scalars['ID']['input'];
 };
 
+export type QueryProductsSuppliedBySupplierIdArgs = {
+    supplierId: Scalars['ID']['input'];
+};
+
 export type QueryPurchaseByIdArgs = {
     id: Scalars['ID']['input'];
 };
@@ -670,6 +763,18 @@ export type QuerySupplierByIdArgs = {
     id: Scalars['ID']['input'];
 };
 
+export type QuerySupplierOrderByIdArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type QuerySupplierOrdersArgs = {
+    page: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type QuerySupplierOrdersBySupplierIdArgs = {
+    id: Scalars['ID']['input'];
+};
+
 export type QuerySuppliersArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
 };
@@ -678,6 +783,12 @@ export type ReceiveInternalOrder = {
     __typename?: 'ReceiveInternalOrder';
     error: Maybe<Scalars['String']['output']>;
     internalOrder: Maybe<InternalOrder>;
+};
+
+export type ReceiveOrderSupplier = {
+    __typename?: 'ReceiveOrderSupplier';
+    error: Maybe<Scalars['String']['output']>;
+    orderSupplier: Scalars['ID']['output'];
 };
 
 export type Refresh = {
@@ -841,6 +952,30 @@ export type Supplier = {
     supplierOrdersBranch: Array<OrderSupplier>;
 };
 
+export type SupplierOrderHistory = {
+    __typename?: 'SupplierOrderHistory';
+    createdOn: Scalars['DateTime']['output'];
+    currentOrder: Maybe<OrderSupplier>;
+    id: Scalars['ID']['output'];
+    modifiedOn: Scalars['DateTime']['output'];
+    status: CoreSupplierOrderHistoryModelStatusChoices;
+    supplierOrder: OrderSupplier;
+    user: Maybe<User>;
+};
+
+export type SupplierOrderProdu = {
+    __typename?: 'SupplierOrderProdu';
+    createdOn: Scalars['DateTime']['output'];
+    id: Scalars['ID']['output'];
+    modifiedOn: Scalars['DateTime']['output'];
+    price: Scalars['Decimal']['output'];
+    product: Product;
+    quantity: Scalars['Int']['output'];
+    quantityReceived: Scalars['Int']['output'];
+    supplierOrder: OrderSupplier;
+    total: Scalars['Decimal']['output'];
+};
+
 export type UpdateClient = {
     __typename?: 'UpdateClient';
     client: Maybe<Client>;
@@ -877,6 +1012,7 @@ export type User = {
     isSuperuser: Scalars['Boolean']['output'];
     lastLogin: Maybe<Scalars['DateTime']['output']>;
     lastName: Scalars['String']['output'];
+    supplierorderhistorymodelSet: Array<SupplierOrderHistory>;
 };
 
 export type Verify = {
@@ -1227,7 +1363,7 @@ export type InternalOrdersQuery = {
         results: Array<{
             __typename?: 'InternalOrder';
             id: string;
-            dateCreated: any;
+            createdOn: any;
             officeBranch: { __typename?: 'Office'; name: string };
             officeDestination: { __typename?: 'Office'; name: string };
             currentHistory: {
@@ -1248,6 +1384,176 @@ export type CreateInternalOrderMutation = {
         __typename?: 'CreateInternalOrder';
         error: string | null;
         internalOrder: { __typename?: 'InternalOrder'; id: string } | null;
+    } | null;
+};
+
+export type CreateSupplierOrderMutationVariables = Exact<{
+    data: CreateSupplierOrderInput;
+}>;
+
+export type CreateSupplierOrderMutation = {
+    __typename?: 'Mutation';
+    createSupplierOrder: {
+        __typename?: 'CreateSupplierOrder';
+        error: string | null;
+        supplierOrder: { __typename?: 'OrderSupplier'; id: string } | null;
+    } | null;
+};
+
+export type SupplierOrdersQueryVariables = Exact<{
+    page: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+export type SupplierOrdersQuery = {
+    __typename?: 'Query';
+    supplierOrders: {
+        __typename?: 'PaginatedOrderSupplierQueryResult';
+        count: number;
+        numPages: number;
+        results: Array<{
+            __typename?: 'OrderSupplier';
+            id: string;
+            createdOn: any;
+            supplier: { __typename?: 'Supplier'; name: string };
+            officeDestination: { __typename?: 'Office'; name: string };
+            currentHistory: {
+                __typename?: 'SupplierOrderHistory';
+                status: CoreSupplierOrderHistoryModelStatusChoices;
+            } | null;
+        }>;
+    };
+};
+
+export type SupplierOrderByIdQueryVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type SupplierOrderByIdQuery = {
+    __typename?: 'Query';
+    supplierOrderById: {
+        __typename?: 'OrderSupplier';
+        id: string;
+        supplier: {
+            __typename?: 'Supplier';
+            cuit: string;
+            name: string;
+            email: string;
+            houseNumber: string;
+            streetName: string;
+            phoneCode: string;
+            phoneNumber: string;
+            locality: {
+                __typename?: 'Locality';
+                name: string;
+                postalCode: string;
+                state: StateChoices;
+            };
+        };
+        officeDestination: {
+            __typename?: 'Office';
+            name: string;
+            street: string;
+            houseNumber: string;
+            locality: { __typename?: 'Locality'; name: string };
+        };
+        currentHistory: {
+            __typename?: 'SupplierOrderHistory';
+            status: CoreSupplierOrderHistoryModelStatusChoices;
+            user: {
+                __typename?: 'User';
+                firstName: string;
+                lastName: string;
+                email: string;
+            } | null;
+        } | null;
+        orders: Array<{
+            __typename?: 'SupplierOrderProdu';
+            id: string;
+            quantity: number;
+            quantityReceived: number;
+            product: {
+                __typename?: 'Product';
+                id: string;
+                name: string;
+                type: ProductTypeChoices;
+                brand: { __typename?: 'Brand'; name: string } | null;
+            };
+        }>;
+    } | null;
+};
+
+export type SupplierOrdersBySupplierIdQueryVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type SupplierOrdersBySupplierIdQuery = {
+    __typename?: 'Query';
+    supplierOrdersBySupplierId: Array<{
+        __typename?: 'OrderSupplier';
+        id: string;
+        createdOn: any;
+        officeDestination: {
+            __typename?: 'Office';
+            name: string;
+            street: string;
+            houseNumber: string;
+        };
+        currentHistory: {
+            __typename?: 'SupplierOrderHistory';
+            status: CoreSupplierOrderHistoryModelStatusChoices;
+            createdOn: any;
+            user: {
+                __typename?: 'User';
+                email: string;
+                firstName: string;
+                lastName: string;
+            } | null;
+        } | null;
+        orders: Array<{
+            __typename?: 'SupplierOrderProdu';
+            id: string;
+            quantity: number;
+            quantityReceived: number;
+            product: {
+                __typename?: 'Product';
+                id: string;
+                name: string;
+                price: any | null;
+                type: ProductTypeChoices;
+                brand: { __typename?: 'Brand'; name: string } | null;
+            };
+        }>;
+    }>;
+};
+
+export type CreateSupplierMutationVariables = Exact<{
+    data: CreateSupplierInput;
+}>;
+
+export type CreateSupplierMutation = {
+    __typename?: 'Mutation';
+    createSupplier: {
+        __typename?: 'CreateSupplier';
+        error: string | null;
+        supplier: {
+            __typename?: 'Supplier';
+            id: string;
+            cuit: string;
+            email: string;
+            houseNumber: string;
+            houseUnit: string | null;
+            name: string;
+            note: string | null;
+            phoneCode: string;
+            phoneNumber: string;
+            streetName: string;
+            locality: {
+                __typename?: 'Locality';
+                name: string;
+                postalCode: string;
+                state: StateChoices;
+            };
+        } | null;
     } | null;
 };
 
@@ -1344,6 +1650,20 @@ export type ProductsStocksByOfficeIdQuery = {
     }>;
 };
 
+export type ProductsSuppliedBySupplierIdQueryVariables = Exact<{
+    supplierId: Scalars['ID']['input'];
+}>;
+
+export type ProductsSuppliedBySupplierIdQuery = {
+    __typename?: 'Query';
+    productsSuppliedBySupplierId: Array<{
+        __typename?: 'Product';
+        id: string;
+        name: string;
+        price: any | null;
+    }>;
+};
+
 export type PurchasesQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -1422,6 +1742,13 @@ export type PurchaseListItemFragment = {
     date: any;
     total: any | null;
     client: { __typename?: 'Client'; firstName: string; lastName: string };
+};
+
+export type AllSuppliersQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AllSuppliersQuery = {
+    __typename?: 'Query';
+    allSuppliers: Array<{ __typename?: 'Supplier'; id: string; name: string }>;
 };
 
 export type SuppliersQueryVariables = Exact<{
@@ -3192,7 +3519,7 @@ export const InternalOrdersDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'dateCreated',
+                                                    value: 'createdOn',
                                                 },
                                             },
                                             {
@@ -3289,6 +3616,825 @@ export const CreateInternalOrderDocument = {
     CreateInternalOrderMutation,
     CreateInternalOrderMutationVariables
 >;
+export const CreateSupplierOrderDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'createSupplierOrder' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'data' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreateSupplierOrderInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'createSupplierOrder' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'data' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'data' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'supplierOrder' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    CreateSupplierOrderMutation,
+    CreateSupplierOrderMutationVariables
+>;
+export const SupplierOrdersDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'supplierOrders' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'page' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'supplierOrders' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'page' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'page' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'count' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'numPages' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'results' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'supplier' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'officeDestination',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'createdOn',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'currentHistory',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<SupplierOrdersQuery, SupplierOrdersQueryVariables>;
+export const SupplierOrderByIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'supplierOrderById' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'supplierOrderById' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'supplier' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'cuit' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'email' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'locality' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'postalCode',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'state',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'houseNumber',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'streetName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'phoneCode',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'phoneNumber',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'officeDestination' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'street' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'houseNumber',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'locality' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'currentHistory' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'user' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'firstName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'lastName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'email',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'orders' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'product' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'brand',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'type',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'quantity' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'quantityReceived',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<SupplierOrderByIdQuery, SupplierOrderByIdQueryVariables>;
+export const SupplierOrdersBySupplierIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'supplierOrdersBySupplierId' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'supplierOrdersBySupplierId' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'createdOn' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'officeDestination' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'street' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'houseNumber',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'currentHistory' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'user' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'email',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'firstName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'lastName',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'createdOn',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'orders' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'product' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'brand',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'price',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'type',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'quantity' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'quantityReceived',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    SupplierOrdersBySupplierIdQuery,
+    SupplierOrdersBySupplierIdQueryVariables
+>;
+export const CreateSupplierDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'CreateSupplier' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'data' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'CreateSupplierInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'createSupplier' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'data' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'data' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'supplier' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'cuit' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'email' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'houseNumber',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'houseUnit',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'note' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'phoneCode',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'phoneNumber',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'streetName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'locality' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'postalCode',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'state',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<CreateSupplierMutation, CreateSupplierMutationVariables>;
 export const ProductsDocument = {
     kind: 'Document',
     definitions: [
@@ -3682,6 +4828,59 @@ export const ProductsStocksByOfficeIdDocument = {
     ProductsStocksByOfficeIdQuery,
     ProductsStocksByOfficeIdQueryVariables
 >;
+export const ProductsSuppliedBySupplierIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'productsSuppliedBySupplierId' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'supplierId' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'productsSuppliedBySupplierId' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'supplierId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'supplierId' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    ProductsSuppliedBySupplierIdQuery,
+    ProductsSuppliedBySupplierIdQueryVariables
+>;
 export const PurchasesDocument = {
     kind: 'Document',
     definitions: [
@@ -4021,6 +5220,32 @@ export const CreatePurchaseDocument = {
         },
     ],
 } as unknown as DocumentNode<CreatePurchaseMutation, CreatePurchaseMutationVariables>;
+export const AllSuppliersDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'allSuppliers' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'allSuppliers' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<AllSuppliersQuery, AllSuppliersQueryVariables>;
 export const SuppliersDocument = {
     kind: 'Document',
     definitions: [

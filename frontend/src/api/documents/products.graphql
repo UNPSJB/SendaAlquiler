@@ -65,3 +65,11 @@ query productsStocksByOfficeId($officeId: ID!) {
         stock
     }
 }
+
+query productsSuppliedBySupplierId($supplierId: ID!) {
+    productsSuppliedBySupplierId(supplierId: $supplierId) {
+        id
+        name
+        price
+    }
+}

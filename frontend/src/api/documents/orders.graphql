@@ -10,7 +10,7 @@ query internalOrders($page: Int) {
             officeDestination {
                 name
             }
-            dateCreated
+            createdOn
             currentHistory {
                 status
             }
@@ -22,6 +22,143 @@ mutation createInternalOrder($data: CreateInternalOrderInput!) {
     createInternalOrder(data: $data) {
         internalOrder {
             id
+        }
+        error
+    }
+}
+
+mutation createSupplierOrder($data: CreateSupplierOrderInput!) {
+    createSupplierOrder(data: $data) {
+        supplierOrder {
+            id
+        }
+        error
+    }
+}
+
+query supplierOrders($page: Int) {
+    supplierOrders(page: $page) {
+        count
+        numPages
+        results {
+            id
+            supplier {
+                name
+            }
+            officeDestination {
+                name
+            }
+            createdOn
+            currentHistory {
+                status
+            }
+        }
+    }
+}
+
+query supplierOrderById($id: ID!) {
+    supplierOrderById(id: $id) {
+        id
+        supplier {
+            cuit
+            name
+            email
+            locality {
+                name
+                postalCode
+                state
+            }
+            houseNumber
+            streetName
+            phoneCode
+            phoneNumber
+        }
+        officeDestination {
+            name
+            street
+            houseNumber
+            locality {
+                name
+            }
+        }
+        currentHistory {
+            status
+            user {
+                firstName
+                lastName
+                email
+            }
+        }
+        orders {
+            id
+            product {
+                id
+                name
+                brand {
+                    name
+                }
+                type
+            }
+            quantity
+            quantityReceived
+        }
+    }
+}
+
+query supplierOrdersBySupplierId($id: ID!) {
+    supplierOrdersBySupplierId(id: $id) {
+        id
+        createdOn
+        officeDestination {
+            name
+            street
+            houseNumber
+        }
+        currentHistory {
+            status
+            user {
+                email
+                firstName
+                lastName
+            }
+            createdOn
+        }
+        orders {
+            id
+            product {
+                id
+                name
+                brand {
+                    name
+                }
+                name
+                price
+                type
+            }
+            quantity
+            quantityReceived
+        }
+    }
+}
+
+mutation CreateSupplier($data: CreateSupplierInput!) {
+    createSupplier(data: $data) {
+        supplier {
+            id
+            cuit
+            email
+            houseNumber
+            houseUnit
+            name
+            note
+            phoneCode
+            phoneNumber
+            streetName
+            locality {
+                name
+                postalCode
+                state
+            }
         }
         error
     }

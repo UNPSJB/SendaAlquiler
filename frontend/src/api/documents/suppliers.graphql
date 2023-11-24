@@ -1,3 +1,10 @@
+query allSuppliers {
+    allSuppliers {
+        id
+        name
+    }
+}
+
 query suppliers($page: Int) {
     suppliers(page: $page) {
         count

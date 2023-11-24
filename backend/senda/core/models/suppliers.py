@@ -2,6 +2,7 @@ from django.db import models
 
 from extensions.db.models import TimeStampedModel
 from senda.core.models.localities import LocalityModel
+from senda.core.managers import SupplierModelManager
 from senda.core.validators import only_digits_validator
 
 
@@ -63,3 +64,5 @@ class SupplierModel(TimeStampedModel):
 
     def __str__(self) -> str:
         return self.name
+
+    objects: SupplierModelManager = SupplierModelManager()

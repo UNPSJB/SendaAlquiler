@@ -9,7 +9,11 @@ from senda.core.models.order_internal import (
     InternalOrderHistoryStatusChoices,
     InternalOrderModel,
 )
-from senda.core.models.order_supplier import SupplierOrderModel
+from senda.core.models.order_supplier import (
+    SupplierOrderModel,
+    SupplierOrderHistoryModel,
+    SupplierOrderProduct,
+)
 from senda.core.models.products import (
     BrandModel,
     ProductModel,
@@ -172,3 +176,12 @@ class RentalContractHistory(DjangoObjectType):
 class ProductService(DjangoObjectType):
     class Meta:
         model = ProductServiceModel
+
+
+class SupplierOrderHistory(DjangoObjectType):
+    class Meta:
+        model = SupplierOrderHistoryModel
+
+class SupplierOrderProdu(DjangoObjectType):
+    class Meta:
+        model = SupplierOrderProduct

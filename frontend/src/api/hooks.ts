@@ -26,6 +26,9 @@ import {
     CreateLocalityDocument,
     CreateLocalityMutation,
     CreateLocalityMutationVariables,
+    CreateSupplierDocument,
+    CreateSupplierMutation,
+    CreateSupplierMutationVariables,
     EmployeesDocument,
     EmployeeByIdDocument,
     CreateProductDocument,
@@ -45,6 +48,7 @@ import {
     ProductsStocksByOfficeIdDocument,
     SupplierByIdDocument,
     SuppliersDocument,
+    SupplierOrdersDocument,
     CreatePurchaseMutation,
     CreatePurchaseMutationVariables,
     CreateEmployeeMutation,
@@ -52,8 +56,15 @@ import {
     CreateEmployeeDocument,
     PurchaseByIdDocument,
     CreatePurchaseDocument,
+    SupplierOrderByIdDocument,
     ProductByIdDocument,
     ProductsQueryVariables,
+    SupplierOrdersBySupplierIdDocument,
+    ProductsSuppliedBySupplierIdDocument,
+    AllSuppliersDocument,
+    CreateSupplierOrderMutationVariables,
+    CreateSupplierOrderDocument,
+    CreateSupplierOrderMutation,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -76,6 +87,15 @@ const queryKeys = {
 
     suppliers: ['suppliers'],
     supplierById: (id: string | undefined) => [...queryKeys.suppliers, id],
+
+    supplierOrdersBySupplier: ['supplier-orders-by-supplier'],
+    supplierOrderBySupplierId: (id: string | undefined) => [
+        ...queryKeys.supplierOrdersBySupplier,
+        id,
+    ],
+
+    supplierOrders: ['supplier-orders'],
+    supplierOrderById: (id: string | undefined) => [...queryKeys.supplierOrders, id],
 
     internalOrders: ['internal-orders'],
     internalOrderById: (id: string | undefined) => [...queryKeys.internalOrders, id],
@@ -177,6 +197,53 @@ export const useClientById = (id: string | undefined) => {
     );
 };
 
+export const useSupplierOrders = () => {
+    return usePaginatedQuery(
+        queryKeys.supplierOrders,
+        SupplierOrdersDocument,
+        'supplierOrders',
+        {
+            page: 'number',
+        },
+    );
+};
+
+export const useSupplierOrderById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.supplierById(id),
+        () => {
+            return clientGraphqlQuery(SupplierOrderByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
+};
+
+export const useSupplierOrdersBySupplierId = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.supplierOrderBySupplierId(id),
+        () => {
+            return clientGraphqlQuery(SupplierOrdersBySupplierIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
+};
+
+// export const useProductsStocksByOfficeId = (officeId: string) => {
+//     return useQuery(queryKeys.productsStocksByOfficeId(officeId), () => {
+//         return clientGraphqlQuery(ProductsStocksByOfficeIdDocument, {
+//             officeId,
+//         });
+//     });
+// };
+
 export const useLocalities = () => {
     return usePaginatedQuery(queryKeys.localities, LocalitiesDocument, 'localities', {
         page: 'number',
@@ -203,6 +270,12 @@ export const useProductById = (id: string | undefined) => {
     );
 };
 
+export const useAllSuppliers = () => {
+    return useQuery(['all-suppliers'], () => {
+        return clientGraphqlQuery(AllSuppliersDocument, {});
+    });
+};
+
 export const usePaginatedSuppliers = () => {
     return usePaginatedQuery(queryKeys.suppliers, SuppliersDocument, 'suppliers', {
         page: 'number',
@@ -219,6 +292,37 @@ export const useSupplierById = (id: string | undefined) => {
         },
         {
             enabled: typeof id === 'string',
+        },
+    );
+};
+
+type UseCreateSupplierOptions = UseMutationOptions<
+    CreateSupplierMutation,
+    Error,
+    CreateSupplierMutationVariables
+>;
+
+export const useCreateSupplier = ({
+    onSuccess,
+    ...options
+}: UseCreateSupplierOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<CreateSupplierMutation, Error, CreateSupplierMutationVariables>(
+        (data) => {
+            return clientGraphqlQuery(CreateSupplierDocument, data);
+        },
+        {
+            onSuccess: (data, context, variables) => {
+                if (data.createSupplier?.supplier) {
+                    client.invalidateQueries(queryKeys.suppliers);
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, context, variables);
+                }
+            },
+            ...options,
         },
     );
 };
@@ -321,6 +425,41 @@ export const useCreateInternalOrder = ({
             onSuccess: (data, variables, context) => {
                 if (data.createInternalOrder?.internalOrder) {
                     client.invalidateQueries(queryKeys.internalOrders);
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+type UseCreateSupplierOrderOptions = UseMutationOptions<
+    CreateSupplierOrderMutation,
+    Error,
+    CreateSupplierOrderMutationVariables
+>;
+
+export const useCreateSupplierOrder = ({
+    onSuccess,
+    ...options
+}: UseCreateSupplierOrderOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<
+        CreateSupplierOrderMutation,
+        Error,
+        CreateSupplierOrderMutationVariables
+    >(
+        (data) => {
+            return clientGraphqlQuery(CreateSupplierOrderDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                if (data.createSupplierOrder?.supplierOrder) {
+                    client.invalidateQueries(queryKeys.supplierOrders);
                 }
 
                 if (onSuccess) {
@@ -489,6 +628,20 @@ export const usePurchases = () => {
     return usePaginatedQuery(queryKeys.purchases, PurchasesDocument, 'purchases', {
         page: 'number',
     });
+};
+
+export const useProductsSuppliedBySupplierId = (id: string | undefined) => {
+    return useQuery(
+        ['ProductsSuppliedBySupplierId', id],
+        () => {
+            return clientGraphqlQuery(ProductsSuppliedBySupplierIdDocument, {
+                supplierId: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
 };
 
 export const usePurchaseById = (id: string | undefined) => {

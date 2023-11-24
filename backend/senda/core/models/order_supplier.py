@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 
 
 from django.db import models
@@ -43,7 +43,6 @@ class SupplierOrderModel(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="supplier_orders_destination",
     )
-    date_created = models.DateTimeField(auto_now_add=True)
 
     current_history = models.OneToOneField(
         "SupplierOrderHistoryModel",
@@ -53,7 +52,7 @@ class SupplierOrderModel(TimeStampedModel):
         null=True,
     )
 
-    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
+    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True)
 
     objects: SupplierOrderManager = SupplierOrderManager()  # pyright: ignore
 
@@ -91,14 +90,14 @@ class SupplierOrderProduct(TimeStampedModel):
     product = models.ForeignKey(
         ProductModel, on_delete=models.CASCADE, related_name="related_supplier_orders"
     )
-    price = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
-    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
 
     quantity = models.PositiveIntegerField(default=0)
     quantity_received = models.PositiveIntegerField(default=0)
     supplier_order = models.ForeignKey(
         SupplierOrderModel, on_delete=models.CASCADE, related_name="orders"
     )
+    price = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
+    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
 
     def __str__(self) -> str:
         return f"{self.product.name} - {self.quantity}"
@@ -163,7 +162,6 @@ class SupplierOrderHistoryModel(TimeStampedModel):
     supplier_order = models.ForeignKey(
         SupplierOrderModel, on_delete=models.CASCADE, related_name="history"
     )
-    date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
         "users.UserModel", on_delete=models.SET_NULL, null=True, blank=True
     )
