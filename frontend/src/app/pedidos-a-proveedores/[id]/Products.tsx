@@ -12,26 +12,20 @@ const SupplierOrderByIdProductsTab: React.FC<SupplierOrderByIdTabComponentProps>
                 </div>
 
                 <div className="mt-2">
-                    {supplierOrder.currentHistory?.supplierOrder.orders.map(
-                        (item, index) => (
-                            <div key={index}>
-                                <div className="flex justify-between pb-1">
-                                    <h2 className="text-gray-500">
-                                        {item.product.name} {item.product.brand?.name}
-                                    </h2>
-                                    <p className=" text-gray-500">
-                                        {item.quantity}{' '}
-                                        {item.quantity > 1 ? 'unidad/es' : 'unidad'}{' '}
-                                        <span className="font-bold">|</span>{' '}
-                                        {item.quantityReceived}
-                                        {item.quantityReceived > 1
-                                            ? 'unidad/es'
-                                            : 'unidad'}
-                                    </p>
-                                </div>
+                    {supplierOrder.orders.map((item, index) => (
+                        <div key={index}>
+                            <div className="flex justify-between pb-1">
+                                <h2 className="text-gray-500">
+                                    {item.product.name} {item.product.brand?.name}
+                                </h2>
+                                <p className=" text-gray-500">
+                                    {item.quantity} u.{' '}
+                                    <span className="font-bold">|</span>{' '}
+                                    {item.quantityReceived} u.
+                                </p>
                             </div>
-                        ),
-                    )}
+                        </div>
+                    ))}
                 </div>
             </div>
         </>

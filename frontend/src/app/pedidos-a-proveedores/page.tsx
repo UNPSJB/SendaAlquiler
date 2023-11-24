@@ -48,7 +48,7 @@ const SupplierOrderRowRenderer = (handleRemove: (id: OrderSupplier['id']) => voi
                     className="text-violet-600"
                     href={`/pedidos-a-proveedores/${supplierOrder.id}`}
                 >
-                    {new Date(supplierOrder.dateCreated).toLocaleDateString('es-ES')}
+                    {new Date(supplierOrder.createdOn).toLocaleDateString('es-ES')}
                 </Link>
             </TD>
             <TD>{supplierOrder.supplier.name}</TD>

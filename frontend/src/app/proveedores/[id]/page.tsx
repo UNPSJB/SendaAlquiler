@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 
 import { useState } from 'react';
 
-import { SupplierByIdQuery, SupplierOrderBySupplierIdQuery } from '@/api/graphql';
+import { SupplierByIdQuery } from '@/api/graphql';
 import { useSupplierById } from '@/api/hooks';
 
 import DashboardLayout, {
@@ -41,13 +41,11 @@ const getDasboardTitle = (supplier: SupplierByIdQuery['supplierById'] | undefine
 };
 
 export type SupplierByIdTabComponentProps = {
-    client: NonNullable<SupplierByIdQuery['supplierById']>;
+    supplier: NonNullable<SupplierByIdQuery['supplierById']>;
 };
 
 export type SupplierOrderBySupplierIdTabComponentProps = {
-    supplierOrder: NonNullable<
-        SupplierOrderBySupplierIdQuery['supplierOrderBySupplierId']
-    >[0];
+    id: string;
 };
 
 const tabs = [
@@ -130,7 +128,7 @@ const Page = () => {
 
                             <div className="flex-1 bg-gray-100 px-0">
                                 <section className="pl-10 ">
-                                    <Component client={supplier} />
+                                    <Component id={id as string} supplier={supplier} />
                                 </section>
                             </div>
                         </div>

@@ -10,7 +10,7 @@ query internalOrders($page: Int) {
             officeDestination {
                 name
             }
-            dateCreated
+            createdOn
             currentHistory {
                 status
             }
@@ -39,7 +39,7 @@ query supplierOrders($page: Int) {
             officeDestination {
                 name
             }
-            dateCreated
+            createdOn
             currentHistory {
                 status
             }
@@ -79,26 +79,27 @@ query supplierOrderById($id: ID!) {
                 lastName
                 email
             }
-            supplierOrder {
-                orders {
-                    product {
-                        brand {
-                            name
-                        }
-                        type
-                    }
-                    quantity
-                    quantityReceived
+        }
+        orders {
+            id
+            product {
+                id
+                name
+                brand {
+                    name
                 }
+                type
             }
+            quantity
+            quantityReceived
         }
     }
 }
 
-query supplierOrderBySupplierId($id: ID!) {
-    supplierOrderBySupplierId(id: $id) {
+query supplierOrdersBySupplierId($id: ID!) {
+    supplierOrdersBySupplierId(id: $id) {
         id
-        dateCreated
+        createdOn
         officeDestination {
             name
             street
@@ -111,9 +112,13 @@ query supplierOrderBySupplierId($id: ID!) {
                 firstName
                 lastName
             }
+            createdOn
         }
         orders {
+            id
             product {
+                id
+                name
                 brand {
                     name
                 }

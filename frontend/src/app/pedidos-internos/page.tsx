@@ -42,7 +42,7 @@ const InternalOrderRowRenderer = (handleRemove: (id: InternalOrder['id']) => voi
     const renderer = (
         supplier: ArrayElement<InternalOrdersQuery['internalOrders']['results']>,
     ) => {
-        const humanReadableDate = new Date(supplier.dateCreated).toLocaleDateString();
+        const humanReadableDate = new Date(supplier.createdOn).toLocaleDateString();
 
         return (
             <TR key={supplier.id}>

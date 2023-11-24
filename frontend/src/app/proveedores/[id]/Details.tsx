@@ -14,49 +14,51 @@ const SN: React.FC<PropsWithChildren> = ({ children }) => {
     return <span className="font-bold">{children}</span>;
 };
 
-const ClientByIdDetailsTab: React.FC<SupplierByIdTabComponentProps> = ({ client }) => {
+const SupplierByIdDetailsTab: React.FC<SupplierByIdTabComponentProps> = ({
+    supplier,
+}) => {
     return (
         <>
             <UL>
                 <h1 className="mb-3 text-xl font-bold">Información Básica</h1>
                 <LI>
                     <SN>Correo: </SN>
-                    {client.email}
+                    {supplier.email}
                 </LI>
                 <LI>
                     <SN>Telefono: </SN>
-                    {client.phoneCode}
-                    {client.phoneNumber}
+                    {supplier.phoneCode}
+                    {supplier.phoneNumber}
                 </LI>
                 <LI>
                     <SN>Dni: </SN>
-                    {client.cuit}
+                    {supplier.cuit}
                 </LI>
             </UL>
             <UL>
                 <h1 className="mb-3 text-xl font-bold">Ubicación</h1>
                 <LI>
                     <SN>Provincia: </SN>
-                    {client.locality.state}
+                    {supplier.locality.state}
                 </LI>
                 <LI>
-                    <SN>Ciudad: </SN> {client.locality.name}
+                    <SN>Ciudad: </SN> {supplier.locality.name}
                 </LI>
                 <LI>
-                    <SN>Codigo Postal: </SN> {client.locality.postalCode}
+                    <SN>Codigo Postal: </SN> {supplier.locality.postalCode}
                 </LI>
                 <LI>
-                    <SN>Calle: </SN> {client.streetName}
+                    <SN>Calle: </SN> {supplier.streetName}
                 </LI>
                 <LI>
-                    <SN>N° de Casa: </SN> {client.houseNumber}
+                    <SN>N° de Casa: </SN> {supplier.houseNumber}
                 </LI>
                 <LI>
-                    <SN>Apartamento, habitación, unidad, etc: </SN> {client.houseUnit}
+                    <SN>Apartamento, habitación, unidad, etc: </SN> {supplier.houseUnit}
                 </LI>
             </UL>
         </>
     );
 };
 
-export default ClientByIdDetailsTab;
+export default SupplierByIdDetailsTab;

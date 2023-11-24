@@ -464,7 +464,6 @@ export type OrderSupplier = {
     __typename?: 'OrderSupplier';
     createdOn: Scalars['DateTime']['output'];
     currentHistory: Maybe<SupplierOrderHistory>;
-    dateCreated: Scalars['DateTime']['output'];
     history: Array<SupplierOrderHistory>;
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
@@ -654,8 +653,8 @@ export type Query = {
     rentalContracts: PaginatedRentalContractQueryResult;
     supplierById: Maybe<Supplier>;
     supplierOrderById: Maybe<OrderSupplier>;
-    supplierOrderBySupplierId: Maybe<Array<Maybe<OrderSupplier>>>;
     supplierOrders: PaginatedOrderSupplierQueryResult;
+    supplierOrdersBySupplierId: Array<OrderSupplier>;
     suppliers: PaginatedSupplierQueryResult;
     users: Array<User>;
 };
@@ -724,12 +723,12 @@ export type QuerySupplierOrderByIdArgs = {
     id: Scalars['ID']['input'];
 };
 
-export type QuerySupplierOrderBySupplierIdArgs = {
-    id: Scalars['ID']['input'];
-};
-
 export type QuerySupplierOrdersArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type QuerySupplierOrdersBySupplierIdArgs = {
+    id: Scalars['ID']['input'];
 };
 
 export type QuerySuppliersArgs = {
@@ -907,7 +906,6 @@ export type SupplierOrderHistory = {
     __typename?: 'SupplierOrderHistory';
     createdOn: Scalars['DateTime']['output'];
     currentOrder: Maybe<OrderSupplier>;
-    date: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     status: CoreSupplierOrderHistoryModelStatusChoices;
@@ -1315,7 +1313,7 @@ export type InternalOrdersQuery = {
         results: Array<{
             __typename?: 'InternalOrder';
             id: string;
-            dateCreated: any;
+            createdOn: any;
             officeBranch: { __typename?: 'Office'; name: string };
             officeDestination: { __typename?: 'Office'; name: string };
             currentHistory: {
@@ -1352,7 +1350,7 @@ export type SupplierOrdersQuery = {
         results: Array<{
             __typename?: 'OrderSupplier';
             id: string;
-            dateCreated: any;
+            createdOn: any;
             supplier: { __typename?: 'Supplier'; name: string };
             officeDestination: { __typename?: 'Office'; name: string };
             currentHistory: {
@@ -1404,33 +1402,33 @@ export type SupplierOrderByIdQuery = {
                 lastName: string;
                 email: string;
             } | null;
-            supplierOrder: {
-                __typename?: 'OrderSupplier';
-                orders: Array<{
-                    __typename?: 'SupplierOrderProdu';
-                    quantity: number;
-                    quantityReceived: number;
-                    product: {
-                        __typename?: 'Product';
-                        type: ProductTypeChoices;
-                        brand: { __typename?: 'Brand'; name: string } | null;
-                    };
-                }>;
-            };
         } | null;
+        orders: Array<{
+            __typename?: 'SupplierOrderProdu';
+            id: string;
+            quantity: number;
+            quantityReceived: number;
+            product: {
+                __typename?: 'Product';
+                id: string;
+                name: string;
+                type: ProductTypeChoices;
+                brand: { __typename?: 'Brand'; name: string } | null;
+            };
+        }>;
     } | null;
 };
 
-export type SupplierOrderBySupplierIdQueryVariables = Exact<{
+export type SupplierOrdersBySupplierIdQueryVariables = Exact<{
     id: Scalars['ID']['input'];
 }>;
 
-export type SupplierOrderBySupplierIdQuery = {
+export type SupplierOrdersBySupplierIdQuery = {
     __typename?: 'Query';
-    supplierOrderBySupplierId: Array<{
+    supplierOrdersBySupplierId: Array<{
         __typename?: 'OrderSupplier';
         id: string;
-        dateCreated: any;
+        createdOn: any;
         officeDestination: {
             __typename?: 'Office';
             name: string;
@@ -1440,6 +1438,7 @@ export type SupplierOrderBySupplierIdQuery = {
         currentHistory: {
             __typename?: 'SupplierOrderHistory';
             status: CoreSupplierOrderHistoryModelStatusChoices;
+            createdOn: any;
             user: {
                 __typename?: 'User';
                 email: string;
@@ -1449,17 +1448,19 @@ export type SupplierOrderBySupplierIdQuery = {
         } | null;
         orders: Array<{
             __typename?: 'SupplierOrderProdu';
+            id: string;
             quantity: number;
             quantityReceived: number;
             product: {
                 __typename?: 'Product';
+                id: string;
                 name: string;
                 price: any | null;
                 type: ProductTypeChoices;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
         }>;
-    } | null> | null;
+    }>;
 };
 
 export type CreateSupplierMutationVariables = Exact<{
@@ -3434,7 +3435,7 @@ export const InternalOrdersDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'dateCreated',
+                                                    value: 'createdOn',
                                                 },
                                             },
                                             {
@@ -3618,7 +3619,7 @@ export const SupplierOrdersDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'dateCreated',
+                                                    value: 'createdOn',
                                                 },
                                             },
                                             {
@@ -3847,12 +3848,22 @@ export const SupplierOrderByIdDocument = {
                                                     ],
                                                 },
                                             },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'orders' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
                                             {
                                                 kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'supplierOrder',
-                                                },
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'product' },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
@@ -3860,7 +3871,21 @@ export const SupplierOrderByIdDocument = {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'orders',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'brand',
                                                             },
                                                             selectionSet: {
                                                                 kind: 'SelectionSet',
@@ -3869,60 +3894,31 @@ export const SupplierOrderByIdDocument = {
                                                                         kind: 'Field',
                                                                         name: {
                                                                             kind: 'Name',
-                                                                            value: 'product',
-                                                                        },
-                                                                        selectionSet: {
-                                                                            kind: 'SelectionSet',
-                                                                            selections: [
-                                                                                {
-                                                                                    kind: 'Field',
-                                                                                    name: {
-                                                                                        kind: 'Name',
-                                                                                        value: 'brand',
-                                                                                    },
-                                                                                    selectionSet:
-                                                                                        {
-                                                                                            kind: 'SelectionSet',
-                                                                                            selections:
-                                                                                                [
-                                                                                                    {
-                                                                                                        kind: 'Field',
-                                                                                                        name: {
-                                                                                                            kind: 'Name',
-                                                                                                            value: 'name',
-                                                                                                        },
-                                                                                                    },
-                                                                                                ],
-                                                                                        },
-                                                                                },
-                                                                                {
-                                                                                    kind: 'Field',
-                                                                                    name: {
-                                                                                        kind: 'Name',
-                                                                                        value: 'type',
-                                                                                    },
-                                                                                },
-                                                                            ],
-                                                                        },
-                                                                    },
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'quantity',
-                                                                        },
-                                                                    },
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'quantityReceived',
+                                                                            value: 'name',
                                                                         },
                                                                     },
                                                                 ],
                                                             },
                                                         },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'type',
+                                                            },
+                                                        },
                                                     ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'quantity' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'quantityReceived',
                                                 },
                                             },
                                         ],
@@ -3936,13 +3932,13 @@ export const SupplierOrderByIdDocument = {
         },
     ],
 } as unknown as DocumentNode<SupplierOrderByIdQuery, SupplierOrderByIdQueryVariables>;
-export const SupplierOrderBySupplierIdDocument = {
+export const SupplierOrdersBySupplierIdDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'supplierOrderBySupplierId' },
+            name: { kind: 'Name', value: 'supplierOrdersBySupplierId' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -3958,7 +3954,7 @@ export const SupplierOrderBySupplierIdDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'supplierOrderBySupplierId' },
+                        name: { kind: 'Name', value: 'supplierOrdersBySupplierId' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -3975,7 +3971,7 @@ export const SupplierOrderBySupplierIdDocument = {
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'dateCreated' },
+                                    name: { kind: 'Name', value: 'createdOn' },
                                 },
                                 {
                                     kind: 'Field',
@@ -4041,6 +4037,13 @@ export const SupplierOrderBySupplierIdDocument = {
                                                     ],
                                                 },
                                             },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'createdOn',
+                                                },
+                                            },
                                         ],
                                     },
                                 },
@@ -4052,10 +4055,28 @@ export const SupplierOrderBySupplierIdDocument = {
                                         selections: [
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'product' },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
                                                         {
                                                             kind: 'Field',
                                                             name: {
@@ -4121,8 +4142,8 @@ export const SupplierOrderBySupplierIdDocument = {
         },
     ],
 } as unknown as DocumentNode<
-    SupplierOrderBySupplierIdQuery,
-    SupplierOrderBySupplierIdQueryVariables
+    SupplierOrdersBySupplierIdQuery,
+    SupplierOrdersBySupplierIdQueryVariables
 >;
 export const CreateSupplierDocument = {
     kind: 'Document',

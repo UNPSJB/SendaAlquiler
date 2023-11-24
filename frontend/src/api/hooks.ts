@@ -46,7 +46,6 @@ import {
     PurchasesDocument,
     ProductsDocument,
     ProductsStocksByOfficeIdDocument,
-    SupplierOrderBySupplierIdDocument,
     SupplierByIdDocument,
     SuppliersDocument,
     SupplierOrdersDocument,
@@ -60,6 +59,7 @@ import {
     SupplierOrderByIdDocument,
     ProductByIdDocument,
     ProductsQueryVariables,
+    SupplierOrdersBySupplierIdDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -221,7 +221,7 @@ export const useSupplierOrdersBySupplierId = (id: string | undefined) => {
     return useQuery(
         queryKeys.supplierOrderBySupplierId(id),
         () => {
-            return clientGraphqlQuery(SupplierOrderBySupplierIdDocument, {
+            return clientGraphqlQuery(SupplierOrdersBySupplierIdDocument, {
                 id: id as string,
             });
         },

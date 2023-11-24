@@ -43,7 +43,6 @@ class SupplierOrderModel(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="supplier_orders_destination",
     )
-    date_created = models.DateTimeField(auto_now_add=True)
 
     current_history = models.OneToOneField(
         "SupplierOrderHistoryModel",
@@ -163,7 +162,6 @@ class SupplierOrderHistoryModel(TimeStampedModel):
     supplier_order = models.ForeignKey(
         SupplierOrderModel, on_delete=models.CASCADE, related_name="history"
     )
-    date = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(
         "users.UserModel", on_delete=models.SET_NULL, null=True, blank=True
     )
