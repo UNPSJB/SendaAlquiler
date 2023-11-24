@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Skeleton from 'react-loading-skeleton';
 
 import { InternalOrder, InternalOrdersQuery, Supplier } from '@/api/graphql';
-import { useInternalOrders } from '@/api/hooks';
+import { usePaginatedInternalOrders } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -39,7 +39,9 @@ const SkeletonRowRenderer = (key: number) => (
 );
 
 const InternalOrderRowRenderer = (handleRemove: (id: InternalOrder['id']) => void) => {
-    const renderer = (supplier: ArrayElement<InternalOrdersQuery['internalOrders']>) => {
+    const renderer = (
+        supplier: ArrayElement<InternalOrdersQuery['internalOrders']['results']>,
+    ) => {
         const humanReadableDate = new Date(supplier.dateCreated).toLocaleDateString();
 
         return (
@@ -66,15 +68,8 @@ const InternalOrderRowRenderer = (handleRemove: (id: InternalOrder['id']) => voi
 };
 
 const Page = () => {
-    const useInternalOrdersResult = useInternalOrders();
-
-    const handlePrevious = () => {
-        console.log('previous');
-    };
-
-    const handleNext = () => {
-        console.log('next');
-    };
+    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
+        usePaginatedInternalOrders();
 
     const handleRemove = (id: Supplier['id']) => {
         console.log(`remove ${id}`);
@@ -91,7 +86,7 @@ const Page = () => {
             }
         >
             <FetchedDataRenderer
-                {...useInternalOrdersResult}
+                {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
                         <DataTable
@@ -111,7 +106,7 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ internalOrders }) => {
+                {({ internalOrders: { results: internalOrders } }) => {
                     if (internalOrders.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
@@ -131,8 +126,10 @@ const Page = () => {
                             />
 
                             <DataTablePagination
-                                onPrevious={handlePrevious}
-                                onNext={handleNext}
+                                currentPage={activePage}
+                                hasPrevious={hasPreviousPage}
+                                hasNext={hasNextPage}
+                                totalPages={noPages}
                             />
                         </div>
                     );

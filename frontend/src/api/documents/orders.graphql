@@ -1,0 +1,28 @@
+query internalOrders($page: Int) {
+    internalOrders(page: $page) {
+        count
+        numPages
+        results {
+            id
+            officeBranch {
+                name
+            }
+            officeDestination {
+                name
+            }
+            dateCreated
+            currentHistory {
+                status
+            }
+        }
+    }
+}
+
+mutation createInternalOrder($data: CreateInternalOrderInput!) {
+    createInternalOrder(data: $data) {
+        internalOrder {
+            id
+        }
+        error
+    }
+}

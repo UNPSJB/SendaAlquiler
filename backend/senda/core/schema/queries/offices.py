@@ -1,6 +1,6 @@
 from typing import Any
 
-import graphene  # pyright: ignore
+import graphene
 
 from senda.core.models.offices import OfficeModel
 from senda.core.schema.custom_types import Office

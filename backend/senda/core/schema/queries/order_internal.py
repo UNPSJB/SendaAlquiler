@@ -1,14 +1,24 @@
 from typing import Any
 
-import graphene  # pyright: ignore
+import graphene
 
 from senda.core.models.order_internal import InternalOrderModel
-from senda.core.schema.custom_types import InternalOrder
-from utils.graphene import non_null_list_of
+from senda.core.schema.custom_types import (
+    PaginatedInternalOrderQueryResult,
+)
+from utils.graphene import get_paginated_model
 
 
 class Query(graphene.ObjectType):
-    internal_orders = non_null_list_of(InternalOrder)
+    internal_orders = graphene.NonNull(PaginatedInternalOrderQueryResult, page=graphene.Int())
 
-    def resolve_internal_orders(self, info: Any):
-        return InternalOrderModel.objects.all()
+    def resolve_internal_orders(self, info: Any, page: int):
+        paginator, selected_page = get_paginated_model(
+            InternalOrderModel.objects.all().order_by("-created_on"), page
+        )
+
+        return PaginatedInternalOrderQueryResult(
+            count=paginator.count,
+            results=selected_page.object_list,
+            num_pages=paginator.num_pages,
+        )

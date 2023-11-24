@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Skeleton from 'react-loading-skeleton';
 
 import { Supplier, SuppliersQuery } from '@/api/graphql';
-import { useSuppliers } from '@/api/hooks';
+import { usePaginatedSuppliers } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -40,7 +40,7 @@ const SkeletonRowRenderer = (key: number) => (
 );
 
 const SupplierRowRenderer = (handleRemove: (id: Supplier['id']) => void) => {
-    const renderer = (supplier: ArrayElement<SuppliersQuery['suppliers']>) => (
+    const renderer = (supplier: ArrayElement<SuppliersQuery['suppliers']['results']>) => (
         <TR key={supplier.id}>
             <TD>
                 <Link className="text-violet-600" href={`/proveedores/${supplier.id}`}>
@@ -66,15 +66,8 @@ const SupplierRowRenderer = (handleRemove: (id: Supplier['id']) => void) => {
 };
 
 const Page = () => {
-    const useSuppliersResult = useSuppliers();
-
-    const handlePrevious = () => {
-        console.log('previous');
-    };
-
-    const handleNext = () => {
-        console.log('next');
-    };
+    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
+        usePaginatedSuppliers();
 
     const handleRemove = (id: Supplier['id']) => {
         console.log(`remove ${id}`);
@@ -91,7 +84,7 @@ const Page = () => {
             }
         >
             <FetchedDataRenderer
-                {...useSuppliersResult}
+                {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
                         <DataTable
@@ -111,7 +104,7 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ suppliers }) => {
+                {({ suppliers: { results: suppliers } }) => {
                     if (suppliers.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
@@ -131,8 +124,10 @@ const Page = () => {
                             />
 
                             <DataTablePagination
-                                onPrevious={handlePrevious}
-                                onNext={handleNext}
+                                currentPage={activePage}
+                                hasPrevious={hasPreviousPage}
+                                hasNext={hasNextPage}
+                                totalPages={noPages}
                             />
                         </div>
                     );

@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 
-import { use } from 'react';
 import Skeleton from 'react-loading-skeleton';
 
 import { Purchase, PurchasesQuery } from '@/api/graphql';
@@ -39,7 +38,7 @@ const SkeletonRowRenderer = (key: number) => (
 );
 
 const PurchaseRowRenderer = (handleRemove: (id: Purchase['id']) => void) => {
-    const renderer = (purchase: ArrayElement<PurchasesQuery['purchases']>) => (
+    const renderer = (purchase: ArrayElement<PurchasesQuery['purchases']['results']>) => (
         <TR key={purchase.id}>
             <TD>
                 <Link className="text-violet-600" href={`/ventas/${purchase.id}`}>
@@ -58,15 +57,8 @@ const PurchaseRowRenderer = (handleRemove: (id: Purchase['id']) => void) => {
 };
 
 const Page = () => {
-    const usePurchasesResult = usePurchases();
-
-    const handlePrevious = () => {
-        console.log('previous');
-    };
-
-    const handleNext = () => {
-        console.log('next');
-    };
+    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
+        usePurchases();
 
     const handleRemove = (id: Purchase['id']) => {
         console.log(`remove ${id}`);
@@ -83,7 +75,7 @@ const Page = () => {
             }
         >
             <FetchedDataRenderer
-                {...usePurchasesResult}
+                {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
                         <DataTable
@@ -103,7 +95,7 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ purchases }) => {
+                {({ purchases: { results: purchases } }) => {
                     if (purchases.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
@@ -123,8 +115,10 @@ const Page = () => {
                             />
 
                             <DataTablePagination
-                                onPrevious={handlePrevious}
-                                onNext={handleNext}
+                                currentPage={activePage}
+                                hasPrevious={hasPreviousPage}
+                                hasNext={hasNextPage}
+                                totalPages={noPages}
                             />
                         </div>
                     );

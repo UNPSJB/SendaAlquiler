@@ -1,0 +1,24 @@
+query localities($page: Int) {
+    localities(page: $page) {
+        count
+        numPages
+        results {
+            id
+            name
+            postalCode
+            state
+        }
+    }
+}
+
+mutation createLocality($name: String!, $state: StateChoices!, $postalCode: String!) {
+    createLocality(name: $name, state: $state, postalCode: $postalCode) {
+        locality {
+            id
+            name
+            state
+            postalCode
+        }
+        error
+    }
+}

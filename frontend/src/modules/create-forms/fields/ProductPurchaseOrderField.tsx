@@ -3,7 +3,7 @@ import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
 import { ProductsQuery, ProductTypeChoices } from '@/api/graphql';
-import { useProducts } from '@/api/hooks';
+import { usePaginatedProducts } from '@/api/hooks';
 
 import Label from '@/modules/forms/Label';
 
@@ -14,7 +14,7 @@ import { FormField } from '../../forms/FormField';
 import { Input } from '../../forms/Input';
 import { CustomSelect } from '../../forms/Select';
 
-type ProductDetails = ProductsQuery['products'][0];
+type ProductDetails = ProductsQuery['products']['results'][0];
 
 export type ProductQuantityPair = {
     product: {
@@ -40,7 +40,7 @@ const DEFAULT_PRODUCT_QUANTITY_PAIR: ProductQuantityPair = {
  * Allows adding, updating, and displaying products and quantities.
  */
 const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
-    const useProductsResult = useProducts();
+    const { queryResult: useProductsResult } = usePaginatedProducts();
     const productsData = useProductsResult.data;
 
     const orderedProducts = useMemo(
@@ -77,7 +77,7 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
     // Products options for Select
     const selectableProductOptions = useMemo(() => {
         return (
-            productsData?.products
+            productsData?.products.results
                 .filter((product) => {
                     return product.type === ProductTypeChoices.Comerciable;
                 })
@@ -90,7 +90,7 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
     }, [productsData]);
 
     const canOrderMoreProducts =
-        orderedProducts.length < (productsData?.products.length || 0);
+        orderedProducts.length < (productsData?.products.results.length || 0);
 
     return (
         <FetchedDataRenderer

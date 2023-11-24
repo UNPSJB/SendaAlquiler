@@ -40,7 +40,7 @@ type FormValues = {
     client?: {
         label: string;
         value: string;
-        data: ClientsQuery['clients'][0];
+        data: ClientsQuery['clients']['results'][0];
     };
     billing: {
         firstName: string;
@@ -70,7 +70,7 @@ type FormValues = {
 };
 
 const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) => {
-    const clientsResult = useClients();
+    const { queryResult } = useClients();
     const formMethods = useForm<FormValues>();
     const { watch, control, setValue } = formMethods;
     const router = useRouter();
@@ -210,7 +210,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
             </header>
 
             <FetchedDataRenderer
-                {...clientsResult}
+                {...queryResult}
                 Loading={
                     <main className="flex min-h-screen items-center justify-center pb-16 pt-36">
                         <Spinner />
@@ -227,7 +227,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                     </main>
                 }
             >
-                {({ clients }) => (
+                {({ clients: { results: clients } }) => (
                     <FormProvider {...formMethods}>
                         <main className="container pb-16 pt-36">
                             <section className="flex pb-8">

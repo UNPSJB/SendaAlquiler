@@ -4,8 +4,8 @@ import Link from 'next/link';
 
 import Skeleton from 'react-loading-skeleton';
 
-import { Product, ProductsQuery } from '@/api/graphql';
-import { useProducts } from '@/api/hooks';
+import { Product, ProductListItemFragment } from '@/api/graphql';
+import { usePaginatedProducts } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -39,7 +39,7 @@ const SkeletonRowRenderer = (key: number) => (
 );
 
 const ProductRowRenderer = (handleRemove: (id: Product['id']) => void) => {
-    const renderer = (product: ArrayElement<ProductsQuery['products']>) => (
+    const renderer = (product: ProductListItemFragment) => (
         <TR key={product.id}>
             <TD>
                 <Link className="text-violet-600" href={`/productos/${product.id}`}>
@@ -59,18 +59,11 @@ const ProductRowRenderer = (handleRemove: (id: Product['id']) => void) => {
 };
 
 const Page = () => {
-    const useProductsResult = useProducts();
-
-    const handlePrevious = () => {
-        console.log('previous');
-    };
-
-    const handleNext = () => {
-        console.log('next');
-    };
+    const { hasPreviousPage, hasNextPage, queryResult, activePage, noPages } =
+        usePaginatedProducts();
 
     const handleRemove = (id: Product['id']) => {
-        console.log(`remove ${id}`);
+        console.log('remove', id);
     };
 
     return (
@@ -84,7 +77,7 @@ const Page = () => {
             }
         >
             <FetchedDataRenderer
-                {...useProductsResult}
+                {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
                         <DataTable
@@ -104,8 +97,10 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ products }) => {
-                    if (products.length === 0) {
+                {({ products: data }) => {
+                    const edges = data?.results;
+
+                    if (!edges || edges.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay productos"
@@ -119,13 +114,15 @@ const Page = () => {
                         <div className="pr-container flex-1 py-5 pl-10">
                             <DataTable
                                 columns={columns}
-                                data={products}
+                                data={edges.map((edge) => edge)}
                                 rowRenderer={ProductRowRenderer(handleRemove)}
                             />
 
                             <DataTablePagination
-                                onPrevious={handlePrevious}
-                                onNext={handleNext}
+                                currentPage={activePage}
+                                hasPrevious={hasPreviousPage}
+                                hasNext={hasNextPage}
+                                totalPages={noPages}
                             />
                         </div>
                     );

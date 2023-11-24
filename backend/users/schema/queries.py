@@ -1,6 +1,6 @@
 from typing import Any
 
-import graphene  # pyright: ignore
+import graphene
 
 from users.models import UserModel
 from users.schema.types import User

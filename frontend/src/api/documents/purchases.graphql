@@ -1,0 +1,54 @@
+query purchases($page: Int) {
+    purchases(page: $page) {
+        count
+        numPages
+        results {
+            ...PurchaseListItem
+        }
+    }
+}
+
+query purchaseById($id: ID!) {
+    purchaseById(id: $id) {
+        id
+        date
+        total
+        purchaseItems {
+            product {
+                name
+                brand {
+                    name
+                }
+                price
+            }
+            quantity
+            total
+        }
+        client {
+            firstName
+            lastName
+            email
+            phoneCode
+            phoneNumber
+        }
+    }
+}
+
+mutation createPurchase($purchaseData: CreatePurchaseInput!) {
+    createPurchase(data: $purchaseData) {
+        purchase {
+            ...PurchaseListItem
+        }
+        error
+    }
+}
+
+fragment PurchaseListItem on Purchase {
+    id
+    date
+    total
+    client {
+        firstName
+        lastName
+    }
+}

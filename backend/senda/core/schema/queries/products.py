@@ -1,25 +1,38 @@
 from typing import Any
 
-import graphene  # pyright: ignore
+import graphene
 
 from senda.core.models.products import (
     BrandModel,
     ProductModel,
     ProductStockInOfficeModel,
 )
-from senda.core.schema.custom_types import Brand, Product, ProductStockInOffice
-from utils.graphene import non_null_list_of
+from senda.core.schema.custom_types import (
+    Brand,
+    Product,
+    ProductStockInOffice,
+    PaginatedProductQueryResult,
+)
+from utils.graphene import non_null_list_of, get_paginated_model
 
 
 class Query(graphene.ObjectType):
-    products = non_null_list_of(Product)
+    products = graphene.NonNull(PaginatedProductQueryResult, page=graphene.Int())
 
-    def resolve_products(self, info: Any):
-        return ProductModel.objects.all()
+    def resolve_products(self, info, page: int):
+        paginator, selected_page = get_paginated_model(
+            ProductModel.objects.all().order_by("-created_on"), page
+        )
+
+        return PaginatedProductQueryResult(
+            count=paginator.count,
+            results=selected_page.object_list,
+            num_pages=paginator.num_pages,
+        )
 
     brands = non_null_list_of(Brand)
 
-    def resolve_brands(self, info: Any):
+    def resolve_brands(self, info: Any, page: int):
         return BrandModel.objects.all()
 
     products_stocks_by_office_id = graphene.Field(

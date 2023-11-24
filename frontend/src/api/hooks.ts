@@ -5,6 +5,8 @@ import {
     useQueryClient,
 } from '@tanstack/react-query';
 
+import usePaginatedQuery from '@/modules/usePaginatedQuery';
+
 import {
     BrandsDocument,
     BrandsQuery,
@@ -12,7 +14,6 @@ import {
     ClientsDocument,
     ContractByIdDocument,
     ContractsDocument,
-    ContractsQuery,
     CreateBrandDocument,
     CreateBrandMutation,
     CreateBrandMutationVariables,
@@ -35,15 +36,12 @@ import {
     CreateRentalContractMutationVariables,
     InternalOrdersDocument,
     LocalitiesDocument,
-    LocalitiesQuery,
     LoginDocument,
     LoginMutation,
     LoginMutationVariables,
     OfficesDocument,
     PurchasesDocument,
-    ProductByIdDocument,
     ProductsDocument,
-    ProductsQuery,
     ProductsStocksByOfficeIdDocument,
     SupplierByIdDocument,
     SuppliersDocument,
@@ -53,8 +51,9 @@ import {
     CreateEmployeeMutationVariables,
     CreateEmployeeDocument,
     PurchaseByIdDocument,
-    PurchasesQuery,
     CreatePurchaseDocument,
+    ProductByIdDocument,
+    ProductsQueryVariables,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -83,8 +82,9 @@ const queryKeys = {
 
     offices: ['offices'],
 
-    products: ['products'],
-    productById: (id: string | undefined) => [...queryKeys.products, id],
+    products: (variables: ProductsQueryVariables | null = null) =>
+        variables ? ['products', variables] : ['products'],
+    productById: (id: string | undefined) => [...queryKeys.products(), id],
 
     productsStocksByOfficeId: (id: string) => ['products-stocks-by-office-id', id],
 };
@@ -107,8 +107,8 @@ export const useLogin = (options: UseLoginOptions = {}) => {
 };
 
 export const useEmployees = () => {
-    return useQuery(queryKeys.employees, () => {
-        return clientGraphqlQuery(EmployeesDocument, {});
+    return usePaginatedQuery(queryKeys.employees, EmployeesDocument, 'employees', {
+        page: 'number',
     });
 };
 
@@ -158,8 +158,8 @@ export const useEmployeeById = (id: string | undefined) => {
 };
 
 export const useClients = () => {
-    return useQuery(queryKeys.clients, () => {
-        return clientGraphqlQuery(ClientsDocument, {});
+    return usePaginatedQuery(queryKeys.clients, ClientsDocument, 'clients', {
+        page: 'number',
     });
 };
 
@@ -178,14 +178,14 @@ export const useClientById = (id: string | undefined) => {
 };
 
 export const useLocalities = () => {
-    return useQuery(queryKeys.localities, () => {
-        return clientGraphqlQuery(LocalitiesDocument, {});
+    return usePaginatedQuery(queryKeys.localities, LocalitiesDocument, 'localities', {
+        page: 'number',
     });
 };
 
-export const useProducts = () => {
-    return useQuery(queryKeys.products, () => {
-        return clientGraphqlQuery(ProductsDocument, {});
+export const usePaginatedProducts = () => {
+    return usePaginatedQuery(queryKeys.products, ProductsDocument, 'products', {
+        page: 'number',
     });
 };
 
@@ -203,9 +203,9 @@ export const useProductById = (id: string | undefined) => {
     );
 };
 
-export const useSuppliers = () => {
-    return useQuery(queryKeys.suppliers, () => {
-        return clientGraphqlQuery(SuppliersDocument, {});
+export const usePaginatedSuppliers = () => {
+    return usePaginatedQuery(queryKeys.suppliers, SuppliersDocument, 'suppliers', {
+        page: 'number',
     });
 };
 
@@ -274,25 +274,7 @@ export const useCreateLocality = ({
             onSuccess: (data, variables, context) => {
                 const locality = data.createLocality?.locality;
                 if (locality) {
-                    client.setQueryData<LocalitiesQuery>(queryKeys.localities, (prev) => {
-                        if (!prev) {
-                            return prev;
-                        }
-
-                        return {
-                            ...prev,
-                            localities: [
-                                ...prev.localities,
-                                {
-                                    __typename: 'Locality',
-                                    id: locality.id,
-                                    name: locality.name,
-                                    postalCode: variables.postalCode,
-                                    state: variables.state,
-                                },
-                            ],
-                        };
-                    });
+                    client.invalidateQueries(queryKeys.localities);
                 }
 
                 if (onSuccess) {
@@ -304,10 +286,15 @@ export const useCreateLocality = ({
     );
 };
 
-export const useInternalOrders = () => {
-    return useQuery(queryKeys.internalOrders, () => {
-        return clientGraphqlQuery(InternalOrdersDocument, {});
-    });
+export const usePaginatedInternalOrders = () => {
+    return usePaginatedQuery(
+        queryKeys.internalOrders,
+        InternalOrdersDocument,
+        'internalOrders',
+        {
+            page: 'number',
+        },
+    );
 };
 
 type UseCreateInternalOrderOptions = UseMutationOptions<
@@ -380,20 +367,7 @@ export const useCreateProduct = ({
                 const product = data.createProduct?.product;
 
                 if (product) {
-                    client.setQueryData<ProductsQuery>(queryKeys.products, (prev) => {
-                        const products = prev?.products;
-
-                        if (!products) {
-                            return prev;
-                        }
-
-                        const next: ProductsQuery = {
-                            ...prev,
-                            products: [...products, product],
-                        };
-
-                        return next;
-                    });
+                    client.invalidateQueries(queryKeys.products());
                 }
 
                 if (onSuccess) {
@@ -455,8 +429,8 @@ export const useBrands = () => {
 };
 
 export const useContracts = () => {
-    return useQuery(queryKeys.contracts, () => {
-        return clientGraphqlQuery(ContractsDocument, {});
+    return usePaginatedQuery(queryKeys.contracts, ContractsDocument, 'rentalContracts', {
+        page: 'number',
     });
 };
 
@@ -499,20 +473,7 @@ export const useCreateRentalContract = ({
                 const rentalContract = data.createRentalContract?.rentalContract;
 
                 if (rentalContract) {
-                    client.setQueryData<ContractsQuery>(queryKeys.contracts, (prev) => {
-                        const rentalContracts = prev?.rentalContracts;
-
-                        if (!rentalContracts) {
-                            return prev;
-                        }
-
-                        const next: ContractsQuery = {
-                            ...prev,
-                            rentalContracts: [...rentalContracts, rentalContract],
-                        };
-
-                        return next;
-                    });
+                    client.invalidateQueries(queryKeys.contracts);
                 }
 
                 if (onSuccess) {
@@ -525,8 +486,8 @@ export const useCreateRentalContract = ({
 };
 
 export const usePurchases = () => {
-    return useQuery(queryKeys.purchases,() => {
-       return clientGraphqlQuery(PurchasesDocument, {});
+    return usePaginatedQuery(queryKeys.purchases, PurchasesDocument, 'purchases', {
+        page: 'number',
     });
 };
 
@@ -550,7 +511,10 @@ type UseCreatePurchaseOptions = UseMutationOptions<
     CreatePurchaseMutationVariables
 >;
 
-export const useCreatePurchase = ({ onSuccess, ...options }: UseCreatePurchaseOptions = {}) => {
+export const useCreatePurchase = ({
+    onSuccess,
+    ...options
+}: UseCreatePurchaseOptions = {}) => {
     const client = useQueryClient();
 
     return useMutation<CreatePurchaseMutation, Error, CreatePurchaseMutationVariables>(
@@ -562,20 +526,7 @@ export const useCreatePurchase = ({ onSuccess, ...options }: UseCreatePurchaseOp
                 const purchase = data.createPurchase?.purchase;
 
                 if (purchase) {
-                    client.setQueryData<PurchasesQuery>(queryKeys.purchases, (prev) => {
-                        const purchases = prev?.purchases;
-
-                        if (!purchases) {
-                            return prev;
-                        }
-
-                        const next: PurchasesQuery = {
-                            ...prev,
-                            purchases: [...purchases, purchase],
-                        };
-
-                        return next;
-                    });
+                    client.invalidateQueries(queryKeys.purchases);
                 }
 
                 if (onSuccess) {

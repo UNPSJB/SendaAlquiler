@@ -36,7 +36,9 @@ const SkeletonRowRenderer = (key: number) => (
 );
 
 const LocalityRowRenderer = (handleRemove: (id: Locality['id']) => void) => {
-    const renderer = (locality: ArrayElement<LocalitiesQuery['localities']>) => (
+    const renderer = (
+        locality: ArrayElement<LocalitiesQuery['localities']['results']>,
+    ) => (
         <TR key={locality.id}>
             <TD>{locality.name}</TD>
             <TD>{locality.postalCode}</TD>
@@ -51,15 +53,8 @@ const LocalityRowRenderer = (handleRemove: (id: Locality['id']) => void) => {
 };
 
 const Page = () => {
-    const useLocalitiesResult = useLocalities();
-
-    const handlePrevious = () => {
-        console.log('previous');
-    };
-
-    const handleNext = () => {
-        console.log('next');
-    };
+    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
+        useLocalities();
 
     const handleRemove = (id: Locality['id']) => {
         console.log(`remove ${id}`);
@@ -76,7 +71,7 @@ const Page = () => {
             }
         >
             <FetchedDataRenderer
-                {...useLocalitiesResult}
+                {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
                         <DataTable
@@ -96,7 +91,7 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ localities }) => {
+                {({ localities: { results: localities } }) => {
                     if (localities.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
@@ -116,8 +111,10 @@ const Page = () => {
                             />
 
                             <DataTablePagination
-                                onPrevious={handlePrevious}
-                                onNext={handleNext}
+                                currentPage={activePage}
+                                hasPrevious={hasPreviousPage}
+                                hasNext={hasNextPage}
+                                totalPages={noPages}
                             />
                         </div>
                     );

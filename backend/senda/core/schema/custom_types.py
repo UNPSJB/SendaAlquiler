@@ -1,6 +1,5 @@
 import graphene
 from graphene_django import DjangoObjectType
-
 from senda.core.models.clients import ClientModel
 from senda.core.models.employees import EmployeeModel
 from senda.core.models.localities import LocalityModel, StateChoices
@@ -27,6 +26,8 @@ from senda.core.models.rental_contracts import (
 )
 from senda.core.models.suppliers import SupplierModel
 
+from utils.graphene import non_null_list_of
+
 StateChoicesEnum = graphene.Enum.from_enum(StateChoices)
 InternalOrderHistoryStatusEnum = graphene.Enum.from_enum(
     InternalOrderHistoryStatusChoices
@@ -35,9 +36,18 @@ ProductTypeChoicesEnum = graphene.Enum.from_enum(ProductTypeChoices)
 RentalContractStatusChoicesEnum = graphene.Enum.from_enum(RentalContractStatusChoices)
 
 
+class PaginatedQueryResult(graphene.ObjectType):
+    count = graphene.NonNull(graphene.Int)
+    num_pages = graphene.NonNull(graphene.Int)
+
+
 class Brand(DjangoObjectType):
     class Meta:
         model = BrandModel
+
+
+class PaginatedBrandQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(Brand)
 
 
 class Locality(DjangoObjectType):
@@ -45,6 +55,10 @@ class Locality(DjangoObjectType):
 
     class Meta:
         model = LocalityModel
+
+
+class PaginatedLocalityQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(Locality)
 
 
 class Office(DjangoObjectType):
@@ -59,9 +73,17 @@ class Product(DjangoObjectType):
         model = ProductModel
 
 
+class PaginatedProductQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(Product)
+
+
 class Employee(DjangoObjectType):
     class Meta:
         model = EmployeeModel
+
+
+class PaginatedEmployeeQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(Employee)
 
 
 class Client(DjangoObjectType):
@@ -69,9 +91,17 @@ class Client(DjangoObjectType):
         model = ClientModel
 
 
+class PaginatedClientQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(Client)
+
+
 class Supplier(DjangoObjectType):
     class Meta:
         model = SupplierModel
+
+
+class PaginatedSupplierQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(Supplier)
 
 
 class OrderSupplier(DjangoObjectType):
@@ -79,9 +109,17 @@ class OrderSupplier(DjangoObjectType):
         model = SupplierOrderModel
 
 
+class PaginatedOrderSupplierQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(OrderSupplier)
+
+
 class InternalOrder(DjangoObjectType):
     class Meta:
         model = InternalOrderModel
+
+
+class PaginatedInternalOrderQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(InternalOrder)
 
 
 class InternalOrderHistory(DjangoObjectType):
@@ -101,6 +139,10 @@ class Purchase(DjangoObjectType):
         model = PurchaseModel
 
 
+class PaginatedPurchaseQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(Purchase)
+
+
 class PurchaseItem(DjangoObjectType):
     class Meta:
         model = PurchaseItemModel
@@ -109,6 +151,10 @@ class PurchaseItem(DjangoObjectType):
 class RentalContract(DjangoObjectType):
     class Meta:
         model = RentalContractModel
+
+
+class PaginatedRentalContractQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(RentalContract)
 
 
 class RentalContractItem(DjangoObjectType):

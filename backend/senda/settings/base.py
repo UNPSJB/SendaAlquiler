@@ -49,6 +49,7 @@ class Common(Configuration):
         "corsheaders",
         "markdownx",
         "graphene_django",
+        "django_filters",
     ]
 
     LOCAL_APPS: List[str] = [

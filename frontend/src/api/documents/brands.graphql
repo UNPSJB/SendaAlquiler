@@ -1,0 +1,16 @@
+mutation createBrand($name: String!) {
+    createBrand(name: $name) {
+        brand {
+            id
+            name
+        }
+        error
+    }
+}
+
+query brands {
+    brands {
+        id
+        name
+    }
+}

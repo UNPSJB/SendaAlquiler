@@ -1,0 +1,67 @@
+query products($page: Int) {
+    products(page: $page) {
+        count
+        numPages
+        results {
+            ...ProductListItem
+        }
+    }
+}
+
+query productById($id: ID!) {
+    productById(id: $id) {
+        sku
+        name
+        description
+        brand {
+            name
+        }
+        type
+        price
+        stock {
+            office {
+                locality {
+                    name
+                }
+            }
+            stock
+        }
+        services {
+            name
+        }
+    }
+}
+
+mutation createProduct($productData: CreateProductInput!) {
+    createProduct(productData: $productData) {
+        product {
+            ...ProductListItem
+        }
+        error
+    }
+}
+
+fragment ProductListItem on Product {
+    id
+    name
+    price
+    type
+    brand {
+        name
+    }
+    services {
+        id
+        name
+    }
+}
+
+query productsStocksByOfficeId($officeId: ID!) {
+    productsStocksByOfficeId(officeId: $officeId) {
+        id
+        product {
+            id
+            name
+        }
+        stock
+    }
+}
