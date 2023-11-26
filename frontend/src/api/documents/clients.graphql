@@ -50,3 +50,29 @@ mutation createClient($clientData: CreateClientInput!) {
         error
     }
 }
+
+mutation deleteClient($id: ID!) {
+    deleteClient(id: $id) {
+        success
+    }
+}
+
+query allClients {
+    allClients {
+        id
+        firstName
+        lastName
+        email
+        dni
+        phoneCode
+        phoneNumber
+        houseNumber
+        houseUnit
+        streetName
+        locality {
+            name
+            state
+            postalCode
+        }
+    }
+}

@@ -305,6 +305,22 @@ class SuccessfulReturnContract(BaseChangeContractStatus):
             return BaseChangeContractStatus(error=str(e))
 
 
+class DeleteRentalContract(graphene.Mutation):
+    success = graphene.Boolean(required=True)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    def mutate(self, info: Any, id: str):
+        try:
+            rental_contract = RentalContractModel.objects.get(id=id)
+            rental_contract.delete()
+        except ObjectDoesNotExist:
+            return DeleteRentalContract(success=False)
+
+        return DeleteRentalContract(success=True)
+
+
 class Mutation(graphene.ObjectType):
     create_rental_contract = CreateRentalContract.Field()
     pay_contract_deposit = PayContractDeposit.Field()
@@ -315,3 +331,5 @@ class Mutation(graphene.ObjectType):
     finish_contract = FinishContract.Field()
     failed_return_contract = FailedReturnContract.Field()
     successful_return_contract = SuccessfulReturnContract.Field()
+
+    delete_rental_contract = DeleteRentalContract.Field()

@@ -4,7 +4,7 @@ import { Props as ReactSelectProps } from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 
 import { CreateLocalityMutation, Locality } from '@/api/graphql';
-import { useLocalities } from '@/api/hooks';
+import { useAllLocalities } from '@/api/hooks';
 
 import CreateLocalityForm from '@/modules/create-forms/CreateLocalityForm';
 
@@ -102,9 +102,7 @@ const LocalityField = <
     props: RHFProps<TFieldValues, TName>,
 ) => {
     const { name, control, setValue } = props;
-    const {
-        queryResult: { data, isLoading },
-    } = useLocalities();
+    const { data, isLoading } = useAllLocalities();
 
     const [localityToCreate, setLocalityToCreate] = useState<string | null>(null);
 
@@ -136,7 +134,7 @@ const LocalityField = <
             return [];
         }
 
-        return data.localities.results.map((locality) => ({
+        return data.allLocalities.map((locality) => ({
             label: locality.name,
             value: locality.id,
             data: locality,

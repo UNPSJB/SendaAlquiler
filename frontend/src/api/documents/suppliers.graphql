@@ -44,3 +44,9 @@ query supplierById($id: ID!) {
         }
     }
 }
+
+mutation deleteSupplier($id: ID!) {
+    deleteSupplier(id: $id) {
+        success
+    }
+}

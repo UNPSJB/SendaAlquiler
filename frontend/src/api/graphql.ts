@@ -234,6 +234,51 @@ export type CreateSupplierOrderProductInput = {
     quantity: Scalars['Int']['input'];
 };
 
+export type DeleteClient = {
+    __typename?: 'DeleteClient';
+    success: Scalars['Boolean']['output'];
+};
+
+export type DeleteEmployee = {
+    __typename?: 'DeleteEmployee';
+    success: Scalars['Boolean']['output'];
+};
+
+export type DeleteInternalOrder = {
+    __typename?: 'DeleteInternalOrder';
+    success: Scalars['Boolean']['output'];
+};
+
+export type DeleteLocality = {
+    __typename?: 'DeleteLocality';
+    success: Scalars['Boolean']['output'];
+};
+
+export type DeleteProduct = {
+    __typename?: 'DeleteProduct';
+    success: Scalars['Boolean']['output'];
+};
+
+export type DeletePurchase = {
+    __typename?: 'DeletePurchase';
+    success: Scalars['Boolean']['output'];
+};
+
+export type DeleteRentalContract = {
+    __typename?: 'DeleteRentalContract';
+    success: Scalars['Boolean']['output'];
+};
+
+export type DeleteSupplier = {
+    __typename?: 'DeleteSupplier';
+    success: Scalars['Boolean']['output'];
+};
+
+export type DeleteSupplierOrder = {
+    __typename?: 'DeleteSupplierOrder';
+    success: Scalars['Boolean']['output'];
+};
+
 export type Employee = {
     __typename?: 'Employee';
     createdOn: Scalars['DateTime']['output'];
@@ -338,6 +383,15 @@ export type Mutation = {
     createRentalContract: Maybe<CreateRentalContract>;
     createSupplier: Maybe<CreateSupplier>;
     createSupplierOrder: Maybe<CreateSupplierOrder>;
+    deleteClient: Maybe<DeleteClient>;
+    deleteEmployee: Maybe<DeleteEmployee>;
+    deleteInternalOrder: Maybe<DeleteInternalOrder>;
+    deleteLocality: Maybe<DeleteLocality>;
+    deleteProduct: Maybe<DeleteProduct>;
+    deletePurchase: Maybe<DeletePurchase>;
+    deleteRentalContract: Maybe<DeleteRentalContract>;
+    deleteSupplier: Maybe<DeleteSupplier>;
+    deleteSupplierOrder: Maybe<DeleteSupplierOrder>;
     expiredContract: Maybe<ExpiredContract>;
     failedReturnContract: Maybe<FailedReturnContract>;
     finishContract: Maybe<FinishContract>;
@@ -408,6 +462,42 @@ export type MutationCreateSupplierArgs = {
 
 export type MutationCreateSupplierOrderArgs = {
     data: CreateSupplierOrderInput;
+};
+
+export type MutationDeleteClientArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteEmployeeArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteInternalOrderArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteLocalityArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteProductArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type MutationDeletePurchaseArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteRentalContractArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteSupplierArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteSupplierOrderArgs = {
+    id: Scalars['ID']['input'];
 };
 
 export type MutationExpiredContractArgs = {
@@ -840,7 +930,7 @@ export type RentalContractItem = {
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
-    price: Scalars['Decimal']['output'];
+    price: Maybe<Scalars['Decimal']['output']>;
     product: Product;
     quantity: Scalars['Int']['output'];
     quantityReturned: Maybe<Scalars['Int']['output']>;
@@ -848,7 +938,7 @@ export type RentalContractItem = {
     service: Maybe<ProductService>;
     servicePrice: Maybe<Scalars['Decimal']['output']>;
     serviceTotal: Maybe<Scalars['Decimal']['output']>;
-    total: Scalars['Decimal']['output'];
+    total: Maybe<Scalars['Decimal']['output']>;
 };
 
 export type RentalContractProductsItemInput = {
@@ -1075,32 +1165,6 @@ export type ClientsQuery = {
     };
 };
 
-export type AllClientsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type AllClientsQuery = {
-    __typename?: 'Query';
-    allClients: Array<{
-        __typename?: 'Client';
-        id: string;
-        email: string;
-        firstName: string;
-        lastName: string;
-        phoneCode: string;
-        phoneNumber: string;
-        streetName: string;
-        houseUnit: string | null;
-        houseNumber: string;
-        dni: string;
-        locality: {
-            __typename?: 'Locality';
-            id: string;
-            name: string;
-            state: StateChoices;
-            postalCode: string;
-        };
-    }>;
-};
-
 export type ClientByIdQueryVariables = Exact<{
     id: Scalars['ID']['input'];
 }>;
@@ -1138,6 +1202,40 @@ export type CreateClientMutation = {
         error: string | null;
         client: { __typename?: 'Client'; id: string } | null;
     } | null;
+};
+
+export type DeleteClientMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type DeleteClientMutation = {
+    __typename?: 'Mutation';
+    deleteClient: { __typename?: 'DeleteClient'; success: boolean } | null;
+};
+
+export type AllClientsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AllClientsQuery = {
+    __typename?: 'Query';
+    allClients: Array<{
+        __typename?: 'Client';
+        id: string;
+        firstName: string;
+        lastName: string;
+        email: string;
+        dni: string;
+        phoneCode: string;
+        phoneNumber: string;
+        houseNumber: string;
+        houseUnit: string | null;
+        streetName: string;
+        locality: {
+            __typename?: 'Locality';
+            name: string;
+            state: StateChoices;
+            postalCode: string;
+        };
+    }>;
 };
 
 export type ContractsQueryVariables = Exact<{
@@ -1215,8 +1313,8 @@ export type ContractByIdQuery = {
             __typename?: 'RentalContractItem';
             serviceTotal: any | null;
             servicePrice: any | null;
-            total: any;
-            price: any;
+            total: any | null;
+            price: any | null;
             quantity: number;
             product: {
                 __typename?: 'Product';
@@ -1256,6 +1354,18 @@ export type CreateRentalContractMutation = {
                 status: RentalContractStatusChoices;
             } | null;
         } | null;
+    } | null;
+};
+
+export type DeleteRentalContractMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type DeleteRentalContractMutation = {
+    __typename?: 'Mutation';
+    deleteRentalContract: {
+        __typename?: 'DeleteRentalContract';
+        success: boolean;
     } | null;
 };
 
@@ -1317,6 +1427,15 @@ export type EmployeeByIdQuery = {
     } | null;
 };
 
+export type DeleteEmployeeMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type DeleteEmployeeMutation = {
+    __typename?: 'Mutation';
+    deleteEmployee: { __typename?: 'DeleteEmployee'; success: boolean } | null;
+};
+
 export type LocalitiesQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -1356,6 +1475,15 @@ export type CreateLocalityMutation = {
             postalCode: string;
         } | null;
     } | null;
+};
+
+export type DeleteLocalityMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type DeleteLocalityMutation = {
+    __typename?: 'Mutation';
+    deleteLocality: { __typename?: 'DeleteLocality'; success: boolean } | null;
 };
 
 export type AllLocalitiesQueryVariables = Exact<{ [key: string]: never }>;
@@ -1598,6 +1726,24 @@ export type CreateSupplierMutation = {
     } | null;
 };
 
+export type DeleteSupplierOrderMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type DeleteSupplierOrderMutation = {
+    __typename?: 'Mutation';
+    deleteSupplierOrder: { __typename?: 'DeleteSupplierOrder'; success: boolean } | null;
+};
+
+export type DeleteInternalOrderMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type DeleteInternalOrderMutation = {
+    __typename?: 'Mutation';
+    deleteInternalOrder: { __typename?: 'DeleteInternalOrder'; success: boolean } | null;
+};
+
 export type ProductsQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -1618,21 +1764,6 @@ export type ProductsQuery = {
             services: Array<{ __typename?: 'ProductService'; id: string; name: string }>;
         }>;
     };
-};
-
-export type AllProductsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type AllProductsQuery = {
-    __typename?: 'Query';
-    allProducts: Array<{
-        __typename?: 'Product';
-        id: string;
-        name: string;
-        price: any | null;
-        type: ProductTypeChoices;
-        brand: { __typename?: 'Brand'; name: string } | null;
-        services: Array<{ __typename?: 'ProductService'; id: string; name: string }>;
-    }>;
 };
 
 export type ProductByIdQueryVariables = Exact<{
@@ -1720,6 +1851,30 @@ export type ProductsSuppliedBySupplierIdQuery = {
     }>;
 };
 
+export type DeleteProductMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type DeleteProductMutation = {
+    __typename?: 'Mutation';
+    deleteProduct: { __typename?: 'DeleteProduct'; success: boolean } | null;
+};
+
+export type AllProductsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AllProductsQuery = {
+    __typename?: 'Query';
+    allProducts: Array<{
+        __typename?: 'Product';
+        id: string;
+        name: string;
+        price: any | null;
+        type: ProductTypeChoices;
+        brand: { __typename?: 'Brand'; name: string } | null;
+        services: Array<{ __typename?: 'ProductService'; id: string; name: string }>;
+    }>;
+};
+
 export type PurchasesQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -1800,6 +1955,15 @@ export type PurchaseListItemFragment = {
     client: { __typename?: 'Client'; firstName: string; lastName: string };
 };
 
+export type DeletePurchaseMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type DeletePurchaseMutation = {
+    __typename?: 'Mutation';
+    deletePurchase: { __typename?: 'DeletePurchase'; success: boolean } | null;
+};
+
 export type AllSuppliersQueryVariables = Exact<{ [key: string]: never }>;
 
 export type AllSuppliersQuery = {
@@ -1857,6 +2021,15 @@ export type SupplierByIdQuery = {
             postalCode: string;
         };
     } | null;
+};
+
+export type DeleteSupplierMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type DeleteSupplierMutation = {
+    __typename?: 'Mutation';
+    deleteSupplier: { __typename?: 'DeleteSupplier'; success: boolean } | null;
 };
 
 export type UsersQueryVariables = Exact<{ [key: string]: never }>;
@@ -2207,89 +2380,6 @@ export const ClientsDocument = {
         },
     ],
 } as unknown as DocumentNode<ClientsQuery, ClientsQueryVariables>;
-export const AllClientsDocument = {
-    kind: 'Document',
-    definitions: [
-        {
-            kind: 'OperationDefinition',
-            operation: 'query',
-            name: { kind: 'Name', value: 'allClients' },
-            selectionSet: {
-                kind: 'SelectionSet',
-                selections: [
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'allClients' },
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'firstName' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'lastName' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'phoneCode' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'phoneNumber' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'locality' },
-                                    selectionSet: {
-                                        kind: 'SelectionSet',
-                                        selections: [
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'id' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'name' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'state' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'postalCode',
-                                                },
-                                            },
-                                        ],
-                                    },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'streetName' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'houseUnit' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'houseNumber' },
-                                },
-                                { kind: 'Field', name: { kind: 'Name', value: 'dni' } },
-                            ],
-                        },
-                    },
-                ],
-            },
-        },
-    ],
-} as unknown as DocumentNode<AllClientsQuery, AllClientsQueryVariables>;
 export const ClientByIdDocument = {
     kind: 'Document',
     definitions: [
@@ -2452,6 +2542,133 @@ export const CreateClientDocument = {
         },
     ],
 } as unknown as DocumentNode<CreateClientMutation, CreateClientMutationVariables>;
+export const DeleteClientDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'deleteClient' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deleteClient' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteClientMutation, DeleteClientMutationVariables>;
+export const AllClientsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'allClients' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'allClients' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'firstName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'lastName' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'dni' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'phoneCode' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'phoneNumber' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseNumber' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseUnit' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'streetName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'locality' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'state' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'postalCode',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<AllClientsQuery, AllClientsQueryVariables>;
 export const ContractsDocument = {
     kind: 'Document',
     definitions: [
@@ -3056,6 +3273,57 @@ export const CreateRentalContractDocument = {
     CreateRentalContractMutation,
     CreateRentalContractMutationVariables
 >;
+export const DeleteRentalContractDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'deleteRentalContract' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deleteRentalContract' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    DeleteRentalContractMutation,
+    DeleteRentalContractMutationVariables
+>;
 export const EmployeesDocument = {
     kind: 'Document',
     definitions: [
@@ -3303,6 +3571,54 @@ export const EmployeeByIdDocument = {
         },
     ],
 } as unknown as DocumentNode<EmployeeByIdQuery, EmployeeByIdQueryVariables>;
+export const DeleteEmployeeDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'deleteEmployee' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deleteEmployee' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteEmployeeMutation, DeleteEmployeeMutationVariables>;
 export const LocalitiesDocument = {
     kind: 'Document',
     definitions: [
@@ -3497,6 +3813,54 @@ export const CreateLocalityDocument = {
         },
     ],
 } as unknown as DocumentNode<CreateLocalityMutation, CreateLocalityMutationVariables>;
+export const DeleteLocalityDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'deleteLocality' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deleteLocality' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteLocalityMutation, DeleteLocalityMutationVariables>;
 export const AllLocalitiesDocument = {
     kind: 'Document',
     definitions: [
@@ -4605,6 +4969,108 @@ export const CreateSupplierDocument = {
         },
     ],
 } as unknown as DocumentNode<CreateSupplierMutation, CreateSupplierMutationVariables>;
+export const DeleteSupplierOrderDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'deleteSupplierOrder' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deleteSupplierOrder' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    DeleteSupplierOrderMutation,
+    DeleteSupplierOrderMutationVariables
+>;
+export const DeleteInternalOrderDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'deleteInternalOrder' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deleteInternalOrder' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    DeleteInternalOrderMutation,
+    DeleteInternalOrderMutationVariables
+>;
 export const ProductsDocument = {
     kind: 'Document',
     definitions: [
@@ -4705,72 +5171,6 @@ export const ProductsDocument = {
         },
     ],
 } as unknown as DocumentNode<ProductsQuery, ProductsQueryVariables>;
-export const AllProductsDocument = {
-    kind: 'Document',
-    definitions: [
-        {
-            kind: 'OperationDefinition',
-            operation: 'query',
-            name: { kind: 'Name', value: 'allProducts' },
-            selectionSet: {
-                kind: 'SelectionSet',
-                selections: [
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'allProducts' },
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                {
-                                    kind: 'FragmentSpread',
-                                    name: { kind: 'Name', value: 'ProductListItem' },
-                                },
-                            ],
-                        },
-                    },
-                ],
-            },
-        },
-        {
-            kind: 'FragmentDefinition',
-            name: { kind: 'Name', value: 'ProductListItem' },
-            typeCondition: {
-                kind: 'NamedType',
-                name: { kind: 'Name', value: 'Product' },
-            },
-            selectionSet: {
-                kind: 'SelectionSet',
-                selections: [
-                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'price' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'brand' },
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                            ],
-                        },
-                    },
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'services' },
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                            ],
-                        },
-                    },
-                ],
-            },
-        },
-    ],
-} as unknown as DocumentNode<AllProductsQuery, AllProductsQueryVariables>;
 export const ProductByIdDocument = {
     kind: 'Document',
     definitions: [
@@ -5117,6 +5517,120 @@ export const ProductsSuppliedBySupplierIdDocument = {
     ProductsSuppliedBySupplierIdQuery,
     ProductsSuppliedBySupplierIdQueryVariables
 >;
+export const DeleteProductDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'deleteProduct' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deleteProduct' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteProductMutation, DeleteProductMutationVariables>;
+export const AllProductsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'allProducts' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'allProducts' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'ProductListItem' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'ProductListItem' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'Product' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'brand' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'services' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<AllProductsQuery, AllProductsQueryVariables>;
 export const PurchasesDocument = {
     kind: 'Document',
     definitions: [
@@ -5456,6 +5970,54 @@ export const CreatePurchaseDocument = {
         },
     ],
 } as unknown as DocumentNode<CreatePurchaseMutation, CreatePurchaseMutationVariables>;
+export const DeletePurchaseDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'deletePurchase' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deletePurchase' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeletePurchaseMutation, DeletePurchaseMutationVariables>;
 export const AllSuppliersDocument = {
     kind: 'Document',
     definitions: [
@@ -5699,6 +6261,54 @@ export const SupplierByIdDocument = {
         },
     ],
 } as unknown as DocumentNode<SupplierByIdQuery, SupplierByIdQueryVariables>;
+export const DeleteSupplierDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'deleteSupplier' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'deleteSupplier' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DeleteSupplierMutation, DeleteSupplierMutationVariables>;
 export const UsersDocument = {
     kind: 'Document',
     definitions: [

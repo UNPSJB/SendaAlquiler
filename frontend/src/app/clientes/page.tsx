@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Skeleton from 'react-loading-skeleton';
 
 import { Client, ClientsQuery } from '@/api/graphql';
-import { useClients } from '@/api/hooks';
+import { useClients, useDeleteClient } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -69,8 +69,10 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         useClients();
 
+    const { mutate } = useDeleteClient();
+
     const handleRemove = (id: Client['id']) => {
-        console.log(`remove ${id}`);
+        mutate(id);
     };
 
     return (

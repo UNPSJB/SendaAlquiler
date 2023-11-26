@@ -36,3 +36,9 @@ query employeeById($id: ID!) {
         }
     }
 }
+
+mutation deleteEmployee($id: ID!) {
+    deleteEmployee(id: $id) {
+        success
+    }
+}

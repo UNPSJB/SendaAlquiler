@@ -56,5 +56,21 @@ class CreateEmployee(graphene.Mutation):
             return CreateEmployee(error=e)
 
 
+class DeleteEmployee(graphene.Mutation):
+    success = graphene.Boolean(required=True)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    def mutate(self, info: Any, id: str):
+        try:
+            employee = EmployeeModel.objects.get(id=id)
+            employee.delete()
+            return DeleteEmployee(success=True)
+        except Exception as e:
+            return DeleteEmployee(success=False)
+
+
 class Mutation(graphene.ObjectType):
     create_employee = CreateEmployee.Field()
+    delete_employee = DeleteEmployee.Field()

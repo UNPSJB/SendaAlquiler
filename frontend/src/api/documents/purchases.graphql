@@ -52,3 +52,9 @@ fragment PurchaseListItem on Purchase {
         lastName
     }
 }
+
+mutation deletePurchase($id: ID!) {
+    deletePurchase(id: $id) {
+        success
+    }
+}

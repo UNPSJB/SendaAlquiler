@@ -22,3 +22,18 @@ mutation createLocality($name: String!, $state: StateChoices!, $postalCode: Stri
         error
     }
 }
+
+mutation deleteLocality($id: ID!) {
+    deleteLocality(id: $id) {
+        success
+    }
+}
+
+query allLocalities {
+    allLocalities {
+        id
+        name
+        state
+        postalCode
+    }
+}

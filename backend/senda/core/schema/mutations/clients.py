@@ -107,6 +107,22 @@ class UpdateClient(graphene.Mutation):
         return UpdateClient(client=updated_client)
 
 
+class DeleteClient(graphene.Mutation):
+    success = graphene.Boolean(required=True)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    def mutate(self, info: Any, id: str):
+        try:
+            ClientModel.objects.get(id=id).delete()
+        except ObjectDoesNotExist:
+            return DeleteClient(success=False)
+
+        return DeleteClient(success=True)
+
+
 class Mutation(graphene.ObjectType):
     create_client = CreateClient.Field()
     update_client = UpdateClient.Field()
+    delete_client = DeleteClient.Field()

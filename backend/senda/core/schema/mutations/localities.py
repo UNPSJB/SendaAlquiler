@@ -25,5 +25,22 @@ class CreateLocality(graphene.Mutation):
         return CreateLocality(locality=locality)
 
 
+class DeleteLocality(graphene.Mutation):
+    success = graphene.Boolean(required=True)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    def mutate(self, info: Any, id: str):
+        try:
+            locality = LocalityModel.objects.get(id=id)
+            locality.delete()
+        except ObjectDoesNotExist:
+            return DeleteLocality(success=False)
+
+        return DeleteLocality(success=True)
+
+
 class Mutation(graphene.ObjectType):
     create_locality = CreateLocality.Field()
+    delete_locality = DeleteLocality.Field()

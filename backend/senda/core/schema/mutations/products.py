@@ -5,6 +5,7 @@ import graphene
 from senda.core.models.products import BrandModel, ProductModel
 from senda.core.schema.custom_types import Brand, Product, ProductTypeChoicesEnum
 from utils.graphene import input_object_type_to_dict, non_null_list_of
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class ServiceInput(graphene.InputObjectType):
@@ -82,6 +83,23 @@ class CreateBrand(graphene.Mutation):
             return CreateBrand(error=e)
 
 
+class DeleteProduct(graphene.Mutation):
+    success = graphene.Boolean(required=True)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    def mutate(self, info: Any, id: str):
+        try:
+            product = ProductModel.objects.get(id=id)
+            product.delete()
+        except ObjectDoesNotExist:
+            return DeleteProduct(success=False)
+
+        return DeleteProduct(success=True)
+
+
 class Mutation(graphene.ObjectType):
     create_product = CreateProduct.Field()
     create_brand = CreateBrand.Field()
+    delete_product = DeleteProduct.Field()

@@ -73,3 +73,15 @@ query productsSuppliedBySupplierId($supplierId: ID!) {
         price
     }
 }
+
+mutation deleteProduct($id: ID!) {
+    deleteProduct(id: $id) {
+        success
+    }
+}
+
+query allProducts {
+    allProducts {
+        ...ProductListItem
+    }
+}

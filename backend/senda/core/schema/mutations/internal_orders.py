@@ -114,6 +114,7 @@ class BaseChangeOrderInternalStatus(graphene.Mutation):
     ):
         raise NotImplementedError()
 
+
 class InProgressInternalOrder(BaseChangeOrderInternalStatus):
     @classmethod
     def mutate(cls, self: "InProgressInternalOrder", info: Any, internal_order_id: str):
@@ -162,8 +163,24 @@ class CancelInternalOrder(BaseChangeOrderInternalStatus):
             return BaseChangeOrderInternalStatus(error=str(e))
 
 
+class DeleteInternalOrder(graphene.Mutation):
+    success = graphene.Boolean(required=True)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    def mutate(self, info: Any, id: str):
+        try:
+            order = InternalOrderModel.objects.get(id=id)
+            order.delete()
+            return DeleteInternalOrder(success=True)
+        except Exception as e:
+            return DeleteInternalOrder(success=False)
+
+
 class Mutation(graphene.ObjectType):
     create_internal_order = CreateInternalOrder.Field()
     in_progress_internal_order = InProgressInternalOrder.Field()
     receive_internal_order = ReceiveInternalOrder.Field()
     cancel_internal_order = CancelInternalOrder.Field()
+    delete_internal_order = DeleteInternalOrder.Field()

@@ -12,7 +12,7 @@ import {
 import toast from 'react-hot-toast';
 
 import { ClientsQuery } from '@/api/graphql';
-import { useClients, useCreateRentalContract } from '@/api/hooks';
+import { useAllClients, useCreateRentalContract } from '@/api/hooks';
 
 import LocalityField, { LocalityFieldValue } from './fields/LocalityField';
 import RHFOfficesField, { OfficesFieldValue } from './fields/OfficesField';
@@ -70,7 +70,7 @@ type FormValues = {
 };
 
 const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) => {
-    const { queryResult } = useClients();
+    const queryResult = useAllClients();
     const formMethods = useForm<FormValues>();
     const { watch, control, setValue } = formMethods;
     const router = useRouter();
@@ -227,7 +227,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                     </main>
                 }
             >
-                {({ clients: { results: clients } }) => (
+                {({ allClients: clients }) => (
                     <FormProvider {...formMethods}>
                         <main className="container pb-16 pt-36">
                             <section className="flex pb-8">

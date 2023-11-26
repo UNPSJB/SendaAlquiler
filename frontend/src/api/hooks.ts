@@ -65,6 +65,24 @@ import {
     CreateSupplierOrderMutationVariables,
     CreateSupplierOrderDocument,
     CreateSupplierOrderMutation,
+    DeletePurchaseDocument,
+    DeleteSupplierDocument,
+    DeleteSupplierOrderDocument,
+    DeleteInternalOrderDocument,
+    DeleteEmployeeDocument,
+    DeleteClientDocument,
+    DeleteProductDocument,
+    DeleteRentalContractDocument,
+    DeleteLocalityDocument,
+    DeleteInternalOrderMutation,
+    DeleteSupplierOrderMutation,
+    DeleteSupplierMutation,
+    DeleteEmployeeMutation,
+    DeleteClientMutation,
+    DeleteProductMutation,
+    DeleteRentalContractMutation,
+    DeleteLocalityMutation,
+    DeletePurchaseMutation,
     AllLocalitiesDocument,
     AllProductsDocument,
     AllClientsDocument,
@@ -705,6 +723,231 @@ export const useCreatePurchase = ({
                 if (purchase) {
                     client.invalidateQueries(queryKeys.purchases);
                 }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useDeletePurchase = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<DeletePurchaseMutation, Error, string> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<DeletePurchaseMutation, Error, string>(
+        (id: string) => {
+            return clientGraphqlQuery(DeletePurchaseDocument, {
+                id,
+            });
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                client.invalidateQueries(queryKeys.purchases);
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useDeleteSupplierOrder = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<DeleteSupplierOrderMutation, Error, string> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<DeleteSupplierOrderMutation, Error, string>(
+        (id: string) => {
+            return clientGraphqlQuery(DeleteSupplierOrderDocument, {
+                id,
+            });
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                client.invalidateQueries(queryKeys.supplierOrders);
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useDeleteInternalOrder = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<DeleteInternalOrderMutation, Error, string> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<DeleteInternalOrderMutation, Error, string>(
+        (id: string) => {
+            return clientGraphqlQuery(DeleteInternalOrderDocument, {
+                id,
+            });
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                client.invalidateQueries(queryKeys.internalOrders);
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useDeleteSupplier = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<DeleteSupplierMutation, Error, string> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<DeleteSupplierMutation, Error, string>(
+        (id: string) => {
+            return clientGraphqlQuery(DeleteSupplierDocument, {
+                id,
+            });
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                client.invalidateQueries(queryKeys.suppliers);
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useDeleteEmployee = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<DeleteEmployeeMutation, Error, string> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<DeleteEmployeeMutation, Error, string>(
+        (id: string) => {
+            return clientGraphqlQuery(DeleteEmployeeDocument, {
+                id,
+            });
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                client.invalidateQueries(queryKeys.employees);
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useDeleteClient = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<DeleteClientMutation, Error, string> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<DeleteClientMutation, Error, string>(
+        (id: string) => {
+            return clientGraphqlQuery(DeleteClientDocument, {
+                id,
+            });
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                client.invalidateQueries(queryKeys.clients);
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useDeleteProduct = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<DeleteProductMutation, Error, string> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<DeleteProductMutation, Error, string>(
+        (id: string) => {
+            return clientGraphqlQuery(DeleteProductDocument, {
+                id,
+            });
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                client.invalidateQueries(queryKeys.products());
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useDeleteRentalContract = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<DeleteRentalContractMutation, Error, string> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<DeleteRentalContractMutation, Error, string>(
+        (id: string) => {
+            return clientGraphqlQuery(DeleteRentalContractDocument, {
+                id,
+            });
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                client.invalidateQueries(queryKeys.contracts);
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useDeleteLocality = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<DeleteLocalityMutation, Error, string> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<DeleteLocalityMutation, Error, string>(
+        (id: string) => {
+            return clientGraphqlQuery(DeleteLocalityDocument, {
+                id,
+            });
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                client.invalidateQueries(queryKeys.localities);
 
                 if (onSuccess) {
                     onSuccess(data, variables, context);

@@ -163,3 +163,15 @@ mutation CreateSupplier($data: CreateSupplierInput!) {
         error
     }
 }
+
+mutation deleteSupplierOrder($id: ID!) {
+    deleteSupplierOrder(id: $id) {
+        success
+    }
+}
+
+mutation deleteInternalOrder($id: ID!) {
+    deleteInternalOrder(id: $id) {
+        success
+    }
+}

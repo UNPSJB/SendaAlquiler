@@ -99,3 +99,9 @@ mutation CreateRentalContract($data: CreateRentalContractInput!) {
         error
     }
 }
+
+mutation deleteRentalContract($id: ID!) {
+    deleteRentalContract(id: $id) {
+        success
+    }
+}

@@ -117,7 +117,7 @@ class BaseChangeOrderSupplierStatus(graphene.Mutation):
         )
 
     @classmethod
-    def mutate(cls, self, info):
+    def mutate(cls, self: "ReceiveOrderSupplier", info: Any, order_supplier_id: str):
         raise NotImplementedError()
 
 
@@ -153,7 +153,24 @@ class CancelOrderSupplier(BaseChangeOrderSupplierStatus):
             return BaseChangeOrderSupplierStatus(error=str(e))
 
 
+class DeleteSupplierOrder(graphene.Mutation):
+    success = graphene.Boolean(required=True)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    def mutate(self, info: Any, id: str):
+        try:
+            order_supplier = SupplierOrderModel.objects.get(id=id)
+            order_supplier.delete()
+        except ObjectDoesNotExist:
+            return DeleteSupplierOrder(success=False)
+
+        return DeleteSupplierOrder(success=True)
+
+
 class Mutation(graphene.ObjectType):
     create_supplier_order = CreateSupplierOrder.Field()
     cancel_order_supplier = CancelOrderSupplier.Field()
     receive_order_supplier = ReceiveOrderSupplier.Field()
+    delete_supplier_order = DeleteSupplierOrder.Field()

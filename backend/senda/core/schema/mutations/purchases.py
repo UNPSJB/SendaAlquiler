@@ -59,8 +59,22 @@ class CreatePurchase(graphene.Mutation):
             return CreatePurchase(error=e)
 
 
-# TODO falta update
+class DeletePurchase(graphene.Mutation):
+    success = graphene.Boolean(required=True)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    def mutate(self, info: Any, id: str):
+        try:
+            purchase = PurchaseModel.objects.get(id=id)
+            purchase.delete()
+        except ObjectDoesNotExist:
+            return DeletePurchase(success=False)
+
+        return DeletePurchase(success=True)
 
 
 class Mutation(graphene.ObjectType):
     create_purchase = CreatePurchase.Field()
+    delete_purchase = DeletePurchase.Field()

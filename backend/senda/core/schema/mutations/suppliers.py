@@ -78,8 +78,22 @@ class CreateSupplier(graphene.Mutation):
         return CreateSupplier(supplier=supplier)
 
 
-# TODO falta update
+class DeleteSupplier(graphene.Mutation):
+    success = graphene.Boolean(required=True)
+
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    def mutate(self, info: Any, id: str):
+        try:
+            supplier = SupplierModel.objects.get(id=id)
+            supplier.delete()
+        except ObjectDoesNotExist:
+            return DeleteSupplier(success=False)
+
+        return DeleteSupplier(success=True)
 
 
 class Mutation(graphene.ObjectType):
     create_supplier = CreateSupplier.Field()
+    delete_supplier = DeleteSupplier.Field()
