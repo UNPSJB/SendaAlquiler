@@ -65,11 +65,15 @@ import {
     CreateSupplierOrderMutationVariables,
     CreateSupplierOrderDocument,
     CreateSupplierOrderMutation,
+    AllLocalitiesDocument,
+    AllProductsDocument,
+    AllClientsDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
 const queryKeys = {
     clients: ['clients'],
+    allClients: ['allClients'],
     clientById: (id: string | undefined) => [...queryKeys.clients, id],
 
     employees: ['employees'],
@@ -81,6 +85,7 @@ const queryKeys = {
     contractsById: (id: string | undefined) => [...queryKeys.contracts, id],
 
     localities: ['localities'],
+    allLocalities: ['allLocalities'],
 
     purchases: ['purchases'],
     purchaseById: (id: string | undefined) => [...queryKeys.purchases, id],
@@ -102,6 +107,7 @@ const queryKeys = {
 
     offices: ['offices'],
 
+    allProducts: ['all-products'],
     products: (variables: ProductsQueryVariables | null = null) =>
         variables ? ['products', variables] : ['products'],
     productById: (id: string | undefined) => [...queryKeys.products(), id],
@@ -247,6 +253,24 @@ export const useSupplierOrdersBySupplierId = (id: string | undefined) => {
 export const useLocalities = () => {
     return usePaginatedQuery(queryKeys.localities, LocalitiesDocument, 'localities', {
         page: 'number',
+    });
+};
+
+export const useAllLocalities = () => {
+    return useQuery(queryKeys.allLocalities, () => {
+        return clientGraphqlQuery(AllLocalitiesDocument, {});
+    });
+};
+
+export const useAllProducts = () => {
+    return useQuery(queryKeys.allProducts, () => {
+        return clientGraphqlQuery(AllProductsDocument, {});
+    });
+};
+
+export const useAllClients = () => {
+    return useQuery(queryKeys.allClients, () => {
+        return clientGraphqlQuery(AllClientsDocument, {});
     });
 };
 

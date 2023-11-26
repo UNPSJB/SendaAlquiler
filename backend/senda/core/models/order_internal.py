@@ -38,7 +38,6 @@ class InternalOrderModel(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="internal_orders_destination",
     )
-    date_created = models.DateTimeField(auto_now_add=True)
 
     current_history = models.OneToOneField(
         "InternalOrderHistoryModel",

@@ -40,7 +40,7 @@ class Query(graphene.ObjectType):
         OrderSupplier, id=graphene.ID(required=True)
     )
 
-    def resolve_supplier_order_by_supplier_id(self, info: Any, id: str):
+    def resolve_supplier_orders_by_supplier_id(self, info: Any, id: str):
         supplier_order_by_supplier_id = SupplierModel.objects.get(id=id)
         orders = supplier_order_by_supplier_id.supplier_orders_branch.all()
         return orders

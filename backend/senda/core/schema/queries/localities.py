@@ -3,8 +3,8 @@ from typing import Any
 import graphene
 
 from senda.core.models.localities import LocalityModel
-from senda.core.schema.custom_types import PaginatedLocalityQueryResult
-from utils.graphene import get_paginated_model
+from senda.core.schema.custom_types import PaginatedLocalityQueryResult, Locality
+from utils.graphene import get_paginated_model, non_null_list_of
 
 
 class Query(graphene.ObjectType):
@@ -20,3 +20,8 @@ class Query(graphene.ObjectType):
             results=selected_page.object_list,
             num_pages=paginator.num_pages,
         )
+
+    all_localities = non_null_list_of(Locality)
+
+    def resolve_all_localities(self, info: Any):
+        return LocalityModel.objects.all()

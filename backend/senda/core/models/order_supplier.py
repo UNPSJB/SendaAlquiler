@@ -22,7 +22,6 @@ class SupplierOrderModel(TimeStampedModel):
         history (models.QuerySet["SupplierOrderHistoryModel"]): A queryset for accessing the order's history.
         supplier (models.ForeignKey): A foreign key to the SupplierModel, representing the supplier of the order.
         office_destination (models.ForeignKey): A foreign key to the OfficeModel, representing the destination office for the order.
-        date_created (models.DateTimeField): The date and time when the order was created.
         current_history (models.OneToOneField): A one-to-one relationship to the most current history item of the order.
         total (models.DecimalField): The total cost of the supplier order.
         objects (SupplierOrderManager): Custom manager providing additional functionalities.

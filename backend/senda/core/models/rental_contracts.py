@@ -281,3 +281,16 @@ def update_current_history(
         rental_contract = instance.rental_contract
         rental_contract.current_history = instance
         rental_contract.save()
+
+
+@receiver(post_save, sender=RentalContractItemModel)
+def update_purchase_total(
+    sender: Any, instance: RentalContractItemModel, **kwargs: Any
+) -> None:
+    new_total = instance.quantity * instance.price
+    if instance.total != new_total:
+        instance.total = new_total
+        instance.save()
+
+        instance.rental_contract.total = instance.rental_contract.calculate_total()
+        instance.rental_contract.save()

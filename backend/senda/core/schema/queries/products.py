@@ -31,9 +31,14 @@ class Query(graphene.ObjectType):
             num_pages=paginator.num_pages,
         )
 
+    all_products = non_null_list_of(Product)
+
+    def resolve_all_products(self, info):
+        return ProductModel.objects.all()
+
     brands = non_null_list_of(Brand)
 
-    def resolve_brands(self, info: Any, page: int):
+    def resolve_brands(self, info: Any):
         return BrandModel.objects.all()
 
     products_stocks_by_office_id = graphene.Field(
@@ -53,8 +58,8 @@ class Query(graphene.ObjectType):
     )
 
     def resolve_products_supplied_by_supplier_id(self, info: Any, supplier_id: int):
-        result = ProductSupplierModel.objects.filter(supplier_id=supplier_id).values_list(
-            "product", flat=True
-        )
+        result = ProductSupplierModel.objects.filter(
+            supplier_id=supplier_id
+        ).values_list("product", flat=True)
         products = ProductModel.objects.filter(id__in=result)
         return products

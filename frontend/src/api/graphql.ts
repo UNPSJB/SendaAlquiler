@@ -270,7 +270,6 @@ export type InternalOrder = {
     __typename?: 'InternalOrder';
     createdOn: Scalars['DateTime']['output'];
     currentHistory: Maybe<InternalOrderHistory>;
-    dateCreated: Scalars['DateTime']['output'];
     history: Array<InternalOrderHistory>;
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
@@ -508,7 +507,7 @@ export type OrderSupplier = {
     officeDestination: Office;
     orders: Array<SupplierOrderProdu>;
     supplier: Supplier;
-    total: Scalars['Decimal']['output'];
+    total: Maybe<Scalars['Decimal']['output']>;
 };
 
 export type PaginatedClientQueryResult = {
@@ -672,6 +671,9 @@ export type PurchaseItemsInput = {
 
 export type Query = {
     __typename?: 'Query';
+    allClients: Array<Client>;
+    allLocalities: Array<Locality>;
+    allProducts: Array<Product>;
     allSuppliers: Array<Supplier>;
     brands: Array<Brand>;
     clientById: Maybe<Client>;
@@ -1073,6 +1075,32 @@ export type ClientsQuery = {
     };
 };
 
+export type AllClientsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AllClientsQuery = {
+    __typename?: 'Query';
+    allClients: Array<{
+        __typename?: 'Client';
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        phoneCode: string;
+        phoneNumber: string;
+        streetName: string;
+        houseUnit: string | null;
+        houseNumber: string;
+        dni: string;
+        locality: {
+            __typename?: 'Locality';
+            id: string;
+            name: string;
+            state: StateChoices;
+            postalCode: string;
+        };
+    }>;
+};
+
 export type ClientByIdQueryVariables = Exact<{
     id: Scalars['ID']['input'];
 }>;
@@ -1330,6 +1358,19 @@ export type CreateLocalityMutation = {
     } | null;
 };
 
+export type AllLocalitiesQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AllLocalitiesQuery = {
+    __typename?: 'Query';
+    allLocalities: Array<{
+        __typename?: 'Locality';
+        id: string;
+        name: string;
+        state: StateChoices;
+        postalCode: string;
+    }>;
+};
+
 export type OfficesQueryVariables = Exact<{ [key: string]: never }>;
 
 export type OfficesQuery = {
@@ -1577,6 +1618,21 @@ export type ProductsQuery = {
             services: Array<{ __typename?: 'ProductService'; id: string; name: string }>;
         }>;
     };
+};
+
+export type AllProductsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type AllProductsQuery = {
+    __typename?: 'Query';
+    allProducts: Array<{
+        __typename?: 'Product';
+        id: string;
+        name: string;
+        price: any | null;
+        type: ProductTypeChoices;
+        brand: { __typename?: 'Brand'; name: string } | null;
+        services: Array<{ __typename?: 'ProductService'; id: string; name: string }>;
+    }>;
 };
 
 export type ProductByIdQueryVariables = Exact<{
@@ -2151,6 +2207,89 @@ export const ClientsDocument = {
         },
     ],
 } as unknown as DocumentNode<ClientsQuery, ClientsQueryVariables>;
+export const AllClientsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'allClients' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'allClients' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'firstName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'lastName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'phoneCode' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'phoneNumber' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'locality' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'state' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'postalCode',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'streetName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseUnit' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseNumber' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'dni' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<AllClientsQuery, AllClientsQueryVariables>;
 export const ClientByIdDocument = {
     kind: 'Document',
     definitions: [
@@ -3358,6 +3497,37 @@ export const CreateLocalityDocument = {
         },
     ],
 } as unknown as DocumentNode<CreateLocalityMutation, CreateLocalityMutationVariables>;
+export const AllLocalitiesDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'allLocalities' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'allLocalities' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'postalCode' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<AllLocalitiesQuery, AllLocalitiesQueryVariables>;
 export const OfficesDocument = {
     kind: 'Document',
     definitions: [
@@ -4535,6 +4705,72 @@ export const ProductsDocument = {
         },
     ],
 } as unknown as DocumentNode<ProductsQuery, ProductsQueryVariables>;
+export const AllProductsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'allProducts' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'allProducts' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'ProductListItem' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'ProductListItem' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'Product' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'brand' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'services' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<AllProductsQuery, AllProductsQueryVariables>;
 export const ProductByIdDocument = {
     kind: 'Document',
     definitions: [

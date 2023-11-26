@@ -86,12 +86,12 @@ class ProductStockInOfficeModelAdmin(admin.ModelAdmin[ProductStockInOfficeModel]
 
 @admin.register(RentalContractModel)
 class RentalContractModelAdmin(admin.ModelAdmin[RentalContractModel]):
-    pass
+    readonly_fields = ("total",)
 
 
 @admin.register(RentalContractItemModel)
 class RentalContractItemModelAdmin(admin.ModelAdmin[RentalContractItemModel]):
-    pass
+    list_display = ("id", "rental_contract", "product", "quantity")
 
 
 @admin.register(RentalContractHistoryModel)

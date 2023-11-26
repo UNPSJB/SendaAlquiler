@@ -4,7 +4,7 @@ import graphene
 
 from senda.core.models.clients import ClientModel
 from senda.core.schema.custom_types import Client, PaginatedClientQueryResult
-from utils.graphene import get_paginated_model
+from utils.graphene import get_paginated_model, non_null_list_of
 
 
 class Query(graphene.ObjectType):
@@ -20,6 +20,11 @@ class Query(graphene.ObjectType):
             results=selected_page.object_list,
             num_pages=paginator.num_pages,
         )
+
+    all_clients = non_null_list_of(Client)
+
+    def resolve_all_clients(self, info):
+        return ClientModel.objects.all()
 
     client_by_id = graphene.Field(Client, id=graphene.ID(required=True))
 
