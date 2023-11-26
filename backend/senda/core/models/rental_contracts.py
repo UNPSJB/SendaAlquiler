@@ -108,6 +108,8 @@ class RentalContractModel(TimeStampedModel):
         total = Decimal(0)
         for item in self.rental_contract_items.all():
             total += item.total
+            if item.service:
+                total += item.service_total
 
         return total
 
@@ -147,8 +149,8 @@ class RentalContractItemModel(TimeStampedModel):
         related_name="rental_contract_items",
     )
     quantity = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
-    total = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
+    price = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
+    total = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
     quantity_returned = models.PositiveIntegerField(default=0, blank=True, null=True)
     service = models.ForeignKey(
         ProductServiceModel,
@@ -191,24 +193,6 @@ class RentalContractItemModel(TimeStampedModel):
             )
 
         return super().clean()
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        if not self.price and self.product.price:
-            self.price = self.product.price
-
-        if not self.service_price and self.service:
-            self.service_price = self.service.price
-
-        if not self.total:
-            self.total = self.price * self.quantity
-
-        if self.service and not self.service_total:
-            self.service_total = Decimal(0)
-            self.service_total += self.service.price * self.quantity
-
-        self.clean()
-
-        super().save(*args, **kwargs)
 
 
 class RentalContractStatusChoices(models.TextChoices):
@@ -287,9 +271,20 @@ def update_current_history(
 def update_purchase_total(
     sender: Any, instance: RentalContractItemModel, **kwargs: Any
 ) -> None:
+    instance.price = instance.product.price
+
     new_total = instance.quantity * instance.price
-    if instance.total != new_total:
+
+    new_service_total = Decimal(0)
+    if instance.service:
+        instance.service_price = instance.service.price
+        new_service_total = instance.service.price * instance.quantity
+    else:
+        instance.service_price = None
+
+    if instance.total != new_total or instance.service_total != new_service_total:
         instance.total = new_total
+        instance.service_total = new_service_total
         instance.save()
 
         instance.rental_contract.total = instance.rental_contract.calculate_total()
