@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 
+import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { Supplier, SuppliersQuery } from '@/api/graphql';
-import { usePaginatedSuppliers } from '@/api/hooks';
+import { useDeleteSupplier, usePaginatedSuppliers } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -69,8 +70,18 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         usePaginatedSuppliers();
 
+    const { mutate } = useDeleteSupplier({
+        onSuccess: () => {
+            toast.success('Proveedor eliminado correctamente');
+            queryResult.refetch();
+        },
+        onError: () => {
+            toast.error('Hubo un error al eliminar el proveedor');
+        },
+    });
+
     const handleRemove = (id: Supplier['id']) => {
-        console.log(`remove ${id}`);
+        mutate(id);
     };
 
     return (

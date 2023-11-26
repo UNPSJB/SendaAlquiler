@@ -1,9 +1,10 @@
 'use client';
 
+import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { LocalitiesQuery, Locality } from '@/api/graphql';
-import { useLocalities } from '@/api/hooks';
+import { useDeleteLocality, useLocalities } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -56,8 +57,18 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         useLocalities();
 
+    const { mutate } = useDeleteLocality({
+        onSuccess: () => {
+            toast.success('Localidad eliminada correctamente');
+            queryResult.refetch();
+        },
+        onError: () => {
+            toast.error('Hubo un error al eliminar la localidad');
+        },
+    });
+
     const handleRemove = (id: Locality['id']) => {
-        console.log(`remove ${id}`);
+        mutate(id);
     };
 
     return (

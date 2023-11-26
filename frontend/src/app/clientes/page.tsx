@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 
+import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { Client, ClientsQuery } from '@/api/graphql';
@@ -69,7 +70,15 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         useClients();
 
-    const { mutate } = useDeleteClient();
+    const { mutate } = useDeleteClient({
+        onSuccess: () => {
+            toast.success('Cliente eliminado correctamente');
+            queryResult.refetch();
+        },
+        onError: () => {
+            toast.error('Ha ocurrido un error al eliminar el cliente');
+        },
+    });
 
     const handleRemove = (id: Client['id']) => {
         mutate(id);

@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 
+import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
-import { RentalContract, ContractsQuery, Supplier } from '@/api/graphql';
-import { useContracts } from '@/api/hooks';
+import { RentalContract, ContractsQuery } from '@/api/graphql';
+import { useContracts, useDeleteRentalContract } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -66,8 +67,18 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         useContracts();
 
-    const handleRemove = (id: Supplier['id']) => {
-        console.log(`remove ${id}`);
+    const { mutate } = useDeleteRentalContract({
+        onSuccess: () => {
+            toast.success('Contrato eliminado correctamente');
+            queryResult.refetch();
+        },
+        onError: () => {
+            toast.error('Ha ocurrido un error al eliminar el contrato');
+        },
+    });
+
+    const handleRemove = (id: RentalContract['id']) => {
+        mutate(id);
     };
 
     return (

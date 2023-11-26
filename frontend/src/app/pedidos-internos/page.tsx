@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 
+import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
-import { InternalOrder, InternalOrdersQuery, Supplier } from '@/api/graphql';
-import { usePaginatedInternalOrders } from '@/api/hooks';
+import { InternalOrder, InternalOrdersQuery } from '@/api/graphql';
+import { useDeleteInternalOrder, usePaginatedInternalOrders } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -71,8 +72,18 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         usePaginatedInternalOrders();
 
-    const handleRemove = (id: Supplier['id']) => {
-        console.log(`remove ${id}`);
+    const { mutate } = useDeleteInternalOrder({
+        onSuccess: () => {
+            toast.success('El pedido interno ha sido eliminado');
+            queryResult.refetch();
+        },
+        onError: () => {
+            toast.error('Ha ocurrido un error al eliminar el pedido interno');
+        },
+    });
+
+    const handleRemove = (id: InternalOrder['id']) => {
+        mutate(id);
     };
 
     return (

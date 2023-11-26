@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 
+import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { OrderSupplier, SupplierOrdersQuery } from '@/api/graphql';
-import { useSupplierOrders } from '@/api/hooks';
+import { useDeleteSupplierOrder, useSupplierOrders } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -67,8 +68,18 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         useSupplierOrders();
 
+    const { mutate } = useDeleteSupplierOrder({
+        onSuccess: () => {
+            toast.success('El pedido a proveedor ha sido eliminado');
+            queryResult.refetch();
+        },
+        onError: () => {
+            toast.error('Ha ocurrido un error al eliminar el pedido a proveedor');
+        },
+    });
+
     const handleRemove = (id: OrderSupplier['id']) => {
-        console.log(`remove ${id}`);
+        mutate(id);
     };
 
     return (

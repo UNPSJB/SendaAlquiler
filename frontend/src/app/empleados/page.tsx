@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 
+import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { Employee, EmployeesQuery } from '@/api/graphql';
-import { useEmployees } from '@/api/hooks';
+import { useDeleteEmployee, useEmployees } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -59,8 +60,18 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         useEmployees();
 
+    const { mutate } = useDeleteEmployee({
+        onSuccess: () => {
+            toast.success('El empleado ha sido eliminado');
+            queryResult.refetch();
+        },
+        onError: () => {
+            toast.error('Ha ocurrido un error al eliminar al empleado');
+        },
+    });
+
     const handleRemove = (id: Employee['id']) => {
-        console.log(`remove ${id}`);
+        mutate(id);
     };
 
     return (

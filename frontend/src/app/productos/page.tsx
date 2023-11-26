@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 
+import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { Product, ProductListItemFragment } from '@/api/graphql';
-import { usePaginatedProducts } from '@/api/hooks';
+import { useDeleteProduct, usePaginatedProducts } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -62,8 +63,18 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, queryResult, activePage, noPages } =
         usePaginatedProducts();
 
+    const { mutate } = useDeleteProduct({
+        onSuccess: () => {
+            toast.success('Producto eliminado correctamente');
+            queryResult.refetch();
+        },
+        onError: () => {
+            toast.error('Hubo un error al eliminar el producto');
+        },
+    });
+
     const handleRemove = (id: Product['id']) => {
-        console.log('remove', id);
+        mutate(id);
     };
 
     return (

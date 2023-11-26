@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 
+import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { Purchase, PurchasesQuery } from '@/api/graphql';
-import { usePurchases } from '@/api/hooks';
+import { useDeletePurchase, usePurchases } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -60,8 +61,18 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         usePurchases();
 
+    const { mutate } = useDeletePurchase({
+        onSuccess: () => {
+            toast.success('Venta eliminada con éxito');
+            queryResult.refetch();
+        },
+        onError: () => {
+            toast.error('Hubo un error al eliminar la venta');
+        },
+    });
+
     const handleRemove = (id: Purchase['id']) => {
-        console.log(`remove ${id}`);
+        mutate(id);
     };
 
     return (
