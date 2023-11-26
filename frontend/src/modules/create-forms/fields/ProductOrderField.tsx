@@ -3,7 +3,7 @@ import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
 import { ProductsQuery } from '@/api/graphql';
-import { usePaginatedProducts } from '@/api/hooks';
+import { useAllProducts } from '@/api/hooks';
 
 import Label from '@/modules/forms/Label';
 
@@ -45,7 +45,7 @@ const DEFAULT_PRODUCT_QUANTITY_PAIR: ProductQuantityAndService = {
  * Allows adding, updating, and displaying products and quantities.
  */
 const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
-    const { queryResult: useProductsResult } = usePaginatedProducts();
+    const useProductsResult = useAllProducts();
     const productsData = useProductsResult.data;
 
     const orderedProducts = useMemo(
@@ -92,18 +92,21 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
     );
 
     // Products options for Select
-    const selectableProductOptions = useMemo(() => {
-        return (
-            productsData?.products.results.map((product) => ({
-                value: product.id,
-                label: product.name,
-                data: product,
-            })) || []
+    const selectableProductOptions = (
+        productsData?.allProducts.map((product) => ({
+            value: product.id,
+            label: product.name,
+            data: product,
+        })) || []
+    ).filter((product) => {
+        // Filter out products that are already selected
+        return !orderedProducts.some(
+            (orderedProduct) => orderedProduct.product?.value === product.value,
         );
-    }, [productsData]);
+    });
 
     const canOrderMoreProducts =
-        orderedProducts.length < (productsData?.products.results.length || 0);
+        orderedProducts.length < (productsData?.allProducts.length || 0);
 
     return (
         <FetchedDataRenderer
@@ -142,7 +145,10 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
                                     showRequired
                                 >
                                     <CustomSelect
-                                        options={selectableProductOptions}
+                                        options={[
+                                            ...(item?.product ? [item.product] : []),
+                                            ...selectableProductOptions,
+                                        ]}
                                         name={`productsAndQuantity.${index}.product`}
                                         placeholder="Selecciona un producto"
                                         onChange={({ data }: any) => {
