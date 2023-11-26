@@ -18,7 +18,9 @@ import toast from 'react-hot-toast';
 import { useCreateInternalOrder } from '@/api/hooks';
 
 import RHFOfficesField, { OfficesFieldValue } from './fields/OfficesField';
-import ProductsFromOfficeField from './fields/ProductsFromOfficeField';
+import ProductsFromOfficeField, {
+    ProductsFromOfficeFieldValue,
+} from './fields/ProductsFromOfficeField';
 import NavigationButtons, { NavigationButtonsCancelProps } from './NavigationButtons';
 
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -28,13 +30,7 @@ import { RHFFormField } from '../forms/FormField';
 type FormValues = {
     officeBranch: OfficesFieldValue;
     officeDestination: OfficesFieldValue;
-    products: {
-        product: {
-            value: string;
-            label: string;
-        };
-        quantity: number;
-    }[];
+    products: ProductsFromOfficeFieldValue['products'];
 };
 
 type FieldsComponentProps = {
@@ -177,12 +173,16 @@ const CreateInternalOrderForm: React.FC<NavigationButtonsCancelProps> = (props) 
             data: {
                 officeBranchId: officeBranch.value,
                 officeDestinationId: officeDestination.value,
-                products: products.map((product) => {
-                    return {
-                        id: product.product.value,
-                        quantity: product.quantity,
-                    };
-                }),
+                products: products
+                    .filter((product) => {
+                        return product.product && product.quantity;
+                    })
+                    .map((product) => {
+                        return {
+                            id: product.product!.value,
+                            quantity: parseInt(product.quantity, 10),
+                        };
+                    }),
             },
         });
     };

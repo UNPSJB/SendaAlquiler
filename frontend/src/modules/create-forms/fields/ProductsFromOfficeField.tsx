@@ -16,19 +16,19 @@ type Props = {
     office: Office['id'];
 };
 
-type FormValues = {
+export type ProductsFromOfficeFieldValue = {
     products: {
         product?: {
             value: string;
             label: string;
             data: ProductsStocksByOfficeIdQuery['productsStocksByOfficeId'][0];
         };
-        quantity: number;
+        quantity: string;
     }[];
 };
 
 const ProductsFromOfficeField: React.FC<Props> = ({ office }) => {
-    const { control, getValues, watch } = useFormContext<FormValues>();
+    const { control, getValues, watch } = useFormContext<ProductsFromOfficeFieldValue>();
     const useProductsStocksByOfficeIdResult = useProductsStocksByOfficeId(office);
     const { data, isLoading } = useProductsStocksByOfficeIdResult;
 
@@ -69,7 +69,10 @@ const ProductsFromOfficeField: React.FC<Props> = ({ office }) => {
                                 className="flex-1"
                                 showRequired
                             >
-                                <RHFSelect<FormValues, `products.${number}.product`>
+                                <RHFSelect<
+                                    ProductsFromOfficeFieldValue,
+                                    `products.${number}.product`
+                                >
                                     options={(data?.productsStocksByOfficeId || [])
                                         .filter((x) => {
                                             const isSelected =
