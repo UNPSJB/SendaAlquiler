@@ -20,7 +20,7 @@ def input_object_type_to_dict(data: graphene.InputObjectType) -> Dict[str, Any]:
 
 
 def get_paginated_model(queryset, page_number: int, **kwargs):
-    paginator = Paginator(queryset, 1)
+    paginator = Paginator(queryset, 10)
 
     selected_page = paginator.page(page_number)
     if paginator.num_pages < page_number:
