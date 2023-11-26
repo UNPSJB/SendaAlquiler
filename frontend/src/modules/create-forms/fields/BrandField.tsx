@@ -1,4 +1,4 @@
-import { Controller, useFormContext } from 'react-hook-form';
+import { Control, Controller, FieldValues, Path, useFormContext } from 'react-hook-form';
 import { Props as ReactSelectProps } from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 
@@ -35,8 +35,25 @@ const customFilter: ReactSelectProps<
     return searchRegex.test(nameNoAccents);
 };
 
-const BrandField: React.FC = () => {
-    const { control: contextControl, setValue: setContextValue } = useFormContext();
+export type BrandFieldValue = {
+    label: string;
+    value: Brand['id'];
+};
+
+type Props<TFieldValues extends FieldValues, TName extends Path<TFieldValues>> = {
+    name: TName;
+    control: Control<TFieldValues>;
+    placeholder: string;
+} & (TFieldValues[Extract<keyof TFieldValues, TName>] extends BrandFieldValue
+    ? object
+    : never);
+
+const BrandField = <TFieldValues extends FieldValues, TName extends Path<TFieldValues>>({
+    name,
+    control,
+    placeholder,
+}: Props<TFieldValues, TName>) => {
+    const { setValue: setContextValue } = useFormContext<TFieldValues>();
     const { data, isLoading } = useBrands();
 
     const { mutate, isLoading: creating } = useCreateBrand();
@@ -51,10 +68,10 @@ const BrandField: React.FC = () => {
                     const brand = data.createBrand?.brand;
                     if (!brand) return;
 
-                    setContextValue('brandId', {
+                    setContextValue<TName>(name, {
                         label: brand.name,
                         value: brand.id,
-                    });
+                    } as any);
                 },
             },
         );
@@ -62,10 +79,10 @@ const BrandField: React.FC = () => {
 
     return (
         <Controller
-            name="brandId"
-            control={contextControl}
+            name={name}
+            control={control}
             render={({ field: { onChange, value } }) => (
-                <CreatableSelect
+                <CreatableSelect<BrandSelectOption, false>
                     classNamePrefix="react-select"
                     isDisabled={!!creating}
                     isLoading={!!creating || isLoading}
@@ -73,10 +90,10 @@ const BrandField: React.FC = () => {
                         return {
                             label: brand.name,
                             value: brand.id,
-                        } as BrandSelectOption;
+                        };
                     })}
                     filterOption={customFilter}
-                    placeholder="Selecciona una localidad"
+                    placeholder={placeholder}
                     formatCreateLabel={(input) => {
                         return (
                             <span className="font-headings">

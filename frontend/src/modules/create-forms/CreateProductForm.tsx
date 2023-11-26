@@ -15,10 +15,10 @@ import {
 } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { CreateProductMutationVariables } from '@/api/graphql';
+import { CreateProductMutationVariables, ProductTypeChoices } from '@/api/graphql';
 import { useCreateProduct } from '@/api/hooks';
 
-import BrandField from '@/modules/create-forms/fields/BrandField';
+import BrandField, { BrandFieldValue } from '@/modules/create-forms/fields/BrandField';
 import { RHFFormField } from '@/modules/forms/FormField';
 import Input from '@/modules/forms/Input';
 
@@ -34,7 +34,19 @@ import ProductsSuppliersField, {
 import ProductTypeField from './fields/ProductTypeField';
 import NavigationButtons, { NavigationButtonsCancelProps } from './NavigationButtons';
 
-type FormValues = CreateProductMutationVariables['productData'];
+type FormValues = Omit<
+    CreateProductMutationVariables['productData'],
+    'brandId' | 'stock' | 'type' | 'suppliers'
+> & {
+    brand: BrandFieldValue;
+    type: {
+        value: ProductTypeChoices;
+        label: string;
+    };
+    suppliers: ProductsSuppliersFieldFormValues['suppliers'];
+    stock: ProductsStockFieldFormValues['stock'];
+    services: ProductsServicesFieldFormValues['services'];
+};
 
 type FieldsComponentProps = {
     formErrors: FormState<FormValues>['errors'];
@@ -83,7 +95,11 @@ const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, control }
         </RHFFormField>
 
         <RHFFormField fieldID="brand" label="Marca" showRequired>
-            <BrandField />
+            <BrandField<FormValues, 'brand'>
+                name="brand"
+                control={control}
+                placeholder="Selecciona una marca"
+            />
         </RHFFormField>
 
         <RHFFormField className="flex-1" fieldID="type" label="Tipo" showRequired>
@@ -142,7 +158,7 @@ const STEPS: Step[] = [
         title: 'Información de Producto',
         description: 'Información basica del producto',
         Component: ProductDataStep,
-        fields: ['sku', 'name', 'description', 'brandId', 'type', 'price'],
+        fields: ['sku', 'name', 'description', 'brand', 'type', 'price'],
     },
     {
         key: 'product-services',
@@ -197,28 +213,25 @@ const CreateProductForm: React.FC<NavigationButtonsCancelProps> = (props) => {
     const onSubmit: SubmitHandler<FormValues> = (data) => {
         mutate({
             productData: {
-                ...data,
-                brandId: (data.brandId as any).value,
-                type: (data.type as any).value,
-                stock: (
-                    data.stock as unknown as ProductsStockFieldFormValues['stock']
-                ).map((stock) => {
+                description: data.description,
+                brandId: data.brand.value,
+                name: data.name,
+                price: data.price,
+                sku: data.sku,
+                type: data.type.value,
+                stock: data.stock.map((stock) => {
                     return {
-                        stock: parseInt(stock.stock as unknown as string, 10),
+                        stock: stock.stock,
                         officeId: stock.office.value,
                     };
                 }),
-                services: (
-                    data.services as unknown as ProductsServicesFieldFormValues['services']
-                ).map((service) => {
+                services: data.services.map((service) => {
                     return {
                         name: service.name,
                         price: service.price,
                     };
                 }),
-                suppliers: (
-                    data.suppliers as unknown as ProductsSuppliersFieldFormValues['suppliers']
-                ).map((data) => {
+                suppliers: data.suppliers.map((data) => {
                     return {
                         supplierId: data.supplier.value,
                         price: data.price.toString(),
