@@ -159,7 +159,7 @@ export type CreateProduct = {
 
 export type CreateProductInput = {
     brandId: Scalars['ID']['input'];
-    description: Scalars['String']['input'];
+    description: InputMaybe<Scalars['String']['input']>;
     name: Scalars['String']['input'];
     price: Scalars['String']['input'];
     services: Array<ServiceInput>;
@@ -735,7 +735,6 @@ export type Purchase = {
     __typename?: 'Purchase';
     client: Client;
     createdOn: Scalars['DateTime']['output'];
-    date: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     purchaseItems: Array<PurchaseItem>;
@@ -764,9 +763,11 @@ export type Query = {
     allClients: Array<Client>;
     allLocalities: Array<Locality>;
     allProducts: Array<Product>;
+    allPurchases: Array<Purchase>;
     allSuppliers: Array<Supplier>;
     brands: Array<Brand>;
     clientById: Maybe<Client>;
+    clientExists: Scalars['Boolean']['output'];
     clients: PaginatedClientQueryResult;
     contractById: Maybe<RentalContract>;
     employeeById: Maybe<Employee>;
@@ -776,6 +777,7 @@ export type Query = {
     officeById: Maybe<Office>;
     offices: Array<Office>;
     productById: Maybe<Product>;
+    productExists: Scalars['Boolean']['output'];
     products: PaginatedProductQueryResult;
     productsStocksByOfficeId: Array<ProductStockInOffice>;
     productsSuppliedBySupplierId: Array<Product>;
@@ -793,6 +795,11 @@ export type Query = {
 
 export type QueryClientByIdArgs = {
     id: Scalars['ID']['input'];
+};
+
+export type QueryClientExistsArgs = {
+    dni: InputMaybe<Scalars['String']['input']>;
+    email: InputMaybe<Scalars['String']['input']>;
 };
 
 export type QueryClientsArgs = {
@@ -825,6 +832,10 @@ export type QueryOfficeByIdArgs = {
 
 export type QueryProductByIdArgs = {
     id: Scalars['ID']['input'];
+};
+
+export type QueryProductExistsArgs = {
+    sku: Scalars['String']['input'];
 };
 
 export type QueryProductsArgs = {
@@ -1238,6 +1249,13 @@ export type AllClientsQuery = {
     }>;
 };
 
+export type ClientExistsQueryVariables = Exact<{
+    email: InputMaybe<Scalars['String']['input']>;
+    dni: InputMaybe<Scalars['String']['input']>;
+}>;
+
+export type ClientExistsQuery = { __typename?: 'Query'; clientExists: boolean };
+
 export type ContractsQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -1367,6 +1385,26 @@ export type DeleteRentalContractMutation = {
         __typename?: 'DeleteRentalContract';
         success: boolean;
     } | null;
+};
+
+export type DashboardQueryVariables = Exact<{ [key: string]: never }>;
+
+export type DashboardQuery = {
+    __typename?: 'Query';
+    allPurchases: Array<{
+        __typename?: 'Purchase';
+        id: string;
+        createdOn: any;
+        total: any | null;
+        client: { __typename?: 'Client'; firstName: string; lastName: string };
+    }>;
+    allClients: Array<{ __typename?: 'Client'; id: string }>;
+    allProducts: Array<{
+        __typename?: 'Product';
+        id: string;
+        name: string;
+        purchaseItems: Array<{ __typename?: 'PurchaseItem'; quantity: number }>;
+    }>;
 };
 
 export type EmployeesQueryVariables = Exact<{
@@ -1875,6 +1913,12 @@ export type AllProductsQuery = {
     }>;
 };
 
+export type ProductExistsQueryVariables = Exact<{
+    sku: Scalars['String']['input'];
+}>;
+
+export type ProductExistsQuery = { __typename?: 'Query'; productExists: boolean };
+
 export type PurchasesQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -1888,7 +1932,7 @@ export type PurchasesQuery = {
         results: Array<{
             __typename?: 'Purchase';
             id: string;
-            date: any;
+            createdOn: any;
             total: any | null;
             client: { __typename?: 'Client'; firstName: string; lastName: string };
         }>;
@@ -1904,7 +1948,7 @@ export type PurchaseByIdQuery = {
     purchaseById: {
         __typename?: 'Purchase';
         id: string;
-        date: any;
+        createdOn: any;
         total: any | null;
         purchaseItems: Array<{
             __typename?: 'PurchaseItem';
@@ -1940,7 +1984,7 @@ export type CreatePurchaseMutation = {
         purchase: {
             __typename?: 'Purchase';
             id: string;
-            date: any;
+            createdOn: any;
             total: any | null;
             client: { __typename?: 'Client'; firstName: string; lastName: string };
         } | null;
@@ -1950,7 +1994,7 @@ export type CreatePurchaseMutation = {
 export type PurchaseListItemFragment = {
     __typename?: 'Purchase';
     id: string;
-    date: any;
+    createdOn: any;
     total: any | null;
     client: { __typename?: 'Client'; firstName: string; lastName: string };
 };
@@ -2115,7 +2159,7 @@ export const PurchaseListItemFragmentDoc = {
                 kind: 'SelectionSet',
                 selections: [
                     { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdOn' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'total' } },
                     {
                         kind: 'Field',
@@ -2669,6 +2713,58 @@ export const AllClientsDocument = {
         },
     ],
 } as unknown as DocumentNode<AllClientsQuery, AllClientsQueryVariables>;
+export const ClientExistsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'clientExists' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'email' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'dni' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'clientExists' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'email' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'email' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'dni' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'dni' },
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<ClientExistsQuery, ClientExistsQueryVariables>;
 export const ContractsDocument = {
     kind: 'Document',
     definitions: [
@@ -3324,6 +3420,90 @@ export const DeleteRentalContractDocument = {
     DeleteRentalContractMutation,
     DeleteRentalContractMutationVariables
 >;
+export const DashboardDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'dashboard' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'allPurchases' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'createdOn' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'total' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'client' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'firstName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'lastName' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'allClients' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'allProducts' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'purchaseItems' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'quantity' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<DashboardQuery, DashboardQueryVariables>;
 export const EmployeesDocument = {
     kind: 'Document',
     definitions: [
@@ -5631,6 +5811,48 @@ export const AllProductsDocument = {
         },
     ],
 } as unknown as DocumentNode<AllProductsQuery, AllProductsQueryVariables>;
+export const ProductExistsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'productExists' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'sku' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'productExists' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'sku' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'sku' },
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<ProductExistsQuery, ProductExistsQueryVariables>;
 export const PurchasesDocument = {
     kind: 'Document',
     definitions: [
@@ -5702,7 +5924,7 @@ export const PurchasesDocument = {
                 kind: 'SelectionSet',
                 selections: [
                     { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdOn' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'total' } },
                     {
                         kind: 'Field',
@@ -5763,7 +5985,10 @@ export const PurchaseByIdDocument = {
                             kind: 'SelectionSet',
                             selections: [
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                                { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'createdOn' },
+                                },
                                 { kind: 'Field', name: { kind: 'Name', value: 'total' } },
                                 {
                                     kind: 'Field',
@@ -5946,7 +6171,7 @@ export const CreatePurchaseDocument = {
                 kind: 'SelectionSet',
                 selections: [
                     { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'date' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'createdOn' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'total' } },
                     {
                         kind: 'Field',

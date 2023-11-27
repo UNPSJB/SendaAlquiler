@@ -15,7 +15,12 @@ import {
 } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { CreateProductMutationVariables, ProductTypeChoices } from '@/api/graphql';
+import {
+    CreateProductMutationVariables,
+    ProductExistsDocument,
+    ProductTypeChoices,
+} from '@/api/graphql';
+import { clientGraphqlQuery } from '@/api/graphqlclient';
 import { useCreateProduct } from '@/api/hooks';
 
 import BrandField, { BrandFieldValue } from '@/modules/create-forms/fields/BrandField';
@@ -63,7 +68,18 @@ const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, control }
                 placeholder="XYZ12345"
                 hasError={!!formErrors.sku}
                 control={control}
-                rules={{ required: true }}
+                rules={{
+                    required: true,
+                    validate: async (value) => {
+                        const response = await clientGraphqlQuery(ProductExistsDocument, {
+                            sku: value,
+                        });
+
+                        return response.productExists
+                            ? 'Ya existe un producto con ese SKU'
+                            : true;
+                    },
+                }}
             />
         </RHFFormField>
 
@@ -78,19 +94,13 @@ const ProductDataStep: React.FC<FieldsComponentProps> = ({ formErrors, control }
             />
         </RHFFormField>
 
-        <RHFFormField
-            className="flex-1"
-            fieldID="description"
-            label="Descripcion"
-            showRequired
-        >
+        <RHFFormField className="flex-1" fieldID="description" label="Descripcion">
             <Input
                 id="description"
                 name="description"
                 placeholder="Descripción"
                 hasError={!!formErrors.description}
                 control={control}
-                rules={{ required: true }}
             />
         </RHFFormField>
 

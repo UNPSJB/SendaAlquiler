@@ -142,8 +142,7 @@ some_chubut_cities_along_postal_code = [
 ]
 
 
-@transaction.atomic
-def create_fixture_data():
+def create_localities():
     for city in some_chubut_cities_along_postal_code:
         LocalityModel.objects.create(
             name=city["name"],
@@ -151,6 +150,8 @@ def create_fixture_data():
             state=StateChoices.CHUBUT,
         )
 
+
+def create_clients():
     localities = list(LocalityModel.objects.all())
 
     for _ in range(30):
@@ -185,7 +186,8 @@ def create_fixture_data():
         # Save the instance to the database
         client.save()
 
-    # create employees
+
+def create_employees():
     for _ in range(10):
         # Generate fake data for each employee
         first_name = fake.first_name()
@@ -205,7 +207,8 @@ def create_fixture_data():
         # Save the instance to the database
         employee.save()
 
-    # create offices
+
+def create_offices():
     OfficeModel.objects.create(
         name="Sucursal en Trelew",
         street="25 de Mayo",
@@ -227,7 +230,8 @@ def create_fixture_data():
         locality=LocalityModel.objects.get(name="Comodoro Rivadavia"),
     )
 
-    # create suppliers
+
+def create_suppliers():
     for _ in range(10):
         SupplierModel.objects.create(
             name=fake.company(),
@@ -240,13 +244,15 @@ def create_fixture_data():
             locality=LocalityModel.objects.order_by("?").first(),
         )
 
-    # Create 10 brands with hardcoded names
+
+def create_brands():
     for _ in range(10):
         BrandModel.objects.create(
             name=fake.company(),
         )
 
-    # Create 10 products COMERCIABLE
+
+def create_comerciable_products():
     for _ in range(10):
         product = ProductModel.objects.create(
             name=fake.word(),
@@ -275,6 +281,8 @@ def create_fixture_data():
                 price=random.randint(100, 1000),
             )
 
+
+def create_alquilable_products():
     # Create products ALQUILABLE
     product = ProductModel.objects.create(
         name="Baño",
@@ -414,12 +422,15 @@ def create_fixture_data():
         price=random.randint(100, 1000),
     )
 
-    # create random purchases
-    for _ in range(10):
+
+def create_purchases():
+    for _ in range(515):
         purchase = PurchaseModel.objects.create(
-            date=fake.date_between(start_date="-1y", end_date="today"),
             client=ClientModel.objects.order_by("?").first(),
         )
+
+        purchase.created_on = fake.date_between(start_date="-1y", end_date="today")
+        purchase.save()
 
         # create random purchase items
         products_to_buy = ProductModel.objects.filter(
@@ -432,6 +443,8 @@ def create_fixture_data():
                 quantity=random.randint(1, 10),
             )
 
+
+def create_internal_orders():
     # create random internal orders
     for _ in range(10):
         order = InternalOrderModel.objects.create(
@@ -453,7 +466,8 @@ def create_fixture_data():
             status=InternalOrderHistoryStatusChoices.PENDING,
         )
 
-    # create random supplier orders
+
+def create_supplier_orders():
     for _ in range(10):
         order = SupplierOrderModel.objects.create(
             supplier=SupplierModel.objects.order_by("?").first(),
@@ -474,7 +488,8 @@ def create_fixture_data():
             status=SupplierOrderHistoryStatusChoices.PENDING,
         )
 
-    # create random rental contracts
+
+def create_contracts():
     for _ in range(10):
         contract = RentalContractModel.objects.create(
             client=ClientModel.objects.order_by("?").first(),
@@ -505,6 +520,27 @@ def create_fixture_data():
         RentalContractHistoryModel.objects.create(
             rental_contract=contract, status=RentalContractStatusChoices.PRESUPUESTADO
         )
+
+
+@transaction.atomic
+def create_fixture_data():
+    create_localities()
+    create_offices()
+
+    create_clients()
+    create_employees()
+
+    create_suppliers()
+    create_brands()
+
+    create_comerciable_products()
+    create_alquilable_products()
+
+    create_purchases()
+    create_internal_orders()
+    create_supplier_orders()
+
+    create_contracts()
 
 
 create_fixture_data()

@@ -26,6 +26,11 @@ class Query(graphene.ObjectType):
             num_pages=paginator.num_pages,
         )
 
+    all_purchases = non_null_list_of(Purchase)
+
+    def resolve_all_purchases(self, info: Any):
+        return PurchaseModel.objects.all()
+
     purchase_items = non_null_list_of(PurchaseItem)
 
     def resolve_purchase_items(self, info: Any):

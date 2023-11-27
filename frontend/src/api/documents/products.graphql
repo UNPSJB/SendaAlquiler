@@ -85,3 +85,7 @@ query allProducts {
         ...ProductListItem
     }
 }
+
+query productExists($sku: String!) {
+    productExists(sku: $sku)
+}

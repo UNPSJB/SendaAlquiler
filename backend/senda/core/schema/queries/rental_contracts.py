@@ -11,7 +11,9 @@ from utils.graphene import get_paginated_model
 
 
 class Query(graphene.ObjectType):
-    rental_contracts = graphene.NonNull(PaginatedRentalContractQueryResult, page=graphene.Int())
+    rental_contracts = graphene.NonNull(
+        PaginatedRentalContractQueryResult, page=graphene.Int()
+    )
 
     def resolve_rental_contracts(self, info: Any, page: int):
         paginator, selected_page = get_paginated_model(
