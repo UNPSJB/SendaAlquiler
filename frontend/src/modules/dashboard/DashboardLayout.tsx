@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 import clsx from 'clsx';
 import { PropsWithChildren, useCallback, useState } from 'react';
@@ -95,6 +95,7 @@ type DashboardLayoutProps = PropsWithChildren<{
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) => {
     const [isMenuOpen, setMenuOpen] = useState(false);
     const toggleMenu = useCallback(() => setMenuOpen((prev) => !prev), []);
+    const router = useRouter();
 
     return (
         <div className="min-h-screen lg:flex">
@@ -131,9 +132,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
                         ))}
 
                         <li className="mt-auto border-t border-white py-5 pt-4">
-                            <NavigationLink href="/configuracion" Icon={Gear}>
-                                Configuración
-                            </NavigationLink>
+                            <span className="mb-4 block text-sm text-gray-200">
+                                admin@admin.com
+                            </span>
+                            <button
+                                className="block w-full rounded bg-white p-2 text-sm font-bold text-black"
+                                onClick={() => {
+                                    router.replace('/login');
+                                }}
+                            >
+                                Cerrar sesión
+                            </button>
                         </li>
                     </ul>
                 </nav>

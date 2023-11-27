@@ -246,10 +246,28 @@ def create_fixture_data():
             name=fake.company(),
         )
 
-    # Create 10 products COMERCIABLE
-    for _ in range(10):
+
+def create_comerciable_products():
+    limpieza_product_names = [
+        "Escoba",
+        "Escobillón",
+        "Balde",
+        "Cepillo",
+        "Fregona",
+        "Mopa",
+        "Trapo",
+        "Cubo",
+        "Aspiradora",
+        "Lustradora",
+        "Lustramuebles",
+        "Lustrametales",
+        "Lustrazapatos",
+        "Lustrabotas",
+    ]
+
+    for name in limpieza_product_names:
         product = ProductModel.objects.create(
-            name=fake.word(),
+            name=name,
             description=fake.sentence(),
             price=str(random.randint(100, 1000)),
             sku=fake.isbn10(),

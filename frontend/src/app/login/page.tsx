@@ -1,5 +1,7 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+
 import { SubmitHandler } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -10,9 +12,13 @@ import LoginForm, { LoginFormValues } from './LoginForm';
 import LoginHeader from './LoginHeader';
 
 const LoginPage = () => {
+    const router = useRouter();
+
     const { mutate } = useLogin({
         onSuccess: ({ login }) => {
-            if (login) toast.success(`Has iniciado sesión con ${login.user.email}`);
+            if (login) {
+                router.replace('/');
+            }
         },
         onError: () => {
             toast.error(`Hubo un error al iniciar sesión`);
