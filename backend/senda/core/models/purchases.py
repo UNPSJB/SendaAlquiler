@@ -32,7 +32,6 @@ class PurchaseModel(TimeStampedModel):
 
     purchase_items: models.QuerySet["PurchaseItemModel"]
 
-    date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
     client = models.ForeignKey(
         ClientModel, on_delete=models.CASCADE, related_name="purchases"
@@ -41,7 +40,7 @@ class PurchaseModel(TimeStampedModel):
     objects: PurchaseModelManager = PurchaseModelManager()  # pyright: ignore
 
     def __str__(self) -> str:
-        return f"{self.date} - {self.total}"
+        return f"{self.created_on} - {self.total}"
 
     def recalculate_total(self) -> None:
         self.total = self.purchase_items.aggregate(

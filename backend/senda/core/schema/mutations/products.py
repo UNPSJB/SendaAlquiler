@@ -26,7 +26,7 @@ class ProductSupplierInput(graphene.InputObjectType):
 class CreateProductInput(graphene.InputObjectType):
     name = graphene.String(required=True)
     sku = graphene.String(required=True)
-    description = graphene.String(required=True)
+    description = graphene.String()
     brand_id = graphene.ID(required=True)
     type = ProductTypeChoicesEnum(required=True)
     price = graphene.String(required=True)

@@ -63,3 +63,10 @@ class Query(graphene.ObjectType):
         ).values_list("product", flat=True)
         products = ProductModel.objects.filter(id__in=result)
         return products
+
+    product_exists = graphene.Field(
+        graphene.NonNull(graphene.Boolean), sku=graphene.String(required=True)
+    )
+
+    def resolve_product_exists(self, info: Any, sku: str):
+        return ProductModel.objects.filter(sku=sku).exists()

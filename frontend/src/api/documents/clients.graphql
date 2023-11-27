@@ -76,3 +76,7 @@ query allClients {
         }
     }
 }
+
+query clientExists($email: String, $dni: String) {
+    clientExists(email: $email, dni: $dni)
+}

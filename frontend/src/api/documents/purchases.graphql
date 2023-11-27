@@ -11,7 +11,7 @@ query purchases($page: Int) {
 query purchaseById($id: ID!) {
     purchaseById(id: $id) {
         id
-        date
+        createdOn
         total
         purchaseItems {
             product {
@@ -45,7 +45,7 @@ mutation createPurchase($purchaseData: CreatePurchaseInput!) {
 
 fragment PurchaseListItem on Purchase {
     id
-    date
+    createdOn
     total
     client {
         firstName

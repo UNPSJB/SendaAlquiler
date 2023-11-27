@@ -16,7 +16,8 @@ import {
 } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { CreateClientInput } from '@/api/graphql';
+import { ClientExistsDocument, CreateClientInput } from '@/api/graphql';
+import { clientGraphqlQuery } from '@/api/graphqlclient';
 import { useCreateClient } from '@/api/hooks';
 
 import LocalityField, {
@@ -82,7 +83,19 @@ const ContactDataStep: React.FC<FieldsComponentProps> = ({ formErrors, control }
                 placeholder="brunodiaz@gmail.com"
                 hasError={!!formErrors.email}
                 control={control}
-                rules={{ required: true }}
+                rules={{
+                    required: true,
+                    validate: async (value) => {
+                        const response = await clientGraphqlQuery(ClientExistsDocument, {
+                            email: value,
+                            dni: null,
+                        });
+
+                        return response.clientExists
+                            ? 'Ya existe un cliente con ese correo'
+                            : true;
+                    },
+                }}
             />
         </RHFFormField>
 
@@ -98,6 +111,16 @@ const ContactDataStep: React.FC<FieldsComponentProps> = ({ formErrors, control }
                 rules={{
                     required: true,
                     maxLength: 10,
+                    validate: async (value) => {
+                        const response = await clientGraphqlQuery(ClientExistsDocument, {
+                            email: null,
+                            dni: value,
+                        });
+
+                        return response.clientExists
+                            ? 'Ya existe un cliente con ese DNI'
+                            : true;
+                    },
                 }}
             />
         </RHFFormField>

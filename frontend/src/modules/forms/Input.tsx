@@ -178,12 +178,13 @@ type RHFProps<TFieldValues extends FieldValues, TName extends Path<TFieldValues>
 const RHFInput = <TFieldValues extends FieldValues, TName extends Path<TFieldValues>>(
     props: RHFProps<TFieldValues, TName>,
 ) => {
-    const { control, name, ...rest } = props;
+    const { control, name, rules, ...rest } = props;
 
     return (
         <Controller
             control={control}
             name={name}
+            rules={rules}
             render={({ field: { onChange, value } }) => (
                 <Input name={name} onChange={onChange} value={value} {...rest} />
             )}
