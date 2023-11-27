@@ -46,7 +46,7 @@ const PurchaseRowRenderer = (handleRemove: (id: Purchase['id']) => void) => {
                     {purchase.client.firstName} {purchase.client.lastName}
                 </Link>
             </TD>
-            <TD>{new Date(purchase.date).toLocaleDateString('es-ES')}</TD>
+            <TD>{new Date(purchase.createdOn).toLocaleDateString('es-ES')}</TD>
             <TD>${purchase.total}</TD>
             <TD>
                 <DataTableDropdown onRemove={() => handleRemove(purchase.id)} />

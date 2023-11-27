@@ -30,3 +30,19 @@ class Query(graphene.ObjectType):
 
     def resolve_client_by_id(self, info: Any, id: str):
         return ClientModel.objects.filter(id=id).first()
+
+    client_exists = graphene.Field(
+        graphene.NonNull(graphene.Boolean),
+        email=graphene.String(),
+        dni=graphene.String(),
+    )
+
+    def resolve_client_exists(self, info: Any, email: str = None, dni: str = None):
+        if email is None and dni is None:
+            return False
+
+        if email is not None:
+            return ClientModel.objects.filter(email=email).exists()
+
+        if dni is not None:
+            return ClientModel.objects.filter(dni=dni).exists()

@@ -1,0 +1,21 @@
+query dashboard {
+    allPurchases {
+        id
+        createdOn
+        total
+        client {
+            firstName
+            lastName
+        }
+    }
+    allClients {
+        id
+    }
+    allProducts {
+        id
+        name
+        purchaseItems {
+            quantity
+        }
+    }
+}

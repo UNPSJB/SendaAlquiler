@@ -107,7 +107,7 @@ const Page = () => {
                                             </h1>
                                             <p className=" text-base">
                                                 {new Date(
-                                                    purchase.date,
+                                                    purchase.createdOn,
                                                 ).toLocaleDateString('es-ES')}
                                             </p>
                                         </div>
