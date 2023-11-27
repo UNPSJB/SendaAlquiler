@@ -48,7 +48,7 @@ const OfficesDataStep: React.FC<FieldsComponentProps> = () => {
 
     return (
         <>
-            <RHFFormField fieldID="officeBranch" label="Sucursal de origen" showRequired>
+            <RHFFormField fieldID="supplier" label="Proveedor" showRequired>
                 <RHFSupplierField<FormValues, 'supplier'>
                     control={control}
                     placeholder="Selecciona un proveedor"
@@ -222,7 +222,7 @@ const CreateSupplierOrderForm: React.FC<NavigationButtonsCancelProps> = (props) 
                 </div>
                 <div className="flex w-9/12 flex-col rounded-r-xl bg-white px-14 pt-6">
                     <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-4">
-                        <h1 className="text-2xl font-bold">Crea un pedido interno</h1>
+                        <h1 className="text-2xl font-bold">Crea un pedido a proveedor</h1>
 
                         <span className="text-xs text-gray-500">
                             Paso {activeStep + 1} de {STEPS.length}
