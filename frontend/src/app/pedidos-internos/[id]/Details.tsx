@@ -27,7 +27,7 @@ const InternalOrderByIddDetailsTab: React.FC<InternalOrderByIdTabComponentProps>
                     {internalOrder.currentHistory?.status}
                 </LI>
                 <LI>
-                    <SN>Fecha: </SN>
+                    <SN>Fecha pedido: </SN>
                     {new Date(internalOrder.createdOn).toLocaleDateString('es-ES')}
                 </LI>
             </UL>
