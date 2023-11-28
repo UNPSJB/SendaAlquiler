@@ -1,23 +1,23 @@
-import { SupplierOrderByIdTabComponentProps } from './page';
+import { InternalOrderByIdTabComponentProps } from './page';
 
-const SupplierOrderByIdProductsTab: React.FC<SupplierOrderByIdTabComponentProps> = ({
-    supplierOrder,
+const InternalOrderByIdProductsTab: React.FC<InternalOrderByIdTabComponentProps> = ({
+    internalOrder,
 }) => {
     return (
         <>
             <div className="mb-4 mr-8 mt-8 rounded-md border bg-white p-8">
-                <div className="flex justify-between border-b-2 font-bold">
+                <div className="flex justify-between border-b-2 text-xl font-bold">
                     <h2>Producto</h2>
                     <h2 className="pr-2">Pedido | Recibido</h2>
                 </div>
 
                 <div className="mt-2">
-                    {supplierOrder.orders.map((item, index) => (
+                    {internalOrder.orders.map((item, index) => (
                         <div key={index}>
                             <div className="flex justify-between pb-2">
                                 <h2 className="text-gray-500">
                                     <b className="font-medium">-</b> {item.product.name}{' '}
-                                    {item.product.brand?.name}
+                                    {item.product.brand?.name} ({item.product.type})
                                 </h2>
                                 <p className=" text-gray-500">
                                     {item.quantity} u.{' '}
@@ -33,4 +33,4 @@ const SupplierOrderByIdProductsTab: React.FC<SupplierOrderByIdTabComponentProps>
     );
 };
 
-export default SupplierOrderByIdProductsTab;
+export default InternalOrderByIdProductsTab;
