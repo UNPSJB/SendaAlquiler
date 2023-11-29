@@ -4,7 +4,7 @@ import graphene
 
 from senda.core.models.order_internal import InternalOrderModel
 from senda.core.schema.custom_types import (
-    PaginatedInternalOrderQueryResult,
+    PaginatedInternalOrderQueryResult, InternalOrder
 )
 from utils.graphene import get_paginated_model
 
@@ -22,3 +22,8 @@ class Query(graphene.ObjectType):
             results=selected_page.object_list,
             num_pages=paginator.num_pages,
         )
+
+    internal_order_by_id = graphene.Field(InternalOrder, id=graphene.ID(required=True))
+
+    def resolve_internal_order_by_id(self, info: Any, id: str):
+        return InternalOrderModel.objects.filter(id=id).first()
