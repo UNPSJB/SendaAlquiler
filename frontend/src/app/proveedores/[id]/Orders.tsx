@@ -16,6 +16,10 @@ const LI: React.FC<PropsWithChildren> = ({ children }) => {
     return <li className="my-2">{children}</li>;
 };
 
+const SN: React.FC<PropsWithChildren> = ({ children }) => {
+    return <span className="font-bold">{children}</span>;
+};
+
 const SupplierByIdOrdersTab: React.FC<SupplierOrderBySupplierIdTabComponentProps> = ({
     id,
 }) => {
@@ -37,38 +41,53 @@ const SupplierByIdOrdersTab: React.FC<SupplierOrderBySupplierIdTabComponentProps
             {({ supplierOrdersBySupplierId }) => (
                 <UL>
                     {supplierOrdersBySupplierId.map((order) => (
-                        <div key={order?.id}>
-                            <h1 className="mb-3 text-xl font-bold">
-                                Pedido <div id={order.id}></div>
+                        <div
+                            className="mb-4 mr-8 mt-8 rounded-md border bg-white p-4"
+                            key={order?.id}
+                        >
+                            <h1 className="mb-3 border-b-2 text-xl font-bold">
+                                Pedido #{order.id}
                             </h1>
 
                             <LI>
-                                Date Created:{' '}
+                                <SN>Fecha:</SN>{' '}
                                 {new Date(order.createdOn).toLocaleDateString()}
                             </LI>
-                            <LI>Office Destination: {order.officeDestination.name}</LI>
-
-                            <>
+                            <LI>
+                                <SN>Estado: </SN>
+                                {order.currentHistory?.status}
+                            </LI>
+                            <UL>
+                                <h2 className="mb-3 text-xl font-bold">
+                                    Sucursal Destino:
+                                </h2>
                                 <LI>
-                                    Current History Status: {order.currentHistory?.status}
+                                    <SN>Nombre: </SN>
+                                    {order.officeDestination.name}{' '}
                                 </LI>
-
-                                <LI>User Email: {order.currentHistory?.user?.email}</LI>
                                 <LI>
-                                    History Date:{' '}
-                                    {new Date(
-                                        order.currentHistory?.createdOn,
-                                    ).toLocaleDateString()}
+                                    <SN>Direccion : </SN>
+                                    {order.officeDestination.street}{' '}
+                                    {order.officeDestination.houseNumber}
                                 </LI>
-                            </>
+                            </UL>
 
                             <LI>
-                                Orders:
                                 <UL>
+                                    <h2 className="mb-3 text-xl font-bold ">
+                                        Productos:
+                                    </h2>
                                     {order.orders.map((orderItem) => (
                                         <LI key={orderItem.id}>
-                                            Product: {orderItem.product.name}, Quantity:{' '}
-                                            {orderItem.quantity}
+                                            <div className="text-gray-500">
+                                                <b>-</b> {orderItem.product.name}{' '}
+                                                {orderItem.product.brand?.name} (x
+                                                {orderItem.quantity}{' '}
+                                                {orderItem.quantity > 1
+                                                    ? 'unidades'
+                                                    : 'unidad'}
+                                                )
+                                            </div>
                                         </LI>
                                     ))}
                                 </UL>
