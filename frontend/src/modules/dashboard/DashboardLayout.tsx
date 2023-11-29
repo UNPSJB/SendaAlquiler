@@ -12,7 +12,6 @@ import ClipBoard from './Icons/ClipBoard';
 import ClipBoardList from './Icons/ClipBoardList';
 import ClipBoardUser from './Icons/ClipBoardUser';
 import FileLines from './Icons/FileLines';
-import Gear from './Icons/Gear';
 import House from './Icons/House';
 import LocationDot from './Icons/LocationDot';
 import MoneyCheckDollar from './Icons/MoneyCheckDollar';

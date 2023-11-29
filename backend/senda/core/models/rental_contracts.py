@@ -194,6 +194,10 @@ class RentalContractItemModel(TimeStampedModel):
 
         return super().clean()
 
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        self.clean()
+        return super().save(*args, **kwargs)
+
 
 class RentalContractStatusChoices(models.TextChoices):
     """

@@ -2,66 +2,63 @@ import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
-import { SuppliersQuery } from '@/api/graphql';
-import { usePaginatedSuppliers } from '@/api/hooks';
+import { OfficesQuery } from '@/api/graphql';
+import { useOffices } from '@/api/hooks';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 
-import { RHFFormField } from '../../forms/FormField';
-import Input from '../../forms/Input';
-import RHFSelect from '../../forms/Select';
+import { RHFFormField } from '../../../forms/FormField';
+import Input from '../../../forms/Input';
+import RHFSelect from '../../../forms/Select';
 
-export type ProductsSuppliersFieldFormValues = {
-    suppliers: {
-        supplier: {
+export type ProductsStockFieldFormValues = {
+    stock: {
+        office: {
             value: string;
             label: string;
-            data: SuppliersQuery['suppliers']['results'][0];
+            data: OfficesQuery['offices'][0];
         };
-        price: number;
+        stock: number;
     }[];
 };
 
-const ProductsSuppliersField: React.FC = () => {
-    const { control, getValues, watch } =
-        useFormContext<ProductsSuppliersFieldFormValues>();
-    const { queryResult: suppliersResult } = usePaginatedSuppliers();
-    const { data, isLoading } = suppliersResult;
+const ProductsStockField: React.FC = () => {
+    const { control, getValues, watch } = useFormContext<ProductsStockFieldFormValues>();
+    const officesResult = useOffices();
+    const { data, isLoading } = officesResult;
 
-    const [suppliersToCreate, setOrdersToCreate] = useState(1);
+    const [officesToCreate, setOrdersToCreate] = useState(1);
 
     const handleAddOrder = () => {
-        const suppliers = data?.suppliers.results;
-        if (!suppliers) return;
+        const offices = data?.offices;
+        if (!offices) return;
 
-        const createdStocks = getValues('suppliers') || [];
-        if (suppliers.length > createdStocks.length) {
+        const createdStocks = getValues('stock') || [];
+        if (offices.length > createdStocks.length) {
             setOrdersToCreate((orders) => orders + 1);
         }
     };
 
-    const stocks = watch('suppliers') || [];
-    const selectedProductIds = stocks
-        .filter((x) => x.supplier)
-        .map((x) => x.supplier?.value);
+    const stocks = watch('stock') || [];
+    const selectedProductIds = stocks.filter((x) => x.office).map((x) => x.office?.value);
 
     return (
         <div className="space-y-4">
             <div className="space-y-2">
-                {Array.from({ length: suppliersToCreate }).map((_, index) => (
+                {Array.from({ length: officesToCreate }).map((_, index) => (
                     <div
                         className="flex space-x-4 rounded border border-gray-200 bg-gray-100 p-4"
                         key={index}
                     >
                         <RHFFormField
-                            fieldID={`stock-${index}-supplier`}
-                            label="Producto"
+                            fieldID={`stock-${index}-office`}
+                            label="Sucursal"
                             className="flex-1"
                             showRequired
                         >
                             <RHFSelect
-                                options={(data?.suppliers.results || [])
+                                options={(data?.offices || [])
                                     .filter((x) => {
                                         const isSelected = selectedProductIds.includes(
                                             x.id,
@@ -77,7 +74,7 @@ const ProductsSuppliersField: React.FC = () => {
                                         data: stock,
                                     }))}
                                 control={control}
-                                name={`suppliers.${index}.supplier`}
+                                name={`stock.${index}.office`}
                                 rules={{
                                     required: true,
                                 }}
@@ -87,14 +84,14 @@ const ProductsSuppliersField: React.FC = () => {
                         </RHFFormField>
 
                         <RHFFormField
-                            fieldID={`stock-${index}-price`}
-                            label="Precio"
+                            fieldID={`stock-${index}-stock`}
+                            label="Stock"
                             showRequired
                         >
                             <Input
-                                id={`stock-${index}-price`}
-                                name={`suppliers.${index}.price`}
-                                type="price"
+                                id={`stock-${index}-stock`}
+                                name={`stock.${index}.stock`}
+                                type="number"
                                 placeholder="1"
                                 control={control}
                                 rules={{ required: true }}
@@ -105,19 +102,19 @@ const ProductsSuppliersField: React.FC = () => {
             </div>
 
             <FetchedDataRenderer
-                {...suppliersResult}
+                {...officesResult}
                 Loading={<Skeleton height={30} />}
                 Error={null}
             >
-                {({ suppliers }) => {
-                    if (suppliersToCreate < suppliers.results.length) {
+                {({ offices }) => {
+                    if (officesToCreate < offices.length) {
                         return (
                             <Button
                                 fullWidth
                                 variant={ButtonVariant.OUTLINE_WHITE}
                                 onClick={handleAddOrder}
                             >
-                                + Añadir proveedor
+                                + Añadir stock
                             </Button>
                         );
                     }
@@ -129,4 +126,4 @@ const ProductsSuppliersField: React.FC = () => {
     );
 };
 
-export default ProductsSuppliersField;
+export default ProductsStockField;

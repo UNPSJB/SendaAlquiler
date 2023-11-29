@@ -86,6 +86,10 @@ import {
     AllLocalitiesDocument,
     AllProductsDocument,
     AllClientsDocument,
+    UpdateClientMutation,
+    UpdateClientMutationVariables,
+    UpdateClientDocument,
+    InternalOrderByIdDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -228,6 +232,20 @@ export const useSupplierOrders = () => {
         'supplierOrders',
         {
             page: 'number',
+        },
+    );
+};
+
+export const useInternalOrderById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.internalOrderById(id),
+        () => {
+            return clientGraphqlQuery(InternalOrderByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
         },
     );
 };
@@ -388,6 +406,37 @@ export const useCreateClient = ({
         {
             onSuccess: (data, context, variables) => {
                 if (data.createClient?.client) {
+                    client.invalidateQueries(queryKeys.clients);
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, context, variables);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+type UseUpdateClientOptions = UseMutationOptions<
+    UpdateClientMutation,
+    Error,
+    UpdateClientMutationVariables
+>;
+
+export const useUpdateClient = ({
+    onSuccess,
+    ...options
+}: UseUpdateClientOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<UpdateClientMutation, Error, UpdateClientMutationVariables>(
+        (data) => {
+            return clientGraphqlQuery(UpdateClientDocument, data);
+        },
+        {
+            onSuccess: (data, context, variables) => {
+                if (data.updateClient?.client) {
                     client.invalidateQueries(queryKeys.clients);
                 }
 

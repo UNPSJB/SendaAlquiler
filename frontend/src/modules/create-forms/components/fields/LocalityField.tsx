@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { Control, Controller, FieldValues, Path } from 'react-hook-form';
+import { Control, Controller, FieldValues, Path, SubmitHandler } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import { Props as ReactSelectProps } from 'react-select';
 import CreatableSelect from 'react-select/creatable';
 
-import { CreateLocalityMutation, Locality } from '@/api/graphql';
-import { useAllLocalities } from '@/api/hooks';
+import { Locality } from '@/api/graphql';
+import { useAllLocalities, useCreateLocality } from '@/api/hooks';
 
-import CreateLocalityForm from '@/modules/create-forms/CreateLocalityForm';
+import CreateOrUpdateLocalityForm, {
+    CreateOrUpdateLocalityFormValues,
+} from '@/modules/create-forms/CreateOrUpdateLocalityForm';
 
 import ModalWithBox from '../ModalWithBox';
 
@@ -114,19 +117,41 @@ const LocalityField = <
         setLocalityToCreate(null);
     };
 
-    const onLocalityCreation = (
-        locality: NonNullable<
-            NonNullable<CreateLocalityMutation['createLocality']>['locality']
-        >,
-    ) => {
-        const nextValue: LocalityFieldValue = {
-            label: locality.name,
-            value: locality.id,
-            data: locality,
-        };
+    const { mutate, isLoading: isCreating } = useCreateLocality({
+        onSuccess: ({ createLocality }) => {
+            const error = createLocality?.error;
+            const locality = createLocality?.locality;
 
-        setValue(name, nextValue);
-        setLocalityToCreate(null);
+            if (error) {
+                toast.error(error);
+            }
+
+            if (locality) {
+                const nextValue: LocalityFieldValue = {
+                    label: locality.name,
+                    value: locality.id,
+                    data: locality,
+                };
+
+                setValue(name, nextValue);
+                setLocalityToCreate(null);
+            }
+        },
+        onError: () => {
+            toast.error('No se pudo crear la localidad');
+        },
+    });
+
+    const onSubmit: SubmitHandler<CreateOrUpdateLocalityFormValues> = ({
+        name,
+        state,
+        ...data
+    }) => {
+        mutate({
+            name,
+            state: state.value,
+            ...data,
+        });
     };
 
     const getOptions = (): LocalityFieldValue[] => {
@@ -192,8 +217,9 @@ const LocalityField = <
                 onCancel={onCancelModalCreation}
                 closeOnOutsideClick
             >
-                <CreateLocalityForm
-                    onSuccess={onLocalityCreation}
+                <CreateOrUpdateLocalityForm
+                    mutate={onSubmit}
+                    isMutating={isCreating}
                     onCancel={onCancelModalCreation}
                     defaultValues={{
                         name: localityToCreate || undefined,

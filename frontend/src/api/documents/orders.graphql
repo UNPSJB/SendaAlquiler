@@ -18,6 +18,45 @@ query internalOrders($page: Int) {
     }
 }
 
+query internalOrderById($id: ID!) {
+    internalOrderById(id: $id) {
+        id
+        createdOn
+        officeBranch {
+            houseNumber
+            name
+            street
+            locality {
+                name
+                postalCode
+            }
+        }
+        officeDestination {
+            houseNumber
+            name
+            street
+            locality {
+                name
+                postalCode
+            }
+        }
+        currentHistory {
+            status
+        }
+        orders {
+            quantity
+            quantityReceived
+            product {
+                brand {
+                    name
+                }
+                name
+                type
+            }
+        }
+    }
+}
+
 mutation createInternalOrder($data: CreateInternalOrderInput!) {
     createInternalOrder(data: $data) {
         internalOrder {
