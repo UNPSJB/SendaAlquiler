@@ -70,11 +70,7 @@ type FormValues = {
     contractEndDatetime: Date[];
 };
 
-const getMinimumDatetimeValues = (startDatetimeWatch: Date[]) => {
-    const startDatetime =
-        startDatetimeWatch && startDatetimeWatch.length > 0
-            ? startDatetimeWatch[0]
-            : null;
+const getMinimumDatetimeValues = (startDatetime: Date | null) => {
     const tommorow = dayjs()
         .set('hour', 0)
         .set('minute', 0)
@@ -95,6 +91,29 @@ const getMinimumDatetimeValues = (startDatetimeWatch: Date[]) => {
         minDateForContractStartDatetime,
         minDateForContractEndDatetime,
     };
+};
+
+/**
+ * Calculates the number of days between two dates based only on the dates, not the time.
+ *
+ * @param startDatetime The start date.
+ * @param endDatetime The end date.
+ * @returns The number of days between the two dates.
+ */
+const calculateNumberOfRentalDays = (
+    startDatetime: Date | null,
+    endDatetime: Date | null,
+) => {
+    if (!startDatetime || !endDatetime) {
+        return 0;
+    }
+
+    const startDatetimeDayjs = dayjs(startDatetime).set('minutes', 0).set('hours', 0);
+    const endDatetimeDayjs = dayjs(endDatetime).set('minutes', 0).set('hours', 0);
+
+    const numberOfDays = endDatetimeDayjs.diff(startDatetimeDayjs, 'day');
+
+    return numberOfDays;
 };
 
 const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) => {
@@ -124,18 +143,35 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
     const client = watch('client')?.data;
 
     const startDatetimeWatch = watch('contractStartDatetime');
+    const endDatetimeWatch = watch('contractEndDatetime');
+
+    const startDatetimeValue =
+        startDatetimeWatch && startDatetimeWatch.length ? startDatetimeWatch[0] : null;
+    const endDatetimeValue =
+        endDatetimeWatch && endDatetimeWatch.length ? endDatetimeWatch[0] : null;
+
     const { minDateForContractStartDatetime, minDateForContractEndDatetime } =
-        getMinimumDatetimeValues(startDatetimeWatch);
+        getMinimumDatetimeValues(startDatetimeValue);
 
     const productsAndQuantity = watch('productsAndQuantity');
-    const subtotal = productsAndQuantity?.reduce((acc, curr) => {
-        const product = curr.product?.data;
-        const quantity = curr.quantity;
-        if (product && quantity) {
-            return acc + product.price * quantity;
-        }
-        return acc;
-    }, 0);
+
+    const numberOfRentalDays = calculateNumberOfRentalDays(
+        startDatetimeValue,
+        endDatetimeValue,
+    );
+
+    const subtotal = !numberOfRentalDays
+        ? 0
+        : productsAndQuantity?.reduce((acc, current) => {
+              const product = current.product?.data;
+              const quantity = current.quantity;
+
+              if (product && quantity) {
+                  return acc + product.price * quantity;
+              }
+
+              return acc;
+          }, 0) * numberOfRentalDays;
 
     const copyClientDetailsOnDetails = () => {
         if (client) {
@@ -652,6 +688,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                     >
                                         control={control}
                                         name="productsAndQuantity"
+                                        numberOfRentalDays={numberOfRentalDays}
                                     />
                                 </div>
                             </section>
