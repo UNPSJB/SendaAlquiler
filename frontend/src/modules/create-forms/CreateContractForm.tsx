@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import dayjs from 'dayjs';
 import {
     FormProvider,
     SubmitErrorHandler,
@@ -69,6 +70,33 @@ type FormValues = {
     contractEndDatetime: Date[];
 };
 
+const getMinimumDatetimeValues = (startDatetimeWatch: Date[]) => {
+    const startDatetime =
+        startDatetimeWatch && startDatetimeWatch.length > 0
+            ? startDatetimeWatch[0]
+            : null;
+    const tommorow = dayjs()
+        .set('hour', 0)
+        .set('minute', 0)
+        .set('second', 0)
+        .add(1, 'day')
+        .toDate();
+
+    const minDateForContractStartDatetime = tommorow;
+
+    const minDateForContractEndDatetime = dayjs(startDatetime || tommorow)
+        .add(1, 'day')
+        .set('hour', 0)
+        .set('minute', 0)
+        .set('second', 0)
+        .toDate();
+
+    return {
+        minDateForContractStartDatetime,
+        minDateForContractEndDatetime,
+    };
+};
+
 const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) => {
     const queryResult = useAllClients();
     const formMethods = useForm<FormValues>();
@@ -94,6 +122,11 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
     });
 
     const client = watch('client')?.data;
+
+    const startDatetimeWatch = watch('contractStartDatetime');
+    const { minDateForContractStartDatetime, minDateForContractEndDatetime } =
+        getMinimumDatetimeValues(startDatetimeWatch);
+
     const productsAndQuantity = watch('productsAndQuantity');
     const subtotal = productsAndQuantity?.reduce((acc, curr) => {
         const product = curr.product?.data;
@@ -167,8 +200,8 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
         });
     };
 
-    const onError: SubmitErrorHandler<FormValues> = (errors) => {
-        console.log('errors', errors);
+    const onError: SubmitErrorHandler<FormValues> = () => {
+        toast.error('Hay un error en el formulario');
     };
 
     return (
@@ -502,6 +535,9 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             control={control}
                                             rules={{ required: true }}
                                             placeholder="Fecha y hora de inicio"
+                                            options={{
+                                                minDate: minDateForContractStartDatetime,
+                                            }}
                                         />
                                     </RHFFormField>
 
@@ -515,6 +551,9 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             control={control}
                                             rules={{ required: true }}
                                             placeholder="Fecha y hora de finalización"
+                                            options={{
+                                                minDate: minDateForContractEndDatetime,
+                                            }}
                                         />
                                     </RHFFormField>
 
