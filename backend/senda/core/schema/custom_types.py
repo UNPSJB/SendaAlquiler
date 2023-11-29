@@ -6,14 +6,14 @@ from senda.core.models.localities import LocalityModel, StateChoices
 from senda.core.models.offices import OfficeModel
 from senda.core.models.order_internal import (
     InternalOrderHistoryModel,
-    InternalOrderProduct,
+    InternalOrderProductModel,
     InternalOrderHistoryStatusChoices,
     InternalOrderModel,
 )
 from senda.core.models.order_supplier import (
     SupplierOrderModel,
     SupplierOrderHistoryModel,
-    SupplierOrderProduct,
+    SupplierOrderProductModel,
 )
 from senda.core.models.products import (
     BrandModel,
@@ -129,7 +129,7 @@ class PaginatedInternalOrderQueryResult(PaginatedQueryResult):
 
 class InternalOrderProduct(DjangoObjectType):
     class Meta:
-        model = InternalOrderProduct
+        model = InternalOrderProductModel
 
 
 class InternalOrderHistory(DjangoObjectType):
@@ -189,6 +189,6 @@ class SupplierOrderHistory(DjangoObjectType):
         model = SupplierOrderHistoryModel
 
 
-class SupplierOrderProdu(DjangoObjectType):
+class SupplierOrderProduct(DjangoObjectType):
     class Meta:
-        model = SupplierOrderProduct
+        model = SupplierOrderProductModel
