@@ -89,6 +89,7 @@ import {
     UpdateClientMutation,
     UpdateClientMutationVariables,
     UpdateClientDocument,
+    InternalOrderByIdDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -231,6 +232,20 @@ export const useSupplierOrders = () => {
         'supplierOrders',
         {
             page: 'number',
+        },
+    );
+};
+
+export const useInternalOrderById = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.internalOrderById(id),
+        () => {
+            return clientGraphqlQuery(InternalOrderByIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
         },
     );
 };
