@@ -18,6 +18,7 @@ import ClientByIdDetailsTab from './Details';
 import ClientByIdPurchasesTab from './Purchases';
 
 import Avatar from '@/components/Avatar';
+import Button from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -75,7 +76,15 @@ const Page = () => {
     const Component = tabs.find((tab) => tab.key === activeTab)!.Component;
 
     return (
-        <DashboardLayout header={getDasboardTitle(client)}>
+        <DashboardLayout
+            header={
+                <div className="flex items-center justify-between">
+                    {getDasboardTitle(client)}
+
+                    <Button href={`/clientes/${id}/edit`}>Editar cliente</Button>
+                </div>
+            }
+        >
             <FetchedDataRenderer
                 {...useClientByIdResult}
                 Loading={

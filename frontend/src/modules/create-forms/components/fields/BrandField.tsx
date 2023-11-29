@@ -44,9 +44,7 @@ type Props<TFieldValues extends FieldValues, TName extends Path<TFieldValues>> =
     name: TName;
     control: Control<TFieldValues>;
     placeholder: string;
-} & (TFieldValues[Extract<keyof TFieldValues, TName>] extends BrandFieldValue
-    ? object
-    : never);
+} & (TFieldValues[TName] extends BrandFieldValue | undefined ? object : never);
 
 const BrandField = <TFieldValues extends FieldValues, TName extends Path<TFieldValues>>({
     name,

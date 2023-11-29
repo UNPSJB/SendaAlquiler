@@ -16,7 +16,7 @@ import { useCreatePurchase, useClients } from '@/api/hooks';
 
 import ProductPurchaseOrderField, {
     ProductQuantityPair,
-} from './fields/ProductPurchaseOrderField';
+} from './components/fields/ProductPurchaseOrderField';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import ButtonWithSpinner from '@/components/ButtonWithSpinner';

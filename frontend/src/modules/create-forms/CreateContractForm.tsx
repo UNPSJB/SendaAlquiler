@@ -14,11 +14,11 @@ import toast from 'react-hot-toast';
 import { ClientsQuery } from '@/api/graphql';
 import { useAllClients, useCreateRentalContract } from '@/api/hooks';
 
-import LocalityField, { LocalityFieldValue } from './fields/LocalityField';
-import RHFOfficesField, { OfficesFieldValue } from './fields/OfficesField';
+import LocalityField, { LocalityFieldValue } from './components/fields/LocalityField';
+import RHFOfficesField, { OfficesFieldValue } from './components/fields/OfficesField';
 import RHFProductOrderField, {
     ProductQuantityAndService,
-} from './fields/ProductOrderField';
+} from './components/fields/ProductOrderField';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import ButtonWithSpinner from '@/components/ButtonWithSpinner';
@@ -88,6 +88,9 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                 router.push('/contratos');
             }
         },
+        onError: () => {
+            toast.error('No se pudo crear el contrato');
+        },
     });
 
     const client = watch('client')?.data;
@@ -145,6 +148,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
             !officeId ||
             !streetName
         ) {
+            toast.error('Faltan campos obligatorios');
             return;
         }
 
