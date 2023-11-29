@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
-import { ProductsQuery } from '@/api/graphql';
+import { ProductTypeChoices, ProductsQuery } from '@/api/graphql';
 import { useAllProducts } from '@/api/hooks';
 
 import Label from '@/modules/forms/Label';
@@ -93,11 +93,13 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
 
     // Products options for Select
     const selectableProductOptions = (
-        productsData?.allProducts.map((product) => ({
-            value: product.id,
-            label: product.name,
-            data: product,
-        })) || []
+        productsData?.allProducts
+            .filter((product) => product.type === ProductTypeChoices.Alquilable)
+            .map((product) => ({
+                value: product.id,
+                label: product.name,
+                data: product,
+            })) || []
     ).filter((product) => {
         // Filter out products that are already selected
         return !orderedProducts.some(
