@@ -28,7 +28,7 @@ class InternalOrderModel(TimeStampedModel):
     """
 
     history: models.QuerySet["InternalOrderHistoryModel"]
-    orders: models.QuerySet["InternalOrderProduct"]
+    orders: models.QuerySet["InternalOrderProductModel"]
 
     office_branch = models.ForeignKey(
         OfficeModel, on_delete=models.CASCADE, related_name="internal_orders_branch"
@@ -53,7 +53,7 @@ class InternalOrderModel(TimeStampedModel):
         return str(self.pk)
 
 
-class InternalOrderProduct(TimeStampedModel):
+class InternalOrderProductModel(TimeStampedModel):
     """
     Represents a product within an internal order in the Senda system. Inherits from TimeStampedModel.
 

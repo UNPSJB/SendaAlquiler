@@ -7,7 +7,7 @@ from .models.offices import OfficeModel
 from .models.order_internal import InternalOrderModel
 from .models.order_supplier import (
     SupplierOrderModel,
-    SupplierOrderProduct,
+    SupplierOrderProductModel,
     SupplierOrderHistoryModel,
 )
 from .models.products import (
@@ -114,8 +114,8 @@ class PurchaseModelAdmin(admin.ModelAdmin[PurchaseModel]):
     pass
 
 
-@admin.register(SupplierOrderProduct)
-class SupplierOrderProductAdmin(admin.ModelAdmin[SupplierOrderProduct]):
+@admin.register(SupplierOrderProductModel)
+class SupplierOrderProductAdmin(admin.ModelAdmin[SupplierOrderProductModel]):
     pass
 
 

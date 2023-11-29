@@ -12,6 +12,9 @@ from senda.core.schema.custom_types import (
 )
 from utils.graphene import non_null_list_of, get_paginated_model
 
+import csv
+import io
+
 
 class Query(graphene.ObjectType):
     purchases = graphene.NonNull(PaginatedPurchaseQueryResult, page=graphene.Int())
@@ -40,3 +43,53 @@ class Query(graphene.ObjectType):
 
     def resolve_purchase_by_id(self, info: Any, id: str):
         return PurchaseModel.objects.filter(id=id).first()
+
+    purchases_csv = graphene.NonNull(graphene.String)
+
+    def resolve_purchases_csv(self, info: Any):
+        purchases = PurchaseModel.objects.all().prefetch_related(
+            "client",
+            "purchase_items",
+            "purchase_items__product",
+            "purchase_items__product__brand",
+        )
+        csv_buffer = io.StringIO()
+
+        fieldnames = [
+            "ID de compra",
+            "Fecha de creacion",
+            "Email de Cliente",
+            "Nombre de Cliente",
+            "Apellido de Cliente",
+            "SKU de producto",
+            "Nombre de producto",
+            "Marca de producto",
+            "Precio de producto",
+            "Cantidad vendida",
+            "Precio de Producto x cantidad",
+            "Total de compra",
+        ]
+
+        writer = csv.DictWriter(csv_buffer, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for purchase in purchases:
+            for purchase_item in purchase.purchase_items.all():
+                writer.writerow(
+                    {
+                        "ID de compra": purchase.id,
+                        "Fecha de creacion": purchase.created_on,
+                        "Email de Cliente": purchase.client.email,
+                        "Nombre de Cliente": purchase.client.first_name,
+                        "Apellido de Cliente": purchase.client.last_name,
+                        "SKU de producto": purchase_item.product.sku,
+                        "Nombre de producto": purchase_item.product.name,
+                        "Marca de producto": purchase_item.product.brand.name,
+                        "Precio de producto": purchase_item.price,
+                        "Cantidad vendida": purchase_item.quantity,
+                        "Precio de Producto x cantidad": purchase_item.total,
+                        "Total de compra": purchase.total,
+                    }
+                )
+
+        return csv_buffer.getvalue()
