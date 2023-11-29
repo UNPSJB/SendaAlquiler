@@ -35,6 +35,7 @@ query clientById($id: ID!) {
         houseUnit
         streetName
         locality {
+            id
             name
             state
             postalCode
@@ -44,6 +45,15 @@ query clientById($id: ID!) {
 
 mutation createClient($clientData: CreateClientInput!) {
     createClient(clientData: $clientData) {
+        client {
+            id
+        }
+        error
+    }
+}
+
+mutation updateClient($id: ID!, $clientData: UpdateClientInput!) {
+    updateClient(id: $id, clientData: $clientData) {
         client {
             id
         }

@@ -10,9 +10,9 @@ import Label from '@/modules/forms/Label';
 import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 
-import { FormField } from '../../forms/FormField';
-import { Input } from '../../forms/Input';
-import { CustomSelect } from '../../forms/Select';
+import { FormField } from '../../../forms/FormField';
+import { Input } from '../../../forms/Input';
+import { CustomSelect } from '../../../forms/Select';
 
 type ProductDetails = ProductsQuery['products']['results'][0];
 

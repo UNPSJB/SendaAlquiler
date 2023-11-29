@@ -28,7 +28,6 @@ class CreateClientInput(graphene.InputObjectType):
 
 
 class UpdateClientInput(graphene.InputObjectType):
-    id = graphene.ID(required=True)
     email = graphene.String()
     first_name = graphene.String()
     last_name = graphene.String()
@@ -81,9 +80,10 @@ class UpdateClient(graphene.Mutation):
     error = graphene.String()
 
     class Arguments:
+        id = graphene.ID(required=True)
         client_data = UpdateClientInput(required=True)
 
-    def mutate(self, info: Any, client_data: UpdateClientInput):
+    def mutate(self, info: Any, id: str, client_data: UpdateClientInput):
         client_data_dict = input_object_type_to_dict(client_data)
 
         client_id = client_data_dict.pop("id")

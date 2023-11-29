@@ -568,6 +568,7 @@ export type MutationTokenAuthArgs = {
 
 export type MutationUpdateClientArgs = {
     clientData: UpdateClientInput;
+    id: Scalars['ID']['input'];
 };
 
 export type MutationVerifyTokenArgs = {
@@ -1109,7 +1110,6 @@ export type UpdateClientInput = {
     firstName: InputMaybe<Scalars['String']['input']>;
     houseNumber: InputMaybe<Scalars['String']['input']>;
     houseUnit: InputMaybe<Scalars['String']['input']>;
-    id: Scalars['ID']['input'];
     lastName: InputMaybe<Scalars['String']['input']>;
     localityId: InputMaybe<Scalars['ID']['input']>;
     phoneCode: InputMaybe<Scalars['String']['input']>;
@@ -1213,6 +1213,7 @@ export type ClientByIdQuery = {
         streetName: string;
         locality: {
             __typename?: 'Locality';
+            id: string;
             name: string;
             state: StateChoices;
             postalCode: string;
@@ -1228,6 +1229,20 @@ export type CreateClientMutation = {
     __typename?: 'Mutation';
     createClient: {
         __typename?: 'CreateClient';
+        error: string | null;
+        client: { __typename?: 'Client'; id: string } | null;
+    } | null;
+};
+
+export type UpdateClientMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+    clientData: UpdateClientInput;
+}>;
+
+export type UpdateClientMutation = {
+    __typename?: 'Mutation';
+    updateClient: {
+        __typename?: 'UpdateClient';
         error: string | null;
         client: { __typename?: 'Client'; id: string } | null;
     } | null;
@@ -2558,6 +2573,10 @@ export const ClientByIdDocument = {
                                         selections: [
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'name' },
                                             },
                                             {
@@ -2646,6 +2665,86 @@ export const CreateClientDocument = {
         },
     ],
 } as unknown as DocumentNode<CreateClientMutation, CreateClientMutationVariables>;
+export const UpdateClientDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'updateClient' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'clientData' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'UpdateClientInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updateClient' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'clientData' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'clientData' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'client' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<UpdateClientMutation, UpdateClientMutationVariables>;
 export const DeleteClientDocument = {
     kind: 'Document',
     definitions: [
