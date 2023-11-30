@@ -1,4 +1,4 @@
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 const monthsInSpanish = [
     'Enero',
@@ -39,4 +39,19 @@ export const getDayNameFromDayjs = (date: Dayjs) => {
         default:
             return '';
     }
+};
+
+export const formatContractDateTime = (datetime: string) => {
+    const dateTimeDayjs = dayjs(datetime);
+
+    const dayName = getDayNameFromDayjs(dateTimeDayjs);
+    const dateNumber = dateTimeDayjs.get('date');
+
+    const monthName = getMonthNameFromDayjs(dateTimeDayjs);
+
+    const yearNumber = dateTimeDayjs.get('year');
+
+    const timeStr = dateTimeDayjs.format('HH:mm');
+
+    return `${dayName} ${dateNumber} de ${monthName} del ${yearNumber} a las ${timeStr}`;
 };
