@@ -178,7 +178,7 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                                         })}
                                     </div>
                                 </div>
-                                <div className="flex justify-between border-b p-2">
+                                <div className="mr-2 flex justify-between border-b p-2">
                                     <p className="ml-2 font-bold">Total</p>
                                     <b className="text-xl font-normal">
                                         ${contract.total}

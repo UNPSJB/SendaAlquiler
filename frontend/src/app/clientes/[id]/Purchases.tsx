@@ -75,7 +75,7 @@ const ClientByIdPurchasesTab: React.FC<PurchasesByClientIdTabComponentProps> = (
                                         );
                                     })}
                                 </div>
-                                <div className="flex justify-between border-b px-2 pb-2">
+                                <div className="mr-2 flex justify-between border-b px-2 pb-2">
                                     <p className="ml-2 font-bold">Total</p>
                                     <b className="text-xl font-normal">
                                         ${purchase.total}
