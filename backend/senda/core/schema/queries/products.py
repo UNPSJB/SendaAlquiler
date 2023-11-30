@@ -16,6 +16,9 @@ from senda.core.schema.custom_types import (
 )
 from utils.graphene import non_null_list_of, get_paginated_model
 
+import csv
+import io
+
 
 class Query(graphene.ObjectType):
     products = graphene.NonNull(PaginatedProductQueryResult, page=graphene.Int())
@@ -70,3 +73,38 @@ class Query(graphene.ObjectType):
 
     def resolve_product_exists(self, info: Any, sku: str):
         return ProductModel.objects.filter(sku=sku).exists()
+
+    products_csv = graphene.NonNull(graphene.String)
+
+    def resolve_products_csv(self, info: Any):
+        products = ProductModel.objects.all().prefetch_related("brand")
+        csv_buffer = io.StringIO()
+
+        fieldnames = [
+            "ID",
+            "SKU",
+            "Tipo de producto",
+            "Nombre",
+            "Descripcion",
+            "Marca",
+            "Precio",
+            "Stock",
+        ]
+
+        writer = csv.DictWriter(csv_buffer, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for product in products:
+            writer.writerow(
+                {
+                    "ID": product.id,
+                    "SKU": product.sku,
+                    "Nombre": product.name,
+                    "Descripcion": product.description,
+                    "Marca": product.brand.name,
+                    "Precio": product.price,
+                    "Stock": product.stock,
+                }
+            )
+
+        return csv_buffer.getvalue()

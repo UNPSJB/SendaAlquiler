@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
-import { ProductsQuery } from '@/api/graphql';
+import { ProductTypeChoices, ProductsQuery } from '@/api/graphql';
 import { useAllProducts } from '@/api/hooks';
 
 import Label from '@/modules/forms/Label';
@@ -30,6 +30,7 @@ export type ProductQuantityAndService = {
 };
 
 type Props = {
+    numberOfRentalDays: number;
     value?: ProductQuantityAndService[];
     onChange: (val: ProductQuantityAndService[] | null) => void;
 };
@@ -44,7 +45,11 @@ const DEFAULT_PRODUCT_QUANTITY_PAIR: ProductQuantityAndService = {
  * Component for managing a list of products and their quantities.
  * Allows adding, updating, and displaying products and quantities.
  */
-const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
+const ProductOrderField: React.FC<Props> = ({
+    numberOfRentalDays,
+    onChange,
+    value = [],
+}) => {
     const useProductsResult = useAllProducts();
     const productsData = useProductsResult.data;
 
@@ -93,11 +98,13 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
 
     // Products options for Select
     const selectableProductOptions = (
-        productsData?.allProducts.map((product) => ({
-            value: product.id,
-            label: product.name,
-            data: product,
-        })) || []
+        productsData?.allProducts
+            .filter((product) => product.type === ProductTypeChoices.Alquilable)
+            .map((product) => ({
+                value: product.id,
+                label: product.name,
+                data: product,
+            })) || []
     ).filter((product) => {
         // Filter out products that are already selected
         return !orderedProducts.some(
@@ -121,6 +128,10 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
                         if (item.product && item.quantity) {
                             subtotal = item.product.data.price * item.quantity;
                         }
+
+                        console.log(subtotal);
+                        console.log(numberOfRentalDays);
+                        subtotal = (subtotal || 0) * numberOfRentalDays;
 
                         const services = item.product?.data.services;
                         const servicesOptions =
@@ -228,6 +239,7 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
 type RHFProps<TFieldValues extends FieldValues, TName extends Path<TFieldValues>> = {
     name: TName;
     control: Control<TFieldValues>;
+    numberOfRentalDays: number;
 } & (TFieldValues[Extract<keyof TFieldValues, TName>] extends ProductQuantityAndService[]
     ? object
     : never);
@@ -238,7 +250,7 @@ const RHFProductOrderField = <
 >(
     props: RHFProps<TFieldValues, TName>,
 ) => {
-    const { name, control } = props;
+    const { name, control, numberOfRentalDays } = props;
 
     return (
         <Controller
@@ -248,6 +260,7 @@ const RHFProductOrderField = <
                 <ProductOrderField
                     value={value as ProductQuantityAndService[]}
                     onChange={onChange}
+                    numberOfRentalDays={numberOfRentalDays}
                 />
             )}
         />

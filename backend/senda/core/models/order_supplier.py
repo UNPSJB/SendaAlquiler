@@ -31,7 +31,7 @@ class SupplierOrderModel(TimeStampedModel):
         calculate_total: Calculates and returns the total cost of the order.
     """
 
-    orders: models.QuerySet["SupplierOrderProduct"]
+    orders: models.QuerySet["SupplierOrderProductModel"]
     history: models.QuerySet["SupplierOrderHistoryModel"]
 
     supplier = models.ForeignKey(
@@ -66,7 +66,7 @@ class SupplierOrderModel(TimeStampedModel):
         return total
 
 
-class SupplierOrderProduct(TimeStampedModel):
+class SupplierOrderProductModel(TimeStampedModel):
     """
     Represents a product within a supplier order in the Senda system. Inherits from TimeStampedModel.
 

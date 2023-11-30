@@ -10,9 +10,9 @@ import {
     RegisterOptions,
 } from 'react-hook-form';
 
-type FlatpickrProps = Omit<DateTimePickerProps, 'className' | 'options'>;
+type FlatpickrProps = Omit<DateTimePickerProps, 'className'>;
 
-export const CustomFlatpickr: React.FC<FlatpickrProps> = (props) => {
+export const CustomFlatpickr: React.FC<FlatpickrProps> = ({ options, ...props }) => {
     const enableTime = 'data-enable-time' in props;
     return (
         <Flatpickr
@@ -22,6 +22,7 @@ export const CustomFlatpickr: React.FC<FlatpickrProps> = (props) => {
             options={{
                 dateFormat: enableTime ? 'd/m/Y H:i' : 'd/m/Y',
                 locale: Spanish,
+                ...options,
             }}
         />
     );

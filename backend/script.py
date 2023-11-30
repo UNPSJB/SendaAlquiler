@@ -23,12 +23,12 @@ from senda.core.models.products import (
 from senda.core.models.order_internal import (
     InternalOrderModel,
     InternalOrderHistoryModel,
-    InternalOrderProduct,
+    InternalOrderProductModel,
     InternalOrderHistoryStatusChoices,
 )
 from senda.core.models.order_supplier import (
     SupplierOrderModel,
-    SupplierOrderProduct,
+    SupplierOrderProductModel,
     SupplierOrderHistoryModel,
     SupplierOrderHistoryStatusChoices,
 )
@@ -455,7 +455,7 @@ def create_internal_orders():
         # create random internal order items
         products_to_order = ProductModel.objects.order_by("?")[: random.randint(1, 10)]
         for product in products_to_order:
-            InternalOrderProduct.objects.create(
+            InternalOrderProductModel.objects.create(
                 product=product,
                 internal_order=order,
                 quantity=random.randint(1, 10),
@@ -477,7 +477,7 @@ def create_supplier_orders():
         # create random supplier order items
         products_to_order = ProductModel.objects.order_by("?")[: random.randint(1, 10)]
         for product in products_to_order:
-            SupplierOrderProduct.objects.create(
+            SupplierOrderProductModel.objects.create(
                 product=product,
                 supplier_order=order,
                 quantity=random.randint(1, 10),

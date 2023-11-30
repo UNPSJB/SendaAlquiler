@@ -275,14 +275,19 @@ def update_current_history(
 def update_purchase_total(
     sender: Any, instance: RentalContractItemModel, **kwargs: Any
 ) -> None:
+    days_of_rental = (
+        instance.rental_contract.contract_end_datetime.date()
+        - instance.rental_contract.contract_start_datetime.date()
+    ).days
+
     instance.price = instance.product.price
 
-    new_total = instance.quantity * instance.price
+    new_total = instance.quantity * instance.price * days_of_rental
 
     new_service_total = Decimal(0)
     if instance.service:
         instance.service_price = instance.service.price
-        new_service_total = instance.service.price * instance.quantity
+        new_service_total = instance.service.price * instance.quantity * days_of_rental
     else:
         instance.service_price = None
 

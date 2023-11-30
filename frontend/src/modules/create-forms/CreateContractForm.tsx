@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
+import dayjs from 'dayjs';
 import {
     FormProvider,
     SubmitErrorHandler,
@@ -69,6 +70,52 @@ type FormValues = {
     contractEndDatetime: Date[];
 };
 
+const getMinimumDatetimeValues = (startDatetime: Date | null) => {
+    const tommorow = dayjs()
+        .set('hour', 0)
+        .set('minute', 0)
+        .set('second', 0)
+        .add(1, 'day')
+        .toDate();
+
+    const minDateForContractStartDatetime = tommorow;
+
+    const minDateForContractEndDatetime = dayjs(startDatetime || tommorow)
+        .add(1, 'day')
+        .set('hour', 0)
+        .set('minute', 0)
+        .set('second', 0)
+        .toDate();
+
+    return {
+        minDateForContractStartDatetime,
+        minDateForContractEndDatetime,
+    };
+};
+
+/**
+ * Calculates the number of days between two dates based only on the dates, not the time.
+ *
+ * @param startDatetime The start date.
+ * @param endDatetime The end date.
+ * @returns The number of days between the two dates.
+ */
+const calculateNumberOfRentalDays = (
+    startDatetime: Date | null,
+    endDatetime: Date | null,
+) => {
+    if (!startDatetime || !endDatetime) {
+        return 0;
+    }
+
+    const startDatetimeDayjs = dayjs(startDatetime).set('minutes', 0).set('hours', 0);
+    const endDatetimeDayjs = dayjs(endDatetime).set('minutes', 0).set('hours', 0);
+
+    const numberOfDays = endDatetimeDayjs.diff(startDatetimeDayjs, 'day');
+
+    return numberOfDays;
+};
+
 const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) => {
     const queryResult = useAllClients();
     const formMethods = useForm<FormValues>();
@@ -94,15 +141,37 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
     });
 
     const client = watch('client')?.data;
+
+    const startDatetimeWatch = watch('contractStartDatetime');
+    const endDatetimeWatch = watch('contractEndDatetime');
+
+    const startDatetimeValue =
+        startDatetimeWatch && startDatetimeWatch.length ? startDatetimeWatch[0] : null;
+    const endDatetimeValue =
+        endDatetimeWatch && endDatetimeWatch.length ? endDatetimeWatch[0] : null;
+
+    const { minDateForContractStartDatetime, minDateForContractEndDatetime } =
+        getMinimumDatetimeValues(startDatetimeValue);
+
     const productsAndQuantity = watch('productsAndQuantity');
-    const subtotal = productsAndQuantity?.reduce((acc, curr) => {
-        const product = curr.product?.data;
-        const quantity = curr.quantity;
-        if (product && quantity) {
-            return acc + product.price * quantity;
-        }
-        return acc;
-    }, 0);
+
+    const numberOfRentalDays = calculateNumberOfRentalDays(
+        startDatetimeValue,
+        endDatetimeValue,
+    );
+
+    const subtotal = !numberOfRentalDays
+        ? 0
+        : productsAndQuantity?.reduce((acc, current) => {
+              const product = current.product?.data;
+              const quantity = current.quantity;
+
+              if (product && quantity) {
+                  return acc + product.price * quantity;
+              }
+
+              return acc;
+          }, 0) * numberOfRentalDays;
 
     const copyClientDetailsOnDetails = () => {
         if (client) {
@@ -167,8 +236,8 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
         });
     };
 
-    const onError: SubmitErrorHandler<FormValues> = (errors) => {
-        console.log('errors', errors);
+    const onError: SubmitErrorHandler<FormValues> = () => {
+        toast.error('Hay un error en el formulario');
     };
 
     return (
@@ -502,6 +571,9 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             control={control}
                                             rules={{ required: true }}
                                             placeholder="Fecha y hora de inicio"
+                                            options={{
+                                                minDate: minDateForContractStartDatetime,
+                                            }}
                                         />
                                     </RHFFormField>
 
@@ -515,6 +587,9 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             control={control}
                                             rules={{ required: true }}
                                             placeholder="Fecha y hora de finalización"
+                                            options={{
+                                                minDate: minDateForContractEndDatetime,
+                                            }}
                                         />
                                     </RHFFormField>
 
@@ -613,6 +688,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                     >
                                         control={control}
                                         name="productsAndQuantity"
+                                        numberOfRentalDays={numberOfRentalDays}
                                     />
                                 </div>
                             </section>
