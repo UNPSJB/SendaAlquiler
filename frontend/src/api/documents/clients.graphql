@@ -61,6 +61,7 @@ query rentalContractsByClientId($id: ID!) {
         streetName
         houseUnit
         rentalContractItems {
+            id
             product {
                 name
                 brand {

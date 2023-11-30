@@ -594,6 +594,7 @@ export type Office = {
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
     note: Maybe<Scalars['String']['output']>;
+    purchases: Array<Purchase>;
     rentalContracts: Array<RentalContract>;
     stock: Array<ProductStockInOffice>;
     street: Scalars['String']['output'];
@@ -751,6 +752,7 @@ export type Purchase = {
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
+    office: Office;
     purchaseItems: Array<PurchaseItem>;
     total: Maybe<Scalars['Decimal']['output']>;
 };
@@ -1265,6 +1267,7 @@ export type RentalContractsByClientIdQuery = {
         locality: { __typename?: 'Locality'; name: string; state: StateChoices };
         rentalContractItems: Array<{
             __typename?: 'RentalContractItem';
+            id: string;
             quantity: number;
             product: {
                 __typename?: 'Product';
@@ -1441,6 +1444,7 @@ export type ContractByIdQuery = {
         };
         rentalContractItems: Array<{
             __typename?: 'RentalContractItem';
+            id: string;
             serviceTotal: any | null;
             servicePrice: any | null;
             total: any | null;
@@ -2832,6 +2836,10 @@ export const RentalContractsByClientIdDocument = {
                                         selections: [
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'product' },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -3668,6 +3676,10 @@ export const ContractByIdDocument = {
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
                                             {
                                                 kind: 'Field',
                                                 name: {

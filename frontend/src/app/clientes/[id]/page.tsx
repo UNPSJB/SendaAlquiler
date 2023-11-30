@@ -151,7 +151,7 @@ const Page = () => {
 
                             <div className="flex-1 bg-gray-100 px-0">
                                 <section className="pl-10 ">
-                                    <Component client={client} />
+                                    <Component client={client} id={id as string} />
                                 </section>
                             </div>
                         </div>

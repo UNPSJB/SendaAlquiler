@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import { PropsWithChildren } from 'react';
 
 import { usePurchasesByClientId } from '@/api/hooks';
@@ -127,12 +129,12 @@ const ClientByIdPurchasesTab: React.FC<PurchasesByClientIdTabComponentProps> = (
                         >
                             Comprar de nuevo
                         </button>
-                        <button
-                            onClick={() => redirigirACompra(comprasFicticias[0].id)}
+                        <Link
+                            href={`/ventas/${comprasFicticias[0].id}`}
                             className="border-x-2 px-8 py-4  font-bold text-gray-500 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
                         >
                             Ver mas detalles
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </UL>
