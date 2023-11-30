@@ -12,6 +12,7 @@ import {
     Legend,
     ChartOptions,
 } from 'chart.js';
+import dayjs from 'dayjs';
 import { Line } from 'react-chartjs-2';
 import Skeleton from 'react-loading-skeleton';
 
@@ -21,6 +22,7 @@ import { clientGraphqlQuery } from '@/api/graphqlclient';
 import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
+import { getMonthNameFromDayjs } from '@/modules/dayjs/utils';
 
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 
@@ -59,21 +61,6 @@ const options: ChartOptions<'line'> = {
     },
 };
 
-const monthsInSpanish = [
-    'Enero',
-    'Febrero',
-    'Marzo',
-    'Abril',
-    'Mayo',
-    'Junio',
-    'Julio',
-    'Agosto',
-    'Septiembre',
-    'Octubre',
-    'Noviembre',
-    'Diciembre',
-];
-
 const Home = () => {
     const result = useQuery([], () => {
         return clientGraphqlQuery(DashboardDocument, {});
@@ -101,9 +88,9 @@ const Home = () => {
                     {({ allPurchases, allClients, allProducts }) => {
                         const purchasesByMonth = allPurchases.reduce(
                             (acc, purchase) => {
-                                const date = new Date(purchase.createdOn);
-                                const month = date.getMonth();
-                                const monthNameInSpanish = monthsInSpanish[month];
+                                const dateDayjs = dayjs(purchase.createdOn);
+                                const monthNameInSpanish =
+                                    getMonthNameFromDayjs(dateDayjs);
 
                                 if (acc[monthNameInSpanish]) {
                                     acc[monthNameInSpanish].push(purchase);

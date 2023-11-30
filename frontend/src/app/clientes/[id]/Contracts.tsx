@@ -1,10 +1,13 @@
 import Link from 'next/link';
 
 import clsx from 'clsx';
+import dayjs from 'dayjs';
 import { PropsWithChildren } from 'react';
 
 import { RentalContractStatusChoices } from '@/api/graphql';
 import { useRentalContractsByClientId } from '@/api/hooks';
+
+import { getDayNameFromDayjs, getMonthNameFromDayjs } from '@/modules/dayjs/utils';
 
 import { RentalContractsByClientIdTabComponentProps } from './page';
 
@@ -86,6 +89,16 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status }) => {
     );
 };
 
+const formatDateTime = (datetime: string) => {
+    const dateTimeDayjs = dayjs(datetime);
+
+    return `${getDayNameFromDayjs(dateTimeDayjs)} ${dateTimeDayjs.get(
+        'date',
+    )} de ${getMonthNameFromDayjs(dateTimeDayjs)} del ${dateTimeDayjs.get(
+        'year',
+    )} a las ${dateTimeDayjs.format('HH:mm')}`;
+};
+
 const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProps> = ({
     id,
 }) => {
@@ -124,8 +137,8 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                             >
                                 <div className="flex justify-between border-b-2 px-4 pt-3">
                                     <h2 className="mt-2">
-                                        {contract.contractStartDatetime} -{' '}
-                                        {contract.contractEndDatetime}
+                                        {formatDateTime(contract.contractStartDatetime)} -{' '}
+                                        {formatDateTime(contract.contractEndDatetime)}
                                     </h2>
 
                                     <div className="mb-3 flex rounded-full border border-black px-4 py-1 ">
