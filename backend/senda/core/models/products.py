@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 
 from django.db import models
 
@@ -103,6 +103,16 @@ class ProductModel(TimeStampedModel):
 
     objects: ProductModelManager = ProductModelManager()  # pyright: ignore
 
+    def get_stock_for_office(
+        self, office: OfficeModel
+    ) -> Optional["ProductStockInOfficeModel"]:
+        stock_data = self.stock.filter(office=office).first()
+
+        if not stock_data:
+            return None
+
+        return stock_data
+
 
 class ProductStockInOfficeModel(TimeStampedModel):
     """
@@ -118,17 +128,24 @@ class ProductStockInOfficeModel(TimeStampedModel):
     """
 
     office = models.ForeignKey(
-        OfficeModel, on_delete=models.CASCADE, related_name="stock"
+        OfficeModel, on_delete=models.CASCADE, related_name="stock", db_index=True
     )
     product = models.ForeignKey(
-        ProductModel, on_delete=models.CASCADE, related_name="stock"
+        ProductModel, on_delete=models.CASCADE, related_name="stock", db_index=True
     )
-    stock = models.IntegerField()
+    stock = models.PositiveIntegerField()
 
     class Meta(TimeStampedModel.Meta):
         constraints = [
             models.UniqueConstraint(fields=["office", "product"], name="unique_stock")
         ]
+
+    def __str__(self) -> str:
+        return f"{self.product} - {self.office}"
+
+    def reduce_stock(self, quantity: int) -> None:
+        self.stock -= quantity
+        self.save()
 
 
 class ProductSupplierModel(TimeStampedModel):

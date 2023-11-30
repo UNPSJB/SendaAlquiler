@@ -21,6 +21,7 @@ class PurchaseModel(TimeStampedModel):
         purchase_items (models.QuerySet["PurchaseItemModel"]): A queryset for accessing the items included in the purchase.
         date (models.DateTimeField): The date and time when the purchase was made.
         total (models.DecimalField): The total cost of the purchase.
+        office (models.ForeignKey): A foreign key to OfficeModel, linking to the office where the purchase was made and from where we should subtract the stock.
         client (models.ForeignKey): A foreign key to ClientModel, linking to the client who made the purchase.
 
     Methods:
@@ -35,6 +36,10 @@ class PurchaseModel(TimeStampedModel):
     total = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
     client = models.ForeignKey(
         ClientModel, on_delete=models.CASCADE, related_name="purchases"
+    )
+
+    office = models.ForeignKey(
+        "OfficeModel", on_delete=models.CASCADE, related_name="purchases"
     )
 
     objects: PurchaseModelManager = PurchaseModelManager()  # pyright: ignore
@@ -96,6 +101,17 @@ class PurchaseItemModel(TimeStampedModel):
                 "No se puede agregar un producto que no sea Comerciable a una venta en sucursal"
             )
 
+        stock_in_office = self.product.get_stock_for_office(self.purchase.office)
+        if stock_in_office is None:
+            raise ValidationError(
+                "No se puede agregar un producto que no esté en stock en una sucursal"
+            )
+
+        if stock_in_office.stock < self.quantity:
+            raise ValidationError(
+                "No se puede agregar un producto con stock menor al solicitado a en una venta"
+            )
+
     def __str__(self) -> str:
         return f"{self.product.name} - {self.quantity}"
 
@@ -103,6 +119,7 @@ class PurchaseItemModel(TimeStampedModel):
         if not self.price and self.product.price:
             self.price = self.product.price
 
+        self.clean()
         super().save(*args, **kwargs)
 
 
@@ -118,6 +135,23 @@ def update_purchase_total(
         instance (PurchaseItemModel): The instance of the model that was saved.
         kwargs (Any): Additional keyword arguments.
     """
+    # if is creating
+    if not instance.pk:
+        stock_in_office = instance.product.get_stock_for_office(
+            instance.purchase.office
+        )
+        if stock_in_office is None:
+            raise ValidationError(
+                "No se puede agregar un producto que no esté en stock en una sucursal"
+            )
+
+        if stock_in_office.stock < instance.quantity:
+            raise ValidationError(
+                "No se puede agregar un producto con stock menor al solicitado en una venta"
+            )
+
+        stock_in_office.reduce_stock(instance.quantity)
+
     new_total = instance.quantity * instance.price
     if instance.total != new_total:
         instance.total = new_total
