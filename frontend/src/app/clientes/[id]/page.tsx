@@ -48,6 +48,10 @@ export type ClientByIdTabComponentProps = {
     client: NonNullable<ClientByIdQuery['clientById']>;
 };
 
+export type RentalContractsByClietnIdTabComponentProps = {
+    id: string;
+};
+
 const tabs = [
     {
         label: 'Detalles',

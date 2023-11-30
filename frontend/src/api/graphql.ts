@@ -800,6 +800,7 @@ export type Query = {
     purchaseItems: Array<PurchaseItem>;
     purchases: PaginatedPurchaseQueryResult;
     rentalContracts: PaginatedRentalContractQueryResult;
+    rentalContractsByClientId: Array<RentalContract>;
     supplierById: Maybe<Supplier>;
     supplierOrderById: Maybe<OrderSupplier>;
     supplierOrders: PaginatedOrderSupplierQueryResult;
@@ -879,6 +880,10 @@ export type QueryPurchasesArgs = {
 
 export type QueryRentalContractsArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type QueryRentalContractsByClientIdArgs = {
+    id: Scalars['ID']['input'];
 };
 
 export type QuerySupplierByIdArgs = {
@@ -1219,6 +1224,40 @@ export type ClientByIdQuery = {
             postalCode: string;
         };
     } | null;
+};
+
+export type RentalContractsByClientIdQueryVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type RentalContractsByClientIdQuery = {
+    __typename?: 'Query';
+    rentalContractsByClientId: Array<{
+        __typename?: 'RentalContract';
+        id: string;
+        createdOn: any;
+        expirationDate: any | null;
+        contractStartDatetime: any;
+        contractEndDatetime: any;
+        houseNumber: string;
+        streetName: string;
+        houseUnit: string | null;
+        total: any | null;
+        currentHistory: {
+            __typename?: 'RentalContractHistory';
+            status: RentalContractStatusChoices;
+        } | null;
+        locality: { __typename?: 'Locality'; name: string; state: StateChoices };
+        rentalContractItems: Array<{
+            __typename?: 'RentalContractItem';
+            product: {
+                __typename?: 'Product';
+                name: string;
+                price: any | null;
+                brand: { __typename?: 'Brand'; name: string } | null;
+            };
+        }>;
+    }>;
 };
 
 export type CreateClientMutationVariables = Exact<{
@@ -2601,6 +2640,167 @@ export const ClientByIdDocument = {
         },
     ],
 } as unknown as DocumentNode<ClientByIdQuery, ClientByIdQueryVariables>;
+export const RentalContractsByClientIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'rentalContractsByClientId' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'rentalContractsByClientId' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'createdOn' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'currentHistory' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'expirationDate' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'contractStartDatetime',
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'contractEndDatetime' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'locality' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'state' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseNumber' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'streetName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'houseUnit' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'rentalContractItems' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'product' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'brand',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'price',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'total' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    RentalContractsByClientIdQuery,
+    RentalContractsByClientIdQueryVariables
+>;
 export const CreateClientDocument = {
     kind: 'Document',
     definitions: [

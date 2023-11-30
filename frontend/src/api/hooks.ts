@@ -90,6 +90,7 @@ import {
     UpdateClientMutationVariables,
     UpdateClientDocument,
     InternalOrderByIdDocument,
+    RentalContractsByClientIdDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -105,6 +106,9 @@ const queryKeys = {
 
     contracts: ['contracts'],
     contractsById: (id: string | undefined) => [...queryKeys.contracts, id],
+
+    contractsByClient: ['contracts-by-client'],
+    contractsByClientId: (id: string | undefined) => [...queryKeys.contractsByClient, id],
 
     localities: ['localities'],
     allLocalities: ['allLocalities'],
@@ -269,6 +273,20 @@ export const useSupplierOrdersBySupplierId = (id: string | undefined) => {
         queryKeys.supplierOrderBySupplierId(id),
         () => {
             return clientGraphqlQuery(SupplierOrdersBySupplierIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
+};
+
+export const useRentalContractsByClientId = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.contractsByClientId(id),
+        () => {
+            return clientGraphqlQuery(RentalContractsByClientIdDocument, {
                 id: id as string,
             });
         },
