@@ -805,6 +805,7 @@ export type Query = {
     purchaseById: Maybe<Purchase>;
     purchaseItems: Array<PurchaseItem>;
     purchases: PaginatedPurchaseQueryResult;
+    purchasesByClientId: Array<Purchase>;
     purchasesCsv: Scalars['String']['output'];
     rentalContracts: PaginatedRentalContractQueryResult;
     rentalContractsByClientId: Array<RentalContract>;
@@ -886,6 +887,10 @@ export type QueryPurchaseByIdArgs = {
 
 export type QueryPurchasesArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type QueryPurchasesByClientIdArgs = {
+    id: Scalars['ID']['input'];
 };
 
 export type QueryRentalContractsArgs = {
@@ -1260,6 +1265,31 @@ export type RentalContractsByClientIdQuery = {
         locality: { __typename?: 'Locality'; name: string; state: StateChoices };
         rentalContractItems: Array<{
             __typename?: 'RentalContractItem';
+            quantity: number;
+            product: {
+                __typename?: 'Product';
+                name: string;
+                price: any | null;
+                brand: { __typename?: 'Brand'; name: string } | null;
+            };
+        }>;
+    }>;
+};
+
+export type PurchasesByClientIdQueryVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type PurchasesByClientIdQuery = {
+    __typename?: 'Query';
+    purchasesByClientId: Array<{
+        __typename?: 'Purchase';
+        id: string;
+        createdOn: any;
+        total: any | null;
+        purchaseItems: Array<{
+            __typename?: 'PurchaseItem';
+            quantity: number;
             product: {
                 __typename?: 'Product';
                 name: string;
@@ -2842,6 +2872,10 @@ export const RentalContractsByClientIdDocument = {
                                                     ],
                                                 },
                                             },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'quantity' },
+                                            },
                                         ],
                                     },
                                 },
@@ -2857,6 +2891,111 @@ export const RentalContractsByClientIdDocument = {
     RentalContractsByClientIdQuery,
     RentalContractsByClientIdQueryVariables
 >;
+export const PurchasesByClientIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'purchasesByClientId' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'purchasesByClientId' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'createdOn' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'total' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'purchaseItems' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'product' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'brand',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'price',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'quantity' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<PurchasesByClientIdQuery, PurchasesByClientIdQueryVariables>;
 export const CreateClientDocument = {
     kind: 'Document',
     definitions: [

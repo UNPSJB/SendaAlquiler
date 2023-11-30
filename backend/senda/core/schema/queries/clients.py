@@ -3,7 +3,7 @@ from typing import Any
 import graphene
 
 from senda.core.models.clients import ClientModel
-from senda.core.schema.custom_types import Client, PaginatedClientQueryResult, RentalContract
+from senda.core.schema.custom_types import Client, PaginatedClientQueryResult, RentalContract, Purchase
 from utils.graphene import get_paginated_model, non_null_list_of
 
 import csv
@@ -104,3 +104,12 @@ class Query(graphene.ObjectType):
         rental_contracts_by_client_id = ClientModel.objects.get(id=id)
         contracts = rental_contracts_by_client_id.rental_contracts.all()
         return contracts
+
+    purchases_by_client_id = non_null_list_of(
+        Purchase, id=graphene.ID(required=True)
+    )
+
+    def resolve_purchases_by_client_id(self,info: Any, id: str):
+        purchases_by_client_id = ClientModel.objects.get(id=id)
+        purchases = purchases_by_client_id.purchases.all()
+        return purchases

@@ -68,8 +68,27 @@ query rentalContractsByClientId($id: ID!) {
                 }
                 price
             }
+            quantity
         }
         total
+    }
+}
+
+query purchasesByClientId($id: ID!) {
+    purchasesByClientId(id: $id) {
+        id
+        createdOn
+        total
+        purchaseItems {
+            product {
+                name
+                brand {
+                    name
+                }
+                price
+            }
+            quantity
+        }
     }
 }
 

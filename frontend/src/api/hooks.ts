@@ -103,6 +103,7 @@ import {
     OfficesCsvDocument,
     PurchasesCsvDocument,
     RentalContractsCsvDocument,
+    PurchasesByClientIdDocument,
 } from './graphql';
 import { clientGraphqlQuery } from './graphqlclient';
 
@@ -118,6 +119,9 @@ const queryKeys = {
 
     contracts: ['contracts'],
     contractsById: (id: string | undefined) => [...queryKeys.contracts, id],
+
+    purchasesByClient: ['purchases-by-client'],
+    purchasesByClientId: (id: string | undefined) => [...queryKeys.purchasesByClient, id],
 
     contractsByClient: ['contracts-by-client'],
     contractsByClientId: (id: string | undefined) => [...queryKeys.contractsByClient, id],
@@ -299,6 +303,20 @@ export const useRentalContractsByClientId = (id: string | undefined) => {
         queryKeys.contractsByClientId(id),
         () => {
             return clientGraphqlQuery(RentalContractsByClientIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
+};
+
+export const usePurchasesByClientId = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.purchasesByClientId(id),
+        () => {
+            return clientGraphqlQuery(PurchasesByClientIdDocument, {
                 id: id as string,
             });
         },
