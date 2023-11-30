@@ -35,14 +35,12 @@ class Query(graphene.ObjectType):
     def resolve_supplier_order_by_id(self, info: Any, id: str):
         return SupplierOrderModel.objects.filter(id=id).first()
 
-    supplier_orders_csv = graphene.NonNull(graphene.String)
+    suppliers_orders_csv = graphene.NonNull(graphene.String)
 
-    def resolve_supplier_orders_csv(self, info: Any):
+    def resolve_suppliers_orders_csv(self, info: Any):
         supplier_orders = SupplierOrderModel.objects.all().prefetch_related(
             "supplier",
-            "order_items",
-            "order_items__product",
-            "order_items__product__brand",
+            "orders",
         )
         output = io.StringIO()
 

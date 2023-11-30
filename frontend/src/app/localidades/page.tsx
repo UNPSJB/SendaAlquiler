@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { LocalitiesQuery, Locality } from '@/api/graphql';
-import { useDeleteLocality, useLocalities } from '@/api/hooks';
+import { useDeleteLocality, useExportLocalitiesCsv, useLocalities } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -13,7 +13,7 @@ import DataTable from '@/modules/data-table/DataTable';
 import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
-import Button from '@/components/Button';
+import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -71,13 +71,26 @@ const Page = () => {
         mutate(id);
     };
 
+    const { exportCsv } = useExportLocalitiesCsv();
+
     return (
         <DashboardLayout
             header={
                 <div className="flex items-center justify-between">
                     <DashboardLayoutBigTitle>Localidades</DashboardLayoutBigTitle>
 
-                    <Button href="/localidades/add">+ Añadir localidad</Button>
+                    <div className="flex space-x-8">
+                        <Button
+                            variant={ButtonVariant.GRAY}
+                            onClick={() => {
+                                exportCsv({});
+                            }}
+                        >
+                            Exportar a CSV
+                        </Button>
+
+                        <Button href="/localidades/add">+ Añadir localidad</Button>
+                    </div>
                 </div>
             }
         >

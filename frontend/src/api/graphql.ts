@@ -608,7 +608,7 @@ export type OrderSupplier = {
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     officeDestination: Office;
-    orders: Array<SupplierOrderProdu>;
+    orders: Array<SupplierOrderProduct>;
     supplier: Supplier;
     total: Maybe<Scalars['Decimal']['output']>;
 };
@@ -699,7 +699,7 @@ export type Product = {
     price: Maybe<Scalars['Decimal']['output']>;
     purchaseItems: Array<PurchaseItem>;
     relatedOrders: Array<InternalOrderProduct>;
-    relatedSupplierOrders: Array<SupplierOrderProdu>;
+    relatedSupplierOrders: Array<SupplierOrderProduct>;
     rentalContractItems: Array<RentalContractItem>;
     services: Array<ProductService>;
     sku: Maybe<Scalars['String']['output']>;
@@ -783,29 +783,39 @@ export type Query = {
     clientById: Maybe<Client>;
     clientExists: Scalars['Boolean']['output'];
     clients: PaginatedClientQueryResult;
+    clientsCsv: Scalars['String']['output'];
     contractById: Maybe<RentalContract>;
     employeeById: Maybe<Employee>;
     employees: PaginatedEmployeeQueryResult;
+    employeesCsv: Scalars['String']['output'];
     internalOrderById: Maybe<InternalOrder>;
     internalOrders: PaginatedInternalOrderQueryResult;
+    internalOrdersCsv: Scalars['String']['output'];
     localities: PaginatedLocalityQueryResult;
+    localitiesCsv: Scalars['String']['output'];
     officeById: Maybe<Office>;
     offices: Array<Office>;
+    officesCsv: Scalars['String']['output'];
     productById: Maybe<Product>;
     productExists: Scalars['Boolean']['output'];
     products: PaginatedProductQueryResult;
+    productsCsv: Scalars['String']['output'];
     productsStocksByOfficeId: Array<ProductStockInOffice>;
     productsSuppliedBySupplierId: Array<Product>;
     purchaseById: Maybe<Purchase>;
     purchaseItems: Array<PurchaseItem>;
     purchases: PaginatedPurchaseQueryResult;
+    purchasesCsv: Scalars['String']['output'];
     rentalContracts: PaginatedRentalContractQueryResult;
     rentalContractsByClientId: Array<RentalContract>;
+    rentalContractsCsv: Scalars['String']['output'];
     supplierById: Maybe<Supplier>;
     supplierOrderById: Maybe<OrderSupplier>;
     supplierOrders: PaginatedOrderSupplierQueryResult;
     supplierOrdersBySupplierId: Array<OrderSupplier>;
     suppliers: PaginatedSupplierQueryResult;
+    suppliersCsv: Scalars['String']['output'];
+    suppliersOrdersCsv: Scalars['String']['output'];
     users: Array<User>;
 };
 
@@ -1090,8 +1100,8 @@ export type SupplierOrderHistory = {
     user: Maybe<User>;
 };
 
-export type SupplierOrderProdu = {
-    __typename?: 'SupplierOrderProdu';
+export type SupplierOrderProduct = {
+    __typename?: 'SupplierOrderProduct';
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
@@ -1459,6 +1469,52 @@ export type DeleteRentalContractMutation = {
     } | null;
 };
 
+export type ClientsCsvQueryVariables = Exact<{ [key: string]: never }>;
+
+export type ClientsCsvQuery = { __typename?: 'Query'; clientsCsv: string };
+
+export type EmployeesCsvQueryVariables = Exact<{ [key: string]: never }>;
+
+export type EmployeesCsvQuery = { __typename?: 'Query'; employeesCsv: string };
+
+export type RentalContractsCsvQueryVariables = Exact<{ [key: string]: never }>;
+
+export type RentalContractsCsvQuery = {
+    __typename?: 'Query';
+    rentalContractsCsv: string;
+};
+
+export type ProductsCsvQueryVariables = Exact<{ [key: string]: never }>;
+
+export type ProductsCsvQuery = { __typename?: 'Query'; productsCsv: string };
+
+export type LocalitiesCsvQueryVariables = Exact<{ [key: string]: never }>;
+
+export type LocalitiesCsvQuery = { __typename?: 'Query'; localitiesCsv: string };
+
+export type OfficesCsvQueryVariables = Exact<{ [key: string]: never }>;
+
+export type OfficesCsvQuery = { __typename?: 'Query'; officesCsv: string };
+
+export type PurchasesCsvQueryVariables = Exact<{ [key: string]: never }>;
+
+export type PurchasesCsvQuery = { __typename?: 'Query'; purchasesCsv: string };
+
+export type SuppliersCsvQueryVariables = Exact<{ [key: string]: never }>;
+
+export type SuppliersCsvQuery = { __typename?: 'Query'; suppliersCsv: string };
+
+export type InternalOrdersCsvQueryVariables = Exact<{ [key: string]: never }>;
+
+export type InternalOrdersCsvQuery = { __typename?: 'Query'; internalOrdersCsv: string };
+
+export type SuppliersOrdersCsvQueryVariables = Exact<{ [key: string]: never }>;
+
+export type SuppliersOrdersCsvQuery = {
+    __typename?: 'Query';
+    suppliersOrdersCsv: string;
+};
+
 export type DashboardQueryVariables = Exact<{ [key: string]: never }>;
 
 export type DashboardQuery = {
@@ -1788,7 +1844,7 @@ export type SupplierOrderByIdQuery = {
             } | null;
         } | null;
         orders: Array<{
-            __typename?: 'SupplierOrderProdu';
+            __typename?: 'SupplierOrderProduct';
             id: string;
             quantity: number;
             quantityReceived: number;
@@ -1831,7 +1887,7 @@ export type SupplierOrdersBySupplierIdQuery = {
             } | null;
         } | null;
         orders: Array<{
-            __typename?: 'SupplierOrderProdu';
+            __typename?: 'SupplierOrderProduct';
             id: string;
             quantity: number;
             quantityReceived: number;
@@ -3779,6 +3835,172 @@ export const DeleteRentalContractDocument = {
     DeleteRentalContractMutation,
     DeleteRentalContractMutationVariables
 >;
+export const ClientsCsvDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'clientsCsv' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'clientsCsv' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<ClientsCsvQuery, ClientsCsvQueryVariables>;
+export const EmployeesCsvDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'employeesCsv' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'employeesCsv' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<EmployeesCsvQuery, EmployeesCsvQueryVariables>;
+export const RentalContractsCsvDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'rentalContractsCsv' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'rentalContractsCsv' },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<RentalContractsCsvQuery, RentalContractsCsvQueryVariables>;
+export const ProductsCsvDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'productsCsv' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'productsCsv' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<ProductsCsvQuery, ProductsCsvQueryVariables>;
+export const LocalitiesCsvDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'localitiesCsv' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'localitiesCsv' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<LocalitiesCsvQuery, LocalitiesCsvQueryVariables>;
+export const OfficesCsvDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'officesCsv' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'officesCsv' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<OfficesCsvQuery, OfficesCsvQueryVariables>;
+export const PurchasesCsvDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'purchasesCsv' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'purchasesCsv' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<PurchasesCsvQuery, PurchasesCsvQueryVariables>;
+export const SuppliersCsvDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'suppliersCsv' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'suppliersCsv' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<SuppliersCsvQuery, SuppliersCsvQueryVariables>;
+export const InternalOrdersCsvDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'internalOrdersCsv' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'internalOrdersCsv' } },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<InternalOrdersCsvQuery, InternalOrdersCsvQueryVariables>;
+export const SuppliersOrdersCsvDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'suppliersOrdersCsv' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'suppliersOrdersCsv' },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<SuppliersOrdersCsvQuery, SuppliersOrdersCsvQueryVariables>;
 export const DashboardDocument = {
     kind: 'Document',
     definitions: [

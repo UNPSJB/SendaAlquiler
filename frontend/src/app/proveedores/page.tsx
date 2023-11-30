@@ -6,7 +6,11 @@ import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { Supplier, SuppliersQuery } from '@/api/graphql';
-import { useDeleteSupplier, usePaginatedSuppliers } from '@/api/hooks';
+import {
+    useDeleteSupplier,
+    useExportSuppliersCsv,
+    usePaginatedSuppliers,
+} from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -15,7 +19,7 @@ import DataTable from '@/modules/data-table/DataTable';
 import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
-import Button from '@/components/Button';
+import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -84,13 +88,26 @@ const Page = () => {
         mutate(id);
     };
 
+    const { exportCsv } = useExportSuppliersCsv();
+
     return (
         <DashboardLayout
             header={
                 <div className="flex items-center justify-between">
                     <DashboardLayoutBigTitle>Proveedores</DashboardLayoutBigTitle>
 
-                    <Button href="/proveedores/add">+ Añadir proveedor</Button>
+                    <div className="flex space-x-8">
+                        <Button
+                            variant={ButtonVariant.GRAY}
+                            onClick={() => {
+                                exportCsv({});
+                            }}
+                        >
+                            Exportar a CSV
+                        </Button>
+
+                        <Button href="/proveedores/add">+ Añadir proveedor</Button>
+                    </div>
                 </div>
             }
         >

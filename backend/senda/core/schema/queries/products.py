@@ -104,6 +104,7 @@ class Query(graphene.ObjectType):
                     "Marca": product.brand.name,
                     "Precio": product.price,
                     "Stock": product.stock,
+                    "Tipo de producto": product.get_type_display(),
                 }
             )
 
