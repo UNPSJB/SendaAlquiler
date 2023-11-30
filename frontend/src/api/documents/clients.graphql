@@ -81,6 +81,7 @@ query purchasesByClientId($id: ID!) {
         createdOn
         total
         purchaseItems {
+            id
             product {
                 name
                 brand {

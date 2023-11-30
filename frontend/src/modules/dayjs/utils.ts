@@ -44,7 +44,6 @@ export const getDayNameFromDayjs = (date: Dayjs) => {
 export const formatContractDateTime = (datetime: string) => {
     const dateTimeDayjs = dayjs(datetime);
 
-    const dayName = getDayNameFromDayjs(dateTimeDayjs);
     const dateNumber = dateTimeDayjs.get('date');
 
     const monthName = getMonthNameFromDayjs(dateTimeDayjs);
@@ -53,5 +52,17 @@ export const formatContractDateTime = (datetime: string) => {
 
     const timeStr = dateTimeDayjs.format('HH:mm');
 
-    return `${dayName} ${dateNumber} de ${monthName} del ${yearNumber} a las ${timeStr}`;
+    return ` ${dateNumber} de ${monthName} del ${yearNumber} a las ${timeStr}`;
+};
+
+export const formatDateTime = (datetime: string) => {
+    const dateTimeDayjs = dayjs(datetime);
+
+    const dateNumber = dateTimeDayjs.get('date');
+
+    const monthName = getMonthNameFromDayjs(dateTimeDayjs);
+
+    const yearNumber = dateTimeDayjs.get('year');
+
+    return ` ${dateNumber} de ${monthName} del ${yearNumber} `;
 };

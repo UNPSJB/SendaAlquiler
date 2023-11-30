@@ -1292,6 +1292,7 @@ export type PurchasesByClientIdQuery = {
         total: any | null;
         purchaseItems: Array<{
             __typename?: 'PurchaseItem';
+            id: string;
             quantity: number;
             product: {
                 __typename?: 'Product';
@@ -2947,6 +2948,10 @@ export const PurchasesByClientIdDocument = {
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'product' },

@@ -7,6 +7,7 @@ import { RentalContractStatusChoices } from '@/api/graphql';
 import { useRentalContractsByClientId } from '@/api/hooks';
 
 import { formatContractDateTime } from '@/modules/dayjs/utils';
+import { formatDateTime } from '@/modules/dayjs/utils';
 
 import { RentalContractsByClientIdTabComponentProps } from './page';
 
@@ -99,8 +100,8 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
             Loading={<Spinner />}
             Error={
                 <FetchStatusMessageWithDescription
-                    title="Error al obtener las compras"
-                    line1="Hubo un error al obtener las compras del cliente."
+                    title="Error al obtener los contratos"
+                    line1="Hubo un error al obtener los contratos del cliente."
                 />
             }
         >
@@ -124,7 +125,7 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                                 className="mb-4 mr-4 mt-8 rounded-md border bg-white "
                                 key={contract.id}
                             >
-                                <div className="flex justify-between border-b-2 px-4 pt-3">
+                                <div className="flex justify-between border-b px-4 pt-3">
                                     <h2 className="mt-2">
                                         {formatContractDateTime(
                                             contract.contractStartDatetime,
@@ -141,56 +142,43 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                                         />
                                     </div>
                                 </div>
-                                <div className="h-full border-b-2 px-4 py-2 text-gray-400">
+                                <div className="h-full border-b px-4 py-2 text-gray-400">
                                     <LI>
-                                        <SN>Contrato creado el:</SN> {contract.createdOn}
+                                        <SN>Contrato creado el:</SN>{' '}
+                                        {formatDateTime(contract.createdOn)}
                                     </LI>
                                     <LI>
                                         <SN>Fecha Vencimiento:</SN>{' '}
-                                        {contract.expirationDate}{' '}
+                                        {formatDateTime(contract.expirationDate)}{' '}
                                     </LI>
                                     <LI>
                                         <SN>Locación:</SN> {contract.streetName}{' '}
-                                        {contract.houseNumber} {contract.locality.name}{' '}
-                                        {contract.locality.state}{' '}
+                                        {contract.houseNumber}, {contract.locality.name},{' '}
+                                        {contract.locality.state}
                                     </LI>
                                 </div>
                                 <div>
-                                    <div className="mt-2 flex justify-between px-4">
+                                    <div className="mt-2 px-4">
                                         {contract.rentalContractItems.map((item) => {
                                             return (
-                                                <li key={item.id}>
+                                                <li
+                                                    key={item.id}
+                                                    className="flex justify-between py-1"
+                                                >
                                                     <h2 className="text-gray-400">
-                                                        {
-                                                            contract
-                                                                .rentalContractItems[0]
-                                                                .product.name
-                                                        }{' '}
-                                                        {
-                                                            contract
-                                                                .rentalContractItems[0]
-                                                                .product.brand?.name
-                                                        }
+                                                        {item.product.name}{' '}
+                                                        {item.product.brand?.name}
                                                     </h2>
                                                     <p className=" text-gray-400">
-                                                        {
-                                                            contract
-                                                                .rentalContractItems[0]
-                                                                .quantity
-                                                        }{' '}
-                                                        u. x $
-                                                        {
-                                                            contract
-                                                                .rentalContractItems[0]
-                                                                .product.price
-                                                        }
+                                                        {item.quantity} u. x $
+                                                        {item.product.price}
                                                     </p>
                                                 </li>
                                             );
                                         })}
                                     </div>
                                 </div>
-                                <div className=" flex justify-between border-b-2 p-2">
+                                <div className="flex justify-between border-b p-2">
                                     <p className="ml-2 font-bold">Total</p>
                                     <b className="text-xl font-normal">
                                         ${contract.total}
@@ -199,13 +187,13 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                                 <div className="flex justify-end">
                                     <Link
                                         href={`/contratos/${contract.id}`}
-                                        className="border-x-2 px-8 py-4  text-gray-400 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
+                                        className="border-x px-8 py-4  text-gray-400 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
                                     >
                                         Ver mas detalles
                                     </Link>
                                     <button
                                         onClick={() => {}}
-                                        className="border-x-2 px-8 py-4  font-bold text-gray-500 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
+                                        className=" px-8 py-4  font-bold text-gray-500 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
                                     >
                                         Señar contrato
                                     </button>
