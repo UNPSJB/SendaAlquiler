@@ -6,7 +6,11 @@ import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { InternalOrder, InternalOrdersQuery } from '@/api/graphql';
-import { useDeleteInternalOrder, usePaginatedInternalOrders } from '@/api/hooks';
+import {
+    useDeleteInternalOrder,
+    useExportInternalOrdersCsv,
+    usePaginatedInternalOrders,
+} from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -15,7 +19,7 @@ import DataTable from '@/modules/data-table/DataTable';
 import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
-import Button from '@/components/Button';
+import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -86,13 +90,26 @@ const Page = () => {
         mutate(id);
     };
 
+    const { exportCsv } = useExportInternalOrdersCsv();
+
     return (
         <DashboardLayout
             header={
                 <div className="flex items-center justify-between">
                     <DashboardLayoutBigTitle>Pedidos Internos</DashboardLayoutBigTitle>
 
-                    <Button href="/pedidos-internos/add">+ Añadir pedido</Button>
+                    <div className="flex space-x-8">
+                        <Button
+                            variant={ButtonVariant.GRAY}
+                            onClick={() => {
+                                exportCsv({});
+                            }}
+                        >
+                            Exportar a CSV
+                        </Button>
+
+                        <Button href="/pedidos-internos/add">+ Añadir pedido</Button>
+                    </div>
                 </div>
             }
         >

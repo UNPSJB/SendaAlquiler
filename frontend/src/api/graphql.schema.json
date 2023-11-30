@@ -4668,7 +4668,7 @@
                                     "name": null,
                                     "ofType": {
                                         "kind": "OBJECT",
-                                        "name": "SupplierOrderProdu",
+                                        "name": "SupplierOrderProduct",
                                         "ofType": null
                                     }
                                 }
@@ -5552,7 +5552,7 @@
                                     "name": null,
                                     "ofType": {
                                         "kind": "OBJECT",
-                                        "name": "SupplierOrderProdu",
+                                        "name": "SupplierOrderProduct",
                                         "ofType": null
                                     }
                                 }
@@ -6509,6 +6509,22 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "clientsCsv",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "contractById",
                         "description": null,
                         "args": [
@@ -6596,6 +6612,22 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "employeesCsv",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "internalOrderById",
                         "description": null,
                         "args": [
@@ -6654,6 +6686,22 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "internalOrdersCsv",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "localities",
                         "description": null,
                         "args": [
@@ -6676,6 +6724,22 @@
                             "ofType": {
                                 "kind": "OBJECT",
                                 "name": "PaginatedLocalityQueryResult",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "localitiesCsv",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
                                 "ofType": null
                             }
                         },
@@ -6730,6 +6794,22 @@
                                         "ofType": null
                                     }
                                 }
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "officesCsv",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
+                                "ofType": null
                             }
                         },
                         "isDeprecated": false,
@@ -6820,6 +6900,22 @@
                             "ofType": {
                                 "kind": "OBJECT",
                                 "name": "PaginatedProductQueryResult",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "productsCsv",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
                                 "ofType": null
                             }
                         },
@@ -6991,6 +7087,22 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "purchasesCsv",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "rentalContracts",
                         "description": null,
                         "args": [
@@ -7013,6 +7125,22 @@
                             "ofType": {
                                 "kind": "OBJECT",
                                 "name": "PaginatedRentalContractQueryResult",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "rentalContractsCsv",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
                                 "ofType": null
                             }
                         },
@@ -7170,6 +7298,38 @@
                             "ofType": {
                                 "kind": "OBJECT",
                                 "name": "PaginatedSupplierQueryResult",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "suppliersCsv",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "suppliersOrdersCsv",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
                                 "ofType": null
                             }
                         },
@@ -8707,7 +8867,7 @@
             },
             {
                 "kind": "OBJECT",
-                "name": "SupplierOrderProdu",
+                "name": "SupplierOrderProduct",
                 "description": null,
                 "fields": [
                     {

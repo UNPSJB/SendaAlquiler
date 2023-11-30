@@ -88,8 +88,12 @@ class Query(graphene.ObjectType):
                         "Nombre de producto": rental_contract_item.product.name,
                         "Marca de producto": rental_contract_item.product.brand.name,
                         "Precio de producto": rental_contract_item.product.price,
-                        "Servicio asociado al producto": rental_contract_item.service.name,
-                        "Precio de servicio": rental_contract_item.service.price,
+                        "Servicio asociado al producto": rental_contract_item.service.name
+                        if rental_contract_item.service
+                        else None,
+                        "Precio de servicio": rental_contract_item.service.price
+                        if rental_contract_item.service
+                        else None,
                         "Cantidad de productos": rental_contract_item.quantity,
                         "Precio total por producto y servicio a pagar": rental_contract_item.total,
                         "Total del contrato": rental_contract.total,

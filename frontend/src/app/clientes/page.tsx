@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { Client, ClientsQuery } from '@/api/graphql';
-import { useClients, useDeleteClient } from '@/api/hooks';
+import { useClients, useDeleteClient, useExportClientsCsv } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -15,7 +15,7 @@ import DataTable from '@/modules/data-table/DataTable';
 import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
-import Button from '@/components/Button';
+import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -84,13 +84,25 @@ const Page = () => {
         mutate(id);
     };
 
+    const { exportCsv } = useExportClientsCsv();
+
     return (
         <DashboardLayout
             header={
                 <div className="flex items-center justify-between">
                     <DashboardLayoutBigTitle>Clientes</DashboardLayoutBigTitle>
 
-                    <Button href="/clientes/add">+ Añadir cliente</Button>
+                    <div className="flex space-x-8">
+                        <Button
+                            onClick={() => {
+                                exportCsv({});
+                            }}
+                            variant={ButtonVariant.GRAY}
+                        >
+                            Exportar
+                        </Button>
+                        <Button href="/clientes/add">+ Añadir cliente</Button>
+                    </div>
                 </div>
             }
         >

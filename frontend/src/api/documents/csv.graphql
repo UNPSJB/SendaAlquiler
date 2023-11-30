@@ -1,0 +1,39 @@
+query clientsCsv {
+    clientsCsv
+}
+
+query employeesCsv {
+    employeesCsv
+}
+
+query rentalContractsCsv {
+    rentalContractsCsv
+}
+
+query productsCsv {
+    productsCsv
+}
+
+query localitiesCsv {
+    localitiesCsv
+}
+
+query officesCsv {
+    officesCsv
+}
+
+query purchasesCsv {
+    purchasesCsv
+}
+
+query suppliersCsv {
+    suppliersCsv
+}
+
+query internalOrdersCsv {
+    internalOrdersCsv
+}
+
+query suppliersOrdersCsv {
+    suppliersOrdersCsv
+}
