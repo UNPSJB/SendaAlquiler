@@ -48,6 +48,14 @@ export type ClientByIdTabComponentProps = {
     client: NonNullable<ClientByIdQuery['clientById']>;
 };
 
+export type RentalContractsByClientIdTabComponentProps = {
+    id: string;
+};
+
+export type PurchasesByClientIdTabComponentProps = {
+    id: string;
+};
+
 const tabs = [
     {
         label: 'Detalles',
@@ -143,7 +151,7 @@ const Page = () => {
 
                             <div className="flex-1 bg-gray-100 px-0">
                                 <section className="pl-10 ">
-                                    <Component client={client} />
+                                    <Component client={client} id={id as string} />
                                 </section>
                             </div>
                         </div>

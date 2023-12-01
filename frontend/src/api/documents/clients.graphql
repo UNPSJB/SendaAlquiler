@@ -43,6 +43,57 @@ query clientById($id: ID!) {
     }
 }
 
+query rentalContractsByClientId($id: ID!) {
+    rentalContractsByClientId(id: $id) {
+        id
+        createdOn
+        currentHistory {
+            status
+        }
+        expirationDate
+        contractStartDatetime
+        contractEndDatetime
+        locality {
+            name
+            state
+        }
+        houseNumber
+        streetName
+        houseUnit
+        rentalContractItems {
+            id
+            product {
+                name
+                brand {
+                    name
+                }
+                price
+            }
+            quantity
+        }
+        total
+    }
+}
+
+query purchasesByClientId($id: ID!) {
+    purchasesByClientId(id: $id) {
+        id
+        createdOn
+        total
+        purchaseItems {
+            id
+            product {
+                name
+                brand {
+                    name
+                }
+                price
+            }
+            quantity
+        }
+    }
+}
+
 mutation createClient($clientData: CreateClientInput!) {
     createClient(clientData: $clientData) {
         client {

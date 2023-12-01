@@ -87,6 +87,7 @@ class ProductStockInOfficeModelAdmin(admin.ModelAdmin[ProductStockInOfficeModel]
 @admin.register(RentalContractModel)
 class RentalContractModelAdmin(admin.ModelAdmin[RentalContractModel]):
     readonly_fields = ("total",)
+    raw_id_fields = ("client", "office")
 
 
 @admin.register(RentalContractItemModel)
@@ -96,7 +97,7 @@ class RentalContractItemModelAdmin(admin.ModelAdmin[RentalContractItemModel]):
 
 @admin.register(RentalContractHistoryModel)
 class RentalContractHistoryModelAdmin(admin.ModelAdmin[RentalContractHistoryModel]):
-    pass
+    raw_id_fields = ("rental_contract",)
 
 
 @admin.register(ProductServiceModel)

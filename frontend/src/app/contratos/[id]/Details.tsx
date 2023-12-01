@@ -1,5 +1,8 @@
 import { PropsWithChildren } from 'react';
 
+import { formatDateTimeHr } from '@/modules/dayjs/utils';
+import { formatDateTime } from '@/modules/dayjs/utils';
+
 import { ContractByIdTabComponentProps } from './page';
 
 const UL: React.FC<PropsWithChildren> = ({ children }) => {
@@ -54,41 +57,43 @@ const ContractsByIdDetailsTab: React.FC<ContractByIdTabComponentProps> = ({
                     {contract.client.houseUnit}
                 </LI>
             </UL>
-            <UL>
-                <h1 className="mb-3 text-xl font-bold">Detalles del Contrato</h1>
-                <LI>
-                    <b>Estado: </b>
-                    {contract.currentHistory?.status}
-                </LI>
-                <LI>
-                    <b>Vencimiento: </b>{' '}
-                    {new Date(contract.expirationDate).toLocaleDateString('es-ES')}
-                </LI>
-                <LI>
-                    <b>Señado: </b> {contract.hasPayedDeposit ? 'Sí' : 'No'}
-                </LI>
-                <LI>
-                    <b>Cancelado: </b> {contract.hasPayedRemainingAmount ? 'Sí' : 'No'}
-                </LI>
-                <LI>
-                    <b>Fecha Inicio del Evento: </b>{' '}
-                    {new Date(contract.contractStartDatetime).toLocaleDateString('es-ES')}
-                </LI>
-                <LI>
-                    <b>Fecha Fin del Evento: </b>{' '}
-                    {new Date(contract.contractEndDatetime).toLocaleDateString('es-ES')}
-                </LI>
-                <LI>
-                    <b>N° de Locacion: </b> {contract.houseNumber}
-                </LI>
-                <LI>
-                    <b>N° de Unidad: </b> {contract.houseUnit}
-                </LI>
-                <LI>
-                    <b>Sucursal: </b> {contract.office.name} - {contract.office.street}{' '}
-                    {contract.office.houseNumber}
-                </LI>
-            </UL>
+            <div className="mb-8">
+                <UL>
+                    <h1 className="mb-3 text-xl font-bold">Detalles del Contrato</h1>
+                    <LI>
+                        <b>Estado: </b>
+                        {contract.currentHistory?.status}
+                    </LI>
+                    <LI>
+                        <b>Vencimiento: </b> {formatDateTime(contract.expirationDate)}
+                    </LI>
+                    <LI>
+                        <b>Señado: </b> {contract.hasPayedDeposit ? 'Sí' : 'No'}
+                    </LI>
+                    <LI>
+                        <b>Cancelado: </b>{' '}
+                        {contract.hasPayedRemainingAmount ? 'Sí' : 'No'}
+                    </LI>
+                    <LI>
+                        <b>Fecha Inicio del Evento: </b>{' '}
+                        {formatDateTimeHr(contract.contractStartDatetime)}
+                    </LI>
+                    <LI>
+                        <b>Fecha Fin del Evento: </b>{' '}
+                        {formatDateTimeHr(contract.contractEndDatetime)}
+                    </LI>
+                    <LI>
+                        <b>N° de Locacion: </b> {contract.houseNumber}
+                    </LI>
+                    <LI>
+                        <b>N° de Unidad: </b> {contract.houseUnit}
+                    </LI>
+                    <LI>
+                        <b>Sucursal: </b> {contract.office.name} -{' '}
+                        {contract.office.street} {contract.office.houseNumber}
+                    </LI>
+                </UL>
+            </div>
         </>
     );
 };

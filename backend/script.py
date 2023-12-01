@@ -253,7 +253,32 @@ def create_brands():
 
 
 def create_comerciable_products():
-    for _ in range(10):
+    limpieza_products = [
+        "Escoba",
+        "Trapo de piso",
+        "Balde",
+        "Escobillon",
+        "Cepillo",
+        "Cubo",
+        "Desinfectante",
+        "Jabon",
+        "Jabon liquido",
+        "Lavandina",
+        "Lustramuebles",
+        "Lustrametales",
+        "Lustraautos",
+        "Lustrazapatos",
+        "Mopa",
+        "Paño",
+        "Pala",
+        "Recogedor",
+        "Saca pelusas",
+        "Secador de piso",
+        "Trapeador",
+        "Trapero",
+        "Trapeador",
+    ]
+    for name in limpieza_products:
         product = ProductModel.objects.create(
             name=name,
             description=fake.sentence(),
@@ -427,20 +452,28 @@ def create_purchases():
     for _ in range(515):
         purchase = PurchaseModel.objects.create(
             client=ClientModel.objects.order_by("?").first(),
+            office=OfficeModel.objects.order_by("?").first(),
         )
 
         purchase.created_on = fake.date_between(start_date="-1y", end_date="today")
         purchase.save()
 
         # create random purchase items
-        products_to_buy = ProductModel.objects.filter(
-            type=ProductTypeChoices.COMERCIABLE
-        ).order_by("?")[: random.randint(1, 10)]
+        products_to_buy = ProductModel.objects.get_products_with_stock_in_office(
+            purchase.office, type=ProductTypeChoices.COMERCIABLE
+        ).order_by("?")
+        if products_to_buy.count() == 0:
+            continue
+
+        products_to_buy = products_to_buy[: random.randint(1, products_to_buy.count())]
         for product in products_to_buy:
+            data = product.get_stock_for_office(purchase.office)
+            quantity = random.randint(1, data.stock)
+
             PurchaseItemModel.objects.create(
                 product=product,
                 purchase=purchase,
-                quantity=random.randint(1, 10),
+                quantity=quantity,
             )
 
 

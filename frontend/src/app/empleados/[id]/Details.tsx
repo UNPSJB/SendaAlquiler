@@ -1,5 +1,8 @@
 import { PropsWithChildren } from 'react';
 
+import { formatDateTimeHr } from '@/modules/dayjs/utils';
+import { formatDateTime } from '@/modules/dayjs/utils';
+
 import { EmployeeByIdTabComponentProps } from './page';
 
 const UL: React.FC<PropsWithChildren> = ({ children }) => {
@@ -23,7 +26,7 @@ const EmployeeByIdDetailsTab: React.FC<EmployeeByIdTabComponentProps> = ({
                 </LI>
                 <LI>
                     <b>Fecha incorporación: </b>
-                    {new Date(employee.user.dateJoined).toLocaleDateString('es-ES')}
+                    {formatDateTime(employee.user.dateJoined)}
                 </LI>
             </UL>
             <UL>
@@ -34,11 +37,9 @@ const EmployeeByIdDetailsTab: React.FC<EmployeeByIdTabComponentProps> = ({
                 </LI>
                 <LI>
                     <b>Última sesión: </b>{' '}
-                    {new Date(employee.user.lastLogin).toLocaleTimeString('es-ES', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                    })}{' '}
-                    {new Date(employee.user.lastLogin).toLocaleDateString('es-ES')}
+                    {employee.user.lastLogin === null
+                        ? 'Nunca inició sesión'
+                        : formatDateTimeHr(employee.user.lastLogin)}
                 </LI>
             </UL>
         </>

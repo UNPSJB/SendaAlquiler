@@ -1,5 +1,7 @@
 import { PropsWithChildren } from 'react';
 
+import { formatDateTime } from '@/modules/dayjs/utils';
+
 import { InternalOrderByIdTabComponentProps } from './page';
 
 const UL: React.FC<PropsWithChildren> = ({ children }) => {
@@ -28,7 +30,7 @@ const InternalOrderByIddDetailsTab: React.FC<InternalOrderByIdTabComponentProps>
                 </LI>
                 <LI>
                     <SN>Fecha pedido: </SN>
-                    {new Date(internalOrder.createdOn).toLocaleDateString('es-ES')}
+                    {formatDateTime(internalOrder.createdOn)}
                 </LI>
             </UL>
             <UL>

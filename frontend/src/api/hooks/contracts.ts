@@ -19,6 +19,7 @@ import {
     DeleteRentalContractMutation,
     PayContractDepositDocument,
     PayTotalContractDocument,
+    RentalContractsByClientIdDocument,
 } from '../graphql';
 import { clientGraphqlQuery } from '../graphqlclient';
 
@@ -123,4 +124,18 @@ export const usePayTotalContract = () => {
             id,
         });
     });
+};
+
+export const useRentalContractsByClientId = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.contractsListByClientId(id),
+        () => {
+            return clientGraphqlQuery(RentalContractsByClientIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
+        },
+    );
 };

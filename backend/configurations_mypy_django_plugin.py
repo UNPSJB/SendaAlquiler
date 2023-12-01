@@ -1,7 +1,3 @@
-import sys
-
-print(sys.path)
-
 import os
 
 from configurations.importer import install

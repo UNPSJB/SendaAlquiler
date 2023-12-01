@@ -9,7 +9,11 @@ if TYPE_CHECKING:
     from senda.core.models.offices import OfficeModel
     from senda.core.models.order_internal import InternalOrderModel
     from senda.core.models.order_supplier import SupplierOrderModel
-    from senda.core.models.products import ProductModel, ProductTypeChoices
+    from senda.core.models.products import (
+        ProductModel,
+        ProductTypeChoices,
+        ProductStockInOfficeModel,
+    )
     from senda.core.models.purchases import PurchaseModel
     from senda.core.models.rental_contracts import RentalContractModel
     from senda.core.models.suppliers import SupplierModel
@@ -297,6 +301,29 @@ class ProductModelManager(models.Manager["ProductModel"]):
             )
 
         return product
+
+    def get_products_with_stock_in_office(self, office: "OfficeModel", **kwargs: Any):
+        """
+        Returns all products with associated stock in the given office.
+        """
+        return self.filter(stock__office=office, **kwargs)
+
+
+class ProductStockInOfficeManager(models.Manager["ProductStockInOfficeModel"]):
+    """
+    Custom manager for the ProductStockInOfficeModel, providing methods to create and update stock instances.
+    """
+
+    def create_stock(
+        self, product: "ProductModel", office: "OfficeModel", stock: int
+    ) -> "ProductStockInOfficeModel":
+        """
+        Creates a new stock instance for the given product and office.
+        """
+        if self.filter(product=product, office=office).exists():
+            raise ValueError("Ya existe un stock para ese producto en esa sucursal")
+
+        return self.create(product=product, office=office, stock=stock)
 
 
 PurchaseProductsItemDict = TypedDict(

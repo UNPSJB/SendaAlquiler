@@ -109,7 +109,6 @@ class CreateRentalContract(graphene.Mutation):
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
             return CreateRentalContract(error=str(e))
         except Exception as e:
-            print(e)
             return CreateRentalContract(error="Error desconocido")
 
         return CreateRentalContract(rental_contract=rental_contract)

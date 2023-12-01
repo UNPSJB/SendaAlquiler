@@ -72,7 +72,6 @@ class CreateSupplier(graphene.Mutation):
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
             return CreateSupplier(error=str(e))
         except Exception as e:
-            print(e)
             return CreateSupplier(error="Error desconocido")
 
         return CreateSupplier(supplier=supplier)

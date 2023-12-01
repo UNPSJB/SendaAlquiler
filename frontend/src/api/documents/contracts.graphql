@@ -57,6 +57,7 @@ query contractById($id: ID!) {
         streetName
         total
         rentalContractItems {
+            id
             serviceTotal
             servicePrice
             total
