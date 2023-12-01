@@ -17,6 +17,7 @@ import {
     CreatePurchaseDocument,
     DeletePurchaseDocument,
     DeletePurchaseMutation,
+    PurchasesByClientIdDocument,
 } from '../graphql';
 import { clientGraphqlQuery } from '../graphqlclient';
 
@@ -99,6 +100,20 @@ export const useDeletePurchase = ({
                 }
             },
             ...options,
+        },
+    );
+};
+
+export const usePurchasesByClientId = (id: string | undefined) => {
+    return useQuery(
+        queryKeys.purchasesListByClientId(id),
+        () => {
+            return clientGraphqlQuery(PurchasesByClientIdDocument, {
+                id: id as string,
+            });
+        },
+        {
+            enabled: typeof id === 'string',
         },
     );
 };
