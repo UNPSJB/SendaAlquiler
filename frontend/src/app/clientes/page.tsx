@@ -6,7 +6,8 @@ import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { ClientsQuery } from '@/api/graphql';
-import { useClients, useDeleteClient, useExportClientsCsv } from '@/api/hooks';
+import { useClients, useDeleteClient } from '@/api/hooks/clients';
+import { useExportClientsCsv } from '@/api/hooks/csv-export';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,

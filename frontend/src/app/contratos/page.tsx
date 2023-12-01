@@ -16,7 +16,6 @@ import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
-import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
 import Button, { ButtonVariant } from '@/components/Button';
@@ -46,7 +45,7 @@ const SkeletonRowRenderer = () => {
     return renderer;
 };
 
-const RowRenderer = (handleRemove: (id: RentalContract['id']) => void) => {
+const RowRenderer = (extraData: React.ReactNode) => {
     const renderer = (
         contract: ArrayElement<ContractsQuery['rentalContracts']['results']>,
     ) => {
@@ -61,9 +60,8 @@ const RowRenderer = (handleRemove: (id: RentalContract['id']) => void) => {
                 </TD>
                 <TD>{contract.office.name}</TD>
                 <TD>{contract.currentHistory?.status}</TD>
-                <TD>
-                    <DataTableDropdown onRemove={() => handleRemove(contract.id)} />
-                </TD>
+
+                {extraData}
             </TR>
         );
     };
@@ -75,7 +73,7 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         useContracts();
 
-    const { mutate } = useDeleteRentalContract({
+    const { mutate, isLoading: isDeleting } = useDeleteRentalContract({
         onSuccess: () => {
             toast.success('Contrato eliminado correctamente');
             queryResult.refetch();
@@ -149,7 +147,19 @@ const Page = () => {
                             <DataTable
                                 columns={columns}
                                 data={rentalContracts.results}
-                                rowRenderer={RowRenderer(handleRemove)}
+                                rowRenderer={RowRenderer}
+                                deleteOptions={{
+                                    confirmationText: (contract) => (
+                                        <>
+                                            ¿Estás seguro que deseas eliminar el contrato{' '}
+                                            <strong>{contract.id}</strong>?
+                                        </>
+                                    ),
+                                    onDeleteClick: (contract) => {
+                                        handleRemove(contract.id);
+                                    },
+                                    isDeleting,
+                                }}
                             />
 
                             <DataTablePagination

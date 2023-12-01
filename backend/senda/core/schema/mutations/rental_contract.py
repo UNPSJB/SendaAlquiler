@@ -120,7 +120,7 @@ class BaseChangeContractStatus(graphene.Mutation):
     error = graphene.String()
 
     class Arguments:
-        rental_contract_id = graphene.ID(required=True)
+        id = graphene.ID(required=True)
 
     @classmethod
     def get_contract(cls, id: str) -> RentalContractModel:
@@ -150,7 +150,7 @@ class BaseChangeContractStatus(graphene.Mutation):
 
     @classmethod
     def mutate(
-        cls, self: "BaseChangeContractStatus", info: Any, rental_contract_id: str
+        cls, self: "BaseChangeContractStatus", info: Any, id: str
     ):
         raise NotImplementedError()
 
@@ -158,10 +158,10 @@ class BaseChangeContractStatus(graphene.Mutation):
 class PayContractDeposit(BaseChangeContractStatus):
     @classmethod
     def mutate(
-        cls, self: "PayContractDeposit", info: Any, rental_contract_id: str
+        cls, self: "PayContractDeposit", info: Any, id: str
     ) -> BaseChangeContractStatus:
         try:
-            contract = cls.get_contract(rental_contract_id)
+            contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
                 [RentalContractStatusChoices.PRESUPUESTADO],
@@ -176,10 +176,10 @@ class PayContractDeposit(BaseChangeContractStatus):
 class PayTotalContract(BaseChangeContractStatus):
     @classmethod
     def mutate(
-        cls, self: "PayTotalContract", info: Any, rental_contract_id: str
+        cls, self: "PayTotalContract", info: Any, id: str
     ) -> BaseChangeContractStatus:
         try:
-            contract = cls.get_contract(rental_contract_id)
+            contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
                 [RentalContractStatusChoices.CON_DEPOSITO],
@@ -194,10 +194,10 @@ class PayTotalContract(BaseChangeContractStatus):
 class CancelContract(BaseChangeContractStatus):
     @classmethod
     def mutate(
-        cls, self: "CancelContract", info: Any, rental_contract_id: str
+        cls, self: "CancelContract", info: Any, id: str
     ) -> BaseChangeContractStatus:
         try:
-            contract = cls.get_contract(rental_contract_id)
+            contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
                 [
@@ -215,10 +215,10 @@ class CancelContract(BaseChangeContractStatus):
 class StartContract(BaseChangeContractStatus):
     @classmethod
     def mutate(
-        cls, self: "StartContract", info: Any, rental_contract_id: str
+        cls, self: "StartContract", info: Any, id: str
     ) -> BaseChangeContractStatus:
         try:
-            contract = cls.get_contract(rental_contract_id)
+            contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
                 [RentalContractStatusChoices.PAGADO],
@@ -233,10 +233,10 @@ class StartContract(BaseChangeContractStatus):
 class ExpiredContract(BaseChangeContractStatus):
     @classmethod
     def mutate(
-        cls, self: "ExpiredContract", info: Any, rental_contract_id: str
+        cls, self: "ExpiredContract", info: Any, id: str
     ) -> BaseChangeContractStatus:
         try:
-            contract = cls.get_contract(rental_contract_id)
+            contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
                 [
@@ -254,10 +254,10 @@ class ExpiredContract(BaseChangeContractStatus):
 class FinishContract(BaseChangeContractStatus):
     @classmethod
     def mutate(
-        cls, self: "FinishContract", info: Any, rental_contract_id: str
+        cls, self: "FinishContract", info: Any, id: str
     ) -> BaseChangeContractStatus:
         try:
-            contract = cls.get_contract(rental_contract_id)
+            contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
                 [RentalContractStatusChoices.ACTIVO],
@@ -272,10 +272,10 @@ class FinishContract(BaseChangeContractStatus):
 class FailedReturnContract(BaseChangeContractStatus):
     @classmethod
     def mutate(
-        cls, self: "FailedReturnContract", info: Any, rental_contract_id: str
+        cls, self: "FailedReturnContract", info: Any, id: str
     ) -> BaseChangeContractStatus:
         try:
-            contract = cls.get_contract(rental_contract_id)
+            contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
                 [RentalContractStatusChoices.FINALIZADO],
@@ -290,10 +290,10 @@ class FailedReturnContract(BaseChangeContractStatus):
 class SuccessfulReturnContract(BaseChangeContractStatus):
     @classmethod
     def mutate(
-        cls, self: "SuccessfulReturnContract", info: Any, rental_contract_id: str
+        cls, self: "SuccessfulReturnContract", info: Any, id: str
     ) -> BaseChangeContractStatus:
         try:
-            contract = cls.get_contract(rental_contract_id)
+            contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
                 [RentalContractStatusChoices.FINALIZADO],

@@ -105,3 +105,39 @@ mutation deleteRentalContract($id: ID!) {
         success
     }
 }
+
+mutation payContractDeposit($id: ID!) {
+    payContractDeposit(id: $id) {
+        rentalContract {
+            id
+            currentHistory {
+                status
+            }
+        }
+        error
+    }
+}
+
+mutation payTotalContract($id: ID!) {
+    payTotalContract(id: $id) {
+        rentalContract {
+            id
+            currentHistory {
+                status
+            }
+        }
+        error
+    }
+}
+
+mutation cancelContract($id: ID!) {
+    cancelContract(id: $id) {
+        rentalContract {
+            id
+            currentHistory {
+                status
+            }
+        }
+        error
+    }
+}
