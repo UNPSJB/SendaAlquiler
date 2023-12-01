@@ -54,7 +54,7 @@ const DataTableDropdown: React.FC<DropdownProps> = ({ onRemove }) => {
     }, []);
 
     return (
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative z-50" ref={dropdownRef}>
             <button
                 onClick={toggleDropdown}
                 className="focus:outline-none"

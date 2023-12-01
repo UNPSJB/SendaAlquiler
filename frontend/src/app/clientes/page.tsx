@@ -5,14 +5,13 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
-import { Client, ClientsQuery } from '@/api/graphql';
+import { ClientsQuery } from '@/api/graphql';
 import { useClients, useDeleteClient, useExportClientsCsv } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
-import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
 import Button, { ButtonVariant } from '@/components/Button';
@@ -27,21 +26,26 @@ const columns = [
     { key: 'phone', label: 'Celular' },
     { key: 'address', label: 'Domicilio' },
     { key: 'locality', label: 'Localidad' },
-    { key: 'dropdown', label: '' },
 ];
 
-const SkeletonRowRenderer = (key: number) => (
-    <TR key={key}>
-        {[...new Array(columns.length)].map((_, index) => (
-            <TD key={index}>
-                <Skeleton width={100}></Skeleton>
-            </TD>
-        ))}
-    </TR>
-);
+const SkeletonRowRenderer = () => {
+    const renderer = (data: number) => (
+        <TR key={data}>
+            {[...new Array(columns.length)].map((_, index) => (
+                <TD key={index}>
+                    <Skeleton width={100}></Skeleton>
+                </TD>
+            ))}
+        </TR>
+    );
 
-const ClientRowRenderer = (handleRemove: (id: Client['id']) => void) => {
-    const renderer = (client: ArrayElement<ClientsQuery['clients']['results']>) => (
+    return renderer;
+};
+
+type Client = ArrayElement<ClientsQuery['clients']['results']>;
+
+const ClientRowRenderer = (extraData: React.ReactNode) => {
+    const renderer = (client: Client) => (
         <TR key={client.id}>
             <TD>
                 <Link className="text-violet-600" href={`/clientes/${client.id}`}>
@@ -57,9 +61,7 @@ const ClientRowRenderer = (handleRemove: (id: Client['id']) => void) => {
                 {client.streetName} {client.houseNumber}
             </TD>
             <TD>{client.locality.name}</TD>
-            <TD>
-                <DataTableDropdown onRemove={() => handleRemove(client.id)} />
-            </TD>
+            {extraData}
         </TR>
     );
 
@@ -70,7 +72,7 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         useClients();
 
-    const { mutate } = useDeleteClient({
+    const { mutate, isLoading: isDeleting } = useDeleteClient({
         onSuccess: () => {
             toast.success('Cliente eliminado correctamente');
             queryResult.refetch();
@@ -80,8 +82,8 @@ const Page = () => {
         },
     });
 
-    const handleRemove = (id: Client['id']) => {
-        mutate(id);
+    const handleRemove = (client: Client) => {
+        mutate(client.id);
     };
 
     const { exportCsv } = useExportClientsCsv();
@@ -143,7 +145,19 @@ const Page = () => {
                             <DataTable
                                 columns={columns}
                                 data={results}
-                                rowRenderer={ClientRowRenderer(handleRemove)}
+                                rowRenderer={ClientRowRenderer}
+                                deleteOptions={{
+                                    confirmationText: (client: Client) => (
+                                        <>
+                                            ¿Estás seguro que quieres eliminar a{' '}
+                                            <span className="font-bold">
+                                                {client.firstName} {client.lastName}
+                                            </span>
+                                        </>
+                                    ),
+                                    isDeleting: isDeleting,
+                                    onDeleteClick: handleRemove,
+                                }}
                             />
 
                             <DataTablePagination

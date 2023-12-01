@@ -16,7 +16,6 @@ import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
-import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
 import Button, { ButtonVariant } from '@/components/Button';
@@ -33,17 +32,21 @@ const columns = [
     { key: 'dropdown', label: '' },
 ];
 
-const SkeletonRowRenderer = (key: number) => (
-    <TR key={key}>
-        {[...new Array(columns.length)].map((_, index) => (
-            <TD key={index}>
-                <Skeleton width={100}></Skeleton>
-            </TD>
-        ))}
-    </TR>
-);
+const SkeletonRowRenderer = () => {
+    const renderer = (key: number) => (
+        <TR key={key}>
+            {[...new Array(columns.length)].map((_, index) => (
+                <TD key={index}>
+                    <Skeleton width={100}></Skeleton>
+                </TD>
+            ))}
+        </TR>
+    );
 
-const InternalOrderRowRenderer = (handleRemove: (id: InternalOrder['id']) => void) => {
+    return renderer;
+};
+
+const InternalOrderRowRenderer = (extraData: React.ReactNode) => {
     const renderer = (
         supplier: ArrayElement<InternalOrdersQuery['internalOrders']['results']>,
     ) => {
@@ -62,9 +65,7 @@ const InternalOrderRowRenderer = (handleRemove: (id: InternalOrder['id']) => voi
                 <TD>{supplier.officeBranch.name}</TD>
                 <TD>{supplier.officeDestination.name}</TD>
                 <TD>{supplier.currentHistory?.status}</TD>
-                <TD>
-                    <DataTableDropdown onRemove={() => handleRemove(supplier.id)} />
-                </TD>
+                {extraData}
             </TR>
         );
     };
@@ -76,7 +77,7 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         usePaginatedInternalOrders();
 
-    const { mutate } = useDeleteInternalOrder({
+    const { mutate, isLoading: isDeleting } = useDeleteInternalOrder({
         onSuccess: () => {
             toast.success('El pedido interno ha sido eliminado');
             queryResult.refetch();
@@ -150,7 +151,25 @@ const Page = () => {
                             <DataTable
                                 columns={columns}
                                 data={internalOrders}
-                                rowRenderer={InternalOrderRowRenderer(handleRemove)}
+                                rowRenderer={InternalOrderRowRenderer}
+                                deleteOptions={{
+                                    confirmationText: (internalOrder) => (
+                                        <>
+                                            ¿Estás seguro que deseas eliminar el pedido
+                                            interno{' '}
+                                            <span className="font-bold">
+                                                {new Date(
+                                                    internalOrder.createdOn,
+                                                ).toLocaleDateString()}
+                                            </span>
+                                            ?
+                                        </>
+                                    ),
+                                    onDeleteClick: (internalOrder) => {
+                                        handleRemove(internalOrder.id);
+                                    },
+                                    isDeleting,
+                                }}
                             />
 
                             <DataTablePagination
