@@ -12,7 +12,6 @@ import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
-import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
 import Button, { ButtonVariant } from '@/components/Button';
@@ -28,17 +27,21 @@ const columns = [
     { key: 'dropdown', label: '' },
 ];
 
-const SkeletonRowRenderer = (key: number) => (
-    <TR key={key}>
-        {[...new Array(columns.length)].map((_, index) => (
-            <TD key={index}>
-                <Skeleton width={100}></Skeleton>
-            </TD>
-        ))}
-    </TR>
-);
+const SkeletonRowRenderer = () => {
+    const renderer = (key: number) => (
+        <TR key={key}>
+            {[...new Array(columns.length)].map((_, index) => (
+                <TD key={index}>
+                    <Skeleton width={100}></Skeleton>
+                </TD>
+            ))}
+        </TR>
+    );
 
-const EmployeeRowRenderer = (handleRemove: (id: Employee['id']) => void) => {
+    return renderer;
+};
+
+const EmployeeRowRenderer = (extraData: React.ReactNode) => {
     const renderer = (employee: ArrayElement<EmployeesQuery['employees']['results']>) => (
         <TR key={employee.id}>
             <TD>
@@ -48,9 +51,7 @@ const EmployeeRowRenderer = (handleRemove: (id: Employee['id']) => void) => {
             </TD>
             <TD>{employee.user.email}</TD>
             <TD>{employee.user.isActive ? 'Sí' : 'No'}</TD>
-            <TD>
-                <DataTableDropdown onRemove={() => handleRemove(employee.id)} />
-            </TD>
+            {extraData}
         </TR>
     );
     return renderer;
@@ -60,7 +61,7 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         useEmployees();
 
-    const { mutate } = useDeleteEmployee({
+    const { mutate, isLoading: isDeleting } = useDeleteEmployee({
         onSuccess: () => {
             toast.success('El empleado ha sido eliminado');
             queryResult.refetch();
@@ -134,7 +135,23 @@ const Page = () => {
                             <DataTable
                                 columns={columns}
                                 data={employees}
-                                rowRenderer={EmployeeRowRenderer(handleRemove)}
+                                rowRenderer={EmployeeRowRenderer}
+                                deleteOptions={{
+                                    confirmationText: (employee) => (
+                                        <>
+                                            ¿Estás seguro que deseas eliminar a{' '}
+                                            <span className="font-bold">
+                                                {employee.user.firstName}{' '}
+                                                {employee.user.lastName}
+                                            </span>
+                                            ?
+                                        </>
+                                    ),
+                                    isDeleting: isDeleting,
+                                    onDeleteClick: (employee) => {
+                                        handleRemove(employee.id);
+                                    },
+                                }}
                             />
 
                             <DataTablePagination

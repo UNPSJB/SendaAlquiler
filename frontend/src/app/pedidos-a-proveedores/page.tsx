@@ -16,7 +16,6 @@ import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
-import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
 import Button, { ButtonVariant } from '@/components/Button';
@@ -33,17 +32,21 @@ const columns = [
     { key: 'dropdown', label: '' },
 ];
 
-const SkeletonRowRenderer = (key: number) => (
-    <TR key={key}>
-        {[...new Array(columns.length)].map((_, index) => (
-            <TD key={index}>
-                <Skeleton width={100}></Skeleton>
-            </TD>
-        ))}
-    </TR>
-);
+const SkeletonRowRenderer = () => {
+    const renderer = (key: number) => (
+        <TR key={key}>
+            {[...new Array(columns.length)].map((_, index) => (
+                <TD key={index}>
+                    <Skeleton width={100}></Skeleton>
+                </TD>
+            ))}
+        </TR>
+    );
 
-const SupplierOrderRowRenderer = (handleRemove: (id: OrderSupplier['id']) => void) => {
+    return renderer;
+};
+
+const SupplierOrderRowRenderer = (extraData: React.ReactNode) => {
     const renderer = (
         supplierOrder: ArrayElement<SupplierOrdersQuery['supplierOrders']['results']>,
     ) => (
@@ -59,9 +62,7 @@ const SupplierOrderRowRenderer = (handleRemove: (id: OrderSupplier['id']) => voi
             <TD>{supplierOrder.supplier.name}</TD>
             <TD>{supplierOrder.officeDestination.name}</TD>
             <TD>{supplierOrder.currentHistory?.status}</TD>
-            <TD>
-                <DataTableDropdown onRemove={() => handleRemove(supplierOrder.id)} />
-            </TD>
+            {extraData}
         </TR>
     );
 
@@ -72,7 +73,7 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         useSupplierOrders();
 
-    const { mutate } = useDeleteSupplierOrder({
+    const { mutate, isLoading: isDeleting } = useDeleteSupplierOrder({
         onSuccess: () => {
             toast.success('El pedido a proveedor ha sido eliminado');
             queryResult.refetch();
@@ -148,7 +149,17 @@ const Page = () => {
                             <DataTable
                                 columns={columns}
                                 data={supplierOrders}
-                                rowRenderer={SupplierOrderRowRenderer(handleRemove)}
+                                rowRenderer={SupplierOrderRowRenderer}
+                                deleteOptions={{
+                                    confirmationText: (supplierOrder) =>
+                                        `¿Estás seguro de eliminar el pedido a proveedor del ${new Date(
+                                            supplierOrder.createdOn,
+                                        ).toLocaleDateString('es-ES')}?`,
+                                    onDeleteClick: (supplierOrder) => {
+                                        handleRemove(supplierOrder.id);
+                                    },
+                                    isDeleting,
+                                }}
                             />
 
                             <DataTablePagination

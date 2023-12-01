@@ -10,7 +10,6 @@ import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
-import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
 import Button, { ButtonVariant } from '@/components/Button';
@@ -26,17 +25,21 @@ const columns = [
     { key: 'dropdown', label: '' },
 ];
 
-const SkeletonRowRenderer = (key: number) => (
-    <TR key={key}>
-        {[...new Array(columns.length)].map((_, index) => (
-            <TD key={index}>
-                <Skeleton width={100}></Skeleton>
-            </TD>
-        ))}
-    </TR>
-);
+const SkeletonRowRenderer = () => {
+    const renderer = (key: number) => (
+        <TR key={key}>
+            {[...new Array(columns.length)].map((_, index) => (
+                <TD key={index}>
+                    <Skeleton width={100}></Skeleton>
+                </TD>
+            ))}
+        </TR>
+    );
 
-const LocalityRowRenderer = (handleRemove: (id: Locality['id']) => void) => {
+    return renderer;
+};
+
+const LocalityRowRenderer = (extraData: React.ReactNode) => {
     const renderer = (
         locality: ArrayElement<LocalitiesQuery['localities']['results']>,
     ) => (
@@ -44,9 +47,8 @@ const LocalityRowRenderer = (handleRemove: (id: Locality['id']) => void) => {
             <TD>{locality.name}</TD>
             <TD>{locality.postalCode}</TD>
             <TD>{locality.state}</TD>
-            <TD>
-                <DataTableDropdown onRemove={() => handleRemove(locality.id)} />
-            </TD>
+
+            {extraData}
         </TR>
     );
 
@@ -57,7 +59,7 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         useLocalities();
 
-    const { mutate } = useDeleteLocality({
+    const { mutate, isLoading: isDeleting } = useDeleteLocality({
         onSuccess: () => {
             toast.success('Localidad eliminada correctamente');
             queryResult.refetch();
@@ -131,7 +133,19 @@ const Page = () => {
                             <DataTable
                                 columns={columns}
                                 data={localities}
-                                rowRenderer={LocalityRowRenderer(handleRemove)}
+                                rowRenderer={LocalityRowRenderer}
+                                deleteOptions={{
+                                    confirmationText: (locality) => (
+                                        <>
+                                            ¿Estás seguro que deseas eliminar la localidad{' '}
+                                            <b>{locality.name}</b>?
+                                        </>
+                                    ),
+                                    onDeleteClick: (locality) => {
+                                        handleRemove(locality.id);
+                                    },
+                                    isDeleting,
+                                }}
                             />
 
                             <DataTablePagination

@@ -16,7 +16,6 @@ import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
-import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
 import Button, { ButtonVariant } from '@/components/Button';
@@ -34,17 +33,21 @@ const columns = [
     { key: 'dropdown', label: '' },
 ];
 
-const SkeletonRowRenderer = (key: number) => (
-    <TR key={key}>
-        {[...new Array(columns.length)].map((_, index) => (
-            <TD key={index}>
-                <Skeleton width={100}></Skeleton>
-            </TD>
-        ))}
-    </TR>
-);
+const SkeletonRowRenderer = () => {
+    const renderer = (key: number) => (
+        <TR key={key}>
+            {[...new Array(columns.length)].map((_, index) => (
+                <TD key={index}>
+                    <Skeleton width={100}></Skeleton>
+                </TD>
+            ))}
+        </TR>
+    );
 
-const SupplierRowRenderer = (handleRemove: (id: Supplier['id']) => void) => {
+    return renderer;
+};
+
+const SupplierRowRenderer = (extraData: React.ReactNode) => {
     const renderer = (supplier: ArrayElement<SuppliersQuery['suppliers']['results']>) => (
         <TR key={supplier.id}>
             <TD>
@@ -61,9 +64,7 @@ const SupplierRowRenderer = (handleRemove: (id: Supplier['id']) => void) => {
                 {supplier.streetName} {supplier.houseNumber}
             </TD>
             <TD>{supplier.locality.name}</TD>
-            <TD>
-                <DataTableDropdown onRemove={() => handleRemove(supplier.id)} />
-            </TD>
+            {extraData}
         </TR>
     );
 
@@ -74,7 +75,7 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         usePaginatedSuppliers();
 
-    const { mutate } = useDeleteSupplier({
+    const { mutate, isLoading: isDeleting } = useDeleteSupplier({
         onSuccess: () => {
             toast.success('Proveedor eliminado correctamente');
             queryResult.refetch();
@@ -148,7 +149,19 @@ const Page = () => {
                             <DataTable
                                 columns={columns}
                                 data={suppliers}
-                                rowRenderer={SupplierRowRenderer(handleRemove)}
+                                rowRenderer={SupplierRowRenderer}
+                                deleteOptions={{
+                                    confirmationText: (supplier) => (
+                                        <>
+                                            ¿Estás seguro de que quieres eliminar el
+                                            proveedor <strong>{supplier.name}</strong>?
+                                        </>
+                                    ),
+                                    onDeleteClick: (supplier) => {
+                                        handleRemove(supplier.id);
+                                    },
+                                    isDeleting,
+                                }}
                             />
 
                             <DataTablePagination
