@@ -41,7 +41,7 @@ export const getDayNameFromDayjs = (date: Dayjs) => {
     }
 };
 
-export const formatContractDateTime = (datetime: string) => {
+export const formatDateTimeHr = (datetime: string) => {
     const dateTimeDayjs = dayjs(datetime);
 
     const dateNumber = dateTimeDayjs.get('date');

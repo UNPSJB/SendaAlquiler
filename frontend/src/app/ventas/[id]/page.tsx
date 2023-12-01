@@ -8,6 +8,7 @@ import { usePurchaseById } from '@/api/hooks';
 import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
+import { formatDateTime } from '@/modules/dayjs/utils';
 import ChevronRight from '@/modules/icons/ChevronRight';
 
 import Avatar from '@/components/Avatar';
@@ -100,15 +101,13 @@ const Page = () => {
 
                             <div className="flex-1 bg-gray-100 px-0">
                                 <section className="mt-8 items-center pl-10">
-                                    <div className="mb-8 flex">
+                                    <div className="mb-4 flex">
                                         <div className="pl-4">
-                                            <h1 className="mb-2 text-xl font-bold">
+                                            <h1 className="text-xl font-bold">
                                                 Venta #{purchase.id}
                                             </h1>
                                             <p className=" text-base">
-                                                {new Date(
-                                                    purchase.createdOn,
-                                                ).toLocaleDateString('es-ES')}
+                                                {formatDateTime(purchase.createdOn)}
                                             </p>
                                         </div>
                                     </div>
@@ -116,9 +115,9 @@ const Page = () => {
                                         {purchase.purchaseItems.map((item, index) => (
                                             <div
                                                 key={index}
-                                                className="mb-4 mr-8 rounded-md border bg-white p-4"
+                                                className="mb-2 mr-8 rounded-md border bg-white"
                                             >
-                                                <div className="flex justify-between border-b-2">
+                                                <div className="flex justify-between border-b px-4 pb-2 pt-4">
                                                     <h2 className="text-gray-500">
                                                         {item.product.name}{' '}
                                                         {item.product.brand?.name}
@@ -128,7 +127,7 @@ const Page = () => {
                                                         {item.product.price}
                                                     </p>
                                                 </div>
-                                                <div className="mt-4 flex justify-between">
+                                                <div className="flex justify-between px-4 py-2">
                                                     <p className="font-bold">Subtotal </p>
                                                     <p className="font-bold">
                                                         $ {item.total}
@@ -137,8 +136,8 @@ const Page = () => {
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="mr-8 mt-8 flex justify-between border-t-2 pr-2 pt-2">
-                                        <p className="ml-4 font-bold">Total</p>
+                                    <div className="mr-8 mt-8 flex justify-between border-t pr-2 pt-2">
+                                        <p className="ml-4 text-lg font-bold">Total</p>
                                         <b className="text-xl">${purchase.total}</b>
                                     </div>
                                 </section>

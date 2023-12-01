@@ -6,7 +6,7 @@ import { PropsWithChildren } from 'react';
 import { RentalContractStatusChoices } from '@/api/graphql';
 import { useRentalContractsByClientId } from '@/api/hooks';
 
-import { formatContractDateTime } from '@/modules/dayjs/utils';
+import { formatDateTimeHr } from '@/modules/dayjs/utils';
 import { formatDateTime } from '@/modules/dayjs/utils';
 
 import { RentalContractsByClientIdTabComponentProps } from './page';
@@ -127,13 +127,8 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                             >
                                 <div className="flex justify-between border-b px-4 pt-3">
                                     <h2 className="mt-2">
-                                        {formatContractDateTime(
-                                            contract.contractStartDatetime,
-                                        )}{' '}
-                                        -{' '}
-                                        {formatContractDateTime(
-                                            contract.contractEndDatetime,
-                                        )}
+                                        {formatDateTimeHr(contract.contractStartDatetime)}{' '}
+                                        - {formatDateTimeHr(contract.contractEndDatetime)}
                                     </h2>
 
                                     <div className="mb-3 flex rounded-full border border-black px-4 py-1 ">
