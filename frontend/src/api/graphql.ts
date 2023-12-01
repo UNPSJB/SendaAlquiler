@@ -423,7 +423,7 @@ export type Mutation = {
 };
 
 export type MutationCancelContractArgs = {
-    rentalContractId: Scalars['ID']['input'];
+    id: Scalars['ID']['input'];
 };
 
 export type MutationCancelInternalOrderArgs = {
@@ -513,15 +513,15 @@ export type MutationDeleteSupplierOrderArgs = {
 };
 
 export type MutationExpiredContractArgs = {
-    rentalContractId: Scalars['ID']['input'];
+    id: Scalars['ID']['input'];
 };
 
 export type MutationFailedReturnContractArgs = {
-    rentalContractId: Scalars['ID']['input'];
+    id: Scalars['ID']['input'];
 };
 
 export type MutationFinishContractArgs = {
-    rentalContractId: Scalars['ID']['input'];
+    id: Scalars['ID']['input'];
 };
 
 export type MutationInProgressInternalOrderArgs = {
@@ -534,11 +534,11 @@ export type MutationLoginArgs = {
 };
 
 export type MutationPayContractDepositArgs = {
-    rentalContractId: Scalars['ID']['input'];
+    id: Scalars['ID']['input'];
 };
 
 export type MutationPayTotalContractArgs = {
-    rentalContractId: Scalars['ID']['input'];
+    id: Scalars['ID']['input'];
 };
 
 export type MutationReceiveInternalOrderArgs = {
@@ -554,11 +554,11 @@ export type MutationRefreshTokenArgs = {
 };
 
 export type MutationStartContractArgs = {
-    rentalContractId: Scalars['ID']['input'];
+    id: Scalars['ID']['input'];
 };
 
 export type MutationSuccessfulReturnContractArgs = {
-    rentalContractId: Scalars['ID']['input'];
+    id: Scalars['ID']['input'];
 };
 
 export type MutationTokenAuthArgs = {
@@ -1427,6 +1427,66 @@ export type DeleteRentalContractMutation = {
     deleteRentalContract: {
         __typename?: 'DeleteRentalContract';
         success: boolean;
+    } | null;
+};
+
+export type PayContractDepositMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type PayContractDepositMutation = {
+    __typename?: 'Mutation';
+    payContractDeposit: {
+        __typename?: 'PayContractDeposit';
+        error: string | null;
+        rentalContract: {
+            __typename?: 'RentalContract';
+            id: string;
+            currentHistory: {
+                __typename?: 'RentalContractHistory';
+                status: RentalContractStatusChoices;
+            } | null;
+        } | null;
+    } | null;
+};
+
+export type PayTotalContractMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type PayTotalContractMutation = {
+    __typename?: 'Mutation';
+    payTotalContract: {
+        __typename?: 'PayTotalContract';
+        error: string | null;
+        rentalContract: {
+            __typename?: 'RentalContract';
+            id: string;
+            currentHistory: {
+                __typename?: 'RentalContractHistory';
+                status: RentalContractStatusChoices;
+            } | null;
+        } | null;
+    } | null;
+};
+
+export type CancelContractMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type CancelContractMutation = {
+    __typename?: 'Mutation';
+    cancelContract: {
+        __typename?: 'CancelContract';
+        error: string | null;
+        rentalContract: {
+            __typename?: 'RentalContract';
+            id: string;
+            currentHistory: {
+                __typename?: 'RentalContractHistory';
+                status: RentalContractStatusChoices;
+            } | null;
+        } | null;
     } | null;
 };
 
@@ -3635,6 +3695,240 @@ export const DeleteRentalContractDocument = {
     DeleteRentalContractMutation,
     DeleteRentalContractMutationVariables
 >;
+export const PayContractDepositDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'payContractDeposit' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'payContractDeposit' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'rentalContract' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'currentHistory',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    PayContractDepositMutation,
+    PayContractDepositMutationVariables
+>;
+export const PayTotalContractDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'payTotalContract' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'payTotalContract' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'rentalContract' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'currentHistory',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<PayTotalContractMutation, PayTotalContractMutationVariables>;
+export const CancelContractDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'cancelContract' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'cancelContract' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'rentalContract' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'currentHistory',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<CancelContractMutation, CancelContractMutationVariables>;
 export const ClientsCsvDocument = {
     kind: 'Document',
     definitions: [

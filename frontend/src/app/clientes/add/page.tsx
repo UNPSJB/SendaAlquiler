@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 
 import toast from 'react-hot-toast';
 
-import { useCreateClient } from '@/api/hooks';
+import { useCreateClient } from '@/api/hooks/clients';
 
 import CreateOrUpdateClientForm from '@/modules/create-forms/CreateOrUpdateClientForm';
 
