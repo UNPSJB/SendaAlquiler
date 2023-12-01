@@ -1,5 +1,12 @@
+'use client';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { TH, Table } from '@/components/Table';
+import { useCallback, useState } from 'react';
+
+import DataTableDropdown from './DataTableDropdown';
+
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
+import { TH, Table, TD } from '@/components/Table';
 
 type DataTableProps<T extends any> = {
     columns: {
@@ -7,7 +14,12 @@ type DataTableProps<T extends any> = {
         label: string;
     }[];
     data: T[];
-    rowRenderer: (row: T) => JSX.Element;
+    rowRenderer: (extraData: React.ReactNode) => (row: T) => React.ReactNode;
+    deleteOptions?: {
+        confirmationText: string | ((row: T) => React.ReactNode);
+        isDeleting: boolean;
+        onDeleteClick: (row: T) => void;
+    };
 };
 
 /**
@@ -19,17 +31,68 @@ type DataTableProps<T extends any> = {
  * @param {Function} props.rowRenderer - A function to render each row of the table.
  * @returns {JSX.Element} The rendered DataTable component.
  */
-const DataTable = <T extends any>({ columns, data, rowRenderer }: DataTableProps<T>) => (
-    <Table>
-        <thead>
-            <tr>
-                {columns.map((column) => (
-                    <TH key={column.key}>{column.label}</TH>
-                ))}
-            </tr>
-        </thead>
-        <tbody>{data.map(rowRenderer)}</tbody>
-    </Table>
-);
+const DataTable = <T extends any>({
+    columns,
+    data,
+    rowRenderer,
+    deleteOptions,
+}: DataTableProps<T>) => {
+    const [itemToBeDeleted, setItemToBeDeleted] = useState<T | null>(null);
+    const { confirmationText, isDeleting, onDeleteClick } = deleteOptions || {};
+
+    const onRemoveClick = useCallback(
+        (row: T) => () => {
+            setItemToBeDeleted(row);
+        },
+        [],
+    );
+
+    return (
+        <>
+            <Table>
+                <thead>
+                    <tr>
+                        {columns.map((column) => (
+                            <TH key={column.key}>{column.label}</TH>
+                        ))}
+
+                        <TH></TH>
+                    </tr>
+                </thead>
+                <tbody>
+                    {data.map((item) => {
+                        return rowRenderer(
+                            deleteOptions ? (
+                                <TD>
+                                    <DataTableDropdown onRemove={onRemoveClick(item)} />
+                                </TD>
+                            ) : (
+                                <></>
+                            ),
+                        )(item);
+                    })}
+                </tbody>
+            </Table>
+
+            {itemToBeDeleted && onDeleteClick && confirmationText && (
+                <DeleteConfirmationModal
+                    onCancelClick={() => {
+                        setItemToBeDeleted(null);
+                    }}
+                    onConfirmClick={() => {
+                        onDeleteClick(itemToBeDeleted);
+                        setItemToBeDeleted(null);
+                    }}
+                    isDeleting={Boolean(isDeleting)}
+                    confirmationText={
+                        typeof confirmationText === 'function'
+                            ? confirmationText(itemToBeDeleted)
+                            : confirmationText
+                    }
+                />
+            )}
+        </>
+    );
+};
 
 export default DataTable;

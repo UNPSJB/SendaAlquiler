@@ -12,7 +12,6 @@ import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
-import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
 import Button, { ButtonVariant } from '@/components/Button';
@@ -28,17 +27,21 @@ const columns = [
     { key: 'dropdown', label: '' },
 ];
 
-const SkeletonRowRenderer = (key: number) => (
-    <TR key={key}>
-        {[...new Array(columns.length)].map((_, index) => (
-            <TD key={index}>
-                <Skeleton width={100}></Skeleton>
-            </TD>
-        ))}
-    </TR>
-);
+const SkeletonRowRenderer = () => {
+    const renderer = (key: number) => (
+        <TR key={key}>
+            {[...new Array(columns.length)].map((_, index) => (
+                <TD key={index}>
+                    <Skeleton width={100}></Skeleton>
+                </TD>
+            ))}
+        </TR>
+    );
 
-const PurchaseRowRenderer = (handleRemove: (id: Purchase['id']) => void) => {
+    return renderer;
+};
+
+const PurchaseRowRenderer = (extraData: React.ReactNode) => {
     const renderer = (purchase: ArrayElement<PurchasesQuery['purchases']['results']>) => (
         <TR key={purchase.id}>
             <TD>
@@ -48,9 +51,7 @@ const PurchaseRowRenderer = (handleRemove: (id: Purchase['id']) => void) => {
             </TD>
             <TD>{new Date(purchase.createdOn).toLocaleDateString('es-ES')}</TD>
             <TD>${purchase.total}</TD>
-            <TD>
-                <DataTableDropdown onRemove={() => handleRemove(purchase.id)} />
-            </TD>
+            {extraData}
         </TR>
     );
 
@@ -61,7 +62,7 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
         usePurchases();
 
-    const { mutate } = useDeletePurchase({
+    const { mutate, isLoading: isDeleting } = useDeletePurchase({
         onSuccess: () => {
             toast.success('Venta eliminada con éxito');
             queryResult.refetch();
@@ -135,7 +136,25 @@ const Page = () => {
                             <DataTable
                                 columns={columns}
                                 data={purchases}
-                                rowRenderer={PurchaseRowRenderer(handleRemove)}
+                                rowRenderer={PurchaseRowRenderer}
+                                deleteOptions={{
+                                    confirmationText: (purchase) => (
+                                        <>
+                                            ¿Estás seguro de que deseas eliminar la venta
+                                            de{' '}
+                                            <strong>
+                                                {purchase.client.firstName}{' '}
+                                                {purchase.client.lastName}
+                                            </strong>{' '}
+                                            por un total de{' '}
+                                            <strong>${purchase.total}</strong>?
+                                        </>
+                                    ),
+                                    onDeleteClick: (purchase) => {
+                                        handleRemove(purchase.id);
+                                    },
+                                    isDeleting,
+                                }}
                             />
 
                             <DataTablePagination

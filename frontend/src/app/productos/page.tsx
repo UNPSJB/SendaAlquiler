@@ -16,7 +16,6 @@ import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
-import DataTableDropdown from '@/modules/data-table/DataTableDropdown';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
 import Button, { ButtonVariant } from '@/components/Button';
@@ -33,17 +32,21 @@ const columns = [
     { key: 'dropdown', label: '' },
 ];
 
-const SkeletonRowRenderer = (key: number) => (
-    <TR key={key}>
-        {[...new Array(columns.length)].map((_, index) => (
-            <TD key={index}>
-                <Skeleton width={100}></Skeleton>
-            </TD>
-        ))}
-    </TR>
-);
+const SkeletonRowRenderer = () => {
+    const renderer = (key: number) => (
+        <TR key={key}>
+            {[...new Array(columns.length)].map((_, index) => (
+                <TD key={index}>
+                    <Skeleton width={100}></Skeleton>
+                </TD>
+            ))}
+        </TR>
+    );
 
-const ProductRowRenderer = (handleRemove: (id: Product['id']) => void) => {
+    return renderer;
+};
+
+const ProductRowRenderer = (extraData: React.ReactNode) => {
     const renderer = (product: ProductListItemFragment) => (
         <TR key={product.id}>
             <TD>
@@ -54,9 +57,7 @@ const ProductRowRenderer = (handleRemove: (id: Product['id']) => void) => {
             <TD>{product.brand?.name || '-'}</TD>
             <TD>{product.type}</TD>
             <TD>$ {product.price}</TD>
-            <TD>
-                <DataTableDropdown onRemove={() => handleRemove(product.id)} />
-            </TD>
+            {extraData}
         </TR>
     );
 
@@ -67,7 +68,7 @@ const Page = () => {
     const { hasPreviousPage, hasNextPage, queryResult, activePage, noPages } =
         usePaginatedProducts();
 
-    const { mutate } = useDeleteProduct({
+    const { mutate, isLoading: isDeleting } = useDeleteProduct({
         onSuccess: () => {
             toast.success('Producto eliminado correctamente');
             queryResult.refetch();
@@ -143,7 +144,19 @@ const Page = () => {
                             <DataTable
                                 columns={columns}
                                 data={edges.map((edge) => edge)}
-                                rowRenderer={ProductRowRenderer(handleRemove)}
+                                rowRenderer={ProductRowRenderer}
+                                deleteOptions={{
+                                    confirmationText: (product) => (
+                                        <>
+                                            ¿Estás seguro de que quieres eliminar el
+                                            producto <strong>{product.name}</strong>?
+                                        </>
+                                    ),
+                                    onDeleteClick: (product) => {
+                                        handleRemove(product.id);
+                                    },
+                                    isDeleting,
+                                }}
                             />
 
                             <DataTablePagination
