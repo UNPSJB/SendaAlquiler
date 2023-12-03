@@ -28,6 +28,7 @@ query productById($id: ID!) {
         }
         services {
             name
+            price
         }
     }
 }
