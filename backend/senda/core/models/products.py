@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, TYPE_CHECKING
 
 from django.db import models
 
@@ -6,6 +6,11 @@ from extensions.db.models import TimeStampedModel
 from senda.core.managers import ProductModelManager
 from senda.core.models.offices import OfficeModel
 from senda.core.models.suppliers import SupplierModel
+
+if TYPE_CHECKING:
+    from senda.core.models.rental_contracts import (
+        RentalContractItemModel,
+    )
 
 
 class ProductTypeChoices(models.TextChoices):
@@ -65,6 +70,7 @@ class ProductModel(TimeStampedModel):
     stock: models.QuerySet["ProductStockInOfficeModel"]
     suppliers: models.QuerySet["ProductSupplierModel"]
     services: models.QuerySet["ProductServiceModel"]
+    rental_contract_items: models.QuerySet["RentalContractItemModel"]
 
     sku = models.CharField(
         max_length=10, null=True, blank=True, unique=True, db_index=True
@@ -112,6 +118,28 @@ class ProductModel(TimeStampedModel):
             return None
 
         return stock_data
+
+    def get_global_available_stock_between_dates(self, start_date, end_date) -> bool:
+        from senda.core.models.rental_contracts import (
+            RentalContractStatusChoices,
+        )
+
+        available_stock_among_offices = self.stock.aggregate(total=models.Sum("stock"))[
+            "total"
+        ]
+
+        reserved_stock = self.rental_contract_items.filter(
+            models.Q(
+                rental_contract__current_history__status=RentalContractStatusChoices.CON_DEPOSITO
+            )
+            | models.Q(
+                rental_contract__current_history__status=RentalContractStatusChoices.ACTIVO
+            ),
+            rental_contract__contract_start_datetime__date__gte=start_date,
+            rental_contract__contract_start_datetime__date__lte=end_date,
+        ).aggregate(total=models.Sum("quantity"))["total"]
+
+        return available_stock_among_offices - reserved_stock
 
 
 class ProductStockInOfficeModel(TimeStampedModel):
