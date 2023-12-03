@@ -7,7 +7,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "your_project.settings")
 django.setup()
 
 from senda.core.models.clients import ClientModel
-from senda.core.models.employees import EmployeeModel
+from senda.core.models.employees import EmployeeModel, EmployeeOfficeModel
 from senda.core.models.localities import LocalityModel, StateChoices
 from senda.core.models.offices import OfficeModel
 from users.models import UserModel
@@ -187,27 +187,6 @@ def create_clients():
         client.save()
 
 
-def create_employees():
-    for _ in range(10):
-        # Generate fake data for each employee
-        first_name = fake.first_name()
-        last_name = fake.last_name()
-        email = f"{first_name.lower()}.{last_name.lower()}@example.com"
-
-        user = UserModel.objects.create_user(
-            email=email,
-            password="12345678",
-            first_name=first_name,
-            last_name=last_name,
-        )
-
-        # Create a new employee instance
-        employee = EmployeeModel(user=user)
-
-        # Save the instance to the database
-        employee.save()
-
-
 def create_offices():
     OfficeModel.objects.create(
         name="Sucursal en Trelew",
@@ -229,6 +208,50 @@ def create_offices():
         house_number="123",
         locality=LocalityModel.objects.get(name="Comodoro Rivadavia"),
     )
+
+
+def create_employees():
+    for _ in range(12):
+        # Generate fake data for each employee
+        first_name = fake.first_name()
+        last_name = fake.last_name()
+        email = f"{first_name.lower().strip()}.{last_name.lower().strip()}@admin.com"
+
+        user = UserModel.objects.create_user(
+            email=email,
+            password="12345678",
+            first_name=first_name,
+            last_name=last_name,
+        )
+
+        # Create a new employee instance
+        employee = EmployeeModel(user=user)
+        employee.user.set_password("admin")
+        employee.user.save()
+
+        # Save the instance to the database
+        employee.save()
+
+        EmployeeOfficeModel.objects.create(
+            employee=employee,
+            office=OfficeModel.objects.order_by("?").first(),
+        )
+
+        random_50_percent_true = random.randint(1, 2) == 1
+
+        if random_50_percent_true:
+            EmployeeOfficeModel.objects.create(
+                employee=employee,
+                office=OfficeModel.objects.order_by("?")
+                .exclude(
+                    id__in=[
+                        EmployeeOfficeModel.objects.filter(employee=employee)
+                        .first()
+                        .office.id
+                    ]
+                )
+                .first(),
+            )
 
 
 def create_suppliers():
