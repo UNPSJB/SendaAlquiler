@@ -65,8 +65,6 @@ class RentalContractModel(TimeStampedModel):
         blank=True,
         null=True,
     )
-    has_payed_deposit = models.BooleanField(default=False)
-    has_payed_remaining_amount = models.BooleanField(default=False)
     total = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
     expiration_date = models.DateTimeField(blank=True, null=True)
 
@@ -142,11 +140,13 @@ class RentalContractItemModel(TimeStampedModel):
         RentalContractModel,
         on_delete=models.CASCADE,
         related_name="rental_contract_items",
+        db_index=True,
     )
     product = models.ForeignKey(
         ProductModel,
         on_delete=models.CASCADE,
         related_name="rental_contract_items",
+        db_index=True,
     )
     quantity = models.PositiveIntegerField(default=1)
     price = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
