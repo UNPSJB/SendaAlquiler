@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models.clients import ClientModel
-from .models.employees import EmployeeModel
+from .models.employees import EmployeeModel, EmployeeOfficeModel
 from .models.localities import LocalityModel
 from .models.offices import OfficeModel
 from .models.order_internal import InternalOrderModel
@@ -36,9 +36,18 @@ class ClientModelAdmin(admin.ModelAdmin[ClientModel]):
     search_fields = ("email",)
 
 
+class EmployeeOfficeModelInline(
+    admin.TabularInline[EmployeeOfficeModel, EmployeeModel]
+):
+    model = EmployeeOfficeModel
+
+
 @admin.register(EmployeeModel)
 class EmployeeModelAdmin(admin.ModelAdmin[EmployeeModel]):
     search_fields = ("user",)
+    inlines = [
+        EmployeeOfficeModelInline,
+    ]
 
 
 @admin.register(LocalityModel)

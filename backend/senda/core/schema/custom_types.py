@@ -1,7 +1,7 @@
 import graphene
 from graphene_django import DjangoObjectType
 from senda.core.models.clients import ClientModel
-from senda.core.models.employees import EmployeeModel
+from senda.core.models.employees import EmployeeModel, EmployeeOfficeModel
 from senda.core.models.localities import LocalityModel, StateChoices
 from senda.core.models.offices import OfficeModel
 from senda.core.models.order_internal import (
@@ -192,3 +192,8 @@ class SupplierOrderHistory(DjangoObjectType):
 class SupplierOrderProduct(DjangoObjectType):
     class Meta:
         model = SupplierOrderProductModel
+
+
+class EmployeeOffice(DjangoObjectType):
+    class Meta:
+        model = EmployeeOfficeModel
