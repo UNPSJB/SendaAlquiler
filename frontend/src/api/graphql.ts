@@ -284,7 +284,17 @@ export type Employee = {
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
+    offices: Array<EmployeeOffice>;
     user: User;
+};
+
+export type EmployeeOffice = {
+    __typename?: 'EmployeeOffice';
+    createdOn: Scalars['DateTime']['output'];
+    employee: Employee;
+    id: Scalars['ID']['output'];
+    modifiedOn: Scalars['DateTime']['output'];
+    office: Office;
 };
 
 export type ExpiredContract = {
@@ -414,6 +424,7 @@ export type Mutation = {
     receiveInternalOrder: Maybe<ReceiveInternalOrder>;
     receiveOrderSupplier: Maybe<ReceiveOrderSupplier>;
     refreshToken: Maybe<Refresh>;
+    setSessionOfficeCookie: Maybe<SetSessionOfficeCookie>;
     startContract: Maybe<StartContract>;
     successfulReturnContract: Maybe<SuccessfulReturnContract>;
     /** Obtain JSON Web Token mutation */
@@ -553,6 +564,11 @@ export type MutationRefreshTokenArgs = {
     token: InputMaybe<Scalars['String']['input']>;
 };
 
+export type MutationSetSessionOfficeCookieArgs = {
+    clearCookie?: InputMaybe<Scalars['Boolean']['input']>;
+    officeId: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type MutationStartContractArgs = {
     id: Scalars['ID']['input'];
 };
@@ -586,6 +602,7 @@ export type ObtainJsonWebToken = {
 export type Office = {
     __typename?: 'Office';
     createdOn: Scalars['DateTime']['output'];
+    employees: Array<EmployeeOffice>;
     houseNumber: Scalars['String']['output'];
     id: Scalars['ID']['output'];
     internalOrdersBranch: Array<InternalOrder>;
@@ -819,6 +836,7 @@ export type Query = {
     suppliers: PaginatedSupplierQueryResult;
     suppliersCsv: Scalars['String']['output'];
     suppliersOrdersCsv: Scalars['String']['output'];
+    user: Maybe<User>;
     users: Array<User>;
 };
 
@@ -950,8 +968,6 @@ export type RentalContract = {
     createdOn: Scalars['DateTime']['output'];
     currentHistory: Maybe<RentalContractHistory>;
     expirationDate: Maybe<Scalars['DateTime']['output']>;
-    hasPayedDeposit: Scalars['Boolean']['output'];
-    hasPayedRemainingAmount: Scalars['Boolean']['output'];
     /** Número de la calle donde vive el cliente */
     houseNumber: Scalars['String']['output'];
     /** Número de la casa o departamento */
@@ -1021,6 +1037,11 @@ export enum RentalContractStatusChoices {
 export type ServiceInput = {
     name: Scalars['String']['input'];
     price: Scalars['String']['input'];
+};
+
+export type SetSessionOfficeCookie = {
+    __typename?: 'SetSessionOfficeCookie';
+    success: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type StartContract = {
@@ -1409,8 +1430,6 @@ export type ContractByIdQuery = {
         contractEndDatetime: any;
         contractStartDatetime: any;
         expirationDate: any | null;
-        hasPayedDeposit: boolean;
-        hasPayedRemainingAmount: boolean;
         houseNumber: string;
         houseUnit: string | null;
         streetName: string;
@@ -1695,6 +1714,19 @@ export type DeleteEmployeeMutationVariables = Exact<{
 export type DeleteEmployeeMutation = {
     __typename?: 'Mutation';
     deleteEmployee: { __typename?: 'DeleteEmployee'; success: boolean } | null;
+};
+
+export type SetSessionOfficeCookieMutationVariables = Exact<{
+    officeId: InputMaybe<Scalars['ID']['input']>;
+    clearCookie: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+export type SetSessionOfficeCookieMutation = {
+    __typename?: 'Mutation';
+    setSessionOfficeCookie: {
+        __typename?: 'SetSessionOfficeCookie';
+        success: boolean | null;
+    } | null;
 };
 
 export type LocalitiesQueryVariables = Exact<{
@@ -2091,7 +2123,7 @@ export type ProductByIdQuery = {
                 locality: { __typename?: 'Locality'; name: string };
             };
         }>;
-        services: Array<{ __typename?: 'ProductService'; name: string }>;
+        services: Array<{ __typename?: 'ProductService'; name: string; price: any }>;
     } | null;
 };
 
@@ -2341,16 +2373,24 @@ export type DeleteSupplierMutation = {
     deleteSupplier: { __typename?: 'DeleteSupplier'; success: boolean } | null;
 };
 
-export type UsersQueryVariables = Exact<{ [key: string]: never }>;
+export type CurrentUserQueryVariables = Exact<{ [key: string]: never }>;
 
-export type UsersQuery = {
+export type CurrentUserQuery = {
     __typename?: 'Query';
-    users: Array<{
+    user: {
         __typename?: 'User';
         firstName: string;
         lastName: string;
         email: string;
-    }>;
+        employee: {
+            __typename?: 'Employee';
+            offices: Array<{
+                __typename?: 'EmployeeOffice';
+                id: string;
+                office: { __typename?: 'Office'; id: string; name: string };
+            }>;
+        } | null;
+    } | null;
 };
 
 export type LoginMutationVariables = Exact<{
@@ -2363,8 +2403,72 @@ export type LoginMutation = {
     login: {
         __typename?: 'Login';
         token: string;
-        user: { __typename?: 'User'; firstName: string; lastName: string; email: string };
+        user: {
+            __typename?: 'User';
+            firstName: string;
+            lastName: string;
+            email: string;
+            employee: {
+                __typename?: 'Employee';
+                offices: Array<{
+                    __typename?: 'EmployeeOffice';
+                    id: string;
+                    office: { __typename?: 'Office'; id: string; name: string };
+                }>;
+            } | null;
+        };
     } | null;
+};
+
+export type CurrentUserFragment = {
+    __typename?: 'User';
+    firstName: string;
+    lastName: string;
+    email: string;
+    employee: {
+        __typename?: 'Employee';
+        offices: Array<{
+            __typename?: 'EmployeeOffice';
+            id: string;
+            office: { __typename?: 'Office'; id: string; name: string };
+        }>;
+    } | null;
+};
+
+export type RefreshTokenMutationVariables = Exact<{
+    token: Scalars['String']['input'];
+}>;
+
+export type RefreshTokenMutation = {
+    __typename?: 'Mutation';
+    refreshToken: { __typename?: 'Refresh'; token: string } | null;
+};
+
+export type TokenAuthMutationVariables = Exact<{
+    email: Scalars['String']['input'];
+    password: Scalars['String']['input'];
+}>;
+
+export type TokenAuthMutation = {
+    __typename?: 'Mutation';
+    tokenAuth: {
+        __typename?: 'ObtainJSONWebToken';
+        payload: any;
+        refreshExpiresIn: number;
+        token: string;
+    } | null;
+};
+
+export type UsersQueryVariables = Exact<{ [key: string]: never }>;
+
+export type UsersQuery = {
+    __typename?: 'Query';
+    users: Array<{
+        __typename?: 'User';
+        firstName: string;
+        lastName: string;
+        email: string;
+    }>;
 };
 
 export const ProductListItemFragmentDoc = {
@@ -2448,6 +2552,69 @@ export const PurchaseListItemFragmentDoc = {
         },
     ],
 } as unknown as DocumentNode<PurchaseListItemFragment, unknown>;
+export const CurrentUserFragmentDoc = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CurrentUser' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'employee' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'offices' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'office' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<CurrentUserFragment, unknown>;
 export const CreateBrandDocument = {
     kind: 'Document',
     definitions: [
@@ -3689,17 +3856,6 @@ export const ContractByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'hasPayedDeposit' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: {
-                                        kind: 'Name',
-                                        value: 'hasPayedRemainingAmount',
-                                    },
-                                },
-                                {
-                                    kind: 'Field',
                                     name: { kind: 'Name', value: 'houseNumber' },
                                 },
                                 {
@@ -4830,6 +4986,73 @@ export const DeleteEmployeeDocument = {
         },
     ],
 } as unknown as DocumentNode<DeleteEmployeeMutation, DeleteEmployeeMutationVariables>;
+export const SetSessionOfficeCookieDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'setSessionOfficeCookie' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'officeId' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'clearCookie' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'Boolean' } },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'setSessionOfficeCookie' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'officeId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'officeId' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'clearCookie' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'clearCookie' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    SetSessionOfficeCookieMutation,
+    SetSessionOfficeCookieMutationVariables
+>;
 export const LocalitiesDocument = {
     kind: 'Document',
     definitions: [
@@ -6708,6 +6931,10 @@ export const ProductByIdDocument = {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'name' },
                                             },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'price' },
+                                            },
                                         ],
                                     },
                                 },
@@ -7783,31 +8010,84 @@ export const DeleteSupplierDocument = {
         },
     ],
 } as unknown as DocumentNode<DeleteSupplierMutation, DeleteSupplierMutationVariables>;
-export const UsersDocument = {
+export const CurrentUserDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'users' },
+            name: { kind: 'Name', value: 'currentUser' },
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'users' },
+                        name: { kind: 'Name', value: 'user' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'FragmentSpread',
+                                    name: { kind: 'Name', value: 'CurrentUser' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CurrentUser' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'employee' },
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'firstName' },
+                                    name: { kind: 'Name', value: 'offices' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'office' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
                                 },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'lastName' },
-                                },
-                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
                             ],
                         },
                     },
@@ -7815,7 +8095,7 @@ export const UsersDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<UsersQuery, UsersQueryVariables>;
+} as unknown as DocumentNode<CurrentUserQuery, CurrentUserQueryVariables>;
 export const LoginDocument = {
     kind: 'Document',
     definitions: [
@@ -7888,19 +8168,69 @@ export const LoginDocument = {
                                         kind: 'SelectionSet',
                                         selections: [
                                             {
-                                                kind: 'Field',
+                                                kind: 'FragmentSpread',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'firstName',
+                                                    value: 'CurrentUser',
                                                 },
                                             },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'CurrentUser' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'User' } },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'employee' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'offices' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'lastName' },
+                                                name: { kind: 'Name', value: 'id' },
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'email' },
+                                                name: { kind: 'Name', value: 'office' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
                                             },
                                         ],
                                     },
@@ -7913,3 +8243,168 @@ export const LoginDocument = {
         },
     ],
 } as unknown as DocumentNode<LoginMutation, LoginMutationVariables>;
+export const RefreshTokenDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'refreshToken' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'token' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'refreshToken' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'token' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'token' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<RefreshTokenMutation, RefreshTokenMutationVariables>;
+export const TokenAuthDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'tokenAuth' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'email' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'password' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'tokenAuth' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'email' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'email' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'password' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'password' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'payload' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'refreshExpiresIn' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'token' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<TokenAuthMutation, TokenAuthMutationVariables>;
+export const UsersDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'users' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'users' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'firstName' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'lastName' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<UsersQuery, UsersQueryVariables>;

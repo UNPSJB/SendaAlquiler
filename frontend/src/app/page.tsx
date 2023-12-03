@@ -16,8 +16,8 @@ import dayjs from 'dayjs';
 import { Line } from 'react-chartjs-2';
 import Skeleton from 'react-loading-skeleton';
 
+import fetchClient from '@/api/fetch-client';
 import { DashboardDocument, DashboardQuery } from '@/api/graphql';
-import { clientGraphqlQuery } from '@/api/graphqlclient';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -63,7 +63,7 @@ const options: ChartOptions<'line'> = {
 
 const Home = () => {
     const result = useQuery([], () => {
-        return clientGraphqlQuery(DashboardDocument, {});
+        return fetchClient(DashboardDocument, {});
     });
 
     return (

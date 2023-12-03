@@ -18,7 +18,7 @@ class Login(graphene.Mutation):
     user = graphene.Field(User, required=True)
     token = graphene.String(required=True)
 
-    def mutate(cls, info: Any, email: str, password: str):
+    def mutate(self, info: Any, email: str, password: str):
         try:
             user = UserModel.objects.filter(email=email).first()
             if user is None:

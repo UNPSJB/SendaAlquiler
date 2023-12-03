@@ -13,16 +13,20 @@ from utils.graphene import get_paginated_model, non_null_list_of
 import csv
 import io
 
+from senda.core.decorators import employee_required, CustomInfo
+
 
 class Query(graphene.ObjectType):
     all_suppliers = non_null_list_of(Supplier)
 
-    def resolve_all_suppliers(self, info: Any):
+    @employee_required
+    def resolve_all_suppliers(self, info: CustomInfo):
         return SupplierModel.objects.all()
 
     suppliers = graphene.NonNull(PaginatedSupplierQueryResult, page=graphene.Int())
 
-    def resolve_suppliers(self, info: Any, page: int):
+    @employee_required
+    def resolve_suppliers(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
             SupplierModel.objects.all().order_by("-created_on"), page
         )
@@ -35,21 +39,24 @@ class Query(graphene.ObjectType):
 
     supplier_by_id = graphene.Field(Supplier, id=graphene.ID(required=True))
 
-    def resolve_supplier_by_id(self, info: Any, id: str):
+    @employee_required
+    def resolve_supplier_by_id(self, info: CustomInfo, id: str):
         return SupplierModel.objects.filter(id=id).first()
 
     supplier_orders_by_supplier_id = non_null_list_of(
         OrderSupplier, id=graphene.ID(required=True)
     )
 
-    def resolve_supplier_orders_by_supplier_id(self, info: Any, id: str):
+    @employee_required
+    def resolve_supplier_orders_by_supplier_id(self, info: CustomInfo, id: str):
         supplier_order_by_supplier_id = SupplierModel.objects.get(id=id)
         orders = supplier_order_by_supplier_id.supplier_orders_branch.all()
         return orders
 
     suppliers_csv = graphene.NonNull(graphene.String)
 
-    def resolve_suppliers_csv(self, info: Any):
+    @employee_required
+    def resolve_suppliers_csv(self, info: CustomInfo):
         suppliers = SupplierModel.objects.all().prefetch_related("locality")
         output = io.StringIO()
 

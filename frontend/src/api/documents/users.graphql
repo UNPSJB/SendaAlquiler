@@ -1,8 +1,6 @@
-query users {
-    users {
-        firstName
-        lastName
-        email
+query currentUser {
+    user {
+        ...CurrentUser
     }
 }
 
@@ -10,9 +8,44 @@ mutation login($email: String!, $password: String!) {
     login(email: $email, password: $password) {
         token
         user {
-            firstName
-            lastName
-            email
+            ...CurrentUser
         }
+    }
+}
+
+fragment CurrentUser on User {
+    firstName
+    lastName
+    email
+    employee {
+        offices {
+            id
+            office {
+                id
+                name
+            }
+        }
+    }
+}
+
+mutation refreshToken($token: String!) {
+    refreshToken(token: $token) {
+        token
+    }
+}
+
+mutation tokenAuth($email: String!, $password: String!) {
+    tokenAuth(email: $email, password: $password) {
+        payload
+        refreshExpiresIn
+        token
+    }
+}
+
+query users {
+    users {
+        firstName
+        lastName
+        email
     }
 }

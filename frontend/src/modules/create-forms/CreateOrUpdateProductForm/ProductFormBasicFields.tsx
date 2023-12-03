@@ -1,7 +1,7 @@
 import { useFormContext } from 'react-hook-form';
 
+import { fetchClient } from '@/api/fetch-client';
 import { ProductExistsDocument } from '@/api/graphql';
-import { clientGraphqlQuery } from '@/api/graphqlclient';
 
 import { RHFFormField } from '@/modules/forms/FormField';
 import RHFInput from '@/modules/forms/Input';
@@ -28,12 +28,9 @@ const ProductFormBasicFields: React.FC = () => {
                     rules={{
                         required: true,
                         validate: async (value) => {
-                            const response = await clientGraphqlQuery(
-                                ProductExistsDocument,
-                                {
-                                    sku: value,
-                                },
-                            );
+                            const response = await fetchClient(ProductExistsDocument, {
+                                sku: value,
+                            });
 
                             return response.productExists
                                 ? 'Ya existe un producto con ese SKU'

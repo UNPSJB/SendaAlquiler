@@ -1,34 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-
-import { SubmitHandler } from 'react-hook-form';
-import toast from 'react-hot-toast';
-
-import { useLogin } from '@/api/hooks';
-
 import LoginFooter from './LoginFooter';
-import LoginForm, { LoginFormValues } from './LoginForm';
+import LoginForm from './LoginForm';
 import LoginHeader from './LoginHeader';
 
 const LoginPage = () => {
-    const router = useRouter();
-
-    const { mutate } = useLogin({
-        onSuccess: ({ login }) => {
-            if (login) {
-                router.replace('/');
-            }
-        },
-        onError: () => {
-            toast.error(`Hubo un error al iniciar sesión`);
-        },
-    });
-
-    const handleLoginSubmit: SubmitHandler<LoginFormValues> = (data) => {
-        mutate(data);
-    };
-
     return (
         <>
             <LoginHeader />
@@ -42,7 +18,7 @@ const LoginPage = () => {
                         </p>
                     </div>
 
-                    <LoginForm onSubmit={handleLoginSubmit} />
+                    <LoginForm />
                 </div>
             </main>
 

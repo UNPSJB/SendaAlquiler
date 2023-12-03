@@ -13,6 +13,8 @@ from senda.core.models.rental_contracts import (
 from senda.core.schema.custom_types import RentalContract
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
+from senda.core.decorators import employee_required, CustomInfo
+
 
 class ErrorMessages:
     INVALID_OFFICE = "Debes especificar una sucursal"
@@ -80,7 +82,7 @@ class CreateRentalContract(graphene.Mutation):
         data = CreateRentalContractInput(required=True)
 
     def mutate(
-        self, info: Any, data: CreateRentalContractInput
+        self, info: CustomInfo, data: CreateRentalContractInput
     ) -> "CreateRentalContract":
         data_dict = input_object_type_to_dict(data)
 
@@ -148,9 +150,7 @@ class BaseChangeContractStatus(graphene.Mutation):
         )
 
     @classmethod
-    def mutate(
-        cls, self: "BaseChangeContractStatus", info: Any, id: str
-    ):
+    def mutate(cls, self: "BaseChangeContractStatus", info: Any, id: str):
         raise NotImplementedError()
 
 
@@ -310,7 +310,8 @@ class DeleteRentalContract(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    def mutate(self, info: Any, id: str):
+    @employee_required
+    def mutate(self, info: CustomInfo, id: str):
         try:
             rental_contract = RentalContractModel.objects.get(id=id)
             rental_contract.delete()

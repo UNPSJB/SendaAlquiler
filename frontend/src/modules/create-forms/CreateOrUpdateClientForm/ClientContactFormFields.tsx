@@ -1,7 +1,7 @@
 import { useFormContext } from 'react-hook-form';
 
+import { fetchClient } from '@/api/fetch-client';
 import { ClientExistsDocument } from '@/api/graphql';
-import { clientGraphqlQuery } from '@/api/graphqlclient';
 
 import { RHFFormField } from '@/modules/forms/FormField';
 import Input from '@/modules/forms/Input';
@@ -61,13 +61,10 @@ const ClientContactFormFields: React.FC = () => {
                     rules={{
                         required: true,
                         validate: async (value) => {
-                            const response = await clientGraphqlQuery(
-                                ClientExistsDocument,
-                                {
-                                    email: value,
-                                    dni: null,
-                                },
-                            );
+                            const response = await fetchClient(ClientExistsDocument, {
+                                email: value,
+                                dni: null,
+                            });
 
                             return response.clientExists
                                 ? 'Ya existe un cliente con ese correo'
@@ -90,13 +87,10 @@ const ClientContactFormFields: React.FC = () => {
                         required: true,
                         maxLength: 10,
                         validate: async (value) => {
-                            const response = await clientGraphqlQuery(
-                                ClientExistsDocument,
-                                {
-                                    email: null,
-                                    dni: value,
-                                },
-                            );
+                            const response = await fetchClient(ClientExistsDocument, {
+                                email: null,
+                                dni: value,
+                            });
 
                             return response.clientExists
                                 ? 'Ya existe un cliente con ese DNI'
