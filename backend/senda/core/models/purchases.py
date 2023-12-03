@@ -1,10 +1,9 @@
-from decimal import Decimal
 from typing import Any
-from django.db.models.signals import post_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from django.core.exceptions import ValidationError
-from django.db import models, transaction
+from django.db import models
 
 from extensions.db.models import TimeStampedModel
 from senda.core.managers import PurchaseModelManager
@@ -123,7 +122,7 @@ class PurchaseItemModel(TimeStampedModel):
         super().save(*args, **kwargs)
 
 
-@receiver(post_save, sender=PurchaseItemModel)
+@receiver(pre_save, sender=PurchaseItemModel)
 def update_purchase_total(
     sender: Any, instance: PurchaseItemModel, **kwargs: Any
 ) -> None:
@@ -135,7 +134,6 @@ def update_purchase_total(
         instance (PurchaseItemModel): The instance of the model that was saved.
         kwargs (Any): Additional keyword arguments.
     """
-    # if is creating
     if not instance.pk:
         stock_in_office = instance.product.get_stock_for_office(
             instance.purchase.office
@@ -155,5 +153,4 @@ def update_purchase_total(
     new_total = instance.quantity * instance.price
     if instance.total != new_total:
         instance.total = new_total
-        instance.save()
         instance.purchase.recalculate_total()
