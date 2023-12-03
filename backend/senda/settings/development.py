@@ -8,26 +8,10 @@ class Development(Common):
     SERVER_ADDRESS = "http://localhost:3000"
     SERVER_DOMAIN = "localhost:3000"
 
-    CSRF_TRUSTED_ORIGINS = [
-        "http://localhost:3000",
-        "http://localhost",
-        "https://localhost:3000",
-        "https://localhost",
-        "http://0.0.0.0:3000",
-        "https://0.0.0.0",
-    ]
+    CSRF_TRUSTED_ORIGINS = ["http://*"]
 
     CORS_ALLOW_CREDENTIALS = True
-    CORS_ALLOW_ALL_ORIGINS = False
-    CORS_ALLOWED_ORIGINS = [
-        "https://localhost:3000",
-        "http://localhost:3000",
-        "http://localhost",
-        "https://0.0.0.0:3000",
-        "http://0.0.0.0:3000",
-        "http://0.0.0.0",
-        "http://127.0.0.1",
-    ]
+    CORS_ALLOW_ALL_ORIGINS = True
 
     DEBUG: bool = True
 
