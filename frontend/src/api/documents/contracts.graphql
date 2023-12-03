@@ -45,8 +45,6 @@ query contractById($id: ID!) {
             status
         }
         expirationDate
-        hasPayedDeposit
-        hasPayedRemainingAmount
         houseNumber
         houseUnit
         office {
