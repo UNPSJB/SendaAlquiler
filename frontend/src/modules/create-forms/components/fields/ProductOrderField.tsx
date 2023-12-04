@@ -149,7 +149,7 @@ const ProductOrderField: React.FC<Props> = ({
             Error={null}
         >
             {() => (
-                <div>
+                <div className="space-y-4">
                     {orderedProducts.map((item, index) => {
                         let subtotal = null;
                         if (item.product && item.quantity) {
