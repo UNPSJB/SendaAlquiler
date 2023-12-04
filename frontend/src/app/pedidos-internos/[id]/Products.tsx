@@ -1,35 +1,53 @@
+import { InternalOrderHistoryStatusChoices } from '@/api/graphql';
+
 import { InternalOrderByIdTabComponentProps } from './page';
 
 const InternalOrderByIdProductsTab: React.FC<InternalOrderByIdTabComponentProps> = ({
     internalOrder,
 }) => {
     return (
-        <>
-            <div className="mb-4 mr-8 mt-8 rounded-md border bg-white">
-                <div className="flex justify-between border-b px-4 py-2 font-bold">
-                    <h2>Producto</h2>
-                    <h2 className="pr-2">Pedido | Recibido</h2>
-                </div>
+        <div className="mb-4 mr-8 mt-8 rounded-md border border-gray-300 bg-white">
+            <table className="w-full">
+                <thead>
+                    <tr>
+                        <th className="border-b border-gray-200 p-4 text-left">
+                            Producto
+                        </th>
+                        <th className="border-b border-gray-200 p-4 text-left">Marca</th>
+                        <th className="border-b border-gray-200 p-4 text-left">Tipo</th>
+                        <th className="border-b border-gray-200 p-4 text-left">Pedido</th>
+                        <th className="border-b border-gray-200 p-4 text-left">
+                            Recibido
+                        </th>
+                    </tr>
+                </thead>
 
-                <div className="px-4 py-2">
+                <tbody>
                     {internalOrder.orders.map((item, index) => (
-                        <div key={index}>
-                            <div className="flex justify-between pb-2">
-                                <h2 className="text-gray-500">
-                                    <b className="font-medium">-</b> {item.product.name}{' '}
-                                    {item.product.brand?.name} ({item.product.type})
-                                </h2>
-                                <p className=" text-gray-500">
-                                    {item.quantity} u.{' '}
-                                    <span className="font-bold">|</span>{' '}
-                                    {item.quantityReceived} u.
-                                </p>
-                            </div>
-                        </div>
+                        <tr className="group" key={index}>
+                            <td className="p-4 group-last:first:rounded-bl-md group-even:bg-gray-100">
+                                {item.product.name}
+                            </td>
+                            <td className="p-4 group-even:bg-gray-100">
+                                {item.product.brand?.name}
+                            </td>
+                            <td className="p-4 group-even:bg-gray-100">
+                                {item.product.type}
+                            </td>
+                            <td className="p-4 group-even:bg-gray-100">
+                                {item.quantity}
+                            </td>
+                            <td className="p-4 group-last:last:rounded-br-md group-even:bg-gray-100">
+                                {internalOrder.currentHistory?.status ===
+                                InternalOrderHistoryStatusChoices.Completed
+                                    ? item.quantityReceived
+                                    : '-'}
+                            </td>
+                        </tr>
                     ))}
-                </div>
-            </div>
-        </>
+                </tbody>
+            </table>
+        </div>
     );
 };
 
