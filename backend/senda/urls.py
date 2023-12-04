@@ -3,7 +3,6 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.decorators.csrf import csrf_exempt
-from graphql_jwt.decorators import jwt_cookie
 from graphene_django.views import GraphQLView
 
 
@@ -14,7 +13,7 @@ urlpatterns = [
     # regex with and without trailing slash graphql
     re_path(
         r"^graphql/?$",
-        csrf_exempt(jwt_cookie(GraphQLView.as_view(graphiql=enable_graphiql))),
+        csrf_exempt(GraphQLView.as_view(graphiql=enable_graphiql)),
     ),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
