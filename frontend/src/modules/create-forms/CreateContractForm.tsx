@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import dayjs from 'dayjs';
+import { useEffect } from 'react';
 import {
     FormProvider,
     SubmitErrorHandler,
@@ -115,6 +116,9 @@ const calculateNumberOfRentalDays = (
 };
 
 const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) => {
+    const searchParams = useSearchParams();
+    const clientId = searchParams.get('client');
+
     const queryResult = useAllClients();
     const formMethods = useForm<FormValues>();
     const { watch, control, setValue } = formMethods;
@@ -243,6 +247,20 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
     const onError: SubmitErrorHandler<FormValues> = () => {
         toast.error('Hay un error en el formulario');
     };
+
+    useEffect(() => {
+        const data = queryResult.data;
+        if (!data) return;
+
+        const matchingClient = data.allClients.find((client) => client.id === clientId);
+        if (matchingClient) {
+            setValue('client', {
+                value: matchingClient.id,
+                label: matchingClient.firstName + ' ' + matchingClient.lastName,
+                data: matchingClient,
+            });
+        }
+    }, [clientId, setValue, queryResult.data]);
 
     return (
         <>

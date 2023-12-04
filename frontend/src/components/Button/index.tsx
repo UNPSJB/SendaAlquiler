@@ -105,7 +105,6 @@ const Button: React.FC<Props> = forwardRef<HTMLButtonElement | HTMLAnchorElement
             return (
                 <Link
                     href={href}
-                    passHref
                     ref={ref as React.Ref<HTMLAnchorElement>}
                     className={clsx(className, 'text-center')}
                     {...rest}

@@ -131,7 +131,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({ status, id }) => {
 const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProps> = ({
     id,
 }) => {
-    const useRentalContractsByClientIdResult = useRentalContractsByClientId(id as string);
+    const useRentalContractsByClientIdResult = useRentalContractsByClientId(id);
 
     return (
         <FetchedDataRenderer
@@ -153,7 +153,10 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                                 ({rentalContractsByClientId.length})
                             </span>
                         </h1>
-                        <Button href="/contratos/add" className="mr-4 mt-8">
+                        <Button
+                            href={`/contratos/add?client=${id}`}
+                            className="mr-4 mt-8"
+                        >
                             + Añadir Contrato
                         </Button>
                     </div>

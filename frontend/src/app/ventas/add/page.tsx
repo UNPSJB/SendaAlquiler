@@ -2,8 +2,12 @@
 
 import CreatePurchaseForm from '@/modules/create-forms/CreatePurchase';
 
-const Page = () => {
-    return <CreatePurchaseForm cancelHref="/ventas" />;
+const Page = ({ searchParams }: { searchParams: { client?: string } }) => {
+    const clientId = searchParams.client;
+
+    return (
+        <CreatePurchaseForm cancelHref={clientId ? `/clientes/${clientId}` : '/ventas'} />
+    );
 };
 
 export default Page;

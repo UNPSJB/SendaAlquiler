@@ -1,7 +1,13 @@
 import CreateContractForm from '@/modules/create-forms/CreateContractForm';
 
-const Page = () => {
-    return <CreateContractForm cancelHref="/contratos" />;
+const Page = ({ searchParams }: { searchParams: { client?: string } }) => {
+    const clientId = searchParams.client;
+
+    return (
+        <CreateContractForm
+            cancelHref={clientId ? `/clientes/${clientId}` : '/contratos'}
+        />
+    );
 };
 
 export default Page;

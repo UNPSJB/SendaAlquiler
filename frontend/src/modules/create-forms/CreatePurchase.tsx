@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
+import { useEffect } from 'react';
 import {
     FormProvider,
     SubmitErrorHandler,
@@ -45,8 +46,11 @@ type FormValues = {
 const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) => {
     const clientsResult = useClients();
     const formMethods = useForm<FormValues>();
-    const { watch, control } = formMethods;
+    const { watch, control, setValue } = formMethods;
     const router = useRouter();
+
+    const searchParams = useSearchParams();
+    const clientId = searchParams.get('client');
 
     const { mutate, isLoading: isMutating } = useCreatePurchase({
         onSuccess: (data) => {
@@ -100,6 +104,22 @@ const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) =
     const onError: SubmitErrorHandler<FormValues> = () => {
         toast.error('No se pudo crear la venta. Por favor, revisa los datos ingresados.');
     };
+
+    useEffect(() => {
+        if (clientId) {
+            const client = clientsResult.queryResult.data?.clients.results.find(
+                (client) => client.id === clientId,
+            );
+
+            if (client) {
+                setValue('client', {
+                    label: `${client.firstName} ${client.lastName}`,
+                    value: client.id,
+                    data: client,
+                });
+            }
+        }
+    }, [clientId, clientsResult.queryResult.data, setValue]);
 
     return (
         <>
