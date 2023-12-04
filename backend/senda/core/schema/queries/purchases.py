@@ -24,7 +24,9 @@ class Query(graphene.ObjectType):
     @employee_required
     def resolve_purchases(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
-            PurchaseModel.objects.all().order_by("-created_on"), page
+            PurchaseModel.objects.filter(
+                office=info.context.office_id
+            ).order_by("-created_on"), page
         )
         return PaginatedPurchaseQueryResult(
             count=paginator.count,

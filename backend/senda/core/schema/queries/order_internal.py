@@ -15,6 +15,9 @@ import csv
 import io
 
 from senda.core.decorators import employee_required, CustomInfo
+from django.db import models
+
+
 class Query(graphene.ObjectType):
     internal_orders = graphene.NonNull(
         PaginatedInternalOrderQueryResult, page=graphene.Int()
@@ -23,7 +26,11 @@ class Query(graphene.ObjectType):
     @employee_required
     def resolve_internal_orders(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
-            InternalOrderModel.objects.all().order_by("-created_on"), page
+            InternalOrderModel.objects.filter(
+                models.Q(office_branch=info.context.office_id)
+                | models.Q(office_destination=info.context.office_id)
+            ).order_by("-created_on"),
+            page,
         )
 
         return PaginatedInternalOrderQueryResult(

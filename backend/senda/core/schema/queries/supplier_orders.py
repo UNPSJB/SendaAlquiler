@@ -24,7 +24,9 @@ class Query(graphene.ObjectType):
     @employee_required
     def resolve_supplier_orders(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
-            SupplierOrderModel.objects.all().order_by("-created_on"), page
+            SupplierOrderModel.objects.filter(
+                office_destination=info.context.office_id
+            ).order_by("-created_on"), page
         )
 
         return PaginatedOrderSupplierQueryResult(
@@ -43,7 +45,9 @@ class Query(graphene.ObjectType):
 
     @employee_required
     def resolve_suppliers_orders_csv(self, info: CustomInfo):
-        supplier_orders = SupplierOrderModel.objects.all().prefetch_related(
+        supplier_orders = SupplierOrderModel.objects.filter(
+            office_destination=info.context.office_id
+        ).prefetch_related(
             "supplier",
             "orders",
         )
