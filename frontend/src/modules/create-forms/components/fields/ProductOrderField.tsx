@@ -56,7 +56,7 @@ const ProductOrderField: React.FC<Props> = ({
     const productsData = useProductsResult.data;
 
     const [orderedProducts, setOrderedProducts] = useState<ProductQuantityAndService[]>(
-        value.length ? value : [DEFAULT_PRODUCT_QUANTITY_PAIR],
+        value.length ? value : [{ ...DEFAULT_PRODUCT_QUANTITY_PAIR }],
     );
 
     useEffect(() => {
@@ -64,7 +64,7 @@ const ProductOrderField: React.FC<Props> = ({
     }, [orderedProducts, onChange]);
 
     const addProductToOrder = () => {
-        setOrderedProducts((prev) => [...prev, DEFAULT_PRODUCT_QUANTITY_PAIR]);
+        setOrderedProducts((prev) => [...prev, { ...DEFAULT_PRODUCT_QUANTITY_PAIR }]);
     };
 
     const updateSelectedProduct = (product: ProductDetails | null, index: number) => {
@@ -125,6 +125,9 @@ const ProductOrderField: React.FC<Props> = ({
     const selectableProductOptions = (
         productsData?.allProducts
             .filter((product) => product.type === ProductTypeChoices.Alquilable)
+            .filter((product) =>
+                orderedProducts.every((item) => item.product?.value !== product.id),
+            )
             .map((product) => ({
                 value: product.id,
                 label: product.name,
