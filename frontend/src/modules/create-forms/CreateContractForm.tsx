@@ -222,7 +222,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
             !localityId ||
             !streetName
         ) {
-            // TODO: locality id
             toast.error('Faltan campos obligatorios');
             return;
         }
