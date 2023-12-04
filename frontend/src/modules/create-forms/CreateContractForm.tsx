@@ -16,7 +16,6 @@ import { ClientsQuery } from '@/api/graphql';
 import { useAllClients, useCreateRentalContract } from '@/api/hooks';
 
 import LocalityField, { LocalityFieldValue } from './components/fields/LocalityField';
-import RHFOfficesField, { OfficesFieldValue } from './components/fields/OfficesField';
 import RHFProductOrderField, {
     ProductQuantityAndService,
 } from './components/fields/ProductOrderField';
@@ -63,7 +62,6 @@ type FormValues = {
         houseNumber: string;
         houseUnit: string | null;
         note?: string;
-        office?: OfficesFieldValue;
     };
     productsAndQuantity: ProductQuantityAndService[];
     contractStartDatetime: Date[];
@@ -164,13 +162,22 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
         ? 0
         : productsAndQuantity?.reduce((acc, current) => {
               const product = current.product?.data;
+              const service = current.service?.data;
               const quantity = current.quantity;
 
-              if (product && quantity) {
-                  return acc + product.price * quantity;
+              let next = acc;
+
+              if (quantity) {
+                  if (product) {
+                      next += product.price * quantity;
+                  }
+
+                  if (service) {
+                      next += service.price * quantity;
+                  }
               }
 
-              return acc;
+              return next;
           }, 0) * numberOfRentalDays;
 
     const copyClientDetailsOnDetails = () => {
@@ -198,7 +205,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
         const houseNumber = data.details.houseNumber;
         const houseUnit = data.details.houseUnit;
         const localityId = data.details.locality?.data.id;
-        const officeId = data.details.office?.data.id;
         const products = data.productsAndQuantity
             ? data.productsAndQuantity.map((productAndQuantity) => ({
                   id: productAndQuantity.product?.data.id as string,
@@ -214,9 +220,9 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
             !products ||
             products.length === 0 ||
             !localityId ||
-            !officeId ||
             !streetName
         ) {
+            // TODO: locality id
             toast.error('Faltan campos obligatorios');
             return;
         }
@@ -230,7 +236,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                 houseUnit: houseUnit,
                 streetName: streetName,
                 localityId: localityId,
-                officeId: officeId,
                 products: products,
             },
         });
@@ -549,18 +554,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                 </div>
 
                                 <div className="w-9/12 space-y-6">
-                                    <RHFFormField
-                                        label="Sucursal"
-                                        fieldID="details.office"
-                                    >
-                                        <RHFOfficesField<FormValues, 'details.office'>
-                                            name="details.office"
-                                            control={control}
-                                            placeholder="Selecciona una oficina"
-                                            officeToExclude={undefined}
-                                        />
-                                    </RHFFormField>
-
                                     <RHFFormField
                                         label="Fecha y hora de inicio"
                                         fieldID="contractStartDatetime"

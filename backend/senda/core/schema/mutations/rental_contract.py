@@ -33,7 +33,6 @@ class RentalContractProductsItemInput(graphene.InputObjectType):
 
 
 class CreateRentalContractInput(graphene.InputObjectType):
-    office_id = graphene.ID(required=True)
     client_id = graphene.ID(required=True)
     locality_id = graphene.ID(required=True)
     house_number = graphene.String(required=True)
@@ -81,17 +80,13 @@ class CreateRentalContract(graphene.Mutation):
     class Arguments:
         data = CreateRentalContractInput(required=True)
 
+    @employee_required
     def mutate(
         self, info: CustomInfo, data: CreateRentalContractInput
     ) -> "CreateRentalContract":
         data_dict = input_object_type_to_dict(data)
 
         try:
-            office_id = data_dict.pop("office_id")
-            office = get_office(office_id)
-            if office is None:
-                raise ValueError(ErrorMessages.INVALID_OFFICE)
-
             client_id = data_dict.pop("client_id")
             client = get_client(client_id)
             if client is None:
@@ -103,7 +98,7 @@ class CreateRentalContract(graphene.Mutation):
                 raise ValueError(ErrorMessages.INVALID_LOCALITY)
 
             rental_contract = RentalContractModel.objects.create_rental_contract(
-                office=office,
+                office=info.context.office_id,
                 client=client,
                 locality=locality,
                 **data_dict,
@@ -111,6 +106,7 @@ class CreateRentalContract(graphene.Mutation):
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
             return CreateRentalContract(error=str(e))
         except Exception as e:
+            print(e)
             return CreateRentalContract(error="Error desconocido")
 
         return CreateRentalContract(rental_contract=rental_contract)
@@ -155,6 +151,7 @@ class BaseChangeContractStatus(graphene.Mutation):
 
 
 class PayContractDeposit(BaseChangeContractStatus):
+    @employee_required
     @classmethod
     def mutate(
         cls, self: "PayContractDeposit", info: Any, id: str
@@ -173,6 +170,7 @@ class PayContractDeposit(BaseChangeContractStatus):
 
 
 class PayTotalContract(BaseChangeContractStatus):
+    @employee_required
     @classmethod
     def mutate(
         cls, self: "PayTotalContract", info: Any, id: str
@@ -191,6 +189,7 @@ class PayTotalContract(BaseChangeContractStatus):
 
 
 class CancelContract(BaseChangeContractStatus):
+    @employee_required
     @classmethod
     def mutate(
         cls, self: "CancelContract", info: Any, id: str
@@ -212,6 +211,7 @@ class CancelContract(BaseChangeContractStatus):
 
 
 class StartContract(BaseChangeContractStatus):
+    @employee_required
     @classmethod
     def mutate(
         cls, self: "StartContract", info: Any, id: str
@@ -230,6 +230,7 @@ class StartContract(BaseChangeContractStatus):
 
 
 class ExpiredContract(BaseChangeContractStatus):
+    @employee_required
     @classmethod
     def mutate(
         cls, self: "ExpiredContract", info: Any, id: str
@@ -251,6 +252,7 @@ class ExpiredContract(BaseChangeContractStatus):
 
 
 class FinishContract(BaseChangeContractStatus):
+    @employee_required
     @classmethod
     def mutate(
         cls, self: "FinishContract", info: Any, id: str
@@ -269,6 +271,7 @@ class FinishContract(BaseChangeContractStatus):
 
 
 class FailedReturnContract(BaseChangeContractStatus):
+    @employee_required
     @classmethod
     def mutate(
         cls, self: "FailedReturnContract", info: Any, id: str
@@ -287,6 +290,7 @@ class FailedReturnContract(BaseChangeContractStatus):
 
 
 class SuccessfulReturnContract(BaseChangeContractStatus):
+    @employee_required
     @classmethod
     def mutate(
         cls, self: "SuccessfulReturnContract", info: Any, id: str

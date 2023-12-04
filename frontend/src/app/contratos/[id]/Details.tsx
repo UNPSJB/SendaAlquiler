@@ -68,13 +68,6 @@ const ContractsByIdDetailsTab: React.FC<ContractByIdTabComponentProps> = ({
                         <b>Vencimiento: </b> {formatDateTime(contract.expirationDate)}
                     </LI>
                     <LI>
-                        <b>Señado: </b> {contract.hasPayedDeposit ? 'Sí' : 'No'}
-                    </LI>
-                    <LI>
-                        <b>Cancelado: </b>{' '}
-                        {contract.hasPayedRemainingAmount ? 'Sí' : 'No'}
-                    </LI>
-                    <LI>
                         <b>Fecha Inicio del Evento: </b>{' '}
                         {formatDateTimeHr(contract.contractStartDatetime)}
                     </LI>

@@ -67,11 +67,11 @@ query contractById($id: ID!) {
                 name
                 price
                 sku
-                services {
-                    name
-                    price
-                }
             }
+            service {
+                name
+            }
+            servicePrice
             quantity
         }
     }

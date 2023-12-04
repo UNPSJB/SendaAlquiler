@@ -131,6 +131,7 @@ query allClients {
         houseUnit
         streetName
         locality {
+            id
             name
             state
             postalCode

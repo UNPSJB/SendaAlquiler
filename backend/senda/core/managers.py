@@ -375,7 +375,7 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
         self,
         client: "ClientModel",
         products: List[RentalContractProductsItemDict],
-        office: "OfficeModel",
+        office: str,
         locality: "LocalityModel",
         house_number: str,
         street_name: str,
@@ -390,7 +390,7 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
 
         rental_contract = self.create(
             client=client,
-            office=office,
+            office_id=office,
             locality=locality,
             house_number=house_number,
             street_name=street_name,
@@ -401,8 +401,9 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
 
         for product in products:
             rental_contract.rental_contract_items.create(
-                quantity=product["quantity"],
                 product_id=product["id"],
+                service_id=product["service"],
+                quantity=product["quantity"],
             )
 
         rental_contract.rental_contract_history.create(

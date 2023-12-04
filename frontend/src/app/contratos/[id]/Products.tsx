@@ -19,19 +19,16 @@ const ContractsByIdProductsTab: React.FC<ContractByIdTabComponentProps> = ({
                                     </p>
                                 </div>
                                 <div className="pb-2    ">
-                                    {item.product.services.map(
-                                        (service, serviceIndex) => (
-                                            <div key={serviceIndex}>
-                                                <div className="flex justify-between ">
-                                                    <h2 className="text-gray-500">
-                                                        - {service.name}
-                                                    </h2>
-                                                    <p className=" text-gray-500">
-                                                        1 unidad x ${service.price}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ),
+                                    {item.service && (
+                                        <div className="flex justify-between ">
+                                            <h2 className="text-gray-500">
+                                                - {item.service.name}
+                                            </h2>
+                                            <p className=" text-gray-500">
+                                                {item.quantity} unidad x $
+                                                {item.servicePrice}
+                                            </p>
+                                        </div>
                                     )}
                                 </div>
                             </div>

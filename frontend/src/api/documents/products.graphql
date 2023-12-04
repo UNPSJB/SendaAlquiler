@@ -1,3 +1,18 @@
+fragment ProductListItem on Product {
+    id
+    name
+    price
+    type
+    brand {
+        name
+    }
+    services {
+        id
+        name
+        price
+    }
+}
+
 query products($page: Int) {
     products(page: $page) {
         count
@@ -39,20 +54,6 @@ mutation createProduct($productData: CreateProductInput!) {
             ...ProductListItem
         }
         error
-    }
-}
-
-fragment ProductListItem on Product {
-    id
-    name
-    price
-    type
-    brand {
-        name
-    }
-    services {
-        id
-        name
     }
 }
 

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
@@ -15,6 +15,7 @@ import { Input } from '../../../forms/Input';
 import { CustomSelect } from '../../../forms/Select';
 
 type ProductDetails = ProductsQuery['products']['results'][0];
+type ServiceDetails = ProductDetails['services'][0];
 
 export type ProductQuantityAndService = {
     product: {
@@ -54,50 +55,73 @@ const ProductOrderField: React.FC<Props> = ({
     const useProductsResult = useAllProducts();
     const productsData = useProductsResult.data;
 
-    const orderedProducts = useMemo(
-        () => (value.length ? value : [DEFAULT_PRODUCT_QUANTITY_PAIR]),
-        [value],
+    const [orderedProducts, setOrderedProducts] = useState<ProductQuantityAndService[]>(
+        value.length ? value : [DEFAULT_PRODUCT_QUANTITY_PAIR],
     );
+
+    useEffect(() => {
+        onChange(orderedProducts);
+    }, [orderedProducts, onChange]);
 
     const addProductToOrder = () => {
-        onChange([...orderedProducts, DEFAULT_PRODUCT_QUANTITY_PAIR]);
+        setOrderedProducts((prev) => [...prev, DEFAULT_PRODUCT_QUANTITY_PAIR]);
     };
 
-    const updateSelectedProduct = useCallback(
-        (product: ProductDetails, index: number) => {
-            const newProductsAndQuantity = [...orderedProducts];
-            newProductsAndQuantity[index].product = {
-                value: product.id,
-                label: product.name,
-                data: product,
-            };
-            onChange(newProductsAndQuantity);
-        },
-        [orderedProducts, onChange],
-    );
+    const updateSelectedProduct = (product: ProductDetails | null, index: number) => {
+        setOrderedProducts((prev) => {
+            const productWasSelected =
+                prev.length > index + 1 &&
+                prev[index].product?.data &&
+                prev[index].product?.data.id === product?.id;
 
-    const updateSelectedService = useCallback(
-        (service: { label: string; value: string }, index: number) => {
-            const newProductsAndQuantity = [...orderedProducts];
-            newProductsAndQuantity[index].service = {
-                value: service.value,
-                label: service.label,
-            };
-            onChange(newProductsAndQuantity);
-        },
-        [orderedProducts, onChange],
-    );
+            const newProductsAndQuantity = [...prev];
+            if (!product) {
+                newProductsAndQuantity[index].product = null;
+                newProductsAndQuantity[index].service = null;
+            } else {
+                newProductsAndQuantity[index].product = {
+                    value: product.id,
+                    label: product.name,
+                    data: product,
+                };
+                newProductsAndQuantity[index].service = null;
+            }
 
-    const handleQuantityChange = useCallback(
-        (quantity: number, index: number) => {
-            const newProductsAndQuantity = [...orderedProducts];
+            if (productWasSelected) {
+                newProductsAndQuantity[index].service = null;
+            }
+
+            return newProductsAndQuantity;
+        });
+    };
+
+    const updateSelectedService = (service: ServiceDetails | null, index: number) => {
+        setOrderedProducts((prev) => {
+            const newProductsAndQuantity = [...prev];
+
+            if (!service) {
+                newProductsAndQuantity[index].service = null;
+            } else {
+                newProductsAndQuantity[index].service = {
+                    value: service.id,
+                    label: service.name,
+                    data: service,
+                };
+            }
+
+            return newProductsAndQuantity;
+        });
+    };
+
+    const handleQuantityChange = (quantity: number, index: number) => {
+        setOrderedProducts((prev) => {
+            const newProductsAndQuantity = [...prev];
             newProductsAndQuantity[index].quantity = quantity;
-            onChange(newProductsAndQuantity);
-        },
-        [orderedProducts, onChange],
-    );
 
-    // Products options for Select
+            return newProductsAndQuantity;
+        });
+    };
+
     const selectableProductOptions = (
         productsData?.allProducts
             .filter((product) => product.type === ProductTypeChoices.Alquilable)
@@ -107,7 +131,6 @@ const ProductOrderField: React.FC<Props> = ({
                 data: product,
             })) || []
     ).filter((product) => {
-        // Filter out products that are already selected
         return !orderedProducts.some(
             (orderedProduct) => orderedProduct.product?.value === product.value,
         );
@@ -130,10 +153,10 @@ const ProductOrderField: React.FC<Props> = ({
                             subtotal = item.product.data.price * item.quantity;
                         }
 
-                        // if (item.service && item.quantity) {
-                        //     subtotal =
-                        //         (subtotal || 0) + item.service.data. * item.quantity;
-                        // }
+                        if (item.service && item.quantity) {
+                            subtotal =
+                                (subtotal || 0) + item.service.data.price * item.quantity;
+                        }
 
                         subtotal = (subtotal || 0) * numberOfRentalDays;
 
@@ -144,6 +167,7 @@ const ProductOrderField: React.FC<Props> = ({
                                       return {
                                           value: service.id,
                                           label: service.name,
+                                          data: service,
                                       };
                                   })
                                 : null;
@@ -159,17 +183,27 @@ const ProductOrderField: React.FC<Props> = ({
                                     className="flex-1"
                                     showRequired
                                 >
-                                    <CustomSelect
+                                    <CustomSelect<
+                                        {
+                                            value: string;
+                                            label: string;
+                                            data: ProductDetails;
+                                        },
+                                        false
+                                    >
+                                        value={item.product}
                                         options={[
                                             ...(item?.product ? [item.product] : []),
                                             ...selectableProductOptions,
                                         ]}
-                                        name={`productsAndQuantity.${index}.product`}
                                         placeholder="Selecciona un producto"
-                                        onChange={({ data }: any) => {
-                                            if (!data) return;
-                                            updateSelectedProduct(data, index);
+                                        onChange={(next) => {
+                                            updateSelectedProduct(
+                                                next?.data ?? null,
+                                                index,
+                                            );
                                         }}
+                                        isClearable
                                     />
                                 </FormField>
 
@@ -179,9 +213,9 @@ const ProductOrderField: React.FC<Props> = ({
                                     showRequired
                                 >
                                     <Input
-                                        name={`productsAndQuantity.${index}.quantity`}
                                         id={`productsAndQuantity-${index}-quantity`}
                                         type="number"
+                                        name={`productsAndQuantity-${index}-quantity`}
                                         placeholder="1"
                                         onChange={(value) => {
                                             handleQuantityChange(
@@ -196,14 +230,24 @@ const ProductOrderField: React.FC<Props> = ({
                                     fieldID={`productsAndQuantity-${index}-service`}
                                     label="Servicio"
                                 >
-                                    <CustomSelect<{ label: string; value: string }, false>
+                                    <CustomSelect<
+                                        {
+                                            value: string;
+                                            label: string;
+                                            data: ServiceDetails;
+                                        },
+                                        false
+                                    >
+                                        value={item.service}
                                         options={servicesOptions || []}
-                                        name={`productsAndQuantity.${index}.service`}
                                         placeholder="Selecciona un servicio"
                                         onChange={(next) => {
-                                            if (!next) return;
-                                            updateSelectedService(next, index);
+                                            updateSelectedService(
+                                                next?.data ?? null,
+                                                index,
+                                            );
                                         }}
+                                        isClearable
                                     />
                                 </FormField>
 
@@ -262,7 +306,7 @@ const RHFProductOrderField = <
             control={control}
             render={({ field: { onChange, value } }) => (
                 <ProductOrderField
-                    value={value as ProductQuantityAndService[]}
+                    value={value}
                     onChange={onChange}
                     numberOfRentalDays={numberOfRentalDays}
                 />

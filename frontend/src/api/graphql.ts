@@ -193,7 +193,6 @@ export type CreateRentalContractInput = {
     houseNumber: Scalars['String']['input'];
     houseUnit: InputMaybe<Scalars['String']['input']>;
     localityId: Scalars['ID']['input'];
-    officeId: Scalars['ID']['input'];
     products: Array<RentalContractProductsItemInput>;
     streetName: Scalars['String']['input'];
 };
@@ -1379,6 +1378,7 @@ export type AllClientsQuery = {
         streetName: string;
         locality: {
             __typename?: 'Locality';
+            id: string;
             name: string;
             state: StateChoices;
             postalCode: string;
@@ -1476,12 +1476,8 @@ export type ContractByIdQuery = {
                 price: any | null;
                 sku: string | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
-                services: Array<{
-                    __typename?: 'ProductService';
-                    name: string;
-                    price: any;
-                }>;
             };
+            service: { __typename?: 'ProductService'; name: string } | null;
         }>;
     } | null;
 };
@@ -1714,19 +1710,6 @@ export type DeleteEmployeeMutationVariables = Exact<{
 export type DeleteEmployeeMutation = {
     __typename?: 'Mutation';
     deleteEmployee: { __typename?: 'DeleteEmployee'; success: boolean } | null;
-};
-
-export type SetSessionOfficeCookieMutationVariables = Exact<{
-    officeId: InputMaybe<Scalars['ID']['input']>;
-    clearCookie: InputMaybe<Scalars['Boolean']['input']>;
-}>;
-
-export type SetSessionOfficeCookieMutation = {
-    __typename?: 'Mutation';
-    setSessionOfficeCookie: {
-        __typename?: 'SetSessionOfficeCookie';
-        success: boolean | null;
-    } | null;
 };
 
 export type LocalitiesQueryVariables = Exact<{
@@ -2079,6 +2062,21 @@ export type DeleteInternalOrderMutation = {
     deleteInternalOrder: { __typename?: 'DeleteInternalOrder'; success: boolean } | null;
 };
 
+export type ProductListItemFragment = {
+    __typename?: 'Product';
+    id: string;
+    name: string;
+    price: any | null;
+    type: ProductTypeChoices;
+    brand: { __typename?: 'Brand'; name: string } | null;
+    services: Array<{
+        __typename?: 'ProductService';
+        id: string;
+        name: string;
+        price: any;
+    }>;
+};
+
 export type ProductsQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -2096,7 +2094,12 @@ export type ProductsQuery = {
             price: any | null;
             type: ProductTypeChoices;
             brand: { __typename?: 'Brand'; name: string } | null;
-            services: Array<{ __typename?: 'ProductService'; id: string; name: string }>;
+            services: Array<{
+                __typename?: 'ProductService';
+                id: string;
+                name: string;
+                price: any;
+            }>;
         }>;
     };
 };
@@ -2143,19 +2146,14 @@ export type CreateProductMutation = {
             price: any | null;
             type: ProductTypeChoices;
             brand: { __typename?: 'Brand'; name: string } | null;
-            services: Array<{ __typename?: 'ProductService'; id: string; name: string }>;
+            services: Array<{
+                __typename?: 'ProductService';
+                id: string;
+                name: string;
+                price: any;
+            }>;
         } | null;
     } | null;
-};
-
-export type ProductListItemFragment = {
-    __typename?: 'Product';
-    id: string;
-    name: string;
-    price: any | null;
-    type: ProductTypeChoices;
-    brand: { __typename?: 'Brand'; name: string } | null;
-    services: Array<{ __typename?: 'ProductService'; id: string; name: string }>;
 };
 
 export type ProductsStocksByOfficeIdQueryVariables = Exact<{
@@ -2206,7 +2204,12 @@ export type AllProductsQuery = {
         price: any | null;
         type: ProductTypeChoices;
         brand: { __typename?: 'Brand'; name: string } | null;
-        services: Array<{ __typename?: 'ProductService'; id: string; name: string }>;
+        services: Array<{
+            __typename?: 'ProductService';
+            id: string;
+            name: string;
+            price: any;
+        }>;
     }>;
 };
 
@@ -2506,6 +2509,7 @@ export const ProductListItemFragmentDoc = {
                             selections: [
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
                             ],
                         },
                     },
@@ -3483,6 +3487,10 @@ export const AllClientsDocument = {
                                         selections: [
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'name' },
                                             },
                                             {
@@ -3969,33 +3977,30 @@ export const ContractByIdDocument = {
                                                                 value: 'sku',
                                                             },
                                                         },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'service' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
                                                         {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'services',
-                                                            },
-                                                            selectionSet: {
-                                                                kind: 'SelectionSet',
-                                                                selections: [
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'name',
-                                                                        },
-                                                                    },
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'price',
-                                                                        },
-                                                                    },
-                                                                ],
+                                                                value: 'name',
                                                             },
                                                         },
                                                     ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'servicePrice',
                                                 },
                                             },
                                             {
@@ -4986,73 +4991,6 @@ export const DeleteEmployeeDocument = {
         },
     ],
 } as unknown as DocumentNode<DeleteEmployeeMutation, DeleteEmployeeMutationVariables>;
-export const SetSessionOfficeCookieDocument = {
-    kind: 'Document',
-    definitions: [
-        {
-            kind: 'OperationDefinition',
-            operation: 'mutation',
-            name: { kind: 'Name', value: 'setSessionOfficeCookie' },
-            variableDefinitions: [
-                {
-                    kind: 'VariableDefinition',
-                    variable: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'officeId' },
-                    },
-                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
-                },
-                {
-                    kind: 'VariableDefinition',
-                    variable: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'clearCookie' },
-                    },
-                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'Boolean' } },
-                },
-            ],
-            selectionSet: {
-                kind: 'SelectionSet',
-                selections: [
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'setSessionOfficeCookie' },
-                        arguments: [
-                            {
-                                kind: 'Argument',
-                                name: { kind: 'Name', value: 'officeId' },
-                                value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'officeId' },
-                                },
-                            },
-                            {
-                                kind: 'Argument',
-                                name: { kind: 'Name', value: 'clearCookie' },
-                                value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'clearCookie' },
-                                },
-                            },
-                        ],
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'success' },
-                                },
-                            ],
-                        },
-                    },
-                ],
-            },
-        },
-    ],
-} as unknown as DocumentNode<
-    SetSessionOfficeCookieMutation,
-    SetSessionOfficeCookieMutationVariables
->;
 export const LocalitiesDocument = {
     kind: 'Document',
     definitions: [
@@ -6815,6 +6753,7 @@ export const ProductsDocument = {
                             selections: [
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
                             ],
                         },
                     },
@@ -7043,6 +6982,7 @@ export const CreateProductDocument = {
                             selections: [
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
                             ],
                         },
                     },
@@ -7279,6 +7219,7 @@ export const AllProductsDocument = {
                             selections: [
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
                             ],
                         },
                     },
