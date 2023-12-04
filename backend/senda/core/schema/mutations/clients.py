@@ -7,6 +7,9 @@ from senda.core.models.clients import ClientModel, LocalityModel
 from senda.core.schema.custom_types import Client
 from utils.graphene import input_object_type_to_dict
 
+from senda.core.decorators import employee_required, CustomInfo
+
+
 
 class ErrorMessages:
     INVALID_LOCALITY = "Debes especificar una localidad"
@@ -57,7 +60,8 @@ class CreateClient(graphene.Mutation):
     class Arguments:
         client_data = CreateClientInput(required=True)
 
-    def mutate(self, info: Any, client_data: CreateClientInput):
+    @employee_required
+    def mutate(self, info: CustomInfo, client_data: CreateClientInput):
         client_data_dict = input_object_type_to_dict(client_data)
 
         try:
@@ -83,7 +87,8 @@ class UpdateClient(graphene.Mutation):
         id = graphene.ID(required=True)
         client_data = UpdateClientInput(required=True)
 
-    def mutate(self, info: Any, id: str, client_data: UpdateClientInput):
+    @employee_required
+    def mutate(self, info: CustomInfo, id: str, client_data: UpdateClientInput):
         client_data_dict = input_object_type_to_dict(client_data)
 
         client_id = client_data_dict.pop("id")
@@ -113,7 +118,8 @@ class DeleteClient(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    def mutate(self, info: Any, id: str):
+    @employee_required
+    def mutate(self, info: CustomInfo, id: str):
         try:
             ClientModel.objects.get(id=id).delete()
         except ObjectDoesNotExist:

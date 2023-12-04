@@ -9,6 +9,7 @@ import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
 import { queryKeys } from './constants';
 
+import { fetchClient } from '../fetch-client';
 import {
     CreateInternalOrderDocument,
     CreateInternalOrderMutation,
@@ -18,13 +19,12 @@ import {
     DeleteInternalOrderMutation,
     InternalOrderByIdDocument,
 } from '../graphql';
-import { clientGraphqlQuery } from '../graphqlclient';
 
 export const useInternalOrderById = (id: string | undefined) => {
     return useQuery(
         queryKeys.internalOrdersDetailsById(id),
         () => {
-            return clientGraphqlQuery(InternalOrderByIdDocument, {
+            return fetchClient(InternalOrderByIdDocument, {
                 id: id as string,
             });
         },
@@ -63,7 +63,7 @@ export const useCreateInternalOrder = ({
         CreateInternalOrderMutationVariables
     >(
         (data) => {
-            return clientGraphqlQuery(CreateInternalOrderDocument, data);
+            return fetchClient(CreateInternalOrderDocument, data);
         },
         {
             onSuccess: (data, variables, context) => {
@@ -88,7 +88,7 @@ export const useDeleteInternalOrder = ({
 
     return useMutation<DeleteInternalOrderMutation, Error, string>(
         (id: string) => {
-            return clientGraphqlQuery(DeleteInternalOrderDocument, {
+            return fetchClient(DeleteInternalOrderDocument, {
                 id,
             });
         },

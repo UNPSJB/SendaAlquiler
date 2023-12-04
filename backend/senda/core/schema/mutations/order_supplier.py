@@ -13,6 +13,8 @@ from senda.core.schema.custom_types import OrderSupplier
 from senda.core.models.suppliers import SupplierModel
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
+from senda.core.decorators import employee_required, CustomInfo
+
 
 class ErrorMessages:
     INVALID_OFFICE = "Debes especificar una sucursal"
@@ -59,7 +61,8 @@ class CreateSupplierOrder(graphene.Mutation):
     class Arguments:
         data = CreateSupplierOrderInput(required=True)
 
-    def mutate(self, info: Any, data: CreateSupplierOrderInput):
+    @employee_required
+    def mutate(self, info: CustomInfo, data: CreateSupplierOrderInput):
         data_dict = input_object_type_to_dict(data)
 
         try:
@@ -159,7 +162,8 @@ class DeleteSupplierOrder(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    def mutate(self, info: Any, id: str):
+    @employee_required
+    def mutate(self, info: CustomInfo, id: str):
         try:
             order_supplier = SupplierOrderModel.objects.get(id=id)
             order_supplier.delete()

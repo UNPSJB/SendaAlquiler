@@ -1,21 +1,19 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.views.decorators.csrf import csrf_exempt
-from graphene_django.views import GraphQLView
 from graphql_jwt.decorators import jwt_cookie
+from graphene_django.views import GraphQLView
+
 
 enable_graphiql = settings.ENVIRONMENT != "production"
 
 urlpatterns = [
     path("markdownx/", include("markdownx.urls")),
-    path(
-        "graphql",
-        csrf_exempt(jwt_cookie(GraphQLView.as_view(graphiql=enable_graphiql))),
-    ),
-    path(
-        "graphql/",
+    # regex with and without trailing slash graphql
+    re_path(
+        r"^graphql/?$",
         csrf_exempt(jwt_cookie(GraphQLView.as_view(graphiql=enable_graphiql))),
     ),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

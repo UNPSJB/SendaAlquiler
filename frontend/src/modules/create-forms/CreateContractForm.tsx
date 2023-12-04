@@ -652,9 +652,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             type="text"
                                             placeholder="Apartamento, habitación, unidad, etc"
                                             control={control}
-                                            rules={{
-                                                required: true,
-                                            }}
                                         />
                                     </RHFFormField>
 
@@ -668,9 +665,6 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                             type="text"
                                             placeholder="Nota/aclaración"
                                             control={control}
-                                            rules={{
-                                                required: true,
-                                            }}
                                         />
                                     </RHFFormField>
                                 </div>

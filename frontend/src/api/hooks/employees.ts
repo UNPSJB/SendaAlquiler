@@ -9,6 +9,7 @@ import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
 import { queryKeys } from './constants';
 
+import { fetchClient } from '../fetch-client';
 import {
     EmployeesDocument,
     EmployeeByIdDocument,
@@ -18,7 +19,6 @@ import {
     DeleteEmployeeDocument,
     DeleteEmployeeMutation,
 } from '../graphql';
-import { clientGraphqlQuery } from '../graphqlclient';
 
 export const useEmployees = () => {
     return usePaginatedQuery(
@@ -45,7 +45,7 @@ export const useCreateEmployee = ({
 
     return useMutation<CreateEmployeeMutation, Error, CreateEmployeeMutationVariables>(
         (data) => {
-            return clientGraphqlQuery(CreateEmployeeDocument, data);
+            return fetchClient(CreateEmployeeDocument, data);
         },
         {
             onSuccess: (data, context, variables) => {
@@ -66,7 +66,7 @@ export const useEmployeeById = (id: string | undefined) => {
     return useQuery(
         queryKeys.employeeDetailsById(id),
         () => {
-            return clientGraphqlQuery(EmployeeByIdDocument, {
+            return fetchClient(EmployeeByIdDocument, {
                 id: id as string,
             });
         },
@@ -84,7 +84,7 @@ export const useDeleteEmployee = ({
 
     return useMutation<DeleteEmployeeMutation, Error, string>(
         (id: string) => {
-            return clientGraphqlQuery(DeleteEmployeeDocument, {
+            return fetchClient(DeleteEmployeeDocument, {
                 id,
             });
         },

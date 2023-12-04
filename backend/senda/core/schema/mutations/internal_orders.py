@@ -14,6 +14,8 @@ from senda.core.models.order_internal import (
 from senda.core.schema.custom_types import InternalOrder
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
+from senda.core.decorators import employee_required, CustomInfo
+
 
 class ErrorMessages:
     INVALID_OFFICE = "Debes especificar una sucursal"
@@ -48,7 +50,8 @@ class CreateInternalOrder(graphene.Mutation):
     class Arguments:
         data = CreateInternalOrderInput(required=True)
 
-    def mutate(self, info: Any, data: CreateInternalOrderInput):
+    @employee_required
+    def mutate(self, info: CustomInfo, data: CreateInternalOrderInput):
         data_dict = input_object_type_to_dict(data)
 
         try:
@@ -169,7 +172,8 @@ class DeleteInternalOrder(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    def mutate(self, info: Any, id: str):
+    @employee_required
+    def mutate(self, info: CustomInfo, id: str):
         try:
             order = InternalOrderModel.objects.get(id=id)
             order.delete()

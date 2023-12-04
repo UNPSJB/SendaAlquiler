@@ -9,6 +9,7 @@ import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
 import { queryKeys } from './constants';
 
+import fetchClient from '../fetch-client';
 import {
     PurchasesDocument,
     CreatePurchaseMutation,
@@ -19,7 +20,6 @@ import {
     DeletePurchaseMutation,
     PurchasesByClientIdDocument,
 } from '../graphql';
-import { clientGraphqlQuery } from '../graphqlclient';
 
 export const usePurchases = () => {
     return usePaginatedQuery(
@@ -36,7 +36,7 @@ export const usePurchaseById = (id: string | undefined) => {
     return useQuery(
         queryKeys.purchaseDetailsById(id),
         () => {
-            return clientGraphqlQuery(PurchaseByIdDocument, {
+            return fetchClient(PurchaseByIdDocument, {
                 id: id as string,
             });
         },
@@ -60,7 +60,7 @@ export const useCreatePurchase = ({
 
     return useMutation<CreatePurchaseMutation, Error, CreatePurchaseMutationVariables>(
         (data) => {
-            return clientGraphqlQuery(CreatePurchaseDocument, data);
+            return fetchClient(CreatePurchaseDocument, data);
         },
         {
             onSuccess: (data, variables, context) => {
@@ -87,7 +87,7 @@ export const useDeletePurchase = ({
 
     return useMutation<DeletePurchaseMutation, Error, string>(
         (id: string) => {
-            return clientGraphqlQuery(DeletePurchaseDocument, {
+            return fetchClient(DeletePurchaseDocument, {
                 id,
             });
         },
@@ -108,7 +108,7 @@ export const usePurchasesByClientId = (id: string | undefined) => {
     return useQuery(
         queryKeys.purchasesListByClientId(id),
         () => {
-            return clientGraphqlQuery(PurchasesByClientIdDocument, {
+            return fetchClient(PurchasesByClientIdDocument, {
                 id: id as string,
             });
         },

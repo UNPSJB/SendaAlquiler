@@ -1,10 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 import clsx from 'clsx';
+import { signOut } from 'next-auth/react';
 import { PropsWithChildren, useCallback, useState } from 'react';
+
+import { useUserContext } from '@/app/UserProvider';
 
 import styles from './DashboardLayout.module.scss';
 import BagShopping from './Icons/BagShopping';
@@ -17,6 +20,8 @@ import LocationDot from './Icons/LocationDot';
 import MoneyCheckDollar from './Icons/MoneyCheckDollar';
 import User from './Icons/User';
 import UserTie from './Icons/UserTie';
+
+import { EmployeeUser } from '../auth/user-utils';
 
 export type DashboardIconProps = {
     isActive: boolean;
@@ -94,7 +99,8 @@ type DashboardLayoutProps = PropsWithChildren<{
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) => {
     const [isMenuOpen, setMenuOpen] = useState(false);
     const toggleMenu = useCallback(() => setMenuOpen((prev) => !prev), []);
-    const router = useRouter();
+
+    const { user } = useUserContext<EmployeeUser>();
 
     return (
         <div className="min-h-screen lg:flex">
@@ -132,12 +138,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
 
                         <li className="mt-auto border-t border-white py-5 pt-4">
                             <span className="mb-4 block text-sm text-gray-200">
-                                admin@admin.com
+                                {user.email}
                             </span>
                             <button
                                 className="block w-full rounded bg-white p-2 text-sm font-bold text-black"
                                 onClick={() => {
-                                    router.replace('/login');
+                                    signOut({
+                                        callbackUrl: '/login',
+                                    });
                                 }}
                             >
                                 Cerrar sesión

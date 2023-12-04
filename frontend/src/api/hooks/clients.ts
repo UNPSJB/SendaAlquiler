@@ -9,6 +9,7 @@ import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
 import { queryDomains, queryKeys } from './constants';
 
+import { fetchClient } from '../fetch-client';
 import {
     ClientByIdDocument,
     ClientsDocument,
@@ -22,7 +23,6 @@ import {
     UpdateClientMutationVariables,
     UpdateClientDocument,
 } from '../graphql';
-import { clientGraphqlQuery } from '../graphqlclient';
 
 export const useDeleteClient = ({
     onSuccess,
@@ -32,7 +32,7 @@ export const useDeleteClient = ({
 
     return useMutation<DeleteClientMutation, Error, string>(
         (id: string) => {
-            return clientGraphqlQuery(DeleteClientDocument, {
+            return fetchClient(DeleteClientDocument, {
                 id,
             });
         },
@@ -63,7 +63,7 @@ export const useUpdateClient = ({
 
     return useMutation<UpdateClientMutation, Error, UpdateClientMutationVariables>(
         (data) => {
-            return clientGraphqlQuery(UpdateClientDocument, data);
+            return fetchClient(UpdateClientDocument, data);
         },
         {
             onSuccess: (data, context, variables) => {
@@ -94,7 +94,7 @@ export const useCreateClient = ({
 
     return useMutation<CreateClientMutation, Error, CreateClientMutationVariables>(
         (data) => {
-            return clientGraphqlQuery(CreateClientDocument, data);
+            return fetchClient(CreateClientDocument, data);
         },
         {
             onSuccess: (data, context, variables) => {
@@ -113,7 +113,7 @@ export const useCreateClient = ({
 
 export const useAllClients = () => {
     return useQuery(queryKeys.clientsNonPaginated, () => {
-        return clientGraphqlQuery(AllClientsDocument, {});
+        return fetchClient(AllClientsDocument, {});
     });
 };
 
@@ -127,7 +127,7 @@ export const useClientById = (id: string | undefined) => {
     return useQuery(
         queryKeys.clientDetailsById(id),
         () => {
-            return clientGraphqlQuery(ClientByIdDocument, {
+            return fetchClient(ClientByIdDocument, {
                 id: id as string,
             });
         },

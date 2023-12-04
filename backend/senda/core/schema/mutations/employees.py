@@ -7,6 +7,8 @@ from senda.core.models.employees import EmployeeModel
 from users.models import UserModel
 from senda.core.schema.custom_types import Employee
 
+from senda.core.decorators import employee_required, CustomInfo
+
 
 class ErrorMessages:
     USER_NOT_FOUND = "El empleado no existe"
@@ -41,7 +43,8 @@ class CreateEmployee(graphene.Mutation):
     class Arguments:
         employee_data = CreateEmployeeInput(required=True)
 
-    def mutate(self, info: Any, employee_data: CreateEmployeeInput):
+    @employee_required
+    def mutate(self, info: CustomInfo, employee_data: CreateEmployeeInput):
         try:
             user = UserModel.objects.create_user(
                 first_name=employee_data.first_name,
@@ -62,7 +65,8 @@ class DeleteEmployee(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    def mutate(self, info: Any, id: str):
+    @employee_required
+    def mutate(self, info: CustomInfo, id: str):
         try:
             employee = EmployeeModel.objects.get(id=id)
             employee.delete()
@@ -71,6 +75,25 @@ class DeleteEmployee(graphene.Mutation):
             return DeleteEmployee(success=False)
 
 
+class SetSessionOfficeCookie(graphene.Mutation):
+    class Arguments:
+        office_id = graphene.ID()
+        clear_cookie = graphene.Boolean(default_value=False)
+
+    success = graphene.Boolean()
+
+    @employee_required
+    def mutate(self, info, office_id, clear_cookie):
+        context = info.context
+        if clear_cookie:
+            context.cookie_to_clear = True
+        else:
+            context.office_id_to_set = office_id
+        return SetSessionOfficeCookie(success=True)
+
+
 class Mutation(graphene.ObjectType):
     create_employee = CreateEmployee.Field()
     delete_employee = DeleteEmployee.Field()
+
+    set_session_office_cookie = SetSessionOfficeCookie.Field()

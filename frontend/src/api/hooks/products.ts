@@ -9,6 +9,7 @@ import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
 import { queryDomains, queryKeys } from './constants';
 
+import { fetchClient } from '../fetch-client';
 import {
     BrandsDocument,
     BrandsQuery,
@@ -26,11 +27,10 @@ import {
     DeleteProductMutation,
     AllProductsDocument,
 } from '../graphql';
-import { clientGraphqlQuery } from '../graphqlclient';
 
 export const useAllProducts = () => {
     return useQuery(queryKeys.productsNonPaginated, () => {
-        return clientGraphqlQuery(AllProductsDocument, {});
+        return fetchClient(AllProductsDocument, {});
     });
 };
 
@@ -38,7 +38,7 @@ export const useProductById = (id: string | undefined) => {
     return useQuery(
         queryKeys.productDetailsById(id),
         () => {
-            return clientGraphqlQuery(ProductByIdDocument, {
+            return fetchClient(ProductByIdDocument, {
                 id: id as string,
             });
         },
@@ -73,7 +73,7 @@ export const useCreateProduct = ({
 
     return useMutation<CreateProductMutation, Error, CreateProductMutationVariables>(
         (data) => {
-            return clientGraphqlQuery(CreateProductDocument, data);
+            return fetchClient(CreateProductDocument, data);
         },
         {
             onSuccess: (data, variables, context) => {
@@ -103,7 +103,7 @@ export const useCreateBrand = ({ onSuccess, ...options }: UseCreateBrandOptions 
 
     return useMutation<CreateBrandMutation, Error, CreateBrandMutationVariables>(
         (data) => {
-            return clientGraphqlQuery(CreateBrandDocument, data);
+            return fetchClient(CreateBrandDocument, data);
         },
         {
             onSuccess: (data, variables, context) => {
@@ -140,7 +140,7 @@ export const useCreateBrand = ({ onSuccess, ...options }: UseCreateBrandOptions 
 
 export const useBrands = () => {
     return useQuery(queryKeys.brandsNonPaginated, () => {
-        return clientGraphqlQuery(BrandsDocument, {});
+        return fetchClient(BrandsDocument, {});
     });
 };
 
@@ -152,7 +152,7 @@ export const useDeleteProduct = ({
 
     return useMutation<DeleteProductMutation, Error, string>(
         (id: string) => {
-            return clientGraphqlQuery(DeleteProductDocument, {
+            return fetchClient(DeleteProductDocument, {
                 id,
             });
         },
@@ -171,7 +171,7 @@ export const useDeleteProduct = ({
 
 export const useProductsStocksByOfficeId = (officeId: string) => {
     return useQuery(queryKeys.productsStocksByOfficeId(officeId), () => {
-        return clientGraphqlQuery(ProductsStocksByOfficeIdDocument, {
+        return fetchClient(ProductsStocksByOfficeIdDocument, {
             officeId,
         });
     });
@@ -181,7 +181,7 @@ export const useProductsSuppliedBySupplierId = (id: string | undefined) => {
     return useQuery(
         ['ProductsSuppliedBySupplierId', id],
         () => {
-            return clientGraphqlQuery(ProductsSuppliedBySupplierIdDocument, {
+            return fetchClient(ProductsSuppliedBySupplierIdDocument, {
                 supplierId: id as string,
             });
         },

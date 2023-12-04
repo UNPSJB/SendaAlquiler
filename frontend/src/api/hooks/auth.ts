@@ -1,7 +1,13 @@
 import { UseMutationOptions, useMutation } from '@tanstack/react-query';
 
-import { LoginDocument, LoginMutation, LoginMutationVariables } from '../graphql';
-import { clientGraphqlQuery } from '../graphqlclient';
+import { fetchClient } from '../fetch-client';
+import {
+    LoginDocument,
+    LoginMutation,
+    LoginMutationVariables,
+    SetSessionOfficeCookieDocument,
+    SetSessionOfficeCookieMutation,
+} from '../graphql';
 
 /**
  * Type definition for the options when using the login hook.
@@ -16,6 +22,23 @@ type UseLoginOptions = UseMutationOptions<LoginMutation, Error, LoginMutationVar
  */
 export const useLogin = (options: UseLoginOptions = {}) => {
     return useMutation<LoginMutation, Error, LoginMutationVariables>((data) => {
-        return clientGraphqlQuery(LoginDocument, data);
+        return fetchClient(LoginDocument, data);
+    }, options);
+};
+
+type UseSetSessionOfficeCookieOptions = UseMutationOptions<
+    SetSessionOfficeCookieMutation,
+    Error,
+    string
+>;
+
+export const useSetSessionOfficeCookie = (
+    options: UseSetSessionOfficeCookieOptions = {},
+) => {
+    return useMutation<SetSessionOfficeCookieMutation, Error, string>((id: string) => {
+        return fetchClient(SetSessionOfficeCookieDocument, {
+            officeId: id,
+            clearCookie: false,
+        });
     }, options);
 };

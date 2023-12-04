@@ -2,6 +2,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 import { useMutation } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
+import { fetchClient } from '../fetch-client';
 import {
     ClientsCsvDocument,
     EmployeesCsvDocument,
@@ -14,7 +15,6 @@ import {
     PurchasesCsvDocument,
     RentalContractsCsvDocument,
 } from '../graphql';
-import { clientGraphqlQuery } from '../graphqlclient';
 
 type UseCsvExporterOptions<TData extends Record<string, string>, TVariables> = {
     query: DocumentNode<TData, TVariables>;
@@ -29,7 +29,7 @@ const useCsvExporter = <TData extends Record<string, string>, TVariables>(
     const { query, csvKey, variables, filename } = options;
     const { mutate, isLoading } = useMutation<TData, Error, TVariables>({
         mutationFn: () => {
-            return clientGraphqlQuery(query, variables);
+            return fetchClient(query, variables);
         },
         onSuccess: (data) => {
             const csv = data[csvKey];
@@ -37,7 +37,6 @@ const useCsvExporter = <TData extends Record<string, string>, TVariables>(
                 toast.error('No se pudo exportar el CSV');
             }
 
-            console.log(csv);
             const csvContent = `data:text/csv;charset=utf-8,${csv}`;
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement('a');

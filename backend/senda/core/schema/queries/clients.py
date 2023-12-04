@@ -3,17 +3,25 @@ from typing import Any
 import graphene
 
 from senda.core.models.clients import ClientModel
-from senda.core.schema.custom_types import Client, PaginatedClientQueryResult, RentalContract, Purchase
+from senda.core.schema.custom_types import (
+    Client,
+    PaginatedClientQueryResult,
+    RentalContract,
+    Purchase,
+)
 from utils.graphene import get_paginated_model, non_null_list_of
 
 import csv
 import io
 
+from senda.core.decorators import employee_required, CustomInfo
+
 
 class Query(graphene.ObjectType):
     clients = graphene.NonNull(PaginatedClientQueryResult, page=graphene.Int())
 
-    def resolve_clients(self, info: Any, page: int):
+    @employee_required
+    def resolve_clients(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
             ClientModel.objects.all().order_by("-created_on"), page
         )
@@ -26,12 +34,14 @@ class Query(graphene.ObjectType):
 
     all_clients = non_null_list_of(Client)
 
-    def resolve_all_clients(self, info):
+    @employee_required
+    def resolve_all_clients(self, info: CustomInfo):
         return ClientModel.objects.all()
 
     client_by_id = graphene.Field(Client, id=graphene.ID(required=True))
 
-    def resolve_client_by_id(self, info: Any, id: str):
+    @employee_required
+    def resolve_client_by_id(self, info: CustomInfo, id: str):
         return ClientModel.objects.filter(id=id).first()
 
     client_exists = graphene.Field(
@@ -40,7 +50,10 @@ class Query(graphene.ObjectType):
         dni=graphene.String(),
     )
 
-    def resolve_client_exists(self, info: Any, email: str = None, dni: str = None):
+    @employee_required
+    def resolve_client_exists(
+        self, info: CustomInfo, email: str = None, dni: str = None
+    ):
         if email is None and dni is None:
             return False
 
@@ -52,7 +65,8 @@ class Query(graphene.ObjectType):
 
     clients_csv = graphene.NonNull(graphene.String)
 
-    def resolve_clients_csv(self, info: Any):
+    @employee_required
+    def resolve_clients_csv(self, info: CustomInfo):
         clients = ClientModel.objects.all().prefetch_related("locality")
         csv_buffer = io.StringIO()
 
@@ -94,22 +108,20 @@ class Query(graphene.ObjectType):
 
         return csv_buffer.getvalue()
 
-    
-
     rental_contracts_by_client_id = non_null_list_of(
         RentalContract, id=graphene.ID(required=True)
     )
 
-    def resolve_rental_contracts_by_client_id(self, info: Any, id: str):
+    @employee_required
+    def resolve_rental_contracts_by_client_id(self, info: CustomInfo, id: str):
         rental_contracts_by_client_id = ClientModel.objects.get(id=id)
         contracts = rental_contracts_by_client_id.rental_contracts.all()
         return contracts
 
-    purchases_by_client_id = non_null_list_of(
-        Purchase, id=graphene.ID(required=True)
-    )
+    purchases_by_client_id = non_null_list_of(Purchase, id=graphene.ID(required=True))
 
-    def resolve_purchases_by_client_id(self,info: Any, id: str):
+    @employee_required
+    def resolve_purchases_by_client_id(self, info: Any, id: str):
         purchases_by_client_id = ClientModel.objects.get(id=id)
         purchases = purchases_by_client_id.purchases.all()
         return purchases
