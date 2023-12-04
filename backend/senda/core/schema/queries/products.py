@@ -19,13 +19,17 @@ from utils.graphene import non_null_list_of, get_paginated_model
 import csv
 import io
 
+from senda.core.decorators import employee_required, CustomInfo
+
 
 class Query(graphene.ObjectType):
     products = graphene.NonNull(PaginatedProductQueryResult, page=graphene.Int())
 
-    def resolve_products(self, info, page: int):
+    @employee_required
+    def resolve_products(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
-            ProductModel.objects.all().order_by("-created_on"), page
+            ProductModel.objects.all().order_by("-created_on"),
+            page,
         )
 
         return PaginatedProductQueryResult(
@@ -36,31 +40,38 @@ class Query(graphene.ObjectType):
 
     all_products = non_null_list_of(Product)
 
-    def resolve_all_products(self, info):
+    @employee_required
+    def resolve_all_products(self, info: CustomInfo):
         return ProductModel.objects.all()
 
     brands = non_null_list_of(Brand)
 
-    def resolve_brands(self, info: Any):
+    @employee_required
+    def resolve_brands(self, info: CustomInfo):
         return BrandModel.objects.all()
 
     products_stocks_by_office_id = graphene.Field(
         non_null_list_of(ProductStockInOffice), office_id=graphene.ID(required=True)
     )
 
-    def resolve_products_stocks_by_office_id(self, info: Any, office_id: int):
+    @employee_required
+    def resolve_products_stocks_by_office_id(self, info: CustomInfo, office_id: int):
         return ProductStockInOfficeModel.objects.filter(office=office_id)
 
     product_by_id = graphene.Field(Product, id=graphene.ID(required=True))
 
-    def resolve_product_by_id(self, info: Any, id: str):
+    @employee_required
+    def resolve_product_by_id(self, info: CustomInfo, id: str):
         return ProductModel.objects.filter(id=id).first()
 
     products_supplied_by_supplier_id = graphene.Field(
         non_null_list_of(Product), supplier_id=graphene.ID(required=True)
     )
 
-    def resolve_products_supplied_by_supplier_id(self, info: Any, supplier_id: int):
+    @employee_required
+    def resolve_products_supplied_by_supplier_id(
+        self, info: CustomInfo, supplier_id: int
+    ):
         result = ProductSupplierModel.objects.filter(
             supplier_id=supplier_id
         ).values_list("product", flat=True)
@@ -71,12 +82,14 @@ class Query(graphene.ObjectType):
         graphene.NonNull(graphene.Boolean), sku=graphene.String(required=True)
     )
 
-    def resolve_product_exists(self, info: Any, sku: str):
+    @employee_required
+    def resolve_product_exists(self, info: CustomInfo, sku: str):
         return ProductModel.objects.filter(sku=sku).exists()
 
     products_csv = graphene.NonNull(graphene.String)
 
-    def resolve_products_csv(self, info: Any):
+    @employee_required
+    def resolve_products_csv(self, info: CustomInfo):
         products = ProductModel.objects.all().prefetch_related("brand")
         csv_buffer = io.StringIO()
 

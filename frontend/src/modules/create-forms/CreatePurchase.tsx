@@ -97,8 +97,8 @@ const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) =
         });
     };
 
-    const onError: SubmitErrorHandler<FormValues> = (errors) => {
-        console.log('errors', errors);
+    const onError: SubmitErrorHandler<FormValues> = () => {
+        toast.error('No se pudo crear la venta. Por favor, revisa los datos ingresados.');
     };
 
     return (

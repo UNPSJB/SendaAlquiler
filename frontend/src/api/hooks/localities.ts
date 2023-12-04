@@ -9,6 +9,7 @@ import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
 import { queryDomains, queryKeys } from './constants';
 
+import { fetchClient } from '../fetch-client';
 import {
     CreateLocalityDocument,
     CreateLocalityMutation,
@@ -18,7 +19,6 @@ import {
     DeleteLocalityMutation,
     AllLocalitiesDocument,
 } from '../graphql';
-import { clientGraphqlQuery } from '../graphqlclient';
 
 export const useLocalities = () => {
     return usePaginatedQuery(
@@ -33,7 +33,7 @@ export const useLocalities = () => {
 
 export const useAllLocalities = () => {
     return useQuery(queryKeys.localitiesNonPaginated, () => {
-        return clientGraphqlQuery(AllLocalitiesDocument, {});
+        return fetchClient(AllLocalitiesDocument, {});
     });
 };
 
@@ -45,7 +45,7 @@ export const useDeleteLocality = ({
 
     return useMutation<DeleteLocalityMutation, Error, string>(
         (id: string) => {
-            return clientGraphqlQuery(DeleteLocalityDocument, {
+            return fetchClient(DeleteLocalityDocument, {
                 id,
             });
         },
@@ -75,7 +75,7 @@ export const useCreateLocality = ({
 
     return useMutation<CreateLocalityMutation, Error, CreateLocalityMutationVariables>(
         (data) => {
-            return clientGraphqlQuery(CreateLocalityDocument, data);
+            return fetchClient(CreateLocalityDocument, data);
         },
         {
             onSuccess: (data, variables, context) => {

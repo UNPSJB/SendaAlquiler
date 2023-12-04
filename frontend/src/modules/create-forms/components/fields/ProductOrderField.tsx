@@ -25,6 +25,7 @@ export type ProductQuantityAndService = {
     service: {
         value: string;
         label: string;
+        data: ProductDetails['services'][0];
     } | null;
     quantity: number | null;
 };
@@ -129,8 +130,11 @@ const ProductOrderField: React.FC<Props> = ({
                             subtotal = item.product.data.price * item.quantity;
                         }
 
-                        console.log(subtotal);
-                        console.log(numberOfRentalDays);
+                        // if (item.service && item.quantity) {
+                        //     subtotal =
+                        //         (subtotal || 0) + item.service.data. * item.quantity;
+                        // }
+
                         subtotal = (subtotal || 0) * numberOfRentalDays;
 
                         const services = item.product?.data.services;

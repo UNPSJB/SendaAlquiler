@@ -7,6 +7,9 @@ from senda.core.models.suppliers import SupplierModel, LocalityModel
 from senda.core.schema.custom_types import Supplier
 from utils.graphene import input_object_type_to_dict
 
+from senda.core.decorators import employee_required, CustomInfo
+
+
 
 class ErrorMessages:
     INVALID_LOCALITY = "Debes especificar una localidad"
@@ -57,7 +60,8 @@ class CreateSupplier(graphene.Mutation):
     class Arguments:
         data = CreateSupplierInput(required=True)
 
-    def mutate(self, info: Any, data: CreateSupplierInput) -> "CreateSupplier":
+    @employee_required
+    def mutate(self, info: CustomInfo, data: CreateSupplierInput) -> "CreateSupplier":
         data_dict = input_object_type_to_dict(data)
 
         try:
@@ -83,7 +87,8 @@ class DeleteSupplier(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    def mutate(self, info: Any, id: str):
+    @employee_required
+    def mutate(self, info: CustomInfo, id: str):
         try:
             supplier = SupplierModel.objects.get(id=id)
             supplier.delete()

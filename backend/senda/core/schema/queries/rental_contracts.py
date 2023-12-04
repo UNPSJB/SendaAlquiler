@@ -12,13 +12,16 @@ from utils.graphene import get_paginated_model
 import csv
 import io
 
+from senda.core.decorators import employee_required, CustomInfo
+
 
 class Query(graphene.ObjectType):
     rental_contracts = graphene.NonNull(
         PaginatedRentalContractQueryResult, page=graphene.Int()
     )
 
-    def resolve_rental_contracts(self, info: Any, page: int):
+    @employee_required
+    def resolve_rental_contracts(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
             RentalContractModel.objects.all().order_by("-created_on"), page
         )
@@ -31,12 +34,14 @@ class Query(graphene.ObjectType):
 
     contract_by_id = graphene.Field(RentalContract, id=graphene.ID(required=True))
 
-    def resolve_contract_by_id(self, info: Any, id: str):
+    @employee_required
+    def resolve_contract_by_id(self, info: CustomInfo, id: str):
         return RentalContractModel.objects.filter(id=id).first()
 
     rental_contracts_csv = graphene.NonNull(graphene.String)
 
-    def resolve_rental_contracts_csv(self, info: Any):
+    @employee_required
+    def resolve_rental_contracts_csv(self, info: CustomInfo):
         rental_contracts = RentalContractModel.objects.all().prefetch_related(
             "rental_contract_items",
             "rental_contract_items__product",

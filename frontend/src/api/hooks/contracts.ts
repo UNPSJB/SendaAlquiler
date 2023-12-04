@@ -7,8 +7,9 @@ import {
 
 import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
-import { queryKeys } from './constants';
+import { queryDomains, queryKeys } from './constants';
 
+import { fetchClient } from '../fetch-client';
 import {
     ContractByIdDocument,
     ContractsDocument,
@@ -21,7 +22,6 @@ import {
     PayTotalContractDocument,
     RentalContractsByClientIdDocument,
 } from '../graphql';
-import { clientGraphqlQuery } from '../graphqlclient';
 
 export const useContracts = () => {
     return usePaginatedQuery(
@@ -38,7 +38,7 @@ export const useContractById = (id: string | undefined) => {
     return useQuery(
         queryKeys.contractDetailsById(id),
         () => {
-            return clientGraphqlQuery(ContractByIdDocument, {
+            return fetchClient(ContractByIdDocument, {
                 id: id as string,
             });
         },
@@ -66,7 +66,7 @@ export const useCreateRentalContract = ({
         CreateRentalContractMutationVariables
     >(
         (data) => {
-            return clientGraphqlQuery(CreateRentalContractDocument, data);
+            return fetchClient(CreateRentalContractDocument, data);
         },
         {
             onSuccess: (data, variables, context) => {
@@ -93,7 +93,7 @@ export const useDeleteRentalContract = ({
 
     return useMutation<DeleteRentalContractMutation, Error, string>(
         (id: string) => {
-            return clientGraphqlQuery(DeleteRentalContractDocument, {
+            return fetchClient(DeleteRentalContractDocument, {
                 id,
             });
         },
@@ -112,7 +112,7 @@ export const useDeleteRentalContract = ({
 
 export const usePayContractDeposit = () => {
     return useMutation((id: string) => {
-        return clientGraphqlQuery(PayContractDepositDocument, {
+        return fetchClient(PayContractDepositDocument, {
             id,
         });
     });
@@ -120,7 +120,7 @@ export const usePayContractDeposit = () => {
 
 export const usePayTotalContract = () => {
     return useMutation((id: string) => {
-        return clientGraphqlQuery(PayTotalContractDocument, {
+        return fetchClient(PayTotalContractDocument, {
             id,
         });
     });
@@ -130,12 +130,61 @@ export const useRentalContractsByClientId = (id: string | undefined) => {
     return useQuery(
         queryKeys.contractsListByClientId(id),
         () => {
-            return clientGraphqlQuery(RentalContractsByClientIdDocument, {
+            return fetchClient(RentalContractsByClientIdDocument, {
                 id: id as string,
             });
         },
         {
             enabled: typeof id === 'string',
+        },
+    );
+};
+
+export const usePayContractDepositMutation = () => {
+    const client = useQueryClient();
+    return useMutation(
+        (id: string) => {
+            return fetchClient(PayContractDepositDocument, {
+                id,
+            });
+        },
+        {
+            onSuccess: (data) => {
+                const updatedId = data.payContractDeposit?.rentalContract?.id;
+                const updatedHistory =
+                    data.payContractDeposit?.rentalContract?.currentHistory;
+
+                if (!updatedId || !updatedHistory) {
+                    return;
+                }
+
+                client.invalidateQueries([queryDomains.contracts]);
+            },
+        },
+    );
+};
+
+export const usePayTotalContractMutation = () => {
+    const client = useQueryClient();
+
+    return useMutation(
+        (id: string) => {
+            return fetchClient(PayTotalContractDocument, {
+                id,
+            });
+        },
+        {
+            onSuccess: (data) => {
+                const updatedId = data.payTotalContract?.rentalContract?.id;
+                const updatedHistory =
+                    data.payTotalContract?.rentalContract?.currentHistory;
+
+                if (!updatedId || !updatedHistory) {
+                    return;
+                }
+
+                client.invalidateQueries([queryDomains.contracts]);
+            },
         },
     );
 };

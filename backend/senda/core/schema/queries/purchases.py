@@ -15,11 +15,14 @@ from utils.graphene import non_null_list_of, get_paginated_model
 import csv
 import io
 
+from senda.core.decorators import employee_required, CustomInfo
+
 
 class Query(graphene.ObjectType):
     purchases = graphene.NonNull(PaginatedPurchaseQueryResult, page=graphene.Int())
 
-    def resolve_purchases(self, info: Any, page: int):
+    @employee_required
+    def resolve_purchases(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
             PurchaseModel.objects.all().order_by("-created_on"), page
         )
@@ -31,22 +34,26 @@ class Query(graphene.ObjectType):
 
     all_purchases = non_null_list_of(Purchase)
 
-    def resolve_all_purchases(self, info: Any):
+    @employee_required
+    def resolve_all_purchases(self, info: CustomInfo):
         return PurchaseModel.objects.all()
 
     purchase_items = non_null_list_of(PurchaseItem)
 
-    def resolve_purchase_items(self, info: Any):
+    @employee_required
+    def resolve_purchase_items(self, info: CustomInfo):
         return PurchaseItemModel.objects.all()
 
     purchase_by_id = graphene.Field(Purchase, id=graphene.ID(required=True))
 
-    def resolve_purchase_by_id(self, info: Any, id: str):
+    @employee_required
+    def resolve_purchase_by_id(self, info: CustomInfo, id: str):
         return PurchaseModel.objects.filter(id=id).first()
 
     purchases_csv = graphene.NonNull(graphene.String)
 
-    def resolve_purchases_csv(self, info: Any):
+    @employee_required
+    def resolve_purchases_csv(self, info: CustomInfo):
         purchases = PurchaseModel.objects.all().prefetch_related(
             "client",
             "purchase_items",

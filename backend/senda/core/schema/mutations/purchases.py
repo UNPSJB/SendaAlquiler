@@ -8,6 +8,8 @@ from senda.core.models.offices import OfficeModel
 from senda.core.schema.custom_types import Product, PurchaseItem, Purchase
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
+from senda.core.decorators import employee_required, CustomInfo
+
 
 class ErrorMessages:
     INVALID_OFFICE = "Debes especificar una sucursal"
@@ -44,7 +46,13 @@ class CreatePurchase(graphene.Mutation):
     class Arguments:
         data = CreatePurchaseInput(required=True)
 
-    def mutate(self, info: Any, data: CreatePurchaseInput):
+    @employee_required
+    def mutate(self, info: CustomInfo, data: CreatePurchaseInput):
+        user = info.context.user
+        employee = user.employee
+
+        office = employee.offices.first().office
+
         data_dict = input_object_type_to_dict(data)
 
         try:
@@ -53,7 +61,9 @@ class CreatePurchase(graphene.Mutation):
             if client is None:
                 raise ValueError(ErrorMessages.INVALID_CLIENT)
 
-            purchase = PurchaseModel.objects.create_purchase(client=client, **data_dict)
+            purchase = PurchaseModel.objects.create_purchase(
+                client=client, office=office, **data_dict
+            )
             return CreatePurchase(purchase=purchase)
         except Exception as e:
             return CreatePurchase(error=e)
@@ -65,7 +75,8 @@ class DeletePurchase(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    def mutate(self, info: Any, id: str):
+    @employee_required
+    def mutate(self, info: CustomInfo, id: str):
         try:
             purchase = PurchaseModel.objects.get(id=id)
             purchase.delete()

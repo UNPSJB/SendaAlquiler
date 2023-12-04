@@ -11,7 +11,7 @@ import { TypedDocumentNode } from '@graphql-typed-document-node/core';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { clientGraphqlQuery } from '@/api/graphqlclient';
+import { fetchClient } from '@/api/fetch-client';
 
 const useSetSearchParam = () => {
     const router = useRouter();
@@ -148,7 +148,7 @@ const usePaginatedQuery = <T, V extends Record<string, any>>(
     const queryResult = useQuery<unknown, Error, T>(
         [typeof key === 'function' ? key(variables) : key, { ...variables, activePage }],
         () => {
-            return clientGraphqlQuery<T, V>(document, {
+            return fetchClient<T, V>(document, {
                 ...variables,
                 limit,
                 page: activePage,

@@ -5,6 +5,8 @@ import graphene
 from senda.core.models.products import BrandModel, ProductModel
 from senda.core.schema.custom_types import Brand, Product, ProductTypeChoicesEnum
 from utils.graphene import input_object_type_to_dict, non_null_list_of
+
+from senda.core.decorators import employee_required, CustomInfo
 from django.core.exceptions import ObjectDoesNotExist
 
 
@@ -55,7 +57,8 @@ class CreateProduct(graphene.Mutation):
     class Arguments:
         product_data = CreateProductInput(required=True)
 
-    def mutate(self, info: Any, product_data: CreateProductInput):
+    @employee_required
+    def mutate(self, info: CustomInfo, product_data: CreateProductInput):
         try:
             product_data_dict = input_object_type_to_dict(product_data)
 
@@ -75,7 +78,8 @@ class CreateBrand(graphene.Mutation):
     class Arguments:
         name = graphene.String(required=True)
 
-    def mutate(self, info: Any, name: str):
+    @employee_required
+    def mutate(self, info: CustomInfo, name: str):
         try:
             brand = BrandModel.objects.create(name=name)
             return CreateBrand(brand=brand)
@@ -89,7 +93,8 @@ class DeleteProduct(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    def mutate(self, info: Any, id: str):
+    @employee_required
+    def mutate(self, info: CustomInfo, id: str):
         try:
             product = ProductModel.objects.get(id=id)
             product.delete()

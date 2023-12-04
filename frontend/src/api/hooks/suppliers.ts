@@ -9,6 +9,7 @@ import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
 import { queryKeys } from './constants';
 
+import { fetchClient } from '../fetch-client';
 import {
     CreateSupplierDocument,
     CreateSupplierMutation,
@@ -19,7 +20,6 @@ import {
     DeleteSupplierDocument,
     DeleteSupplierMutation,
 } from '../graphql';
-import { clientGraphqlQuery } from '../graphqlclient';
 
 export const useDeleteSupplier = ({
     onSuccess,
@@ -29,7 +29,7 @@ export const useDeleteSupplier = ({
 
     return useMutation<DeleteSupplierMutation, Error, string>(
         (id: string) => {
-            return clientGraphqlQuery(DeleteSupplierDocument, {
+            return fetchClient(DeleteSupplierDocument, {
                 id,
             });
         },
@@ -48,7 +48,7 @@ export const useDeleteSupplier = ({
 
 export const useAllSuppliers = () => {
     return useQuery(['all-suppliers'], () => {
-        return clientGraphqlQuery(AllSuppliersDocument, {});
+        return fetchClient(AllSuppliersDocument, {});
     });
 };
 
@@ -67,7 +67,7 @@ export const useSupplierById = (id: string | undefined) => {
     return useQuery(
         queryKeys.supplierDetailsById(id),
         () => {
-            return clientGraphqlQuery(SupplierByIdDocument, {
+            return fetchClient(SupplierByIdDocument, {
                 id: id as string,
             });
         },
@@ -91,7 +91,7 @@ export const useCreateSupplier = ({
 
     return useMutation<CreateSupplierMutation, Error, CreateSupplierMutationVariables>(
         (data) => {
-            return clientGraphqlQuery(CreateSupplierDocument, data);
+            return fetchClient(CreateSupplierDocument, data);
         },
         {
             onSuccess: (data, context, variables) => {

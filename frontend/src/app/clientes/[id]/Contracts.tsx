@@ -4,7 +4,11 @@ import clsx from 'clsx';
 import { PropsWithChildren } from 'react';
 
 import { RentalContractStatusChoices } from '@/api/graphql';
-import { useRentalContractsByClientId } from '@/api/hooks';
+import {
+    usePayContractDepositMutation,
+    usePayTotalContractMutation,
+    useRentalContractsByClientId,
+} from '@/api/hooks';
 
 import { formatDateTimeHr } from '@/modules/dayjs/utils';
 import { formatDateTime } from '@/modules/dayjs/utils';
@@ -87,6 +91,41 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status }) => {
             <b>{dataByStatus[status].text}</b>
         </>
     );
+};
+
+type StatusButtonProps = { status: RentalContractStatusChoices; id: string };
+
+const StatusButton: React.FC<StatusButtonProps> = ({ status, id }) => {
+    const { mutate: payContractDeposit } = usePayContractDepositMutation();
+    const { mutate: payContractTotal } = usePayTotalContractMutation();
+
+    if (status === RentalContractStatusChoices.Presupuestado) {
+        return (
+            <button
+                onClick={() => {
+                    payContractDeposit(id);
+                }}
+                className=" px-8 py-4  font-bold text-gray-500 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
+            >
+                Señar contrato
+            </button>
+        );
+    }
+
+    if (status === RentalContractStatusChoices.ConDeposito) {
+        return (
+            <button
+                onClick={() => {
+                    payContractTotal(id);
+                }}
+                className=" px-8 py-4  font-bold text-gray-500 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
+            >
+                Pagar totalidad del contrato
+            </button>
+        );
+    }
+
+    return null;
 };
 
 const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProps> = ({
@@ -186,12 +225,11 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                                     >
                                         Ver mas detalles
                                     </Link>
-                                    <button
-                                        onClick={() => {}}
-                                        className=" px-8 py-4  font-bold text-gray-500 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
-                                    >
-                                        Señar contrato
-                                    </button>
+
+                                    <StatusButton
+                                        id={contract.id}
+                                        status={contract.currentHistory!.status}
+                                    />
                                 </div>
                             </div>
                         ))}
