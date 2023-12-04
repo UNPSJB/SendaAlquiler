@@ -5,6 +5,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import fetchClient from '@/api/fetch-client';
 import fetchServer from '@/api/fetch-server';
 import { CurrentUserDocument, LoginDocument, RefreshTokenDocument } from '@/api/graphql';
+import { clearOfficeCookieAction } from '@/api/server-actions';
 
 import { jwt } from './jwt-utils';
 import { CurrentUser } from './user-utils';
@@ -151,7 +152,7 @@ export const authOptions: NextAuthOptions = {
     },
     events: {
         async signOut() {
-            // doesn't exists in graphql in jwt
+            clearOfficeCookieAction();
         },
     },
 };

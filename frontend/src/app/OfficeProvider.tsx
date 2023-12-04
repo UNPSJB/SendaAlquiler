@@ -2,8 +2,9 @@
 
 import { usePathname } from 'next/navigation';
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PropsWithChildren, createContext } from 'react';
+import toast from 'react-hot-toast';
 
 import { OFFICE_COOKIE_QUERY_KEY } from '@/api/server-action-constants';
 import { gettOfficeCookieAction, setOfficeCookieAction } from '@/api/server-actions';
@@ -13,6 +14,7 @@ import { EmployeeUser } from '@/modules/auth/user-utils';
 import { useUserContext } from './UserProvider';
 
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
+import Spinner from '@/components/Spinner/Spinner';
 
 type Office = EmployeeUser['employee']['offices'][0]['office'];
 
@@ -43,13 +45,22 @@ const useSetOfficeCookie = () => {
 const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const pathname = usePathname();
     const { user } = useUserContext<EmployeeUser | null>();
-    const { data: selectedOffice } = useOfficeCookie();
+
+    const client = useQueryClient();
+    const { data: selectedOffice, isLoading } = useOfficeCookie();
     const { mutate } = useSetOfficeCookie();
 
     const offices = user?.employee.offices.map(({ office }) => office);
 
     const handleSetSelectedOffice = (office: Office) => {
-        mutate(office.id);
+        mutate(office.id, {
+            onSuccess: () => {
+                client.setQueryData(OFFICE_COOKIE_QUERY_KEY, office.id);
+            },
+            onError: () => {
+                toast.error('No se pudo seleccionar la oficina');
+            },
+        });
     };
 
     if (pathname === '/login' || selectedOffice) {
@@ -70,6 +81,14 @@ const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
                 title="No tienes oficinas asignadas"
                 line1="Contacta con tu administrador para que te asigne una oficina"
             />
+        );
+    }
+
+    if (isLoading) {
+        return (
+            <main className="flex h-screen items-center justify-center">
+                <Spinner className="border-b-black" />
+            </main>
         );
     }
 

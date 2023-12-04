@@ -7,7 +7,7 @@ export type SpinnerProps = {
 };
 
 const classes = clsx(
-    'block h-5 w-5 rounded-full border-2 border-gray-200 ease-linear',
+    'block h-6 w-6 rounded-full border-2 border-y-gray-200 border-l-gray-200 ease-linear',
     styles.spinner,
 );
 

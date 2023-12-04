@@ -12,6 +12,14 @@ export const setOfficeCookieAction = async (id: string) => {
     });
 };
 
+export const clearOfficeCookieAction = async () => {
+    cookies().set(OFFICE_COOKIE_NAME, '', {
+        maxAge: 0,
+        sameSite: 'lax',
+        httpOnly: true,
+    });
+};
+
 export const gettOfficeCookieAction = async () => {
     return cookies().get(OFFICE_COOKIE_NAME)?.value;
 };
