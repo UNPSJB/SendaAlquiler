@@ -340,12 +340,13 @@ class PurchaseModelManager(models.Manager["PurchaseModel"]):
     def create_purchase(
         self,
         client: "ClientModel",
+        office: str,
         products: List[PurchaseProductsItemDict],
     ) -> "PurchaseModel":
         """
         Creates a new purchase instance with associated purchase items. This process is atomic.
         """
-        purchase = self.create(client=client)
+        purchase = self.create(client=client, office_id=office)
         purchase.save()
 
         for product in products:

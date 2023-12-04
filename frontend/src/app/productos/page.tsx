@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
@@ -17,6 +18,7 @@ import DashboardLayout, {
 } from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
+import { Input } from '@/modules/forms/Input';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
@@ -64,8 +66,15 @@ const ProductRowRenderer = (extraData: React.ReactNode) => {
 };
 
 const Page = () => {
-    const { hasPreviousPage, hasNextPage, queryResult, activePage, noPages } =
-        usePaginatedProducts();
+    const {
+        hasPreviousPage,
+        hasNextPage,
+        queryResult,
+        activePage,
+        noPages,
+        variables,
+        setVariables,
+    } = usePaginatedProducts();
 
     const { mutate, isLoading: isDeleting } = useDeleteProduct({
         onSuccess: () => {
@@ -82,6 +91,7 @@ const Page = () => {
     };
 
     const { exportCsv } = useExportProductsCsv();
+    const [query, setQuery] = useState(variables.query || '');
 
     return (
         <DashboardLayout
@@ -128,7 +138,7 @@ const Page = () => {
                 {({ products: data }) => {
                     const edges = data?.results;
 
-                    if (!edges || edges.length === 0) {
+                    if ((!edges || edges.length === 0) && query.length <= 0) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay productos"
@@ -138,32 +148,89 @@ const Page = () => {
                         );
                     }
 
-                    return (
-                        <div className="pr-container flex-1 py-5 pl-10">
-                            <DataTable
-                                columns={columns}
-                                data={edges.map((edge) => edge)}
-                                rowRenderer={ProductRowRenderer}
-                                deleteOptions={{
-                                    confirmationText: (product) => (
-                                        <>
-                                            ¿Estás seguro de que quieres eliminar el
-                                            producto <strong>{product.name}</strong>?
-                                        </>
-                                    ),
-                                    onDeleteClick: (product) => {
-                                        handleRemove(product.id);
-                                    },
-                                    isDeleting,
-                                }}
-                            />
+                    if (query.length > 0 && (!edges || edges.length === 0)) {
+                        return (
+                            <div className="flex flex-1 flex-col">
+                                <div className="container py-8">
+                                    <form
+                                        onSubmit={() => {
+                                            setVariables({
+                                                page: null,
+                                                query,
+                                            });
+                                        }}
+                                    >
+                                        <Input
+                                            id="query"
+                                            name="query"
+                                            value={query}
+                                            placeholder="Ingresa un termino de busqueda"
+                                            onChange={(val) => {
+                                                setQuery(val);
+                                            }}
+                                        />
+                                    </form>
+                                </div>
 
-                            <DataTablePagination
-                                currentPage={activePage}
-                                hasPrevious={hasPreviousPage}
-                                hasNext={hasNextPage}
-                                totalPages={noPages}
-                            />
+                                <div className="flex h-full w-full flex-1 items-center justify-center">
+                                    <FetchStatusMessageWithDescription
+                                        title="No se encontraron resultados"
+                                        line1="No se encontraron productos con el termino de busqueda"
+                                    />
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <div>
+                            <div className="container pt-8">
+                                <form
+                                    onSubmit={() => {
+                                        setVariables({
+                                            page: null,
+                                            query,
+                                        });
+                                    }}
+                                >
+                                    <Input
+                                        id="query"
+                                        name="query"
+                                        value={query}
+                                        placeholder="Ingresa un termino de busqueda"
+                                        onChange={(val) => {
+                                            setQuery(val);
+                                        }}
+                                    />
+                                </form>
+                            </div>
+
+                            <div className="pr-container flex-1 py-5 pl-10">
+                                <DataTable
+                                    columns={columns}
+                                    data={edges.map((edge) => edge)}
+                                    rowRenderer={ProductRowRenderer}
+                                    deleteOptions={{
+                                        confirmationText: (product) => (
+                                            <>
+                                                ¿Estás seguro de que quieres eliminar el
+                                                producto <strong>{product.name}</strong>?
+                                            </>
+                                        ),
+                                        onDeleteClick: (product) => {
+                                            handleRemove(product.id);
+                                        },
+                                        isDeleting,
+                                    }}
+                                />
+
+                                <DataTablePagination
+                                    currentPage={activePage}
+                                    hasPrevious={hasPreviousPage}
+                                    hasNext={hasNextPage}
+                                    totalPages={noPages}
+                                />
+                            </div>
                         </div>
                     );
                 }}

@@ -140,6 +140,9 @@ class InternalOrderHistoryModel(TimeStampedModel):
         "users.UserModel", on_delete=models.SET_NULL, null=True, blank=True
     )
 
+    def __str__(self) -> str:
+        return f"{self.internal_order} - {self.status}"
+
 
 @receiver(post_save, sender=InternalOrderHistoryModel)
 def update_current_history(
@@ -161,3 +164,19 @@ def update_current_history(
         internal_order = instance.internal_order
         internal_order.current_history = instance
         internal_order.save()
+
+        if instance.status == InternalOrderHistoryStatusChoices.IN_PROGRESS:
+            from_office = internal_order.office_branch
+            for order in internal_order.orders.all():
+                order.product.stock.filter(office=from_office).update(
+                    stock=models.F("stock") - order.quantity
+                )
+        elif instance.status == InternalOrderHistoryStatusChoices.COMPLETED:
+            to_office = internal_order.office_destination
+            for order in internal_order.orders.all():
+                order.product.stock.filter(office=to_office).update(
+                    stock=models.F("stock") + order.quantity
+                )
+
+                order.quantity_received = order.quantity
+                order.save()

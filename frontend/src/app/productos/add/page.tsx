@@ -37,6 +37,7 @@ const Page = () => {
         const { brand, type, stock, suppliers } = data;
 
         if (!brand || !type || !stock || !suppliers) return;
+        console.log(stock);
 
         mutate({
             productData: {
@@ -46,12 +47,16 @@ const Page = () => {
                 price: data.price,
                 sku: data.sku,
                 type: type.value,
-                stock: stock.map((stock) => {
-                    return {
-                        stock: stock.stock,
-                        officeId: stock.office.value,
-                    };
-                }),
+                stock: stock
+                    .filter((stock) => {
+                        return stock.stock && stock.office;
+                    })
+                    .map((stock) => {
+                        return {
+                            stock: parseInt(stock.stock as any, 10),
+                            officeId: stock.office.value,
+                        };
+                    }),
                 services:
                     data.services &&
                     data.services.filter((service) => service.name).length

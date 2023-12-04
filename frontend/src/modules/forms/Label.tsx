@@ -22,7 +22,10 @@ const Label: React.FC<LabelProps> = ({
     readOnly = false,
     ...rest
 }) => (
-    <label className={clsx('block', readOnly && 'pointer-events-none')} {...rest}>
+    <label
+        className={clsx('block text-black', readOnly && 'pointer-events-none')}
+        {...rest}
+    >
         <span className="mb-2 block text-sm">
             {label}
             {showRequired && (

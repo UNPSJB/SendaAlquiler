@@ -38,7 +38,8 @@ type Props = ModableFormComponentProps<CreateOrUpdateClientFormValues>;
 const CreateOrUpdateClientForm: React.FC<Props> = ({ defaultValues, ...props }) => (
     <ModableFormLayout<CreateOrUpdateClientFormValues>
         steps={STEPS}
-        title={defaultValues ? 'Editar cliente' : 'Crear cliente'}
+        title={defaultValues?.dni ? 'Editar cliente' : 'Crear cliente'}
+        defaultValues={defaultValues}
         {...props}
     />
 );

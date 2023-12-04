@@ -13,9 +13,9 @@ import {
 } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { ClientsQuery } from '@/api/graphql';
 import { useAllClients, useCreateRentalContract } from '@/api/hooks';
 
+import ClientField, { ClientFieldValue } from './components/fields/ClientField';
 import LocalityField, { LocalityFieldValue } from './components/fields/LocalityField';
 import RHFProductOrderField, {
     ProductQuantityAndService,
@@ -31,18 +31,13 @@ import { RHFCustomFlatpickr } from '../forms/Flatpickr';
 import { RHFFormField } from '../forms/FormField';
 import RHFInput, { Input } from '../forms/Input';
 import Label from '../forms/Label';
-import RHFSelect from '../forms/Select';
 
 type CreateContractFormProps = {
     cancelHref: string;
 };
 
 type FormValues = {
-    client?: {
-        label: string;
-        value: string;
-        data: ClientsQuery['clients']['results'][0];
-    };
+    client: ClientFieldValue;
     billing: {
         firstName: string;
         lastName: string;
@@ -322,7 +317,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                     </main>
                 }
             >
-                {({ allClients: clients }) => (
+                {() => (
                     <FormProvider {...formMethods}>
                         <main className="container pb-16 pt-36">
                             <section className="flex pb-8">
@@ -334,16 +329,28 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
 
                                 <div className="w-9/12 space-y-6">
                                     <RHFFormField label="Cliente" fieldID="client">
-                                        <RHFSelect
-                                            placeholder="Selecciona un cliente"
+                                        <ClientField<FormValues, 'client'>
+                                            // placeholder="Selecciona un cliente"
                                             name="client"
                                             control={control}
-                                            rules={{ required: true }}
-                                            options={clients.map((client) => ({
-                                                label: `${client.firstName} ${client.lastName}`,
-                                                value: client.id,
-                                                data: client,
-                                            }))}
+                                            setValue={formMethods.setValue}
+                                            // rules={{ required: true }}
+                                            // options={clients
+                                            //     .sort((a, b) => {
+                                            //         return (
+                                            //             a.firstName.localeCompare(
+                                            //                 b.firstName,
+                                            //             ) ||
+                                            //             a.lastName.localeCompare(
+                                            //                 b.lastName,
+                                            //             )
+                                            //         );
+                                            //     })
+                                            //     .map((client) => ({
+                                            //         label: `${client.firstName} ${client.lastName}`,
+                                            //         value: client.id,
+                                            //         data: client,
+                                            //     }))}
                                         />
                                     </RHFFormField>
 

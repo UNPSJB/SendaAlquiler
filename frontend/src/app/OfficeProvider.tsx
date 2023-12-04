@@ -3,7 +3,8 @@
 import { usePathname } from 'next/navigation';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { PropsWithChildren, createContext } from 'react';
+import { signOut } from 'next-auth/react';
+import { PropsWithChildren, createContext, useContext } from 'react';
 import toast from 'react-hot-toast';
 
 import { OFFICE_COOKIE_QUERY_KEY } from '@/api/server-action-constants';
@@ -13,6 +14,7 @@ import { EmployeeUser } from '@/modules/auth/user-utils';
 
 import { useUserContext } from './UserProvider';
 
+import Button from '@/components/Button';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
 
@@ -99,22 +101,50 @@ const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
             }}
         >
             <main className="flex min-h-screen items-center">
-                <div className="container flex w-full flex-wrap justify-center">
-                    <div className="grid grid-cols-3 gap-4">
-                        {offices?.map((office) => (
-                            <button
-                                key={office.id}
-                                className="rounded-md border-2 border-gray-300 p-4 hover:bg-gray-200"
-                                onClick={() => handleSetSelectedOffice(office)}
-                            >
-                                <p>{office.name}</p>
-                            </button>
-                        ))}
+                <header className="absolute top-0 w-full py-8">
+                    <div className="container flex items-center justify-end space-x-4">
+                        <span>{user?.email}</span>
+                        <Button
+                            onClick={() => {
+                                signOut();
+                            }}
+                        >
+                            Cerrar sesión
+                        </Button>
+                    </div>
+                </header>
+
+                <div className="container">
+                    <h1 className="mb-8 text-center text-3xl font-bold">
+                        Selecciona una sucursal
+                    </h1>
+                    <div className="container flex w-full flex-wrap justify-center">
+                        <div className="flex w-full justify-center space-x-8">
+                            {offices?.map((office) => (
+                                <button
+                                    key={office.id}
+                                    className="w-4/12 rounded-md border-2 border-black p-4 py-8 font-bold transition duration-200 hover:bg-black hover:text-white"
+                                    onClick={() => handleSetSelectedOffice(office)}
+                                >
+                                    <p>{office.name}</p>
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </main>
         </OfficeContext.Provider>
     );
+};
+
+export const useOfficeContext = () => {
+    const context = useContext(OfficeContext);
+
+    if (context === undefined) {
+        throw new Error('useOfficeContext must be used within a OfficeProvider');
+    }
+
+    return context;
 };
 
 export default OfficeProvider;

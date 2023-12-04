@@ -4,7 +4,11 @@ from .models.clients import ClientModel
 from .models.employees import EmployeeModel, EmployeeOfficeModel
 from .models.localities import LocalityModel
 from .models.offices import OfficeModel
-from .models.order_internal import InternalOrderModel
+from .models.order_internal import (
+    InternalOrderModel,
+    InternalOrderHistoryModel,
+    InternalOrderProductModel,
+)
 from .models.order_supplier import (
     SupplierOrderModel,
     SupplierOrderProductModel,
@@ -136,4 +140,14 @@ class SupplierOrderHistoryModelAdmin(admin.ModelAdmin[SupplierOrderHistoryModel]
 
 @admin.register(ProductSupplierModel)
 class ProductSupplierModelAdmin(admin.ModelAdmin[ProductSupplierModel]):
+    pass
+
+
+@admin.register(InternalOrderHistoryModel)
+class InternalOrderHistoryModelAdmin(admin.ModelAdmin[InternalOrderHistoryModel]):
+    pass
+
+
+@admin.register(InternalOrderProductModel)
+class InternalOrderProductModelAdmin(admin.ModelAdmin[InternalOrderProductModel]):
     pass

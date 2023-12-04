@@ -87,7 +87,7 @@ class BaseChangeOrderInternalStatus(graphene.Mutation):
     error = graphene.String()
 
     class Arguments:
-        internal_order_id = graphene.ID(required=True)
+        id = graphene.ID(required=True)
 
     @classmethod
     def get_internal_order(cls, id: str):
@@ -113,16 +113,16 @@ class BaseChangeOrderInternalStatus(graphene.Mutation):
 
     @classmethod
     def mutate(
-        cls, self: "BaseChangeOrderInternalStatus", info: Any, rental_contract_id: str
+        cls, self: "BaseChangeOrderInternalStatus", info: Any, id: str
     ):
         raise NotImplementedError()
 
 
 class InProgressInternalOrder(BaseChangeOrderInternalStatus):
     @classmethod
-    def mutate(cls, self: "InProgressInternalOrder", info: Any, internal_order_id: str):
+    def mutate(cls, self: "InProgressInternalOrder", info: Any, id: str):
         try:
-            order = cls.get_internal_order(internal_order_id)
+            order = cls.get_internal_order(id)
             cls.check_internal_order_status_is_one_of_and_update_status(
                 order,
                 [InternalOrderHistoryStatusChoices.PENDING],
@@ -136,9 +136,9 @@ class InProgressInternalOrder(BaseChangeOrderInternalStatus):
 
 class ReceiveInternalOrder(BaseChangeOrderInternalStatus):
     @classmethod
-    def mutate(cls, self: "ReceiveInternalOrder", info: Any, internal_order_id: str):
+    def mutate(cls, self: "ReceiveInternalOrder", info: Any, id: str):
         try:
-            order = cls.get_internal_order(internal_order_id)
+            order = cls.get_internal_order(id)
             cls.check_internal_order_status_is_one_of_and_update_status(
                 order,
                 [InternalOrderHistoryStatusChoices.IN_PROGRESS],
@@ -152,9 +152,9 @@ class ReceiveInternalOrder(BaseChangeOrderInternalStatus):
 
 class CancelInternalOrder(BaseChangeOrderInternalStatus):
     @classmethod
-    def mutate(cls, self: "CancelInternalOrder", info: Any, internal_order_id: str):
+    def mutate(cls, self: "CancelInternalOrder", info: Any, id: str):
         try:
-            order = cls.get_internal_order(internal_order_id)
+            order = cls.get_internal_order(id)
             cls.check_internal_order_status_is_one_of_and_update_status(
                 order,
                 [InternalOrderHistoryStatusChoices.PENDING],

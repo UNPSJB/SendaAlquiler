@@ -20,6 +20,7 @@ type DataTableProps<T extends any> = {
         isDeleting: boolean;
         onDeleteClick: (row: T) => void;
     };
+    dropdownActions?: Array<{ label: string; onClick: () => void }>;
 };
 
 /**
@@ -36,6 +37,7 @@ const DataTable = <T extends any>({
     data,
     rowRenderer,
     deleteOptions,
+    dropdownActions,
 }: DataTableProps<T>) => {
     const [itemToBeDeleted, setItemToBeDeleted] = useState<T | null>(null);
     const { confirmationText, isDeleting, onDeleteClick } = deleteOptions || {};
@@ -56,15 +58,27 @@ const DataTable = <T extends any>({
                             <TH key={column.key}>{column.label}</TH>
                         ))}
 
-                        <TH></TH>
+                        {(deleteOptions || dropdownActions) && <TH></TH>}
                     </tr>
                 </thead>
                 <tbody>
                     {data.map((item) => {
                         return rowRenderer(
-                            deleteOptions ? (
+                            deleteOptions || dropdownActions ? (
                                 <TD>
-                                    <DataTableDropdown onRemove={onRemoveClick(item)} />
+                                    <DataTableDropdown
+                                        actions={[
+                                            ...(deleteOptions
+                                                ? [
+                                                      {
+                                                          label: 'Eliminar',
+                                                          onClick: onRemoveClick(item),
+                                                      },
+                                                  ]
+                                                : []),
+                                            ...(dropdownActions || []),
+                                        ]}
+                                    />
                                 </TD>
                             ) : (
                                 <></>

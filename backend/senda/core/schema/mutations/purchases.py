@@ -48,11 +48,6 @@ class CreatePurchase(graphene.Mutation):
 
     @employee_required
     def mutate(self, info: CustomInfo, data: CreatePurchaseInput):
-        user = info.context.user
-        employee = user.employee
-
-        office = employee.offices.first().office
-
         data_dict = input_object_type_to_dict(data)
 
         try:
@@ -62,7 +57,7 @@ class CreatePurchase(graphene.Mutation):
                 raise ValueError(ErrorMessages.INVALID_CLIENT)
 
             purchase = PurchaseModel.objects.create_purchase(
-                client=client, office=office, **data_dict
+                client=client, office=info.context.office_id, **data_dict
             )
             return CreatePurchase(purchase=purchase)
         except Exception as e:

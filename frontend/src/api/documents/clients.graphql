@@ -98,6 +98,21 @@ mutation createClient($clientData: CreateClientInput!) {
     createClient(clientData: $clientData) {
         client {
             id
+            firstName
+            lastName
+            email
+            dni
+            phoneCode
+            phoneNumber
+            houseNumber
+            houseUnit
+            streetName
+            locality {
+                id
+                name
+                state
+                postalCode
+            }
         }
         error
     }

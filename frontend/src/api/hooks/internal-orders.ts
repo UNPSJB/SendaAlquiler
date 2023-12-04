@@ -4,6 +4,7 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
@@ -18,6 +19,10 @@ import {
     DeleteInternalOrderDocument,
     DeleteInternalOrderMutation,
     InternalOrderByIdDocument,
+    InProgressInternalOrderDocument,
+    InternalOrderByIdQuery,
+    InternalOrderHistoryStatusChoices,
+    ReceiveInternalOrderDocument,
 } from '../graphql';
 
 export const useInternalOrderById = (id: string | undefined) => {
@@ -103,4 +108,87 @@ export const useDeleteInternalOrder = ({
             ...options,
         },
     );
+};
+
+const updateInternalOrderStatus = (
+    client: ReturnType<typeof useQueryClient>,
+    id: string,
+    status: InternalOrderHistoryStatusChoices,
+) => {
+    client.invalidateQueries(queryKeys.internalOrdersPaginatedList());
+    client.setQueryData<InternalOrderByIdQuery>(
+        queryKeys.internalOrdersDetailsById(id),
+        (prev) => {
+            const prevOrder = prev?.internalOrderById;
+
+            if (!prev || !prevOrder) {
+                return prev;
+            }
+
+            const next: InternalOrderByIdQuery = {
+                ...prev,
+                internalOrderById: {
+                    ...prevOrder,
+                    currentHistory: {
+                        ...prevOrder.currentHistory,
+                        status,
+                    },
+                },
+            };
+
+            return next;
+        },
+    );
+};
+
+export const useSetInternalOrderAsInProgress = () => {
+    const client = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => {
+            return fetchClient(InProgressInternalOrderDocument, {
+                id,
+            });
+        },
+        onSuccess: (data) => {
+            const id = data.inProgressInternalOrder?.internalOrder?.id;
+
+            if (id) {
+                updateInternalOrderStatus(
+                    client,
+                    id,
+                    InternalOrderHistoryStatusChoices.InProgress,
+                );
+            }
+        },
+        onError: () => {
+            toast.error('Hubo un error al actualizar el estado del pedido');
+        },
+    });
+};
+
+export const useSetInternalOrderAsCompleted = () => {
+    const client = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => {
+            return fetchClient(ReceiveInternalOrderDocument, {
+                id,
+            });
+        },
+        onSuccess: (data) => {
+            const id = data.receiveInternalOrder?.internalOrder?.id;
+
+            if (id) {
+                updateInternalOrderStatus(
+                    client,
+                    id,
+                    InternalOrderHistoryStatusChoices.Completed,
+                );
+            }
+        },
+        onError: () => {
+            toast.error('Hubo un error al actualizar el estado del pedido');
+        },
+    });
 };

@@ -23,6 +23,7 @@ query internalOrderById($id: ID!) {
         id
         createdOn
         officeBranch {
+            id
             houseNumber
             name
             street
@@ -32,6 +33,7 @@ query internalOrderById($id: ID!) {
             }
         }
         officeDestination {
+            id
             houseNumber
             name
             street
@@ -113,6 +115,7 @@ query supplierOrderById($id: ID!) {
             phoneNumber
         }
         officeDestination {
+            id
             name
             street
             houseNumber
@@ -212,5 +215,30 @@ mutation deleteSupplierOrder($id: ID!) {
 mutation deleteInternalOrder($id: ID!) {
     deleteInternalOrder(id: $id) {
         success
+    }
+}
+
+mutation InProgressInternalOrder($id: ID!) {
+    inProgressInternalOrder(id: $id) {
+        internalOrder {
+            id
+        }
+        error
+    }
+}
+
+mutation receiveInternalOrder($id: ID!) {
+    receiveInternalOrder(id: $id) {
+        internalOrder {
+            id
+        }
+        error
+    }
+}
+
+mutation receiveOrderSupplier($orderSupplierId: ID!) {
+    receiveOrderSupplier(orderSupplierId: $orderSupplierId) {
+        orderSupplier
+        error
     }
 }

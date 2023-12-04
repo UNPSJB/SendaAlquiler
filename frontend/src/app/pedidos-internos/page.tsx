@@ -79,8 +79,6 @@ const Status = ({ status }: { status: InternalOrderHistoryStatusChoices }) => {
             Cancelado
         </span>
     );
-
-    return <span>{status}</span>;
 };
 
 const InternalOrderRowRenderer = (extraData: React.ReactNode) => {
@@ -116,10 +114,23 @@ const InternalOrderRowRenderer = (extraData: React.ReactNode) => {
     return renderer;
 };
 
-const Page = () => {
-    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
-        usePaginatedInternalOrders();
+type Props = {
+    internalOrders: ArrayElement<InternalOrdersQuery['internalOrders']['results']>[];
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+    activePage: number;
+    noPages: number;
+    queryResult: ReturnType<typeof usePaginatedInternalOrders>['queryResult'];
+};
 
+const Content: React.FC<Props> = ({
+    internalOrders,
+    hasPreviousPage,
+    hasNextPage,
+    activePage,
+    noPages,
+    queryResult,
+}) => {
     const { mutate, isLoading: isDeleting } = useDeleteInternalOrder({
         onSuccess: () => {
             toast.success('El pedido interno ha sido eliminado');
@@ -133,6 +144,44 @@ const Page = () => {
     const handleRemove = (id: InternalOrder['id']) => {
         mutate(id);
     };
+
+    return (
+        <div className="pr-container flex-1 py-5 pl-10">
+            <DataTable
+                columns={columns}
+                data={internalOrders}
+                rowRenderer={InternalOrderRowRenderer}
+                deleteOptions={{
+                    confirmationText: (internalOrder) => (
+                        <>
+                            ¿Estás seguro que deseas eliminar el pedido interno{' '}
+                            <span className="font-bold">
+                                {new Date(internalOrder.createdOn).toLocaleDateString()}
+                            </span>
+                            ?
+                        </>
+                    ),
+                    onDeleteClick: (internalOrder) => {
+                        handleRemove(internalOrder.id);
+                    },
+                    isDeleting,
+                }}
+                dropdownActions={[]}
+            />
+
+            <DataTablePagination
+                currentPage={activePage}
+                hasPrevious={hasPreviousPage}
+                hasNext={hasNextPage}
+                totalPages={noPages}
+            />
+        </div>
+    );
+};
+
+const Page = () => {
+    const { queryResult, ...usePaginatedInternalOrdersResult } =
+        usePaginatedInternalOrders();
 
     const { exportCsv } = useExportInternalOrdersCsv();
 
@@ -190,38 +239,11 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 py-5 pl-10">
-                            <DataTable
-                                columns={columns}
-                                data={internalOrders}
-                                rowRenderer={InternalOrderRowRenderer}
-                                deleteOptions={{
-                                    confirmationText: (internalOrder) => (
-                                        <>
-                                            ¿Estás seguro que deseas eliminar el pedido
-                                            interno{' '}
-                                            <span className="font-bold">
-                                                {new Date(
-                                                    internalOrder.createdOn,
-                                                ).toLocaleDateString()}
-                                            </span>
-                                            ?
-                                        </>
-                                    ),
-                                    onDeleteClick: (internalOrder) => {
-                                        handleRemove(internalOrder.id);
-                                    },
-                                    isDeleting,
-                                }}
-                            />
-
-                            <DataTablePagination
-                                currentPage={activePage}
-                                hasPrevious={hasPreviousPage}
-                                hasNext={hasNextPage}
-                                totalPages={noPages}
-                            />
-                        </div>
+                        <Content
+                            internalOrders={internalOrders}
+                            queryResult={queryResult}
+                            {...usePaginatedInternalOrdersResult}
+                        />
                     );
                 }}
             </FetchedDataRenderer>

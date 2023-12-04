@@ -5,7 +5,7 @@ import Button from './Button';
 import Spinner from './Spinner/Spinner';
 
 type Props = ComponentProps<typeof Button> & {
-    isLoading?: boolean;
+    isLoading: boolean;
 };
 
 const ButtonWithSpinner: React.FC<Props> = ({ isLoading, children, ...props }) => (

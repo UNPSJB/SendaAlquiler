@@ -186,3 +186,10 @@ def update_current_history(
         supplier_order = instance.supplier_order
         supplier_order.current_history = instance
         supplier_order.save()
+
+        if instance.status == SupplierOrderHistoryStatusChoices.COMPLETED:
+            for order in supplier_order.orders.all():
+                order.product.stock.filter(
+                    office=supplier_order.office_destination
+                ).update(stock=models.F("stock") + order.quantity)
+                order.product.save()

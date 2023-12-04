@@ -3216,7 +3216,7 @@
                         "description": null,
                         "args": [
                             {
-                                "name": "internalOrderId",
+                                "name": "id",
                                 "description": null,
                                 "type": {
                                     "kind": "NON_NULL",
@@ -3944,7 +3944,7 @@
                         "description": null,
                         "args": [
                             {
-                                "name": "internalOrderId",
+                                "name": "id",
                                 "description": null,
                                 "type": {
                                     "kind": "NON_NULL",
@@ -4076,7 +4076,7 @@
                         "description": null,
                         "args": [
                             {
-                                "name": "internalOrderId",
+                                "name": "id",
                                 "description": null,
                                 "type": {
                                     "kind": "NON_NULL",
@@ -7087,6 +7087,18 @@
                                 "type": {
                                     "kind": "SCALAR",
                                     "name": "Int",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "query",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
                                     "ofType": null
                                 },
                                 "defaultValue": null,

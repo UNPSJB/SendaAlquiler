@@ -80,7 +80,7 @@ class CreateRentalContract(graphene.Mutation):
     class Arguments:
         data = CreateRentalContractInput(required=True)
 
-    @employee_required
+
     def mutate(
         self, info: CustomInfo, data: CreateRentalContractInput
     ) -> "CreateRentalContract":
@@ -151,7 +151,7 @@ class BaseChangeContractStatus(graphene.Mutation):
 
 
 class PayContractDeposit(BaseChangeContractStatus):
-    @employee_required
+
     @classmethod
     def mutate(
         cls, self: "PayContractDeposit", info: Any, id: str
@@ -170,7 +170,7 @@ class PayContractDeposit(BaseChangeContractStatus):
 
 
 class PayTotalContract(BaseChangeContractStatus):
-    @employee_required
+
     @classmethod
     def mutate(
         cls, self: "PayTotalContract", info: Any, id: str
@@ -189,7 +189,7 @@ class PayTotalContract(BaseChangeContractStatus):
 
 
 class CancelContract(BaseChangeContractStatus):
-    @employee_required
+
     @classmethod
     def mutate(
         cls, self: "CancelContract", info: Any, id: str
@@ -211,7 +211,7 @@ class CancelContract(BaseChangeContractStatus):
 
 
 class StartContract(BaseChangeContractStatus):
-    @employee_required
+
     @classmethod
     def mutate(
         cls, self: "StartContract", info: Any, id: str
@@ -230,7 +230,7 @@ class StartContract(BaseChangeContractStatus):
 
 
 class ExpiredContract(BaseChangeContractStatus):
-    @employee_required
+
     @classmethod
     def mutate(
         cls, self: "ExpiredContract", info: Any, id: str
@@ -252,7 +252,7 @@ class ExpiredContract(BaseChangeContractStatus):
 
 
 class FinishContract(BaseChangeContractStatus):
-    @employee_required
+
     @classmethod
     def mutate(
         cls, self: "FinishContract", info: Any, id: str
@@ -271,7 +271,7 @@ class FinishContract(BaseChangeContractStatus):
 
 
 class FailedReturnContract(BaseChangeContractStatus):
-    @employee_required
+
     @classmethod
     def mutate(
         cls, self: "FailedReturnContract", info: Any, id: str
@@ -290,7 +290,7 @@ class FailedReturnContract(BaseChangeContractStatus):
 
 
 class SuccessfulReturnContract(BaseChangeContractStatus):
-    @employee_required
+
     @classmethod
     def mutate(
         cls, self: "SuccessfulReturnContract", info: Any, id: str
@@ -314,7 +314,7 @@ class DeleteRentalContract(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    @employee_required
+
     def mutate(self, info: CustomInfo, id: str):
         try:
             rental_contract = RentalContractModel.objects.get(id=id)

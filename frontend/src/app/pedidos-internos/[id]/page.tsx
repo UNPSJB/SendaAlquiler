@@ -3,9 +3,14 @@
 import { useParams } from 'next/navigation';
 
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
-import { InternalOrderByIdQuery } from '@/api/graphql';
-import { useInternalOrderById } from '@/api/hooks';
+import { InternalOrderByIdQuery, InternalOrderHistoryStatusChoices } from '@/api/graphql';
+import {
+    useInternalOrderById,
+    useSetInternalOrderAsCompleted,
+    useSetInternalOrderAsInProgress,
+} from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -13,10 +18,13 @@ import DashboardLayout, {
 import Tabs from '@/modules/details-page/Tabs';
 import ChevronRight from '@/modules/icons/ChevronRight';
 
+import { useOfficeContext } from '@/app/OfficeProvider';
+
 import InternalOrderByIddDetailsTab from './Details';
 import InternalOrderByIdProductsTab from './Products';
 
 import Avatar from '@/components/Avatar';
+import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -26,18 +34,66 @@ const getAvatarText = (firstName: string) => {
     return firstName[0].toUpperCase();
 };
 
-const getDashboardTitle = (
+const useHeader = (
     internalOrder: InternalOrderByIdQuery['internalOrderById'] | undefined,
 ) => {
+    const { office } = useOfficeContext();
+    const { mutate: markAsInProgress, isLoading: isMarkAsInProgressLoading } =
+        useSetInternalOrderAsInProgress();
+    const { mutate: markAsCompleted, isLoading: isMarkAsCompletedLoading } =
+        useSetInternalOrderAsCompleted();
+
     if (!internalOrder) {
         return <DashboardLayoutBigTitle>Pedidos Internos</DashboardLayoutBigTitle>;
     }
 
     return (
-        <div className="flex items-center space-x-4">
-            <DashboardLayoutBigTitle>Pedidos Internos</DashboardLayoutBigTitle>
-            <ChevronRight />
-            <span className="font-headings text-sm">Pedido #{internalOrder.id}</span>
+        <div className="flex justify-between">
+            <div className="flex items-center space-x-4">
+                <DashboardLayoutBigTitle>Pedidos Internos</DashboardLayoutBigTitle>
+                <ChevronRight />
+                <span className="font-headings text-sm">Pedido #{internalOrder.id}</span>
+            </div>
+
+            {internalOrder.currentHistory?.status ===
+                InternalOrderHistoryStatusChoices.Pending &&
+                internalOrder.officeBranch.id === office && (
+                    <ButtonWithSpinner
+                        isLoading={isMarkAsInProgressLoading}
+                        onClick={() => {
+                            markAsInProgress(internalOrder.id, {
+                                onSuccess: () => {
+                                    toast.success('Pedido en progreso');
+                                },
+                                onError: () => {
+                                    toast.error('Ha ocurrido un error');
+                                },
+                            });
+                        }}
+                    >
+                        Pasar pedido a en progreso
+                    </ButtonWithSpinner>
+                )}
+
+            {internalOrder.currentHistory?.status ===
+                InternalOrderHistoryStatusChoices.InProgress &&
+                internalOrder.officeDestination.id === office && (
+                    <ButtonWithSpinner
+                        isLoading={isMarkAsCompletedLoading}
+                        onClick={() => {
+                            markAsCompleted(internalOrder.id, {
+                                onSuccess: () => {
+                                    toast.success('Pedido completado');
+                                },
+                                onError: () => {
+                                    toast.error('Ha ocurrido un error');
+                                },
+                            });
+                        }}
+                    >
+                        Pasar pedido a completado
+                    </ButtonWithSpinner>
+                )}
         </div>
     );
 };
@@ -68,8 +124,10 @@ const Page = () => {
     const internalOrder = useInternalOrderByIdResult.data?.internalOrderById;
     const Component = tabs.find((tab) => tab.key === activeTab)!.Component;
 
+    const header = useHeader(internalOrder);
+
     return (
-        <DashboardLayout header={getDashboardTitle(internalOrder)}>
+        <DashboardLayout header={header}>
             <FetchedDataRenderer
                 {...useInternalOrderByIdResult}
                 Loading={

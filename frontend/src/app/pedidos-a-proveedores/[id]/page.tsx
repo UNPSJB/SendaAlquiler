@@ -3,9 +3,13 @@
 import { useParams } from 'next/navigation';
 
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
-import { SupplierOrderByIdQuery } from '@/api/graphql';
-import { useSupplierOrderById } from '@/api/hooks';
+import {
+    CoreSupplierOrderHistoryModelStatusChoices,
+    SupplierOrderByIdQuery,
+} from '@/api/graphql';
+import { useReceiveOrderSupplierOrder, useSupplierOrderById } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -13,10 +17,13 @@ import DashboardLayout, {
 import Tabs from '@/modules/details-page/Tabs';
 import ChevronRight from '@/modules/icons/ChevronRight';
 
+import { useOfficeContext } from '@/app/OfficeProvider';
+
 import SupplierOrderByIddDetailsTab from './Details';
 import SupplierOrderByIdProductsTab from './Products';
 
 import Avatar from '@/components/Avatar';
+import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -26,18 +33,43 @@ const getAvatarText = (firstName: string) => {
     return firstName[0].toUpperCase();
 };
 
-const getDashboardTitle = (
+const useDashboardTitle = (
     supplierOrder: SupplierOrderByIdQuery['supplierOrderById'] | undefined,
 ) => {
+    const { office } = useOfficeContext();
+    const { mutate, isLoading } = useReceiveOrderSupplierOrder();
+
     if (!supplierOrder) {
         return <DashboardLayoutBigTitle>Pedidos a Proveedores</DashboardLayoutBigTitle>;
     }
 
     return (
-        <div className="flex items-center space-x-4">
-            <DashboardLayoutBigTitle>Pedidos a Proveedores</DashboardLayoutBigTitle>
-            <ChevronRight />
-            <span className="font-headings text-sm">Pedido #{supplierOrder.id}</span>
+        <div className="flex justify-between">
+            <div className="flex items-center space-x-4">
+                <DashboardLayoutBigTitle>Pedidos a Proveedores</DashboardLayoutBigTitle>
+                <ChevronRight />
+                <span className="font-headings text-sm">Pedido #{supplierOrder.id}</span>
+            </div>
+
+            {supplierOrder.currentHistory?.status ===
+                CoreSupplierOrderHistoryModelStatusChoices.Pending &&
+                supplierOrder.officeDestination.id === office && (
+                    <ButtonWithSpinner
+                        isLoading={isLoading}
+                        onClick={() => {
+                            mutate(supplierOrder.id, {
+                                onSuccess: () => {
+                                    toast.success('Pedido completado');
+                                },
+                                onError: () => {
+                                    toast.error('Ha ocurrido un error');
+                                },
+                            });
+                        }}
+                    >
+                        Pasar pedido a en progreso
+                    </ButtonWithSpinner>
+                )}
         </div>
     );
 };
@@ -69,7 +101,7 @@ const Page = () => {
     const Component = tabs.find((tab) => tab.key === activeTab)!.Component;
 
     return (
-        <DashboardLayout header={getDashboardTitle(supplierOrder)}>
+        <DashboardLayout header={useDashboardTitle(supplierOrder)}>
             <FetchedDataRenderer
                 {...useSupplierOrderByIdResult}
                 Loading={

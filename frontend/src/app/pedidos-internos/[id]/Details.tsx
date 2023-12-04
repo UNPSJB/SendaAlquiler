@@ -22,8 +22,8 @@ const InternalOrderByIddDetailsTab: React.FC<InternalOrderByIdTabComponentProps>
     return (
         <>
             <UL>
-                {' '}
                 <h1 className="mb-3 text-xl font-bold ">Pedido #{internalOrder.id}</h1>
+
                 <LI>
                     <SN>Estado: </SN>
                     {internalOrder.currentHistory?.status}

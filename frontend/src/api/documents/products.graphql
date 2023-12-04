@@ -13,8 +13,8 @@ fragment ProductListItem on Product {
     }
 }
 
-query products($page: Int) {
-    products(page: $page) {
+query products($page: Int, $query: String) {
+    products(page: $page, query: $query) {
         count
         numPages
         results {

@@ -23,12 +23,18 @@ from senda.core.decorators import employee_required, CustomInfo
 
 
 class Query(graphene.ObjectType):
-    products = graphene.NonNull(PaginatedProductQueryResult, page=graphene.Int())
+    products = graphene.NonNull(
+        PaginatedProductQueryResult, page=graphene.Int(), query=graphene.String()
+    )
 
     @employee_required
-    def resolve_products(self, info: CustomInfo, page: int):
+    def resolve_products(self, info: CustomInfo, page: int, query: str = None):
+        products = ProductModel.objects.all()
+        if query:
+            products = products.filter(name__icontains=query)
+
         paginator, selected_page = get_paginated_model(
-            ProductModel.objects.all().order_by("-created_on"),
+            products.order_by("-created_on"),
             page,
         )
 

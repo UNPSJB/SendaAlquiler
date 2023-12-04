@@ -19,6 +19,9 @@ import {
     CreateSupplierOrderMutation,
     DeleteSupplierOrderDocument,
     DeleteSupplierOrderMutation,
+    ReceiveOrderSupplierDocument,
+    CoreSupplierOrderHistoryModelStatusChoices,
+    SupplierOrderByIdQuery,
 } from '../graphql';
 
 export const useSupplierOrders = () => {
@@ -116,6 +119,50 @@ export const useDeleteSupplierOrder = ({
                 }
             },
             ...options,
+        },
+    );
+};
+
+export const useReceiveOrderSupplierOrder = () => {
+    const client = useQueryClient();
+
+    return useMutation(
+        (id: string) => {
+            return fetchClient(ReceiveOrderSupplierDocument, {
+                orderSupplierId: id,
+            });
+        },
+        {
+            onSuccess: (data) => {
+                client.invalidateQueries(queryKeys.supplierOrdersPaginatedList());
+
+                const id = data.receiveOrderSupplier?.orderSupplier;
+
+                if (!id) return;
+
+                client.setQueryData<SupplierOrderByIdQuery>(
+                    queryKeys.supplierOrderDetailsById(id),
+                    (prev) => {
+                        const order = prev?.supplierOrderById;
+                        if (!order || !prev) {
+                            return prev;
+                        }
+
+                        const next: SupplierOrderByIdQuery = {
+                            ...prev,
+                            supplierOrderById: {
+                                ...order,
+                                currentHistory: {
+                                    status: CoreSupplierOrderHistoryModelStatusChoices.Completed,
+                                    user: order.currentHistory?.user || null,
+                                },
+                            },
+                        };
+
+                        return next;
+                    },
+                );
+            },
         },
     );
 };

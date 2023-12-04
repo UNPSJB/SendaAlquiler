@@ -91,9 +91,8 @@ class UpdateClient(graphene.Mutation):
     def mutate(self, info: CustomInfo, id: str, client_data: UpdateClientInput):
         client_data_dict = input_object_type_to_dict(client_data)
 
-        client_id = client_data_dict.pop("id")
         try:
-            client = ClientModel.objects.get(id=client_id)
+            client = ClientModel.objects.get(id=id)
         except ObjectDoesNotExist:
             return UpdateClient(error=ErrorMessages.NOT_FOUND)
 
