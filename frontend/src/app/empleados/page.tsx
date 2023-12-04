@@ -24,7 +24,6 @@ const columns = [
     { key: 'name', label: 'Nombre' },
     { key: 'email', label: 'Correo' },
     { key: 'active', label: 'Activo' },
-    { key: 'dropdown', label: '' },
 ];
 
 const SkeletonRowRenderer = () => {

@@ -22,7 +22,6 @@ const columns = [
     { key: 'name', label: 'Nombre' },
     { key: 'cp', label: 'Código Postal' },
     { key: 'state', label: 'Provincia' },
-    { key: 'dropdown', label: '' },
 ];
 
 const SkeletonRowRenderer = () => {

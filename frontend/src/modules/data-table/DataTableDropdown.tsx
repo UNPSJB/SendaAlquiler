@@ -54,7 +54,7 @@ const DataTableDropdown: React.FC<DropdownProps> = ({ onRemove }) => {
     }, []);
 
     return (
-        <div className="relative z-50" ref={dropdownRef}>
+        <div className="flex justify-end" ref={dropdownRef}>
             <button
                 onClick={toggleDropdown}
                 className="focus:outline-none"
@@ -64,24 +64,26 @@ const DataTableDropdown: React.FC<DropdownProps> = ({ onRemove }) => {
                 <VerticalEllipsis />
             </button>
 
-            {isOpen && (
-                <div
-                    className="absolute right-0 top-full mt-2 overflow-hidden rounded border border-gray-300 bg-white shadow"
-                    role="menu"
-                >
-                    <ul className="divide-y divide-gray-200 text-sm">
-                        <li>
-                            <button
-                                onClick={handleRemove}
-                                className="block w-full px-6 py-2 text-left font-headings font-bold first:rounded-t last:rounded-b hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                                role="menuitem"
-                            >
-                                Eliminar
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            )}
+            <div className="relative">
+                {isOpen && (
+                    <div
+                        className="absolute right-0 top-full mt-0 overflow-hidden rounded border border-gray-300 bg-white shadow"
+                        role="menu"
+                    >
+                        <ul className="divide-y divide-gray-200 text-sm">
+                            <li>
+                                <button
+                                    onClick={handleRemove}
+                                    className="block w-full px-6 py-2 text-left font-headings font-bold first:rounded-t last:rounded-b hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                                    role="menuitem"
+                                >
+                                    Eliminar
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

@@ -30,7 +30,6 @@ const columns = [
     { key: 'phone', label: 'Celular' },
     { key: 'address', label: 'Domicilio' },
     { key: 'locality', label: 'Localidad' },
-    { key: 'dropdown', label: '' },
 ];
 
 const SkeletonRowRenderer = () => {

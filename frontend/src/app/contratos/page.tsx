@@ -28,7 +28,6 @@ const columns = [
     { key: 'name', label: 'Fecha' },
     { key: 'office', label: 'Sucursal' },
     { key: 'address', label: 'Estado' },
-    { key: 'dropdown', label: '' },
 ];
 
 const SkeletonRowRenderer = () => {

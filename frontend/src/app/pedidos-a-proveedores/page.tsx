@@ -29,7 +29,6 @@ const columns = [
     { key: 'supplier', label: 'Proveedor' },
     { key: 'office', label: 'Sucursal' },
     { key: 'status', label: 'Estado' },
-    { key: 'dropdown', label: '' },
 ];
 
 const SkeletonRowRenderer = () => {

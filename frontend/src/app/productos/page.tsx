@@ -29,7 +29,6 @@ const columns = [
     { key: 'brand', label: 'Marca' },
     { key: 'type', label: 'Tipo' },
     { key: 'price', label: 'Precio' },
-    { key: 'dropdown', label: '' },
 ];
 
 const SkeletonRowRenderer = () => {

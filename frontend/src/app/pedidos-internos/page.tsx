@@ -5,7 +5,11 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
-import { InternalOrder, InternalOrdersQuery } from '@/api/graphql';
+import {
+    InternalOrder,
+    InternalOrderHistoryStatusChoices,
+    InternalOrdersQuery,
+} from '@/api/graphql';
 import {
     useDeleteInternalOrder,
     useExportInternalOrdersCsv,
@@ -29,7 +33,6 @@ const columns = [
     { key: 'email', label: 'Origen' },
     { key: 'phone', label: 'Destino' },
     { key: 'address', label: 'Estado' },
-    { key: 'dropdown', label: '' },
 ];
 
 const SkeletonRowRenderer = () => {
@@ -44,6 +47,40 @@ const SkeletonRowRenderer = () => {
     );
 
     return renderer;
+};
+
+const Status = ({ status }: { status: InternalOrderHistoryStatusChoices }) => {
+    if (status === InternalOrderHistoryStatusChoices.Completed) {
+        return (
+            <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+                Completado
+            </span>
+        );
+    }
+
+    if (status === InternalOrderHistoryStatusChoices.InProgress) {
+        return (
+            <span className="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold leading-5 text-blue-800">
+                En progreso
+            </span>
+        );
+    }
+
+    if (status === InternalOrderHistoryStatusChoices.Pending) {
+        return (
+            <span className="inline-flex rounded-full bg-yellow-100 px-2 text-xs font-semibold leading-5 text-yellow-800">
+                Pendiente
+            </span>
+        );
+    }
+
+    return (
+        <span className="inline-flex rounded-full bg-red-100 px-2 text-xs font-semibold leading-5 text-red-800">
+            Cancelado
+        </span>
+    );
+
+    return <span>{status}</span>;
 };
 
 const InternalOrderRowRenderer = (extraData: React.ReactNode) => {
@@ -64,7 +101,13 @@ const InternalOrderRowRenderer = (extraData: React.ReactNode) => {
                 </TD>
                 <TD>{supplier.officeBranch.name}</TD>
                 <TD>{supplier.officeDestination.name}</TD>
-                <TD>{supplier.currentHistory?.status}</TD>
+                <TD>
+                    {supplier.currentHistory ? (
+                        <Status status={supplier.currentHistory.status} />
+                    ) : (
+                        '-'
+                    )}
+                </TD>
                 {extraData}
             </TR>
         );

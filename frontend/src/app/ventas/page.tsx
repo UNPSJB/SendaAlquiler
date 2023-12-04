@@ -24,7 +24,6 @@ const columns = [
     { key: 'name', label: 'Nombre' },
     { key: 'date', label: 'Fecha' },
     { key: 'totalPrice', label: 'Total' },
-    { key: 'dropdown', label: '' },
 ];
 
 const SkeletonRowRenderer = () => {
