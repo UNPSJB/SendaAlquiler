@@ -5,9 +5,11 @@ from graphql import GraphQLResolveInfo
 
 from typing import Callable, Type
 
+from graphql import GraphQLError
+
 
 class CustomContext:
-    office_id: int
+    office_id: str
     user: UserModel
 
 
@@ -37,11 +39,12 @@ def user_passes_test(
         @context(f)
         def wrapper(context, *args, **kwargs):
             user = context.user
+            print(args)
 
             if test_func(user):
                 return f(*args, **kwargs)
 
-            raise exc
+            raise GraphQLError("No tienes permisos para realizar esta acción")
 
         return wrapper
 
