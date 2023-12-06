@@ -6,6 +6,12 @@ import { usePurchasesByClientId } from '@/api/hooks';
 
 import { formatDateTime } from '@/modules/dayjs/utils';
 
+import {
+    TableSecondary,
+    TableSecondaryTData,
+    TableSecondaryTRow,
+} from '@/app/pedidos-internos/[id]/Products';
+
 import { PurchasesByClientIdTabComponentProps } from './page';
 
 import Button from '@/components/Button';
@@ -20,7 +26,7 @@ const UL: React.FC<PropsWithChildren> = ({ children }) => {
 const ClientByIdPurchasesTab: React.FC<PurchasesByClientIdTabComponentProps> = ({
     id,
 }) => {
-    const usePurchasesByClientIdResult = usePurchasesByClientId(id as string);
+    const usePurchasesByClientIdResult = usePurchasesByClientId(id);
 
     return (
         <FetchedDataRenderer
@@ -34,7 +40,7 @@ const ClientByIdPurchasesTab: React.FC<PurchasesByClientIdTabComponentProps> = (
             }
         >
             {({ purchasesByClientId }) => (
-                <>
+                <div className="pr-container">
                     <div className="flex items-center justify-between">
                         <h1 className="pt-4 text-xl font-bold">
                             Compras{' '}
@@ -49,58 +55,81 @@ const ClientByIdPurchasesTab: React.FC<PurchasesByClientIdTabComponentProps> = (
 
                     <UL>
                         {purchasesByClientId.map((purchase) => (
-                            <div
-                                key={purchase.id}
-                                className="mb-4 mr-4 mt-8 rounded-md border bg-white "
-                            >
-                                <div className="flex border-b p-4 font-bold">
-                                    <h2>{formatDateTime(purchase.createdOn)}</h2>
+                            <div key={purchase.id}>
+                                <div className="flex">
+                                    <h2 className="relative mb-[-1px] rounded-t-xl border-x border-t border-gray-300 bg-white px-4 pb-1 pt-4 font-bold">
+                                        {formatDateTime(purchase.createdOn)}
+                                    </h2>
                                 </div>
-                                <div className="my-2">
-                                    {purchase.purchaseItems.map((item) => {
-                                        return (
-                                            <div
-                                                key={item.id}
-                                                className="flex justify-between px-4 py-1"
-                                            >
-                                                <h2 className="text-gray-400">
-                                                    {item.product.name}{' '}
-                                                    {item.product.brand?.name}
-                                                </h2>
-                                                <p className=" text-gray-400">
-                                                    {item.quantity} u. x $
-                                                    {item.product.price}
-                                                </p>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                                <div className="mr-2 flex justify-between border-b px-2 pb-2">
-                                    <p className="ml-2 font-bold">Total</p>
-                                    <b className="text-xl font-normal">
-                                        ${purchase.total}
-                                    </b>
-                                </div>
-                                <div className="flex justify-end">
-                                    <Link
-                                        href={``}
-                                        passHref
-                                        className="border-x px-8 py-4  text-gray-400 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
-                                    >
-                                        Comprar de nuevo
-                                    </Link>
-                                    <Link
-                                        href={`/ventas/${purchase.id}`}
-                                        passHref
-                                        className=" px-8 py-4  font-bold text-gray-500 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
-                                    >
-                                        Ver mas detalles
-                                    </Link>
+
+                                <div className="border border-gray-300 bg-white">
+                                    <TableSecondary
+                                        headers={[
+                                            'Producto',
+                                            'Marca',
+                                            'Cantidad',
+                                            'Precio',
+                                        ]}
+                                        data={
+                                            <>
+                                                {purchase.purchaseItems.map(
+                                                    (item, index) => (
+                                                        <TableSecondaryTRow key={index}>
+                                                            <TableSecondaryTData>
+                                                                {item.product.name}
+                                                            </TableSecondaryTData>
+                                                            <TableSecondaryTData>
+                                                                {item.product.brand?.name}
+                                                            </TableSecondaryTData>
+                                                            <TableSecondaryTData>
+                                                                {item.quantity}
+                                                            </TableSecondaryTData>
+                                                            <TableSecondaryTData>
+                                                                ${item.product.price}
+                                                            </TableSecondaryTData>
+                                                        </TableSecondaryTRow>
+                                                    ),
+                                                )}
+
+                                                <TableSecondaryTRow>
+                                                    <TableSecondaryTData>
+                                                        <span className="text-xl font-bold">
+                                                            Total
+                                                        </span>
+                                                    </TableSecondaryTData>
+                                                    <TableSecondaryTData></TableSecondaryTData>
+                                                    <TableSecondaryTData></TableSecondaryTData>
+                                                    <TableSecondaryTData>
+                                                        <div className="text-xl font-bold">
+                                                            ${purchase.total}
+                                                        </div>
+                                                    </TableSecondaryTData>
+                                                </TableSecondaryTRow>
+                                            </>
+                                        }
+                                    />
+
+                                    <div className="flex justify-end">
+                                        <Link
+                                            href={``}
+                                            passHref
+                                            className="border-x px-8 py-4  text-gray-400 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
+                                        >
+                                            Comprar de nuevo
+                                        </Link>
+                                        <Link
+                                            href={`/ventas/${purchase.id}`}
+                                            passHref
+                                            className=" px-8 py-4  font-bold text-gray-500 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
+                                        >
+                                            Ver mas detalles
+                                        </Link>
+                                    </div>
                                 </div>
                             </div>
                         ))}
                     </UL>
-                </>
+                </div>
             )}
         </FetchedDataRenderer>
     );
