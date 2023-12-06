@@ -35,3 +35,7 @@ serve: ## Run the Django server
 .PHONY: csu
 csu: ## Run createsuperuser
 	python manage.py createsuperuser
+
+.PHONY: erd
+erd: ## Generate ERD
+	python manage.py graph_models -a -g -o imagefile_name.png
