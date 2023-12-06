@@ -37,7 +37,6 @@ const Page = () => {
         const { brand, type, stock, suppliers } = data;
 
         if (!brand || !type || !stock || !suppliers) return;
-        console.log(stock);
 
         mutate({
             productData: {

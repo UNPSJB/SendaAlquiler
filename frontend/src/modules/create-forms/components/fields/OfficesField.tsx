@@ -131,9 +131,6 @@ const RHFOfficesField = <
             name={name}
             control={control}
             render={({ field: { onChange, value } }) => {
-                console.log(data);
-                console.log(value);
-
                 return (
                     <CustomSelect<OfficesSelectOption, TIsMulti>
                         isLoading={isLoading}
