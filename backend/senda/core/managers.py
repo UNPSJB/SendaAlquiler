@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from senda.core.models.purchases import PurchaseModel
     from senda.core.models.rental_contracts import RentalContractModel
     from senda.core.models.suppliers import SupplierModel
-    from senda.core.models.employees import EmployeeModel
+    from senda.core.models.employees import EmployeeModel, EmployeeOfficeModel
     from users.models import UserModel
 
 
@@ -420,16 +420,24 @@ class EmployeeModelManager(models.Manager["EmployeeModel"]):
     Custom manager for the EmployeeModel, providing methods to create and update employee instances.
     """
 
-    def create_employee(self, user: "UserModel"):
+    @transaction.atomic
+    def create_employee(self, user: "UserModel", offices: List[str]):
+        from senda.core.models.offices import OfficeModel
+        from senda.core.models.employees import EmployeeOfficeModel
+
         """
         Creates a new employee instance, ensuring the user does not already have an associated employee.
         """
         if self.filter(user=user).exists():
             raise ValueError("Ya existe ese empleado")
 
-        return self.create(
-            user=user,
-        )
+        employee = self.create(user=user)
+
+        for office_id in offices:
+            office = OfficeModel.objects.get(id=office_id)
+            EmployeeOfficeModel.objects.create(employee=employee, office=office)
+
+        return employee
 
     def update_employee(self, employee: "EmployeeModel", **kwargs: Any):
         """

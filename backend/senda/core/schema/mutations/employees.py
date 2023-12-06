@@ -1,13 +1,13 @@
-from typing import Any
-
 import graphene
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 
 from senda.core.models.employees import EmployeeModel
 from users.models import UserModel
 from senda.core.schema.custom_types import Employee
 
 from senda.core.decorators import employee_required, CustomInfo
+
+from utils.graphene import non_null_list_of
 
 
 class ErrorMessages:
@@ -19,6 +19,7 @@ class CreateEmployeeInput(graphene.InputObjectType):
     last_name = graphene.String(required=True)
     email = graphene.String(required=True)
     password = graphene.String(required=True)
+    offices = non_null_list_of(graphene.ID)
 
 
 class UpdateEmployeeInput(graphene.InputObjectType):
@@ -46,6 +47,9 @@ class CreateEmployee(graphene.Mutation):
     @employee_required
     def mutate(self, info: CustomInfo, employee_data: CreateEmployeeInput):
         try:
+            if UserModel.objects.filter(email=employee_data.email).exists():
+                raise ValueError("El correo ya existe")
+
             user = UserModel.objects.create_user(
                 first_name=employee_data.first_name,
                 last_name=employee_data.last_name,
@@ -53,7 +57,9 @@ class CreateEmployee(graphene.Mutation):
                 password=employee_data.password,
             )
 
-            employee = EmployeeModel.objects.create_employee(user=user)
+            employee = EmployeeModel.objects.create_employee(
+                user=user, offices=employee_data.offices
+            )
             return CreateEmployee(employee=employee)
         except Exception as e:
             return CreateEmployee(error=e)
@@ -75,25 +81,6 @@ class DeleteEmployee(graphene.Mutation):
             return DeleteEmployee(success=False)
 
 
-class SetSessionOfficeCookie(graphene.Mutation):
-    class Arguments:
-        office_id = graphene.ID()
-        clear_cookie = graphene.Boolean(default_value=False)
-
-    success = graphene.Boolean()
-
-    @employee_required
-    def mutate(self, info, office_id, clear_cookie):
-        context = info.context
-        if clear_cookie:
-            context.cookie_to_clear = True
-        else:
-            context.office_id_to_set = office_id
-        return SetSessionOfficeCookie(success=True)
-
-
 class Mutation(graphene.ObjectType):
     create_employee = CreateEmployee.Field()
     delete_employee = DeleteEmployee.Field()
-
-    set_session_office_cookie = SetSessionOfficeCookie.Field()

@@ -46,6 +46,7 @@ const Page = () => {
                 lastName: data.lastName,
                 email: data.email,
                 password: data.password,
+                offices: data.offices.map((office) => office.value),
             },
         });
     };

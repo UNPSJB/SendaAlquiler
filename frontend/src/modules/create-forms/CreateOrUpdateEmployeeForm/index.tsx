@@ -4,15 +4,19 @@ import { CreateEmployeeMutationVariables } from '@/api/graphql';
 
 import EmployeeInfoFormFields from './EmployeeInfoFormFields';
 
+import { OfficesFieldValue } from '../components/fields/OfficesField';
 import ModableFormLayout, {
     ModableFormComponentProps,
     ModableFormLayoutStep,
 } from '../ModableFormLayout';
 
-export type CreateOrUpdateEmployeeFormValues =
-    CreateEmployeeMutationVariables['employeeData'] & {
-        confirmPassword: string;
-    };
+export type CreateOrUpdateEmployeeFormValues = Omit<
+    CreateEmployeeMutationVariables['employeeData'],
+    'offices'
+> & {
+    confirmPassword: string;
+    offices: OfficesFieldValue[];
+};
 
 const STEPS: ModableFormLayoutStep<CreateOrUpdateEmployeeFormValues>[] = [
     {
@@ -29,8 +33,9 @@ type Props = ModableFormComponentProps<CreateOrUpdateEmployeeFormValues>;
 const CreateOrUpdateEmployeeForm: React.FC<Props> = ({ defaultValues, ...props }) => (
     <ModableFormLayout
         title={defaultValues ? 'Editar empleado' : 'Crear empleado'}
-        {...props}
         steps={STEPS}
+        defaultValues={defaultValues}
+        {...props}
     />
 );
 

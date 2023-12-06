@@ -851,6 +851,30 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "offices",
+                        "description": null,
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "LIST",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "SCALAR",
+                                        "name": "ID",
+                                        "ofType": null
+                                    }
+                                }
+                            }
+                        },
+                        "defaultValue": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "password",
                         "description": null,
                         "type": {
@@ -4149,43 +4173,6 @@
                         "type": {
                             "kind": "OBJECT",
                             "name": "Refresh",
-                            "ofType": null
-                        },
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "setSessionOfficeCookie",
-                        "description": null,
-                        "args": [
-                            {
-                                "name": "clearCookie",
-                                "description": null,
-                                "type": {
-                                    "kind": "SCALAR",
-                                    "name": "Boolean",
-                                    "ofType": null
-                                },
-                                "defaultValue": "false",
-                                "isDeprecated": false,
-                                "deprecationReason": null
-                            },
-                            {
-                                "name": "officeId",
-                                "description": null,
-                                "type": {
-                                    "kind": "SCALAR",
-                                    "name": "ID",
-                                    "ofType": null
-                                },
-                                "defaultValue": null,
-                                "isDeprecated": false,
-                                "deprecationReason": null
-                            }
-                        ],
-                        "type": {
-                            "kind": "OBJECT",
-                            "name": "SetSessionOfficeCookie",
                             "ofType": null
                         },
                         "isDeprecated": false,
@@ -8514,29 +8501,6 @@
                     }
                 ],
                 "interfaces": null,
-                "enumValues": null,
-                "possibleTypes": null
-            },
-            {
-                "kind": "OBJECT",
-                "name": "SetSessionOfficeCookie",
-                "description": null,
-                "fields": [
-                    {
-                        "name": "success",
-                        "description": null,
-                        "args": [],
-                        "type": {
-                            "kind": "SCALAR",
-                            "name": "Boolean",
-                            "ofType": null
-                        },
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    }
-                ],
-                "inputFields": null,
-                "interfaces": [],
                 "enumValues": null,
                 "possibleTypes": null
             },

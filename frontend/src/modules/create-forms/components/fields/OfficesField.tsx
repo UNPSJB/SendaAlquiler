@@ -24,11 +24,17 @@ const OfficeOption: React.FC<OfficeOptionProps> = ({ office }) => (
     </div>
 );
 
-type OfficesSelectOption = {
-    label: React.ReactNode;
-    value: Office['id'];
-    data: OfficeOptionProps['office'];
-};
+type OfficesSelectOption =
+    | {
+          label: React.ReactNode;
+          value: Office['id'];
+          data: OfficeOptionProps['office'];
+      }
+    | {
+          __isNew__: boolean;
+          label: string;
+          value: string;
+      };
 
 const removeAccents = (str: string) => {
     return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -80,36 +86,58 @@ export type OfficesFieldValue = {
     data: OfficeOptionProps['office'];
 };
 
-type Props<TFieldValues extends FieldValues, TName extends Path<TFieldValues>> = {
+type Props<
+    TFieldValues extends FieldValues,
+    TName extends Path<TFieldValues>,
+    TIsMulti extends boolean = false,
+> = Omit<
+    ReactSelectProps<OfficesSelectOption, TIsMulti>,
+    | 'options'
+    | 'name'
+    | 'placeholder'
+    | 'filterOption'
+    | 'formatOptionLabel'
+    | 'value'
+    | 'onChange'
+    | 'isLoading'
+> & {
     name: TName;
     control: Control<TFieldValues>;
     placeholder: string;
     officeToExclude: Office['id'] | undefined;
-} & (TFieldValues[Extract<keyof TFieldValues, TName>] extends OfficesFieldValue
-    ? object
-    : never);
+} & (TIsMulti extends true
+        ? TFieldValues[Extract<keyof TFieldValues, TName>] extends OfficesFieldValue[]
+            ? object
+            : never
+        : TFieldValues[Extract<keyof TFieldValues, TName>] extends OfficesFieldValue
+          ? object
+          : never);
 
 const RHFOfficesField = <
     TFieldValues extends FieldValues,
     TName extends Path<TFieldValues>,
+    TIsMulti extends boolean = false,
 >({
     name,
     control,
     placeholder,
     officeToExclude,
-}: Props<TFieldValues, TName>) => {
+    ...props
+}: Props<TFieldValues, TName, TIsMulti>) => {
     const { data, isLoading } = useOffices();
 
     return (
         <Controller
             name={name}
             control={control}
-            render={({ field: { onChange, value } }) => (
-                <CustomSelect
-                    isClearable
-                    isLoading={isLoading}
-                    options={
-                        (data ? data.offices : [])
+            render={({ field: { onChange, value } }) => {
+                console.log(data);
+                console.log(value);
+
+                return (
+                    <CustomSelect<OfficesSelectOption, TIsMulti>
+                        isLoading={isLoading}
+                        options={(data ? data.offices : [])
                             .filter((office) => {
                                 return office.id !== officeToExclude;
                             })
@@ -118,28 +146,24 @@ const RHFOfficesField = <
                                     label: office.name,
                                     value: office.id,
                                     data: office,
-                                } as OfficesFieldValue;
-                            }) as any
-                    }
-                    filterOption={customFilter}
-                    placeholder={placeholder}
-                    formatOptionLabel={(val) => {
-                        if ('data' in val) {
-                            return <OfficeOption office={val.data} />;
-                        }
+                                };
+                            })}
+                        filterOption={customFilter}
+                        placeholder={placeholder}
+                        formatOptionLabel={(val) => {
+                            if ('data' in val) {
+                                return <OfficeOption office={val.data} />;
+                            }
 
-                        return <span>{val.label}</span>;
-                    }}
-                    value={value}
-                    onChange={(val) => {
-                        if (val && 'data' in val) {
-                            onChange(val);
-                        } else {
-                            onChange(null);
-                        }
-                    }}
-                />
-            )}
+                            return <span>{val.label}</span>;
+                        }}
+                        value={value}
+                        onChange={onChange}
+                        isClearable
+                        {...props}
+                    />
+                );
+            }}
         />
     );
 };

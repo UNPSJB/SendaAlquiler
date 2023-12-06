@@ -4,6 +4,7 @@ import { RHFFormField } from '@/modules/forms/FormField';
 import RHFInput from '@/modules/forms/Input';
 
 import { CreateOrUpdateEmployeeFormValues } from '.';
+import RHFOfficesField from '../components/fields/OfficesField';
 
 const EmployeeInfoFormFields: React.FC = () => {
     const {
@@ -93,6 +94,16 @@ const EmployeeInfoFormFields: React.FC = () => {
                             return isValid || 'Las contraseñas no coinciden';
                         },
                     }}
+                />
+            </RHFFormField>
+
+            <RHFFormField fieldID="offices" label="Oficinas" showRequired>
+                <RHFOfficesField<CreateOrUpdateEmployeeFormValues, 'offices', true>
+                    name="offices"
+                    control={control}
+                    placeholder="Oficinas"
+                    officeToExclude={undefined}
+                    isMulti
                 />
             </RHFFormField>
         </>

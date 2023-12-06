@@ -125,6 +125,7 @@ export type CreateEmployeeInput = {
     email: Scalars['String']['input'];
     firstName: Scalars['String']['input'];
     lastName: Scalars['String']['input'];
+    offices: Array<Scalars['ID']['input']>;
     password: Scalars['String']['input'];
 };
 
@@ -423,7 +424,6 @@ export type Mutation = {
     receiveInternalOrder: Maybe<ReceiveInternalOrder>;
     receiveOrderSupplier: Maybe<ReceiveOrderSupplier>;
     refreshToken: Maybe<Refresh>;
-    setSessionOfficeCookie: Maybe<SetSessionOfficeCookie>;
     startContract: Maybe<StartContract>;
     successfulReturnContract: Maybe<SuccessfulReturnContract>;
     /** Obtain JSON Web Token mutation */
@@ -561,11 +561,6 @@ export type MutationReceiveOrderSupplierArgs = {
 
 export type MutationRefreshTokenArgs = {
     token: InputMaybe<Scalars['String']['input']>;
-};
-
-export type MutationSetSessionOfficeCookieArgs = {
-    clearCookie?: InputMaybe<Scalars['Boolean']['input']>;
-    officeId: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type MutationStartContractArgs = {
@@ -1037,11 +1032,6 @@ export enum RentalContractStatusChoices {
 export type ServiceInput = {
     name: Scalars['String']['input'];
     price: Scalars['String']['input'];
-};
-
-export type SetSessionOfficeCookie = {
-    __typename?: 'SetSessionOfficeCookie';
-    success: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type StartContract = {
