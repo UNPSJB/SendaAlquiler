@@ -74,17 +74,33 @@ const ProductsFromOfficeField: React.FC<Props> = ({ office }) => {
                                     `products.${number}.product`
                                 >
                                     options={(data?.productsStocksByOfficeId || [])
+                                        .sort((a, b) => {
+                                            return a.product.name.localeCompare(
+                                                b.product.name,
+                                            );
+                                        })
                                         .filter((x) => {
                                             const isSelected =
-                                                selectedProductIds.includes(x.id);
+                                                selectedProductIds.includes(x.product.id);
                                             const isDisabled = x.stock === 0;
                                             const isSelectedInCurrentIndex =
-                                                selectedProductIds[index] === x.id;
+                                                selectedProductIds.length > index &&
+                                                selectedProductIds[index] ===
+                                                    x.product.id;
 
-                                            return (
-                                                !isDisabled &&
-                                                (isSelectedInCurrentIndex || !isSelected)
-                                            );
+                                            if (isDisabled) {
+                                                return false;
+                                            }
+
+                                            if (isSelectedInCurrentIndex) {
+                                                return true;
+                                            }
+
+                                            if (isSelected) {
+                                                return false;
+                                            }
+
+                                            return true;
                                         })
                                         .map((stock) => ({
                                             label: stock.product.name,
