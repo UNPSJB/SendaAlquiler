@@ -77,10 +77,15 @@ const LoginForm = () => {
 
     return (
         <FormProvider {...useFormMethods}>
-            <form className="mx-auto lg:w-6/12" onSubmit={handleSubmit(onSubmit)}>
+            <form
+                data-cy="login-form"
+                className="mx-auto lg:w-6/12"
+                onSubmit={handleSubmit(onSubmit)}
+            >
                 <div className="mb-4 space-y-4">
                     <RHFFormField fieldID="email" label="Correo electrónico">
                         <Input
+                            data-cy="login-email-input"
                             type="email"
                             id="email"
                             name="email"
@@ -93,6 +98,7 @@ const LoginForm = () => {
 
                     <RHFFormField fieldID="password" label="Contraseña">
                         <Input
+                            data-cy="login-password-input"
                             type="password"
                             id="password"
                             name="password"
@@ -104,7 +110,7 @@ const LoginForm = () => {
                     </RHFFormField>
                 </div>
 
-                <Button fullWidth type="submit">
+                <Button data-cy="login-submit-button" fullWidth type="submit">
                     Iniciar sesión
                 </Button>
             </form>
