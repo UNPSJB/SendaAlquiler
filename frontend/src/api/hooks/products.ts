@@ -26,6 +26,9 @@ import {
     DeleteProductDocument,
     DeleteProductMutation,
     AllProductsDocument,
+    UpdateProductDocument,
+    UpdateProductMutation,
+    UpdateProductMutationVariables,
 } from '../graphql';
 
 export const useAllProducts = () => {
@@ -188,6 +191,37 @@ export const useProductsSuppliedBySupplierId = (id: string | undefined) => {
         },
         {
             enabled: typeof id === 'string',
+        },
+    );
+};
+
+export const useUpdateProduct = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<
+    UpdateProductMutation,
+    Error,
+    UpdateProductMutationVariables
+> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<UpdateProductMutation, Error, UpdateProductMutationVariables>(
+        (data) => {
+            return fetchClient(UpdateProductDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                const product = data.updateProduct?.product;
+
+                if (product) {
+                    client.invalidateQueries([queryDomains.products]);
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
         },
     );
 };

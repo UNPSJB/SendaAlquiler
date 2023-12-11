@@ -1,4 +1,4 @@
-import { Control, Controller, FieldValues, Path } from 'react-hook-form';
+import { Control, Controller, FieldValues, Path, RegisterOptions } from 'react-hook-form';
 import { Props as ReactSelectProps } from 'react-select';
 
 import { Office, OfficesQuery } from '@/api/graphql';
@@ -105,6 +105,7 @@ type Props<
     control: Control<TFieldValues>;
     placeholder: string;
     officeToExclude: Office['id'] | undefined;
+    rules?: RegisterOptions<TFieldValues, TName>;
 } & (TIsMulti extends true
         ? TFieldValues[Extract<keyof TFieldValues, TName>] extends OfficesFieldValue[]
             ? object
@@ -122,6 +123,7 @@ const RHFOfficesField = <
     control,
     placeholder,
     officeToExclude,
+    rules,
     ...props
 }: Props<TFieldValues, TName, TIsMulti>) => {
     const { data, isLoading } = useOffices();
@@ -130,6 +132,7 @@ const RHFOfficesField = <
         <Controller
             name={name}
             control={control}
+            rules={rules}
             render={({ field: { onChange, value } }) => {
                 return (
                     <CustomSelect<OfficesSelectOption, TIsMulti>

@@ -17,6 +17,7 @@ import ChevronRight from '@/modules/icons/ChevronRight';
 import ProductByIdDetailsTab from './Details';
 
 import Avatar from '@/components/Avatar';
+import Button from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -32,12 +33,16 @@ const getDasboardTitle = (product: ProductByIdQuery['productById'] | undefined) 
     }
 
     return (
-        <div className="flex items-center space-x-4">
-            <DashboardLayoutBigTitle>
-                <Link href="/productos">Productos</Link>
-            </DashboardLayoutBigTitle>
-            <ChevronRight />
-            <span className="font-headings text-sm">{product.name}</span>
+        <div className="flex justify-between">
+            <div className="flex items-center space-x-4">
+                <DashboardLayoutBigTitle>
+                    <Link href="/productos">Productos</Link>
+                </DashboardLayoutBigTitle>
+                <ChevronRight />
+                <span className="font-headings text-sm">{product.name}</span>
+            </div>
+
+            <Button href={`/productos/${product.id}/edit`}>Editar</Button>
         </div>
     );
 };

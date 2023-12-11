@@ -60,11 +60,12 @@ const STEPS: ModableFormLayoutStep<CreateOrUpdateProductFormValues>[] = [
 
 type Props = ModableFormComponentProps<CreateOrUpdateProductFormValues>;
 
-const CreateOrUpdateProductForm: React.FC<Props> = ({ defaultValues, ...props }) => {
+const CreateOrUpdateProductForm: React.FC<Props> = ({ isUpdate, ...props }) => {
     return (
         <ModableFormLayout
             steps={STEPS}
-            title={defaultValues ? 'Editar producto' : 'Crear producto'}
+            title={isUpdate ? 'Editar producto' : 'Crear producto'}
+            isUpdate={isUpdate}
             {...props}
         />
     );

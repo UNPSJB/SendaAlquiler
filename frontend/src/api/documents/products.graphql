@@ -11,6 +11,12 @@ fragment ProductListItem on Product {
         name
         price
     }
+    stock {
+        office {
+            id
+        }
+        stock
+    }
 }
 
 query products($page: Int, $query: String) {
@@ -19,31 +25,6 @@ query products($page: Int, $query: String) {
         numPages
         results {
             ...ProductListItem
-        }
-    }
-}
-
-query productById($id: ID!) {
-    productById(id: $id) {
-        sku
-        name
-        description
-        brand {
-            name
-        }
-        type
-        price
-        stock {
-            office {
-                locality {
-                    name
-                }
-            }
-            stock
-        }
-        services {
-            name
-            price
         }
     }
 }
@@ -90,4 +71,57 @@ query allProducts {
 
 query productExists($sku: String!) {
     productExists(sku: $sku)
+}
+
+mutation updateProduct($id: ID!, $productData: UpdateProductInput!) {
+    updateProduct(id: $id, productData: $productData) {
+        product {
+            ...SingleProduct
+        }
+        error
+    }
+}
+
+query productById($id: ID!) {
+    productById(id: $id) {
+        ...SingleProduct
+    }
+}
+
+fragment SingleProduct on Product {
+    id
+    sku
+    name
+    description
+    brand {
+        id
+        name
+    }
+    type
+    price
+    stock {
+        office {
+            id
+            name
+            locality {
+                state
+                postalCode
+                name
+            }
+        }
+        stock
+    }
+    services {
+        id
+        name
+        price
+    }
+    suppliers {
+        id
+        supplier {
+            id
+            name
+        }
+        price
+    }
 }

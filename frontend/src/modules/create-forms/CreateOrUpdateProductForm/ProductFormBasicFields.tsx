@@ -9,8 +9,11 @@ import RHFInput from '@/modules/forms/Input';
 import { CreateOrUpdateProductFormValues } from '.';
 import BrandField from '../components/fields/BrandField';
 import ProductTypeField from '../components/fields/ProductTypeField';
+import { ModableFormLayoutStepComponentProps } from '../ModableFormLayout';
 
-const ProductFormBasicFields: React.FC = () => {
+const ProductFormBasicFields: React.FC<
+    ModableFormLayoutStepComponentProps<CreateOrUpdateProductFormValues>
+> = ({ isUpdate, defaultValues }) => {
     const {
         control,
         formState: { errors },
@@ -18,7 +21,7 @@ const ProductFormBasicFields: React.FC = () => {
 
     return (
         <>
-            <RHFFormField className="flex-1" fieldID="sku" label="Sku" showRequired>
+            <RHFFormField className="flex-1" fieldID="sku" label="Sku">
                 <RHFInput
                     id="sku"
                     name="sku"
@@ -26,8 +29,14 @@ const ProductFormBasicFields: React.FC = () => {
                     hasError={!!errors.sku}
                     control={control}
                     rules={{
-                        required: true,
                         validate: async (value) => {
+                            const shouldValidate =
+                                !isUpdate || (isUpdate && value !== defaultValues?.sku);
+
+                            if (!shouldValidate || !value) {
+                                return;
+                            }
+
                             const response = await fetchClient(ProductExistsDocument, {
                                 sku: value,
                             });

@@ -1,11 +1,17 @@
 import { useFormContext } from 'react-hook-form';
 
+import fetchClient from '@/api/fetch-client';
+import { ClientExistsDocument } from '@/api/graphql';
+
 import { RHFFormField } from '@/modules/forms/FormField';
 import Input from '@/modules/forms/Input';
 
 import { CreateOrUpdateClientFormValues } from '.';
+import { ModableFormLayoutStepComponentProps } from '../ModableFormLayout';
 
-const ClientContactFormFields: React.FC = () => {
+const ClientContactFormFields: React.FC<
+    ModableFormLayoutStepComponentProps<CreateOrUpdateClientFormValues>
+> = ({ isUpdate, defaultValues }) => {
     const {
         formState: { errors },
         control,
@@ -57,16 +63,23 @@ const ClientContactFormFields: React.FC = () => {
                     control={control}
                     rules={{
                         required: true,
-                        // validate: async (value) => {
-                        //     const response = await fetchClient(ClientExistsDocument, {
-                        //         email: value,
-                        //         dni: null,
-                        //     });
+                        validate: async (value) => {
+                            const shouldValidate =
+                                !isUpdate || (isUpdate && value !== defaultValues?.email);
 
-                        //     return response.clientExists
-                        //         ? 'Ya existe un cliente con ese correo'
-                        //         : true;
-                        // },
+                            if (!shouldValidate) {
+                                return;
+                            }
+
+                            const response = await fetchClient(ClientExistsDocument, {
+                                email: value,
+                                dni: null,
+                            });
+
+                            return response.clientExists
+                                ? 'Ya existe un cliente con ese correo'
+                                : true;
+                        },
                     }}
                 />
             </RHFFormField>
@@ -83,16 +96,23 @@ const ClientContactFormFields: React.FC = () => {
                     rules={{
                         required: true,
                         maxLength: 10,
-                        // validate: async (value) => {
-                        //     const response = await fetchClient(ClientExistsDocument, {
-                        //         email: null,
-                        //         dni: value,
-                        //     });
+                        validate: async (value) => {
+                            const shouldValidate =
+                                !isUpdate || (isUpdate && value !== defaultValues?.dni);
 
-                        //     return response.clientExists
-                        //         ? 'Ya existe un cliente con ese DNI'
-                        //         : true;
-                        // },
+                            if (!shouldValidate) {
+                                return;
+                            }
+
+                            const response = await fetchClient(ClientExistsDocument, {
+                                email: null,
+                                dni: value,
+                            });
+
+                            return response.clientExists
+                                ? 'Ya existe un cliente con ese DNI'
+                                : true;
+                        },
                     }}
                 />
             </RHFFormField>

@@ -36,14 +36,16 @@ const Page = () => {
         <FetchedDataRenderer
             {...useClientByIdResult}
             Error={
-                <FetchStatusMessageWithButton
-                    message="Hubo un error al cargar el cliente"
-                    btnText="Volver a intentar"
-                    btnHref={`/clientes/${id}`}
-                />
+                <div className="flex min-h-screen items-center">
+                    <FetchStatusMessageWithButton
+                        message="Hubo un error al cargar el cliente"
+                        btnText="Volver a intentar"
+                        btnHref={`/clientes/${id}`}
+                    />
+                </div>
             }
             Loading={
-                <div className="flex w-full flex-1 items-center justify-center">
+                <div className="flex min-h-screen w-full flex-1 items-center justify-center">
                     <Spinner />
                 </div>
             }
@@ -96,6 +98,7 @@ const Page = () => {
                         }}
                         cancelHref={`/clientes/${id}`}
                         isMutating={isLoading}
+                        isUpdate
                     />
                 );
             }}

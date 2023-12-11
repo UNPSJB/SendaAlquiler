@@ -23,8 +23,10 @@ class CreateEmployeeInput(graphene.InputObjectType):
 
 
 class UpdateEmployeeInput(graphene.InputObjectType):
-    id = graphene.ID(required=True)
-    user_id = graphene.ID()
+    first_name = graphene.String()
+    last_name = graphene.String()
+    email = graphene.String()
+    offices = non_null_list_of(graphene.ID)
 
 
 def get_user(user_id: str):
@@ -65,6 +67,39 @@ class CreateEmployee(graphene.Mutation):
             return CreateEmployee(error=e)
 
 
+class UpdateEmployee(graphene.Mutation):
+    employee = graphene.Field(Employee)
+    error = graphene.String()
+
+    class Arguments:
+        id = graphene.ID(required=True)
+        employee_data = UpdateEmployeeInput(required=True)
+
+    @employee_required
+    def mutate(self, info: CustomInfo, id: str, employee_data: UpdateEmployeeInput):
+        try:
+            employee = EmployeeModel.objects.get(id=id)
+            if employee_data.first_name:
+                employee.user.first_name = employee_data.first_name
+
+            if employee_data.last_name:
+                employee.user.last_name = employee_data.last_name
+
+            if employee_data.email:
+                employee.user.email = employee_data.email
+
+            if employee_data.offices:
+                employee.offices.all().delete()
+
+                for office_id in employee_data.offices:
+                    employee.offices.create(office_id=office_id)
+
+            employee.save()
+            return UpdateEmployee(employee=employee)
+        except Exception as e:
+            return UpdateEmployee(error=e)
+
+
 class DeleteEmployee(graphene.Mutation):
     success = graphene.Boolean(required=True)
 
@@ -84,3 +119,4 @@ class DeleteEmployee(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     create_employee = CreateEmployee.Field()
     delete_employee = DeleteEmployee.Field()
+    update_employee = UpdateEmployee.Field()

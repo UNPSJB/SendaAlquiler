@@ -16,10 +16,10 @@ import toast from 'react-hot-toast';
 import { useAllClients, useCreateRentalContract } from '@/api/hooks';
 
 import ClientField, { ClientFieldValue } from './components/fields/ClientField';
+import ContractProductsField, {
+    ContractProductFieldItemType,
+} from './components/fields/ContractProductsField';
 import LocalityField, { LocalityFieldValue } from './components/fields/LocalityField';
-import RHFProductOrderField, {
-    ProductQuantityAndService,
-} from './components/fields/ProductOrderField';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import ButtonWithSpinner from '@/components/ButtonWithSpinner';
@@ -59,7 +59,7 @@ type FormValues = {
         houseUnit: string | null;
         note?: string;
     };
-    productsAndQuantity: ProductQuantityAndService[];
+    productsAndQuantity: ContractProductFieldItemType[];
     contractStartDatetime: Date[];
     contractEndDatetime: Date[];
 };
@@ -693,13 +693,19 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                 </h2>
 
                                 <div className="w-9/12 space-y-6">
-                                    <RHFProductOrderField<
+                                    <ContractProductsField<
                                         FormValues,
                                         'productsAndQuantity'
                                     >
                                         control={control}
                                         name="productsAndQuantity"
                                         numberOfRentalDays={numberOfRentalDays}
+                                        startDate={dayjs(startDatetimeValue).format(
+                                            'YYYY-MM-DD',
+                                        )}
+                                        endDate={dayjs(endDatetimeValue).format(
+                                            'YYYY-MM-DD',
+                                        )}
                                     />
                                 </div>
                             </section>

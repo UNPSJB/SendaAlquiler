@@ -35,11 +35,11 @@ const STEPS: ModableFormLayoutStep<CreateOrUpdateClientFormValues>[] = [
 
 type Props = ModableFormComponentProps<CreateOrUpdateClientFormValues>;
 
-const CreateOrUpdateClientForm: React.FC<Props> = ({ defaultValues, ...props }) => (
+const CreateOrUpdateClientForm: React.FC<Props> = ({ isUpdate, ...props }) => (
     <ModableFormLayout<CreateOrUpdateClientFormValues>
         steps={STEPS}
-        title={defaultValues?.dni ? 'Editar cliente' : 'Crear cliente'}
-        defaultValues={defaultValues}
+        title={isUpdate ? 'Editar cliente' : 'Crear cliente'}
+        isUpdate={isUpdate}
         {...props}
     />
 );

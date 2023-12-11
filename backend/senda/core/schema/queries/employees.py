@@ -59,3 +59,11 @@ class Query(graphene.ObjectType):
             )
 
         return csv_buffer.getvalue()
+
+    employee_exists = graphene.NonNull(
+        graphene.Boolean, email=graphene.String(required=True)
+    )
+
+    @employee_required
+    def resolve_employee_exists(self, info: CustomInfo, email: str):
+        return EmployeeModel.objects.filter(user__email=email).exists()

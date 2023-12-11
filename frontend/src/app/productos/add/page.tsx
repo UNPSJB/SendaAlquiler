@@ -61,6 +61,7 @@ const Page = () => {
                     data.services.filter((service) => service.name).length
                         ? data.services.map((service) => {
                               return {
+                                  id: null,
                                   name: service.name,
                                   price: service.price,
                               };

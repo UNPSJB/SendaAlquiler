@@ -4,6 +4,11 @@ from extensions.db.models import TimeStampedModel
 from senda.core.managers import EmployeeModelManager
 from users.models import UserModel
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from senda.core.models.offices import OfficeModel
+
 
 class EmployeeModel(TimeStampedModel):
     """
@@ -16,6 +21,8 @@ class EmployeeModel(TimeStampedModel):
     Methods:
         __str__: Returns a string representation of the EmployeeModel instance, which is the email of the associated user.
     """
+
+    offices: models.QuerySet["OfficeModel"]
 
     user = models.OneToOneField(
         UserModel, on_delete=models.CASCADE, related_name="employee"

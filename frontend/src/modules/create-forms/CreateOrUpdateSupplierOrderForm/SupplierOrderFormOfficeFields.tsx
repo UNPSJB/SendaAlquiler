@@ -29,6 +29,9 @@ const SupplierOrderFormOfficeFields: React.FC = () => {
                     placeholder="Selecciona una sucursal"
                     name="officeDestination"
                     officeToExclude={undefined}
+                    rules={{
+                        required: true,
+                    }}
                 />
             </RHFFormField>
         </>

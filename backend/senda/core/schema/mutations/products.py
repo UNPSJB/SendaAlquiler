@@ -11,6 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 class ServiceInput(graphene.InputObjectType):
+    id = graphene.ID()
     name = graphene.String(required=True)
     price = graphene.String(required=True)
 
@@ -27,7 +28,7 @@ class ProductSupplierInput(graphene.InputObjectType):
 
 class CreateProductInput(graphene.InputObjectType):
     name = graphene.String(required=True)
-    sku = graphene.String(required=True)
+    sku = graphene.String()
     description = graphene.String()
     brand_id = graphene.ID(required=True)
     type = ProductTypeChoicesEnum(required=True)
@@ -38,7 +39,6 @@ class CreateProductInput(graphene.InputObjectType):
 
 
 class UpdateProductInput(graphene.InputObjectType):
-    id = graphene.ID(required=True)
     name = graphene.ID()
     sku = graphene.String()
     description = graphene.String()
@@ -69,6 +69,90 @@ class CreateProduct(graphene.Mutation):
                 return CreateProduct(error=str(e))
         except Exception as e:
             return CreateProduct(error=e)
+
+
+class UpdateProduct(graphene.Mutation):
+    product = graphene.Field(Product)
+    error = graphene.String()
+
+    class Arguments:
+        id = graphene.ID(required=True)
+        product_data = UpdateProductInput(required=True)
+
+    @employee_required
+    def mutate(self, info: CustomInfo, id: str, product_data: UpdateProductInput):
+        try:
+            product = ProductModel.objects.filter(id=id).first()
+
+            if not product:
+                return UpdateProduct(error="El producto no existe")
+
+            product.sku = product_data.sku
+            product.name = product_data.name
+            product.description = product_data.description
+            product.brand_id = product_data.brand_id
+            product.type = product_data.type
+            product.price = product_data.price
+
+            for service in product.services.all():
+                if service.id not in [
+                    service_data.id for service_data in product_data.services
+                ]:
+                    service.delete()
+
+            for service_data in product_data.services:
+                service_id = service_data.id
+
+                if not service_id:
+                    product.services.create(
+                        name=service_data.name, price=service_data.price
+                    )
+                else:
+                    service = product.services.filter(id=service_id).first()
+                    if service:
+                        service.price = service_data.price
+                        service.save()
+
+            for stock in product.stock.all():
+                if stock.office_id not in [
+                    stock_data.office_id for stock_data in product_data.stock
+                ]:
+                    stock.delete()
+
+            for stock_data in product_data.stock:
+                stock = product.stock.filter(office_id=stock_data.office_id).first()
+                if not stock:
+                    product.stock.create(
+                        office_id=stock_data.office_id, stock=stock_data.stock
+                    )
+                else:
+                    stock.stock = stock_data.stock
+                    stock.save()
+
+            for supplier in product.suppliers.all():
+                if supplier.supplier_id not in [
+                    supplier_data.supplier_id
+                    for supplier_data in product_data.suppliers
+                ]:
+                    supplier.delete()
+
+            for supplier_data in product_data.suppliers:
+                supplier = product.suppliers.filter(
+                    supplier_id=supplier_data.supplier_id
+                ).first()
+                if not supplier:
+                    product.suppliers.create(
+                        supplier_id=supplier_data.supplier_id, price=supplier_data.price
+                    )
+                else:
+                    supplier.price = supplier_data.price
+                    supplier.save()
+
+            product.save()
+
+            return UpdateProduct(product=product)
+        except Exception as e:
+            return UpdateProduct(error=e)
 
 
 class CreateBrand(graphene.Mutation):
@@ -108,3 +192,4 @@ class Mutation(graphene.ObjectType):
     create_product = CreateProduct.Field()
     create_brand = CreateBrand.Field()
     delete_product = DeleteProduct.Field()
+    update_product = UpdateProduct.Field()

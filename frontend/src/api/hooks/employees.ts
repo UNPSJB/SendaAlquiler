@@ -7,7 +7,7 @@ import {
 
 import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
-import { queryKeys } from './constants';
+import { queryDomains, queryKeys } from './constants';
 
 import { fetchClient } from '../fetch-client';
 import {
@@ -18,6 +18,9 @@ import {
     CreateEmployeeDocument,
     DeleteEmployeeDocument,
     DeleteEmployeeMutation,
+    UpdateEmployeeDocument,
+    UpdateEmployeeMutationVariables,
+    UpdateEmployeeMutation,
 } from '../graphql';
 
 export const useEmployees = () => {
@@ -91,6 +94,33 @@ export const useDeleteEmployee = ({
         {
             onSuccess: (data, variables, context) => {
                 client.invalidateQueries(queryKeys.employeesPaginatedList());
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+export const useUpdateEmployee = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<
+    UpdateEmployeeMutation,
+    Error,
+    UpdateEmployeeMutationVariables
+> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<UpdateEmployeeMutation, Error, UpdateEmployeeMutationVariables>(
+        (data) => {
+            return fetchClient(UpdateEmployeeDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                client.invalidateQueries([queryDomains.employees]);
 
                 if (onSuccess) {
                     onSuccess(data, variables, context);

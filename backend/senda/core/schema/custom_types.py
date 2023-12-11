@@ -21,6 +21,7 @@ from senda.core.models.products import (
     ProductServiceModel,
     ProductStockInOfficeModel,
     ProductTypeChoices,
+    ProductSupplierModel,
 )
 from senda.core.models.purchases import PurchaseItemModel, PurchaseModel
 from senda.core.models.rental_contracts import (
@@ -76,6 +77,11 @@ class Product(DjangoObjectType):
 
     class Meta:
         model = ProductModel
+
+
+class ProductStockInOffice(DjangoObjectType):
+    class Meta:
+        model = ProductStockInOfficeModel
 
 
 class PaginatedProductQueryResult(PaginatedQueryResult):
@@ -139,11 +145,6 @@ class InternalOrderHistory(DjangoObjectType):
         model = InternalOrderHistoryModel
 
 
-class ProductStockInOffice(DjangoObjectType):
-    class Meta:
-        model = ProductStockInOfficeModel
-
-
 class Purchase(DjangoObjectType):
     class Meta:
         model = PurchaseModel
@@ -197,3 +198,8 @@ class SupplierOrderProduct(DjangoObjectType):
 class EmployeeOffice(DjangoObjectType):
     class Meta:
         model = EmployeeOfficeModel
+
+
+class ProductSupplier(DjangoObjectType):
+    class Meta:
+        model = ProductSupplierModel

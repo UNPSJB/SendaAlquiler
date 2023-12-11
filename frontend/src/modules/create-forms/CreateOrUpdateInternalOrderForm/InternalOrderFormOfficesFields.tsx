@@ -18,6 +18,9 @@ const InternalOrderFormOfficesFields: React.FC = () => {
                     placeholder="Selecciona una sucursal"
                     name="officeBranch"
                     officeToExclude={officeDestination?.value}
+                    rules={{
+                        required: true,
+                    }}
                 />
             </RHFFormField>
 
@@ -31,6 +34,9 @@ const InternalOrderFormOfficesFields: React.FC = () => {
                     placeholder="Selecciona una sucursal"
                     name="officeDestination"
                     officeToExclude={officeBranch?.value}
+                    rules={{
+                        required: true,
+                    }}
                 />
             </RHFFormField>
         </>

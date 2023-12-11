@@ -10,11 +10,16 @@ import NavigationButtons, {
     NavigationButtonsCancelProps,
 } from './components/NavigationButtons';
 
+export type ModableFormLayoutStepComponentProps<T extends FieldValues> = {
+    isUpdate: boolean | undefined;
+    defaultValues: DefaultValues<T> | undefined;
+};
+
 export type ModableFormLayoutStep<T extends FieldValues> = {
     key: string;
     title: string;
     description: string | React.FC;
-    Component: React.FC;
+    Component: React.FC<ModableFormLayoutStepComponentProps<T>>;
     fields: Path<T>[];
     isVisible?: (data: T) => boolean;
 };
@@ -25,13 +30,16 @@ type ModableFormLayoutProps<T extends FieldValues> = {
     defaultValues?: DefaultValues<T>;
     title: string;
     steps: ReadonlyArray<ModableFormLayoutStep<T>>;
+    isUpdate?: boolean;
 } & NavigationButtonsCancelProps;
 
 export type ModableFormComponentProps<T extends FieldValues> = Omit<
     ModableFormLayoutProps<T>,
     'steps' | 'title'
 > &
-    NavigationButtonsCancelProps;
+    NavigationButtonsCancelProps & {
+        isUpdate?: boolean;
+    };
 
 const ModableFormLayout = <T extends FieldValues>({
     mutate,
@@ -39,6 +47,7 @@ const ModableFormLayout = <T extends FieldValues>({
     defaultValues,
     title,
     steps,
+    isUpdate,
     ...props
 }: ModableFormLayoutProps<T>) => {
     const useFormMethods = useForm<T>({ defaultValues, reValidateMode: 'onChange' });
@@ -116,7 +125,10 @@ const ModableFormLayout = <T extends FieldValues>({
                                     </p>
 
                                     <form className="space-y-4">
-                                        <Component />
+                                        <Component
+                                            isUpdate={isUpdate}
+                                            defaultValues={defaultValues}
+                                        />
                                     </form>
                                 </div>
                             ),
