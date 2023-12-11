@@ -1,4 +1,4 @@
-from typing import Any
+from typing import List
 
 import graphene
 
@@ -7,12 +7,16 @@ from senda.core.models.products import (
     ProductModel,
     ProductStockInOfficeModel,
     ProductSupplierModel,
+    ProductTypeChoices,
+    OfficeModel,
 )
 from senda.core.schema.custom_types import (
     Brand,
     Product,
     ProductStockInOffice,
     PaginatedProductQueryResult,
+    Office,
+    ProductService,
 )
 from utils.graphene import non_null_list_of, get_paginated_model
 
@@ -20,6 +24,21 @@ import csv
 import io
 
 from senda.core.decorators import employee_required, CustomInfo
+
+from graphene import ObjectType
+
+
+class ProductsStocksInDateRangeStockByOffice(ObjectType):
+    office = graphene.Field(Office)
+    stock = graphene.Field(graphene.Int)
+
+
+class ProductStocksInDateRange(ObjectType):
+    id = graphene.NonNull(graphene.ID)
+    name = graphene.NonNull(graphene.String)
+    price = graphene.NonNull(graphene.Decimal)
+    stocks_by_office = non_null_list_of(ProductsStocksInDateRangeStockByOffice)
+    services = non_null_list_of(ProductService)
 
 
 class Query(graphene.ObjectType):
@@ -128,3 +147,47 @@ class Query(graphene.ObjectType):
             )
 
         return csv_buffer.getvalue()
+
+    products_stocks_by_office_in_date_range = non_null_list_of(
+        ProductStocksInDateRange,
+        start_date=graphene.Date(required=True),
+        end_date=graphene.Date(required=True),
+    )
+
+    @employee_required
+    def resolve_products_stocks_by_office_in_date_range(
+        self, info: CustomInfo, start_date: str, end_date: str
+    ):
+        products_queryset = ProductModel.objects.filter(
+            type=ProductTypeChoices.ALQUILABLE
+        ).prefetch_related(
+            "stock",
+            "stock__office",
+            "rental_contract_items",
+            "rental_contract_items__rental_contract",
+            "services",
+        )
+
+        result: List[ProductStocksInDateRange]
+        result = []
+
+        for product_from_db in products_queryset:
+            result.append(
+                ProductStocksInDateRange(
+                    id=product_from_db.id,
+                    name=product_from_db.name,
+                    price=product_from_db.price,
+                    services=product_from_db.services.all(),
+                    stocks_by_office=[
+                        ProductsStocksInDateRangeStockByOffice(
+                            office=office,
+                            stock=product_from_db.get_available_stock_for_office_in_date_range(
+                                office, start_date, end_date
+                            ),
+                        )
+                        for office in OfficeModel.objects.all()
+                    ],
+                )
+            )
+
+        return result

@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
-import { ProductTypeChoices, ProductsQuery } from '@/api/graphql';
-import { useAllProducts } from '@/api/hooks';
+import { ProductsStocksByOfficeInDateRangeQuery } from '@/api/graphql';
+import { useProductsStocksByOfficeInDateRange } from '@/api/hooks';
 
 import Label from '@/modules/forms/Label';
 
@@ -14,10 +14,11 @@ import { FormField } from '../../../forms/FormField';
 import { Input } from '../../../forms/Input';
 import { CustomSelect } from '../../../forms/Select';
 
-type ProductDetails = ProductsQuery['products']['results'][0];
+type ProductDetails =
+    ProductsStocksByOfficeInDateRangeQuery['productsStocksByOfficeInDateRange'][0];
 type ServiceDetails = ProductDetails['services'][0];
 
-export type ProductQuantityAndService = {
+export type ContractProductFieldItemType = {
     product: {
         value: string;
         label: string;
@@ -33,11 +34,13 @@ export type ProductQuantityAndService = {
 
 type Props = {
     numberOfRentalDays: number;
-    value?: ProductQuantityAndService[];
-    onChange: (val: ProductQuantityAndService[] | null) => void;
+    value?: ContractProductFieldItemType[];
+    onChange: (val: ContractProductFieldItemType[] | null) => void;
+    startDate: string | undefined;
+    endDate: string | undefined;
 };
 
-const DEFAULT_PRODUCT_QUANTITY_PAIR: ProductQuantityAndService = {
+const DEFAULT_PRODUCT_QUANTITY_PAIR: ContractProductFieldItemType = {
     product: null,
     service: null,
     quantity: null,
@@ -47,17 +50,23 @@ const DEFAULT_PRODUCT_QUANTITY_PAIR: ProductQuantityAndService = {
  * Component for managing a list of products and their quantities.
  * Allows adding, updating, and displaying products and quantities.
  */
-const ProductOrderField: React.FC<Props> = ({
+const ContractProductsField: React.FC<Props> = ({
     numberOfRentalDays,
     onChange,
     value = [],
+    startDate,
+    endDate,
 }) => {
-    const useProductsResult = useAllProducts();
+    const useProductsResult = useProductsStocksByOfficeInDateRange({
+        startDate: startDate,
+        endDate: endDate,
+    });
+
     const productsData = useProductsResult.data;
 
-    const [orderedProducts, setOrderedProducts] = useState<ProductQuantityAndService[]>(
-        value.length ? value : [{ ...DEFAULT_PRODUCT_QUANTITY_PAIR }],
-    );
+    const [orderedProducts, setOrderedProducts] = useState<
+        ContractProductFieldItemType[]
+    >(value.length ? value : [{ ...DEFAULT_PRODUCT_QUANTITY_PAIR }]);
 
     useEffect(() => {
         onChange(orderedProducts);
@@ -123,8 +132,7 @@ const ProductOrderField: React.FC<Props> = ({
     };
 
     const selectableProductOptions = (
-        productsData?.allProducts
-            .filter((product) => product.type === ProductTypeChoices.Alquilable)
+        productsData?.productsStocksByOfficeInDateRange
             .filter((product) =>
                 orderedProducts.every((item) => item.product?.value !== product.id),
             )
@@ -140,7 +148,8 @@ const ProductOrderField: React.FC<Props> = ({
     });
 
     const canOrderMoreProducts =
-        orderedProducts.length < (productsData?.allProducts.length || 0);
+        orderedProducts.length <
+        (productsData?.productsStocksByOfficeInDateRange.length || 0);
 
     return (
         <FetchedDataRenderer
@@ -291,7 +300,12 @@ type RHFProps<TFieldValues extends FieldValues, TName extends Path<TFieldValues>
     name: TName;
     control: Control<TFieldValues>;
     numberOfRentalDays: number;
-} & (TFieldValues[Extract<keyof TFieldValues, TName>] extends ProductQuantityAndService[]
+    startDate: string | undefined;
+    endDate: string | undefined;
+} & (TFieldValues[Extract<
+    keyof TFieldValues,
+    TName
+>] extends ContractProductFieldItemType[]
     ? object
     : never);
 
@@ -301,17 +315,18 @@ const RHFProductOrderField = <
 >(
     props: RHFProps<TFieldValues, TName>,
 ) => {
-    const { name, control, numberOfRentalDays } = props;
+    const { name, control, numberOfRentalDays, ...rest } = props;
 
     return (
         <Controller
             name={name}
             control={control}
             render={({ field: { onChange, value } }) => (
-                <ProductOrderField
+                <ContractProductsField
                     value={value}
                     onChange={onChange}
                     numberOfRentalDays={numberOfRentalDays}
+                    {...rest}
                 />
             )}
         />

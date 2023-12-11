@@ -71,6 +71,14 @@ export const queryKeys = {
     productsNonPaginated: [queryDomains.products, 'list', 'non-paginated'],
     productsPaginatedList: buildPaginatedListkey(queryDomains.products),
     productDetailsById: buildDetailKey(queryDomains.products),
-
+    productsStocksByOfficeInDateRange: (options: {
+        startDate: string | undefined;
+        endDate: string | undefined;
+    }) => [
+        queryDomains.products,
+        'list',
+        'with-number-of-available-stocks-between-dates',
+        options,
+    ],
     productsStocksByOfficeId: (id: string) => ['products-stocks-by-office-id', id],
 };

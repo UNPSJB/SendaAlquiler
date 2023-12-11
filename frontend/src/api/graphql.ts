@@ -21,6 +21,7 @@ export type Scalars = {
     Boolean: { input: boolean; output: boolean };
     Int: { input: number; output: number };
     Float: { input: number; output: number };
+    Date: { input: string; output: string };
     DateTime: { input: any; output: any };
     Decimal: { input: any; output: any };
     GenericScalar: { input: any; output: any };
@@ -740,6 +741,15 @@ export type ProductStockInOffice = {
     stock: Scalars['Int']['output'];
 };
 
+export type ProductStocksInDateRange = {
+    __typename?: 'ProductStocksInDateRange';
+    id: Scalars['ID']['output'];
+    name: Scalars['String']['output'];
+    price: Scalars['Decimal']['output'];
+    services: Array<ProductService>;
+    stocksByOffice: Array<ProductsStocksInDateRangeStockByOffice>;
+};
+
 export type ProductSupplierInput = {
     price: Scalars['String']['input'];
     supplierId: Scalars['ID']['input'];
@@ -756,6 +766,12 @@ export enum ProductTypeChoices {
     Alquilable = 'ALQUILABLE',
     Comerciable = 'COMERCIABLE',
 }
+
+export type ProductsStocksInDateRangeStockByOffice = {
+    __typename?: 'ProductsStocksInDateRangeStockByOffice';
+    office: Maybe<Office>;
+    stock: Maybe<Scalars['Int']['output']>;
+};
 
 export type Purchase = {
     __typename?: 'Purchase';
@@ -814,6 +830,7 @@ export type Query = {
     products: PaginatedProductQueryResult;
     productsCsv: Scalars['String']['output'];
     productsStocksByOfficeId: Array<ProductStockInOffice>;
+    productsStocksByOfficeInDateRange: Array<ProductStocksInDateRange>;
     productsSuppliedBySupplierId: Array<Product>;
     purchaseById: Maybe<Purchase>;
     purchaseItems: Array<PurchaseItem>;
@@ -890,6 +907,11 @@ export type QueryProductsArgs = {
 
 export type QueryProductsStocksByOfficeIdArgs = {
     officeId: Scalars['ID']['input'];
+};
+
+export type QueryProductsStocksByOfficeInDateRangeArgs = {
+    endDate: Scalars['Date']['input'];
+    startDate: Scalars['Date']['input'];
 };
 
 export type QueryProductsSuppliedBySupplierIdArgs = {
@@ -2271,6 +2293,32 @@ export type ProductExistsQueryVariables = Exact<{
 }>;
 
 export type ProductExistsQuery = { __typename?: 'Query'; productExists: boolean };
+
+export type ProductsStocksByOfficeInDateRangeQueryVariables = Exact<{
+    startDate: Scalars['Date']['input'];
+    endDate: Scalars['Date']['input'];
+}>;
+
+export type ProductsStocksByOfficeInDateRangeQuery = {
+    __typename?: 'Query';
+    productsStocksByOfficeInDateRange: Array<{
+        __typename?: 'ProductStocksInDateRange';
+        id: string;
+        name: string;
+        price: any;
+        services: Array<{
+            __typename?: 'ProductService';
+            id: string;
+            name: string;
+            price: any;
+        }>;
+        stocksByOffice: Array<{
+            __typename?: 'ProductsStocksInDateRangeStockByOffice';
+            stock: number | null;
+            office: { __typename?: 'Office'; id: string; name: string } | null;
+        }>;
+    }>;
+};
 
 export type PurchasesQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
@@ -7619,6 +7667,144 @@ export const ProductExistsDocument = {
         },
     ],
 } as unknown as DocumentNode<ProductExistsQuery, ProductExistsQueryVariables>;
+export const ProductsStocksByOfficeInDateRangeDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'productsStocksByOfficeInDateRange' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'startDate' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'Date' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'endDate' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'Date' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: {
+                            kind: 'Name',
+                            value: 'productsStocksByOfficeInDateRange',
+                        },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'startDate' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'startDate' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'endDate' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'endDate' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'services' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'price' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'stocksByOffice' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'office' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'stock' },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    ProductsStocksByOfficeInDateRangeQuery,
+    ProductsStocksByOfficeInDateRangeQueryVariables
+>;
 export const PurchasesDocument = {
     kind: 'Document',
     definitions: [

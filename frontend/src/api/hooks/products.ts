@@ -26,6 +26,7 @@ import {
     DeleteProductDocument,
     DeleteProductMutation,
     AllProductsDocument,
+    ProductsStocksByOfficeInDateRangeDocument,
 } from '../graphql';
 
 export const useAllProducts = () => {
@@ -188,6 +189,27 @@ export const useProductsSuppliedBySupplierId = (id: string | undefined) => {
         },
         {
             enabled: typeof id === 'string',
+        },
+    );
+};
+
+export const useProductsStocksByOfficeInDateRange = ({
+    startDate,
+    endDate,
+}: {
+    startDate: string | undefined;
+    endDate: string | undefined;
+}) => {
+    return useQuery(
+        queryKeys.productsStocksByOfficeInDateRange({ startDate, endDate }),
+        () => {
+            return fetchClient(ProductsStocksByOfficeInDateRangeDocument, {
+                startDate: startDate as string,
+                endDate: endDate as string,
+            });
+        },
+        {
+            enabled: typeof startDate === 'string' && typeof endDate === 'string',
         },
     );
 };
