@@ -80,7 +80,6 @@ class CreateRentalContract(graphene.Mutation):
     class Arguments:
         data = CreateRentalContractInput(required=True)
 
-
     def mutate(
         self, info: CustomInfo, data: CreateRentalContractInput
     ) -> "CreateRentalContract":
@@ -151,7 +150,6 @@ class BaseChangeContractStatus(graphene.Mutation):
 
 
 class PayContractDeposit(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "PayContractDeposit", info: Any, id: str
@@ -170,7 +168,6 @@ class PayContractDeposit(BaseChangeContractStatus):
 
 
 class PayTotalContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "PayTotalContract", info: Any, id: str
@@ -189,7 +186,6 @@ class PayTotalContract(BaseChangeContractStatus):
 
 
 class CancelContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "CancelContract", info: Any, id: str
@@ -211,7 +207,6 @@ class CancelContract(BaseChangeContractStatus):
 
 
 class StartContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "StartContract", info: Any, id: str
@@ -230,7 +225,6 @@ class StartContract(BaseChangeContractStatus):
 
 
 class ExpiredContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "ExpiredContract", info: Any, id: str
@@ -252,7 +246,6 @@ class ExpiredContract(BaseChangeContractStatus):
 
 
 class FinishContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "FinishContract", info: Any, id: str
@@ -271,7 +264,6 @@ class FinishContract(BaseChangeContractStatus):
 
 
 class FailedReturnContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "FailedReturnContract", info: Any, id: str
@@ -290,7 +282,6 @@ class FailedReturnContract(BaseChangeContractStatus):
 
 
 class SuccessfulReturnContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "SuccessfulReturnContract", info: Any, id: str
@@ -313,7 +304,6 @@ class DeleteRentalContract(graphene.Mutation):
 
     class Arguments:
         id = graphene.ID(required=True)
-
 
     def mutate(self, info: CustomInfo, id: str):
         try:
