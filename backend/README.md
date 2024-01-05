@@ -25,11 +25,15 @@ Para la implementación de GraphQL en el contexto de Django, se ha optado por el
   [Descargar Python](https://www.python.org/downloads/)
   Al instalar Python, se instalará automáticamente `pip`, el gestor de paquetes de Python.
 
-- **virtualenv:** Herramienta para crear entornos virtuales en Python.  
+- **virtualenv:** Herramienta para crear entornos virtuales en Python.
   Para instalarlo:
+
   ```bash
   pip install virtualenv
   ```
+
+- **wkhtmltopdf**: Herramienta para generar archivos PDF a partir de HTML.
+  [Descargar wkhtmltopdf](https://wkhtmltopdf.org/downloads.html)
 
 ## Instrucciones de Instalación
 
