@@ -9,6 +9,49 @@
         "subscriptionType": null,
         "types": [
             {
+                "kind": "OBJECT",
+                "name": "Admin",
+                "description": null,
+                "fields": [
+                    {
+                        "name": "id",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "ID",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "user",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "OBJECT",
+                                "name": "User",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "inputFields": null,
+                "interfaces": [],
+                "enumValues": null,
+                "possibleTypes": null
+            },
+            {
                 "kind": "SCALAR",
                 "name": "Boolean",
                 "description": "The `Boolean` scalar type represents `true` or `false`.",
@@ -9661,6 +9704,18 @@
                 "name": "User",
                 "description": null,
                 "fields": [
+                    {
+                        "name": "admin",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "OBJECT",
+                            "name": "Admin",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
                     {
                         "name": "dateJoined",
                         "description": null,

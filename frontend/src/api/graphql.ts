@@ -27,6 +27,12 @@ export type Scalars = {
     GenericScalar: { input: any; output: any };
 };
 
+export type Admin = {
+    __typename?: 'Admin';
+    id: Scalars['ID']['output'];
+    user: User;
+};
+
 export type Brand = {
     __typename?: 'Brand';
     createdOn: Scalars['DateTime']['output'];
@@ -1174,6 +1180,7 @@ export type UpdateClientInput = {
 
 export type User = {
     __typename?: 'User';
+    admin: Maybe<Admin>;
     dateJoined: Scalars['DateTime']['output'];
     email: Scalars['String']['output'];
     employee: Maybe<Employee>;
@@ -2486,6 +2493,7 @@ export type CurrentUserQuery = {
         firstName: string;
         lastName: string;
         email: string;
+        admin: { __typename?: 'Admin'; id: string } | null;
         employee: {
             __typename?: 'Employee';
             offices: Array<{
@@ -2512,6 +2520,7 @@ export type LoginMutation = {
             firstName: string;
             lastName: string;
             email: string;
+            admin: { __typename?: 'Admin'; id: string } | null;
             employee: {
                 __typename?: 'Employee';
                 offices: Array<{
@@ -2529,6 +2538,7 @@ export type CurrentUserFragment = {
     firstName: string;
     lastName: string;
     email: string;
+    admin: { __typename?: 'Admin'; id: string } | null;
     employee: {
         __typename?: 'Employee';
         offices: Array<{
@@ -2670,6 +2680,16 @@ export const CurrentUserFragmentDoc = {
                     { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'admin' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            ],
+                        },
+                    },
                     {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'employee' },
@@ -8524,6 +8544,16 @@ export const CurrentUserDocument = {
                     { kind: 'Field', name: { kind: 'Name', value: 'email' } },
                     {
                         kind: 'Field',
+                        name: { kind: 'Name', value: 'admin' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
                         name: { kind: 'Name', value: 'employee' },
                         selectionSet: {
                             kind: 'SelectionSet',
@@ -8669,6 +8699,16 @@ export const LoginDocument = {
                     { kind: 'Field', name: { kind: 'Name', value: 'firstName' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'lastName' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'email' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'admin' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                            ],
+                        },
+                    },
                     {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'employee' },

@@ -17,6 +17,9 @@ fragment CurrentUser on User {
     firstName
     lastName
     email
+    admin {
+        id
+    }
     employee {
         offices {
             id
