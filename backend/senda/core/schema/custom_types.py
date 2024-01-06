@@ -30,6 +30,7 @@ from senda.core.models.rental_contracts import (
     RentalContractStatusChoices,
 )
 from senda.core.models.suppliers import SupplierModel
+from senda.core.models.admin import AdminModel
 
 from utils.graphene import non_null_list_of
 
@@ -197,3 +198,8 @@ class SupplierOrderProduct(DjangoObjectType):
 class EmployeeOffice(DjangoObjectType):
     class Meta:
         model = EmployeeOfficeModel
+
+
+class Admin(DjangoObjectType):
+    class Meta:
+        model = AdminModel
