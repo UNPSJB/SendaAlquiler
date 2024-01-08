@@ -51,6 +51,6 @@ def user_passes_test(
     return decorator
 
 
-employee_required = user_passes_test(
-    lambda user: user.is_authenticated and user.is_employee()
+employee_or_admin_required = user_passes_test(
+    lambda user: user.is_authenticated and (user.is_employee() or user.is_admin())
 )

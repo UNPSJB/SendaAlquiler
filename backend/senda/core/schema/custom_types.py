@@ -84,6 +84,11 @@ class PaginatedProductQueryResult(PaginatedQueryResult):
 
 
 class Employee(DjangoObjectType):
+    offices = non_null_list_of(Office)
+
+    def resolve_offices(parent: EmployeeModel, info):
+        return OfficeModel.objects.filter(employees__employee=parent)
+
     class Meta:
         model = EmployeeModel
 
@@ -201,5 +206,10 @@ class EmployeeOffice(DjangoObjectType):
 
 
 class Admin(DjangoObjectType):
+    offices = non_null_list_of(Office)
+
+    def resolve_offices(self, info):
+        return OfficeModel.objects.all()
+
     class Meta:
         model = AdminModel

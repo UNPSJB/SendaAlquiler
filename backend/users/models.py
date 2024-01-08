@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from senda.core.models.employees import EmployeeModel
+    from senda.core.models.admin import AdminModel
 
 
 class UserModel(AbstractUser):
@@ -18,6 +19,7 @@ class UserModel(AbstractUser):
     """
 
     employee: Optional["EmployeeModel"]
+    admin: Optional["AdminModel"]
 
     def is_employee(self):
         return hasattr(self, "employee") and self.employee is not None
@@ -25,5 +27,14 @@ class UserModel(AbstractUser):
     def get_employee(self):
         if self.is_employee():
             return self.employee
+
+        return None
+
+    def is_admin(self):
+        return hasattr(self, "admin") and self.admin is not None
+
+    def get_admin(self):
+        if self.is_admin():
+            return self.admin
 
         return None

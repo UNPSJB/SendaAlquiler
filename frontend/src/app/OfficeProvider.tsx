@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import { OFFICE_COOKIE_QUERY_KEY } from '@/api/server-action-constants';
 import { gettOfficeCookieAction, setOfficeCookieAction } from '@/api/server-actions';
 
-import { EmployeeUser } from '@/modules/auth/user-utils';
+import { AdminUser, EmployeeUser, isAdmin, isEmployee } from '@/modules/auth/user-utils';
 
 import { useUserContext } from './UserProvider';
 
@@ -18,7 +18,7 @@ import Button from '@/components/Button';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
 
-type Office = EmployeeUser['employee']['offices'][0]['office'];
+type Office = EmployeeUser['employee']['offices'][0];
 
 type OfficeProviderData = {
     office: string | null;
@@ -44,28 +44,26 @@ const useSetOfficeCookie = () => {
     });
 };
 
-const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
-    const pathname = usePathname();
-    const { user } = useUserContext<EmployeeUser | null>();
+type EmployeeContentProps = PropsWithChildren<{
+    user: EmployeeUser | AdminUser;
+    handleSetSelectedOffice: (office: Office) => void;
+}>;
 
-    const client = useQueryClient();
+const EmployeeContent: React.FC<EmployeeContentProps> = ({
+    user,
+    children,
+    handleSetSelectedOffice,
+}) => {
     const { data: selectedOffice, isLoading } = useOfficeCookie();
-    const { mutate } = useSetOfficeCookie();
 
-    const offices = user?.employee.offices.map(({ office }) => office);
+    let offices: Office[] | undefined = undefined;
+    if (isEmployee(user)) {
+        offices = user.employee.offices;
+    } else {
+        offices = user.admin.offices;
+    }
 
-    const handleSetSelectedOffice = (office: Office) => {
-        mutate(office.id, {
-            onSuccess: () => {
-                client.setQueryData(OFFICE_COOKIE_QUERY_KEY, office.id);
-            },
-            onError: () => {
-                toast.error('No se pudo seleccionar la oficina');
-            },
-        });
-    };
-
-    if (pathname === '/login' || selectedOffice) {
+    if (selectedOffice) {
         return (
             <OfficeContext.Provider
                 value={{
@@ -87,11 +85,7 @@ const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
     }
 
     if (isLoading) {
-        return (
-            <main className="flex h-screen items-center justify-center">
-                <Spinner className="border-b-black" />
-            </main>
-        );
+        return <Spinner className="border-b-black" />;
     }
 
     return (
@@ -135,6 +129,50 @@ const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
             </main>
         </OfficeContext.Provider>
     );
+};
+
+const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
+    const pathname = usePathname();
+    const { user } = useUserContext();
+
+    const client = useQueryClient();
+    const { mutate } = useSetOfficeCookie();
+
+    const handleSetSelectedOffice = (office: Office) => {
+        mutate(office.id, {
+            onSuccess: () => {
+                client.setQueryData(OFFICE_COOKIE_QUERY_KEY, office.id);
+            },
+            onError: () => {
+                toast.error('No se pudo seleccionar la oficina');
+            },
+        });
+    };
+
+    if (!user && pathname === '/login') {
+        return children;
+    }
+
+    if (!user) {
+        return (
+            <main className="flex h-screen items-center justify-center">
+                <p>Debes iniciar sesión para acceder a esta página</p>
+            </main>
+        );
+    }
+
+    if (isEmployee(user) || isAdmin(user)) {
+        return (
+            <EmployeeContent
+                handleSetSelectedOffice={handleSetSelectedOffice}
+                user={user}
+            >
+                {children}
+            </EmployeeContent>
+        );
+    }
+
+    return null;
 };
 
 export const useOfficeContext = () => {

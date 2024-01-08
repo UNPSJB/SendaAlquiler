@@ -13,7 +13,7 @@ from senda.core.models.rental_contracts import (
 from senda.core.schema.custom_types import RentalContract
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class ErrorMessages:

@@ -30,6 +30,7 @@ export type Scalars = {
 export type Admin = {
     __typename?: 'Admin';
     id: Scalars['ID']['output'];
+    offices: Array<Office>;
     user: User;
 };
 
@@ -291,7 +292,7 @@ export type Employee = {
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
-    offices: Array<EmployeeOffice>;
+    offices: Array<Office>;
     user: User;
 };
 
@@ -2493,14 +2494,13 @@ export type CurrentUserQuery = {
         firstName: string;
         lastName: string;
         email: string;
-        admin: { __typename?: 'Admin'; id: string } | null;
+        admin: {
+            __typename?: 'Admin';
+            offices: Array<{ __typename?: 'Office'; id: string; name: string }>;
+        } | null;
         employee: {
             __typename?: 'Employee';
-            offices: Array<{
-                __typename?: 'EmployeeOffice';
-                id: string;
-                office: { __typename?: 'Office'; id: string; name: string };
-            }>;
+            offices: Array<{ __typename?: 'Office'; id: string; name: string }>;
         } | null;
     } | null;
 };
@@ -2520,14 +2520,13 @@ export type LoginMutation = {
             firstName: string;
             lastName: string;
             email: string;
-            admin: { __typename?: 'Admin'; id: string } | null;
+            admin: {
+                __typename?: 'Admin';
+                offices: Array<{ __typename?: 'Office'; id: string; name: string }>;
+            } | null;
             employee: {
                 __typename?: 'Employee';
-                offices: Array<{
-                    __typename?: 'EmployeeOffice';
-                    id: string;
-                    office: { __typename?: 'Office'; id: string; name: string };
-                }>;
+                offices: Array<{ __typename?: 'Office'; id: string; name: string }>;
             } | null;
         };
     } | null;
@@ -2538,14 +2537,13 @@ export type CurrentUserFragment = {
     firstName: string;
     lastName: string;
     email: string;
-    admin: { __typename?: 'Admin'; id: string } | null;
+    admin: {
+        __typename?: 'Admin';
+        offices: Array<{ __typename?: 'Office'; id: string; name: string }>;
+    } | null;
     employee: {
         __typename?: 'Employee';
-        offices: Array<{
-            __typename?: 'EmployeeOffice';
-            id: string;
-            office: { __typename?: 'Office'; id: string; name: string };
-        }>;
+        offices: Array<{ __typename?: 'Office'; id: string; name: string }>;
     } | null;
 };
 
@@ -2686,7 +2684,23 @@ export const CurrentUserFragmentDoc = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'offices' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
                             ],
                         },
                     },
@@ -2708,26 +2722,7 @@ export const CurrentUserFragmentDoc = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'office' },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'id',
-                                                            },
-                                                        },
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'name',
-                                                            },
-                                                        },
-                                                    ],
-                                                },
+                                                name: { kind: 'Name', value: 'name' },
                                             },
                                         ],
                                     },
@@ -8548,7 +8543,23 @@ export const CurrentUserDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'offices' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
                             ],
                         },
                     },
@@ -8570,26 +8581,7 @@ export const CurrentUserDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'office' },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'id',
-                                                            },
-                                                        },
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'name',
-                                                            },
-                                                        },
-                                                    ],
-                                                },
+                                                name: { kind: 'Name', value: 'name' },
                                             },
                                         ],
                                     },
@@ -8705,7 +8697,23 @@ export const LoginDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'offices' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
                             ],
                         },
                     },
@@ -8727,26 +8735,7 @@ export const LoginDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'office' },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'id',
-                                                            },
-                                                        },
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'name',
-                                                            },
-                                                        },
-                                                    ],
-                                                },
+                                                name: { kind: 'Name', value: 'name' },
                                             },
                                         ],
                                     },

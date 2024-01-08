@@ -5,7 +5,7 @@ from senda.core.models.employees import EmployeeModel
 from users.models import UserModel
 from senda.core.schema.custom_types import Employee
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 from utils.graphene import non_null_list_of
 
@@ -44,7 +44,7 @@ class CreateEmployee(graphene.Mutation):
     class Arguments:
         employee_data = CreateEmployeeInput(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, employee_data: CreateEmployeeInput):
         try:
             if UserModel.objects.filter(email=employee_data.email).exists():
@@ -71,7 +71,7 @@ class DeleteEmployee(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, id: str):
         try:
             employee = EmployeeModel.objects.get(id=id)

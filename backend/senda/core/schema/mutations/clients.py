@@ -7,7 +7,7 @@ from senda.core.models.clients import ClientModel, LocalityModel
 from senda.core.schema.custom_types import Client
 from utils.graphene import input_object_type_to_dict
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 
@@ -60,7 +60,7 @@ class CreateClient(graphene.Mutation):
     class Arguments:
         client_data = CreateClientInput(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, client_data: CreateClientInput):
         client_data_dict = input_object_type_to_dict(client_data)
 
@@ -87,7 +87,7 @@ class UpdateClient(graphene.Mutation):
         id = graphene.ID(required=True)
         client_data = UpdateClientInput(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, id: str, client_data: UpdateClientInput):
         client_data_dict = input_object_type_to_dict(client_data)
 
@@ -117,7 +117,7 @@ class DeleteClient(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, id: str):
         try:
             ClientModel.objects.get(id=id).delete()

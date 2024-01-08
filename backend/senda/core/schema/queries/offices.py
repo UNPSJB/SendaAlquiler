@@ -9,22 +9,22 @@ from utils.graphene import non_null_list_of
 import csv
 import io
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class Query(graphene.ObjectType):
     offices = non_null_list_of(Office)
-    @employee_required
+    @employee_or_admin_required
     def resolve_offices(self, info: CustomInfo):
         return OfficeModel.objects.all()
 
     office_by_id = graphene.Field(Office, id=graphene.ID(required=True))
-    @employee_required
+    @employee_or_admin_required
     def resolve_office_by_id(self, info: CustomInfo, id: str):
         return OfficeModel.objects.filter(id=id).first()
 
     offices_csv = graphene.NonNull(graphene.String)
-    @employee_required
+    @employee_or_admin_required
     def resolve_offices_csv(self, info: CustomInfo):
         offices = OfficeModel.objects.all()
         csv_buffer = io.StringIO()

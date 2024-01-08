@@ -14,13 +14,13 @@ from utils.graphene import get_paginated_model, non_null_list_of
 import csv
 import io
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class Query(graphene.ObjectType):
     clients = graphene.NonNull(PaginatedClientQueryResult, page=graphene.Int())
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_clients(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
             ClientModel.objects.all().order_by("-created_on"), page
@@ -34,13 +34,13 @@ class Query(graphene.ObjectType):
 
     all_clients = non_null_list_of(Client)
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_all_clients(self, info: CustomInfo):
         return ClientModel.objects.all()
 
     client_by_id = graphene.Field(Client, id=graphene.ID(required=True))
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_client_by_id(self, info: CustomInfo, id: str):
         return ClientModel.objects.filter(id=id).first()
 
@@ -50,7 +50,7 @@ class Query(graphene.ObjectType):
         dni=graphene.String(),
     )
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_client_exists(
         self, info: CustomInfo, email: str = None, dni: str = None
     ):
@@ -65,7 +65,7 @@ class Query(graphene.ObjectType):
 
     clients_csv = graphene.NonNull(graphene.String)
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_clients_csv(self, info: CustomInfo):
         clients = ClientModel.objects.all().prefetch_related("locality")
         csv_buffer = io.StringIO()
@@ -112,7 +112,7 @@ class Query(graphene.ObjectType):
         RentalContract, id=graphene.ID(required=True)
     )
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_rental_contracts_by_client_id(self, info: CustomInfo, id: str):
         rental_contracts_by_client_id = ClientModel.objects.get(id=id)
         contracts = rental_contracts_by_client_id.rental_contracts.all()
@@ -120,7 +120,7 @@ class Query(graphene.ObjectType):
 
     purchases_by_client_id = non_null_list_of(Purchase, id=graphene.ID(required=True))
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_purchases_by_client_id(self, info: Any, id: str):
         purchases_by_client_id = ClientModel.objects.get(id=id)
         purchases = purchases_by_client_id.purchases.all()

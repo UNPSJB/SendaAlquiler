@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from senda.core.models.localities import LocalityModel
 from senda.core.schema.custom_types import Locality, StateChoicesEnum
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class CreateLocality(graphene.Mutation):
@@ -18,7 +18,7 @@ class CreateLocality(graphene.Mutation):
         state = StateChoicesEnum(required=True)
         postal_code = graphene.String(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, **kwargs: Any):
         try:
             locality = LocalityModel.objects.create_locality(**kwargs)
@@ -34,7 +34,7 @@ class DeleteLocality(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, id: str):
         try:
             locality = LocalityModel.objects.get(id=id)

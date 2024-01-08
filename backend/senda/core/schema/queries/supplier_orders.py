@@ -12,7 +12,7 @@ from utils.graphene import get_paginated_model
 import csv
 import io
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class Query(graphene.ObjectType):
@@ -21,7 +21,7 @@ class Query(graphene.ObjectType):
         page=graphene.Int(),
     )
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_supplier_orders(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
             SupplierOrderModel.objects.filter(
@@ -37,13 +37,13 @@ class Query(graphene.ObjectType):
 
     supplier_order_by_id = graphene.Field(OrderSupplier, id=graphene.ID(required=True))
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_supplier_order_by_id(self, info: CustomInfo, id: str):
         return SupplierOrderModel.objects.filter(id=id).first()
 
     suppliers_orders_csv = graphene.NonNull(graphene.String)
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_suppliers_orders_csv(self, info: CustomInfo):
         supplier_orders = SupplierOrderModel.objects.filter(
             office_destination=info.context.office_id

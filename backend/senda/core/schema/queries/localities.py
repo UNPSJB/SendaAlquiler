@@ -9,13 +9,13 @@ from utils.graphene import get_paginated_model, non_null_list_of
 import csv
 import io
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class Query(graphene.ObjectType):
     localities = graphene.NonNull(PaginatedLocalityQueryResult, page=graphene.Int())
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_localities(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
             LocalityModel.objects.all().order_by("-created_on"), page
@@ -29,13 +29,13 @@ class Query(graphene.ObjectType):
 
     all_localities = non_null_list_of(Locality)
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_all_localities(self, info: CustomInfo):
         return LocalityModel.objects.all()
 
     localities_csv = graphene.NonNull(graphene.String)
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_localities_csv(self, info: CustomInfo):
         localities = LocalityModel.objects.all()
         csv_buffer = io.StringIO()

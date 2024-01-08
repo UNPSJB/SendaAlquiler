@@ -18,15 +18,15 @@ fragment CurrentUser on User {
     lastName
     email
     admin {
-        id
+        offices {
+            id
+            name
+        }
     }
     employee {
         offices {
             id
-            office {
-                id
-                name
-            }
+            name
         }
     }
 }
