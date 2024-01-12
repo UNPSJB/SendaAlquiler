@@ -22,6 +22,8 @@ class ErrorMessages:
 class PurchaseItemsInput(graphene.InputObjectType):
     product = graphene.String(required=True)
     quantity = graphene.Int(required=True)
+    total = graphene.Int(required=True)
+    discount = graphene.Int(required=True)
 
 
 class CreatePurchaseInput(graphene.InputObjectType):

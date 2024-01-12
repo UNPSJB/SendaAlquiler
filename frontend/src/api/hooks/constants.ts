@@ -1,3 +1,5 @@
+import { AllClientsQueryVariables } from '../graphql';
+
 export const queryDomains = {
     clients: 'clients',
     employees: 'employees',
@@ -21,7 +23,12 @@ const buildDetailKey = (domain: string) => (key?: any) =>
     typeof key !== 'undefined' ? [domain, 'detail', key] : [domain, 'detail'];
 
 export const queryKeys = {
-    clientsNonPaginated: [queryDomains.clients, 'list', 'non-paginated'],
+    clientsNonPaginated: (variables: AllClientsQueryVariables) => [
+        queryDomains.clients,
+        'list',
+        'non-paginated',
+        variables,
+    ],
     clientsPaginatedList: buildPaginatedListkey(queryDomains.clients),
     clientDetailsById: buildDetailKey(queryDomains.clients),
 

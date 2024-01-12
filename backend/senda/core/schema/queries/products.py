@@ -29,14 +29,14 @@ from graphene import ObjectType
 
 
 class ProductsStocksInDateRangeStockByOffice(ObjectType):
-    office = graphene.Field(Office)
-    stock = graphene.Field(graphene.Int)
+    office = graphene.Field(graphene.NonNull(Office))
+    stock = graphene.Field(graphene.NonNull(graphene.Int))
 
 
 class ProductStocksInDateRange(ObjectType):
     id = graphene.NonNull(graphene.ID)
     name = graphene.NonNull(graphene.String)
-    price = graphene.NonNull(graphene.Decimal)
+    price = graphene.NonNull(graphene.Int)
     stocks_by_office = non_null_list_of(ProductsStocksInDateRangeStockByOffice)
     services = non_null_list_of(ProductService)
 
@@ -181,7 +181,7 @@ class Query(graphene.ObjectType):
                     stocks_by_office=[
                         ProductsStocksInDateRangeStockByOffice(
                             office=office,
-                            stock=product_from_db.get_available_stock_for_office_in_date_range(
+                            stock=product_from_db.get_office_available_stock_between_dates(
                                 office, start_date, end_date
                             ),
                         )

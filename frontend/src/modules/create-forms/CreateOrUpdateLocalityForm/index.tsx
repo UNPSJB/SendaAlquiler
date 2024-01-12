@@ -6,8 +6,8 @@ import { CreateLocalityMutationVariables, StateChoices } from '@/api/graphql';
 
 import { STATES_OPTIONS } from '@/constants';
 
+import Input from '../../forms/DeprecatedInput';
 import { RHFFormField } from '../../forms/FormField';
-import Input from '../../forms/Input';
 import RHFSelect from '../../forms/Select';
 import ModableFormLayout, {
     ModableFormComponentProps,

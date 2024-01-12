@@ -1,7 +1,7 @@
 import { useFormContext } from 'react-hook-form';
 
+import RHFDeprecatedInput from '@/modules/forms/DeprecatedInput';
 import { RHFFormField } from '@/modules/forms/FormField';
-import RHFInput from '@/modules/forms/Input';
 
 import { CreateOrUpdateSupplierFormValues } from '.';
 
@@ -20,7 +20,7 @@ const SupplierFormContactFields: React.FC = () => {
                     label="Nombre"
                     showRequired
                 >
-                    <RHFInput
+                    <RHFDeprecatedInput
                         id="name"
                         name="name"
                         placeholder="Entidad"
@@ -32,7 +32,7 @@ const SupplierFormContactFields: React.FC = () => {
             </div>
 
             <RHFFormField fieldID="email" label="Correo electrónico" showRequired>
-                <RHFInput
+                <RHFDeprecatedInput
                     type="email"
                     id="email"
                     name="email"
@@ -44,7 +44,7 @@ const SupplierFormContactFields: React.FC = () => {
             </RHFFormField>
 
             <RHFFormField fieldID="cuit" label="Cuit" showRequired>
-                <RHFInput
+                <RHFDeprecatedInput
                     type="number"
                     id="cuit"
                     name="cuit"
@@ -60,7 +60,7 @@ const SupplierFormContactFields: React.FC = () => {
             </RHFFormField>
 
             <RHFFormField fieldID="phoneCode" label="Código de área" showRequired>
-                <RHFInput
+                <RHFDeprecatedInput
                     type="number"
                     id="phoneCode"
                     name="phoneCode"
@@ -73,7 +73,7 @@ const SupplierFormContactFields: React.FC = () => {
             </RHFFormField>
 
             <RHFFormField fieldID="phoneNumber" label="Número de celular" showRequired>
-                <RHFInput
+                <RHFDeprecatedInput
                     type="number"
                     id="phoneNumber"
                     name="phoneNumber"

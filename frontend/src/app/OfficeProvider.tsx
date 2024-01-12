@@ -8,7 +8,11 @@ import { PropsWithChildren, createContext, useContext } from 'react';
 import toast from 'react-hot-toast';
 
 import { OFFICE_COOKIE_QUERY_KEY } from '@/api/server-action-constants';
-import { gettOfficeCookieAction, setOfficeCookieAction } from '@/api/server-actions';
+import {
+    clearOfficeCookieAction,
+    gettOfficeCookieAction,
+    setOfficeCookieAction,
+} from '@/api/server-actions';
 
 import { AdminUser, EmployeeUser, isAdmin, isEmployee } from '@/modules/auth/user-utils';
 
@@ -21,11 +25,13 @@ import Spinner from '@/components/Spinner/Spinner';
 type Office = EmployeeUser['employee']['offices'][0];
 
 type OfficeProviderData = {
-    office: string | null;
+    office: Office | null;
+    resetOffice: () => void;
 };
 
 const OfficeContext = createContext<OfficeProviderData>({
     office: null,
+    resetOffice: () => {},
 });
 
 const useOfficeCookie = () => {
@@ -44,17 +50,26 @@ const useSetOfficeCookie = () => {
     });
 };
 
+const useClearOfficeCookie = () => {
+    return useMutation(async (_p: null): Promise<boolean> => {
+        await clearOfficeCookieAction();
+        return true;
+    });
+};
+
 type EmployeeContentProps = PropsWithChildren<{
     user: EmployeeUser | AdminUser;
     handleSetSelectedOffice: (office: Office) => void;
+    resetOffice: () => void;
 }>;
 
 const EmployeeContent: React.FC<EmployeeContentProps> = ({
     user,
     children,
     handleSetSelectedOffice,
+    resetOffice,
 }) => {
-    const { data: selectedOffice, isLoading } = useOfficeCookie();
+    const { data: selectedOfficeId, isLoading } = useOfficeCookie();
 
     let offices: Office[] | undefined = undefined;
     if (isEmployee(user)) {
@@ -63,11 +78,14 @@ const EmployeeContent: React.FC<EmployeeContentProps> = ({
         offices = user.admin.offices;
     }
 
+    const selectedOffice = offices?.find((office) => office.id === selectedOfficeId);
+
     if (selectedOffice) {
         return (
             <OfficeContext.Provider
                 value={{
                     office: selectedOffice ?? null,
+                    resetOffice,
                 }}
             >
                 {children}
@@ -92,6 +110,7 @@ const EmployeeContent: React.FC<EmployeeContentProps> = ({
         <OfficeContext.Provider
             value={{
                 office: null,
+                resetOffice,
             }}
         >
             <main className="flex min-h-screen items-center">
@@ -137,16 +156,28 @@ const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
     const client = useQueryClient();
     const { mutate } = useSetOfficeCookie();
+    const { mutate: clearOfficeCookieMutate } = useClearOfficeCookie();
 
-    const handleSetSelectedOffice = (office: Office) => {
-        mutate(office.id, {
-            onSuccess: () => {
-                client.setQueryData(OFFICE_COOKIE_QUERY_KEY, office.id);
-            },
-            onError: () => {
-                toast.error('No se pudo seleccionar la oficina');
-            },
-        });
+    const handleSetSelectedOffice = (office: Office | null) => {
+        if (!office) {
+            clearOfficeCookieMutate(null, {
+                onSuccess: () => {
+                    client.setQueryData(OFFICE_COOKIE_QUERY_KEY, null);
+                },
+                onError: () => {
+                    toast.error('No se pudo seleccionar la oficina');
+                },
+            });
+        } else {
+            mutate(office.id, {
+                onSuccess: () => {
+                    client.setQueryData(OFFICE_COOKIE_QUERY_KEY, office.id);
+                },
+                onError: () => {
+                    toast.error('No se pudo seleccionar la oficina');
+                },
+            });
+        }
     };
 
     if (!user && pathname === '/login') {
@@ -164,6 +195,7 @@ const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
     if (isEmployee(user) || isAdmin(user)) {
         return (
             <EmployeeContent
+                resetOffice={() => handleSetSelectedOffice(null)}
                 handleSetSelectedOffice={handleSetSelectedOffice}
                 user={user}
             >

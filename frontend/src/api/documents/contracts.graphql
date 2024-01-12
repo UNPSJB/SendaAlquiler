@@ -54,18 +54,16 @@ query contractById($id: ID!) {
         }
         streetName
         total
+        numberOfRentalDays
         rentalContractItems {
             id
-            serviceTotal
             servicePrice
-            total
             price
             product {
                 brand {
                     name
                 }
                 name
-                price
                 sku
             }
             service {
@@ -73,6 +71,9 @@ query contractById($id: ID!) {
             }
             servicePrice
             quantity
+            subtotal
+            discount
+            total
         }
     }
 }

@@ -25,8 +25,8 @@ import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
 
+import { Input } from '../forms/DeprecatedInput';
 import { RHFFormField } from '../forms/FormField';
-import { Input } from '../forms/Input';
 import Label from '../forms/Label';
 import RHFSelect from '../forms/Select';
 
@@ -73,7 +73,7 @@ const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) =
         const product = curr.product?.data;
         const quantity = curr.quantity;
         if (product && quantity) {
-            return acc + product.price * quantity;
+            return acc + (product.price || 0) * quantity;
         }
         return acc;
     }, 0);

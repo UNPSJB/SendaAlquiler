@@ -26,10 +26,16 @@ class ErrorMessages:
     INVALID_LOCALITY = "No se ingreso ninguna localidad"
 
 
+class RentalContractProductsItemOfficeOrderInput(graphene.InputObjectType):
+    office_id = graphene.ID(required=True)
+    quantity = graphene.Int(required=True)
+
+
 class RentalContractProductsItemInput(graphene.InputObjectType):
     id = graphene.ID(required=True)
-    quantity = graphene.Int(required=True)
     service = graphene.String(Required=False)
+    offices_orders = non_null_list_of(RentalContractProductsItemOfficeOrderInput)
+    discount = graphene.Int(required=True)
 
 
 class CreateRentalContractInput(graphene.InputObjectType):
@@ -80,6 +86,7 @@ class CreateRentalContract(graphene.Mutation):
     class Arguments:
         data = CreateRentalContractInput(required=True)
 
+    @employee_or_admin_required
     def mutate(
         self, info: CustomInfo, data: CreateRentalContractInput
     ) -> "CreateRentalContract":
@@ -97,14 +104,18 @@ class CreateRentalContract(graphene.Mutation):
                 raise ValueError(ErrorMessages.INVALID_LOCALITY)
 
             rental_contract = RentalContractModel.objects.create_rental_contract(
+                created_by=info.context.user,
                 office=info.context.office_id,
                 client=client,
                 locality=locality,
                 **data_dict,
             )
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
+            print("Error al crear contrato")
+            print(e)
             return CreateRentalContract(error=str(e))
         except Exception as e:
+            print("Error al crear contrato:_ Exception")
             print(e)
             return CreateRentalContract(error="Error desconocido")
 

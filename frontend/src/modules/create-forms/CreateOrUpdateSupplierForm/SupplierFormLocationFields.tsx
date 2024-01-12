@@ -1,10 +1,10 @@
 import { useFormContext } from 'react-hook-form';
 
+import RHFDeprecatedInput from '@/modules/forms/DeprecatedInput';
 import { RHFFormField } from '@/modules/forms/FormField';
-import RHFInput from '@/modules/forms/Input';
 
 import { CreateOrUpdateSupplierFormValues } from '.';
-import LocalityField from '../components/fields/LocalityField';
+import CreatableSelectLocalityField from '../components/fields/CreatableSelectLocalityField';
 
 const SupplierFormLocationFields: React.FC = () => {
     const {
@@ -16,7 +16,11 @@ const SupplierFormLocationFields: React.FC = () => {
     return (
         <>
             <RHFFormField fieldID="locality" label="Localidad" showRequired>
-                <LocalityField name="locality" control={control} setValue={setValue} />
+                <CreatableSelectLocalityField
+                    name="locality"
+                    control={control}
+                    setValue={setValue}
+                />
             </RHFFormField>
 
             <div className="flex space-x-4">
@@ -26,7 +30,7 @@ const SupplierFormLocationFields: React.FC = () => {
                     label="Calle"
                     showRequired
                 >
-                    <RHFInput
+                    <RHFDeprecatedInput
                         id="streetName"
                         name="streetName"
                         hasError={!!formErrors.streetName}
@@ -41,7 +45,7 @@ const SupplierFormLocationFields: React.FC = () => {
                     label="N° de casa"
                     showRequired
                 >
-                    <RHFInput
+                    <RHFDeprecatedInput
                         id="houseNumber"
                         name="houseNumber"
                         hasError={!!formErrors.houseNumber}
@@ -55,7 +59,7 @@ const SupplierFormLocationFields: React.FC = () => {
                 fieldID="houseUnit"
                 label="Apartamento, habitación, unidad, etc"
             >
-                <RHFInput
+                <RHFDeprecatedInput
                     id="houseUnit"
                     name="houseUnit"
                     hasError={!!formErrors.houseUnit}

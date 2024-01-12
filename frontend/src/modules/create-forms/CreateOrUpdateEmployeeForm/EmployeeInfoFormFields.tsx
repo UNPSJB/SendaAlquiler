@@ -1,7 +1,7 @@
 import { useFormContext } from 'react-hook-form';
 
+import RHFDeprecatedInput from '@/modules/forms/DeprecatedInput';
 import { RHFFormField } from '@/modules/forms/FormField';
-import RHFInput from '@/modules/forms/Input';
 
 import { CreateOrUpdateEmployeeFormValues } from '.';
 import RHFOfficesField from '../components/fields/OfficesField';
@@ -22,7 +22,7 @@ const EmployeeInfoFormFields: React.FC = () => {
                     label="Nombre"
                     showRequired
                 >
-                    <RHFInput
+                    <RHFDeprecatedInput
                         id="firstName"
                         name="firstName"
                         placeholder="Bruno"
@@ -38,7 +38,7 @@ const EmployeeInfoFormFields: React.FC = () => {
                     label="Apellido"
                     showRequired
                 >
-                    <RHFInput
+                    <RHFDeprecatedInput
                         id="lastName"
                         name="lastName"
                         placeholder="Díaz"
@@ -50,7 +50,7 @@ const EmployeeInfoFormFields: React.FC = () => {
             </div>
 
             <RHFFormField fieldID="email" label="Correo electrónico" showRequired>
-                <RHFInput
+                <RHFDeprecatedInput
                     type="email"
                     id="email"
                     name="email"
@@ -62,7 +62,7 @@ const EmployeeInfoFormFields: React.FC = () => {
             </RHFFormField>
 
             <RHFFormField fieldID="password" label="Contraseña" showRequired>
-                <RHFInput
+                <RHFDeprecatedInput
                     type="password"
                     id="password"
                     name="password"
@@ -79,7 +79,7 @@ const EmployeeInfoFormFields: React.FC = () => {
                 label="Confirme contraseña"
                 showRequired
             >
-                <RHFInput
+                <RHFDeprecatedInput
                     type="password"
                     id="confirmPassword"
                     name="confirmPassword"

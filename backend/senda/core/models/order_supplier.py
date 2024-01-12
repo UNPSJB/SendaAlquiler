@@ -1,4 +1,4 @@
-from decimal import Decimal
+
 from typing import Any
 
 
@@ -51,15 +51,15 @@ class SupplierOrderModel(TimeStampedModel):
         null=True,
     )
 
-    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True, null=True)
+    total = models.IntegerField()
 
     objects: SupplierOrderManager = SupplierOrderManager()  # pyright: ignore
 
     def __str__(self) -> str:
         return str(self.pk)
 
-    def calculate_total(self) -> Decimal:
-        total = Decimal(0)
+    def calculate_total(self):
+        total = 0
         for order in self.orders.all():
             total += order.total
 
@@ -95,8 +95,8 @@ class SupplierOrderProductModel(TimeStampedModel):
     supplier_order = models.ForeignKey(
         SupplierOrderModel, on_delete=models.CASCADE, related_name="orders"
     )
-    price = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
-    total = models.DecimalField(decimal_places=2, max_digits=10, blank=True)
+    price = models.IntegerField(blank=True)
+    total = models.IntegerField(blank=True)
 
     def __str__(self) -> str:
         return f"{self.product.name} - {self.quantity}"

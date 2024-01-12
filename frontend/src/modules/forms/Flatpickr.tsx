@@ -12,9 +12,11 @@ import {
 
 type FlatpickrProps = Omit<DateTimePickerProps, 'className'>;
 
-export const CustomFlatpickr: React.FC<FlatpickrProps> = ({ options, ...props }) => {
+export const CustomFlatpickr = ({ options, ...props }: FlatpickrProps) => {
     const enableTime = 'data-enable-time' in props;
     return (
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         <Flatpickr
             {...props}
             className="block w-full rounded border border-gray-200 p-4"
@@ -25,7 +27,7 @@ export const CustomFlatpickr: React.FC<FlatpickrProps> = ({ options, ...props })
                 ...options,
             }}
         />
-    );
+    ) as React.ReactNode;
 };
 
 type Props<TFieldValues extends FieldValues, TName extends FieldPath<TFieldValues>> = {
@@ -33,7 +35,7 @@ type Props<TFieldValues extends FieldValues, TName extends FieldPath<TFieldValue
     control: Control<TFieldValues>;
     rules: RegisterOptions<TFieldValues, TName>;
 } & Omit<FlatpickrProps, 'onChange' | 'id' | 'name'> &
-    (TFieldValues[Extract<keyof TFieldValues, TName>] extends Date[] ? object : never);
+    (TFieldValues[Extract<keyof TFieldValues, TName>] extends Date ? object : never);
 
 export const RHFCustomFlatpickr = <
     TFieldValues extends FieldValues,

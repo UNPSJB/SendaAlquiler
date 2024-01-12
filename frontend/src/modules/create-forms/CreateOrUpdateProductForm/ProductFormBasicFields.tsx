@@ -3,8 +3,8 @@ import { useFormContext } from 'react-hook-form';
 import { fetchClient } from '@/api/fetch-client';
 import { ProductExistsDocument } from '@/api/graphql';
 
+import RHFDeprecatedInput from '@/modules/forms/DeprecatedInput';
 import { RHFFormField } from '@/modules/forms/FormField';
-import RHFInput from '@/modules/forms/Input';
 
 import { CreateOrUpdateProductFormValues } from '.';
 import BrandField from '../components/fields/BrandField';
@@ -19,7 +19,7 @@ const ProductFormBasicFields: React.FC = () => {
     return (
         <>
             <RHFFormField className="flex-1" fieldID="sku" label="Sku" showRequired>
-                <RHFInput
+                <RHFDeprecatedInput
                     id="sku"
                     name="sku"
                     placeholder="XYZ12345"
@@ -41,7 +41,7 @@ const ProductFormBasicFields: React.FC = () => {
             </RHFFormField>
 
             <RHFFormField className="flex-1" fieldID="name" label="Nombre" showRequired>
-                <RHFInput
+                <RHFDeprecatedInput
                     id="name"
                     name="name"
                     placeholder="Lavandina"
@@ -52,7 +52,7 @@ const ProductFormBasicFields: React.FC = () => {
             </RHFFormField>
 
             <RHFFormField className="flex-1" fieldID="description" label="Descripcion">
-                <RHFInput
+                <RHFDeprecatedInput
                     id="description"
                     name="description"
                     placeholder="Descripción"
@@ -74,7 +74,7 @@ const ProductFormBasicFields: React.FC = () => {
             </RHFFormField>
 
             <RHFFormField fieldID="price" label="Precio" showRequired>
-                <RHFInput
+                <RHFDeprecatedInput
                     type="price"
                     id="price"
                     name="price"

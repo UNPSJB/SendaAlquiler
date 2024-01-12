@@ -39,7 +39,6 @@ def user_passes_test(
         @context(f)
         def wrapper(context, *args, **kwargs):
             user = context.user
-            print(args)
 
             if test_func(user):
                 return f(*args, **kwargs)

@@ -7,8 +7,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
+import Input from '@/modules/forms/DeprecatedInput';
 import { RHFFormField } from '@/modules/forms/FormField';
-import Input from '@/modules/forms/Input';
 import { getCleanErrorMessage } from '@/modules/utils';
 
 import Button from '@/components/Button';

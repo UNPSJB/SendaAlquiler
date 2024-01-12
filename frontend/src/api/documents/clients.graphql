@@ -133,8 +133,8 @@ mutation deleteClient($id: ID!) {
     }
 }
 
-query allClients {
-    allClients {
+query allClients($query: String) {
+    allClients(query: $query) {
         id
         firstName
         lastName

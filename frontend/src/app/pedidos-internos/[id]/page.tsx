@@ -57,7 +57,7 @@ const useHeader = (
 
             {internalOrder.currentHistory?.status ===
                 InternalOrderHistoryStatusChoices.Pending &&
-                internalOrder.officeBranch.id === office && (
+                internalOrder.officeBranch.id === office?.id && (
                     <ButtonWithSpinner
                         isLoading={isMarkAsInProgressLoading}
                         onClick={() => {
@@ -77,7 +77,7 @@ const useHeader = (
 
             {internalOrder.currentHistory?.status ===
                 InternalOrderHistoryStatusChoices.InProgress &&
-                internalOrder.officeDestination.id === office && (
+                internalOrder.officeDestination.id === office?.id && (
                     <ButtonWithSpinner
                         isLoading={isMarkAsCompletedLoading}
                         onClick={() => {

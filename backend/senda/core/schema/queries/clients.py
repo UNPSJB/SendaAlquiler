@@ -13,6 +13,10 @@ from utils.graphene import get_paginated_model, non_null_list_of
 
 import csv
 import io
+from django.db import models
+
+from django.db.models import Value
+from django.db.models.functions import Concat
 
 from senda.core.decorators import employee_or_admin_required, CustomInfo
 
@@ -32,10 +36,21 @@ class Query(graphene.ObjectType):
             num_pages=paginator.num_pages,
         )
 
-    all_clients = non_null_list_of(Client)
+    all_clients = non_null_list_of(Client, query=graphene.String(default_value=None))
 
     @employee_or_admin_required
-    def resolve_all_clients(self, info: CustomInfo):
+    def resolve_all_clients(self, info: CustomInfo, query: str = None):
+        if query is not None:
+            return ClientModel.objects.annotate(
+                full_name=Concat("first_name", Value(" "), "last_name")
+            ).filter(
+                models.Q(first_name__icontains=query)
+                | models.Q(last_name__icontains=query)
+                | models.Q(email__icontains=query)
+                | models.Q(dni__icontains=query)
+                | models.Q(full_name__icontains=query)
+            )
+
         return ClientModel.objects.all()
 
     client_by_id = graphene.Field(Client, id=graphene.ID(required=True))

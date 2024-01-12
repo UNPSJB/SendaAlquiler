@@ -111,7 +111,7 @@ const Home = () => {
 
                         const purchasesTotals = allPurchases
                             .reduce((acc, purchase) => {
-                                return acc + parseFloat(purchase.total);
+                                return acc + purchase.total;
                             }, 0)
                             .toString()
                             .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -174,9 +174,7 @@ const Home = () => {
                                                                         ) => {
                                                                             return (
                                                                                 acc +
-                                                                                parseFloat(
-                                                                                    purchase.total,
-                                                                                )
+                                                                                purchase.total
                                                                             );
                                                                         },
                                                                         0,

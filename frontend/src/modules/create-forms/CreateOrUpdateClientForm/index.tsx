@@ -2,7 +2,7 @@
 
 import { CreateClientInput } from '@/api/graphql';
 
-import { LocalityFieldValue } from '@/modules/create-forms/components/fields/LocalityField';
+import { LocalityFieldValue } from '@/modules/create-forms/components/fields/CreatableSelectLocalityField';
 
 import ClientContactFormFields from './ClientContactFormFields';
 import ClientLocationFormFields from './ClientLocationFormFields';

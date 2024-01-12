@@ -6,6 +6,7 @@ from extensions.db.models import TimeStampedModel
 from senda.core.managers import ProductModelManager
 from senda.core.models.offices import OfficeModel
 from senda.core.models.suppliers import SupplierModel
+from datetime import datetime
 
 if TYPE_CHECKING:
     from senda.core.models.rental_contracts import (
@@ -85,7 +86,7 @@ class ProductModel(TimeStampedModel):
         blank=True,
     )
     type = models.CharField(max_length=50, choices=ProductTypeChoices.choices)
-    price = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
+    price = models.IntegerField(null=True, blank=True,)
 
     def __str__(self) -> str:
         return self.name
@@ -119,25 +120,61 @@ class ProductModel(TimeStampedModel):
 
         return stock_data
 
-    def get_global_available_stock_between_dates(self, start_date, end_date) -> bool:
+    def get_office_available_stock_between_dates(
+        self, office: "OfficeModel", start_date: datetime, end_date: datetime
+    ) -> int:
+        from senda.core.models.rental_contracts import (
+            RentalContractStatusChoices,
+            RentalContractItemOfficeOrderModel,
+        )
+
+        available_stock = (
+            self.stock.filter(office=office).aggregate(total=models.Sum("stock"))[
+                "total"
+            ]
+            or 0
+        )
+
+        reserved_stock = (
+            RentalContractItemOfficeOrderModel.objects.filter(
+                models.Q(
+                    item__rental_contract__current_history__status=RentalContractStatusChoices.CON_DEPOSITO
+                )
+                | models.Q(
+                    item__rental_contract__current_history__status=RentalContractStatusChoices.ACTIVO
+                ),
+                item__product=self,
+                item__rental_contract__contract_start_datetime__date__gte=start_date,
+                item__rental_contract__contract_start_datetime__date__lte=end_date,
+                office=office,
+            ).aggregate(total=models.Sum("quantity"))["total"]
+            or 0
+        )
+
+        return available_stock - reserved_stock
+
+    def get_global_available_stock_between_dates(self, start_date, end_date) -> int:
         from senda.core.models.rental_contracts import (
             RentalContractStatusChoices,
         )
 
-        available_stock_among_offices = self.stock.aggregate(total=models.Sum("stock"))[
-            "total"
-        ]
+        available_stock_among_offices = (
+            self.stock.aggregate(total=models.Sum("stock"))["total"] or 0
+        )
 
-        reserved_stock = self.rental_contract_items.filter(
-            models.Q(
-                rental_contract__current_history__status=RentalContractStatusChoices.CON_DEPOSITO
-            )
-            | models.Q(
-                rental_contract__current_history__status=RentalContractStatusChoices.ACTIVO
-            ),
-            rental_contract__contract_start_datetime__date__gte=start_date,
-            rental_contract__contract_start_datetime__date__lte=end_date,
-        ).aggregate(total=models.Sum("quantity"))["total"]
+        reserved_stock = (
+            self.rental_contract_items.filter(
+                models.Q(
+                    rental_contract__current_history__status=RentalContractStatusChoices.CON_DEPOSITO
+                )
+                | models.Q(
+                    rental_contract__current_history__status=RentalContractStatusChoices.ACTIVO
+                ),
+                rental_contract__contract_start_datetime__date__gte=start_date,
+                rental_contract__contract_start_datetime__date__lte=end_date,
+            ).aggregate(total=models.Sum("quantity"))["total"]
+            or 0
+        )
 
         return available_stock_among_offices - reserved_stock
 
@@ -192,7 +229,7 @@ class ProductSupplierModel(TimeStampedModel):
     supplier = models.ForeignKey(
         SupplierModel, on_delete=models.CASCADE, related_name="products"
     )
-    price = models.DecimalField(decimal_places=2, max_digits=10)
+    price = models.IntegerField()
 
     def __str__(self) -> str:
         return f"{self.product} - {self.supplier}"
@@ -219,7 +256,7 @@ class ProductServiceModel(TimeStampedModel):
     )
 
     name = models.CharField(max_length=100)
-    price = models.DecimalField(decimal_places=2, max_digits=10)
+    price = models.IntegerField()
 
     def __str__(self) -> str:
         return f"{self.product} - {self.name}"

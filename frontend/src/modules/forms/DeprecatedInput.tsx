@@ -44,7 +44,7 @@ const parseAsInt = (
     value: string,
     min?: number | string,
     max?: number | string,
-): number => {
+): number | null => {
     const valueInt = parseInt(value.replace(/\D/g, ''), 10);
 
     const minInt = typeof min === 'string' ? parseInt(min, 10) : min;
@@ -58,7 +58,7 @@ const parseAsInt = (
         return maxInt;
     }
 
-    return isNaN(valueInt) ? 0 : valueInt;
+    return isNaN(valueInt) ? null : valueInt;
 };
 
 /**
@@ -66,9 +66,20 @@ const parseAsInt = (
  * @param value The string value to format.
  * @returns The formatted price string.
  */
-const formatPrice = (value: string): string => {
-    const digitsOnly = value.replace(/\D/g, '');
-    return digitsOnly.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+export const formatPrice = (value: string): string => {
+    // should replace with regex
+    // dot every 3 digits.
+    // if value is 1234567.891241241, then it should be 1.234.567,89
+
+    const [integer, decimal] = value.split('.');
+    const integerPart = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const decimalPart = decimal ? `,${decimal.slice(0, 2)}` : '';
+
+    return `${integerPart}${decimalPart}`;
+};
+
+export const formatNumberAsPrice = (value: number): string => {
+    return formatPrice(value.toString());
 };
 
 const useInputChange = (
@@ -85,12 +96,20 @@ const useInputChange = (
         const newValue = e.target.value;
 
         if (type === 'number') {
-            const processedValue = parseAsInt(newValue, min, max).toString();
+            const processedValue = parseAsInt(newValue, min, max);
+
+            if (processedValue === null) {
+                setInputValue('');
+                onChange?.('');
+                return;
+            }
+
             setInputValue(processedValue);
-            onChange?.(processedValue);
+            onChange?.(processedValue.toString());
             return;
         } else if (type === 'price') {
-            const processedValue = formatPrice(newValue);
+            const asInt = parseAsInt(newValue, min, max)?.toString() || '';
+            const processedValue = formatPrice(asInt);
             setInputValue(processedValue);
             onChange?.(processedValue);
             return;
@@ -175,7 +194,10 @@ type RHFProps<TFieldValues extends FieldValues, TName extends Path<TFieldValues>
     rules?: RegisterOptions<TFieldValues, TName>;
 } & Omit<InputProps, 'name'>;
 
-const RHFInput = <TFieldValues extends FieldValues, TName extends Path<TFieldValues>>(
+const RHFDeprecatedInput = <
+    TFieldValues extends FieldValues,
+    TName extends Path<TFieldValues>,
+>(
     props: RHFProps<TFieldValues, TName>,
 ) => {
     const { control, name, rules, ...rest } = props;
@@ -192,4 +214,4 @@ const RHFInput = <TFieldValues extends FieldValues, TName extends Path<TFieldVal
     );
 };
 
-export default RHFInput;
+export default RHFDeprecatedInput;

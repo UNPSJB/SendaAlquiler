@@ -23,7 +23,6 @@ export type Scalars = {
     Float: { input: number; output: number };
     Date: { input: string; output: string };
     DateTime: { input: any; output: any };
-    Decimal: { input: any; output: any };
     GenericScalar: { input: any; output: any };
 };
 
@@ -630,7 +629,7 @@ export type OrderSupplier = {
     officeDestination: Office;
     orders: Array<SupplierOrderProduct>;
     supplier: Supplier;
-    total: Maybe<Scalars['Decimal']['output']>;
+    total: Scalars['Int']['output'];
 };
 
 export type PaginatedClientQueryResult = {
@@ -716,7 +715,7 @@ export type Product = {
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
-    price: Maybe<Scalars['Decimal']['output']>;
+    price: Maybe<Scalars['Int']['output']>;
     purchaseItems: Array<PurchaseItem>;
     relatedOrders: Array<InternalOrderProduct>;
     relatedSupplierOrders: Array<SupplierOrderProduct>;
@@ -733,7 +732,7 @@ export type ProductService = {
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
-    price: Scalars['Decimal']['output'];
+    price: Scalars['Int']['output'];
     product: Product;
     rentalContractItems: Array<RentalContractItem>;
 };
@@ -752,7 +751,7 @@ export type ProductStocksInDateRange = {
     __typename?: 'ProductStocksInDateRange';
     id: Scalars['ID']['output'];
     name: Scalars['String']['output'];
-    price: Scalars['Decimal']['output'];
+    price: Scalars['Int']['output'];
     services: Array<ProductService>;
     stocksByOffice: Array<ProductsStocksInDateRangeStockByOffice>;
 };
@@ -776,8 +775,8 @@ export enum ProductTypeChoices {
 
 export type ProductsStocksInDateRangeStockByOffice = {
     __typename?: 'ProductsStocksInDateRangeStockByOffice';
-    office: Maybe<Office>;
-    stock: Maybe<Scalars['Int']['output']>;
+    office: Office;
+    stock: Scalars['Int']['output'];
 };
 
 export type Purchase = {
@@ -788,7 +787,7 @@ export type Purchase = {
     modifiedOn: Scalars['DateTime']['output'];
     office: Office;
     purchaseItems: Array<PurchaseItem>;
-    total: Maybe<Scalars['Decimal']['output']>;
+    total: Scalars['Int']['output'];
 };
 
 export type PurchaseItem = {
@@ -796,16 +795,18 @@ export type PurchaseItem = {
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
-    price: Scalars['Decimal']['output'];
+    price: Scalars['Int']['output'];
     product: Product;
     purchase: Purchase;
     quantity: Scalars['Int']['output'];
-    total: Maybe<Scalars['Decimal']['output']>;
+    total: Scalars['Int']['output'];
 };
 
 export type PurchaseItemsInput = {
+    discount: Scalars['Int']['input'];
     product: Scalars['String']['input'];
     quantity: Scalars['Int']['input'];
+    total: Scalars['Int']['input'];
 };
 
 export type Query = {
@@ -856,6 +857,10 @@ export type Query = {
     suppliersOrdersCsv: Scalars['String']['output'];
     user: Maybe<User>;
     users: Array<User>;
+};
+
+export type QueryAllClientsArgs = {
+    query?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type QueryClientByIdArgs = {
@@ -989,6 +994,7 @@ export type RentalContract = {
     client: Client;
     contractEndDatetime: Scalars['DateTime']['output'];
     contractStartDatetime: Scalars['DateTime']['output'];
+    createdBy: User;
     createdOn: Scalars['DateTime']['output'];
     currentHistory: Maybe<RentalContractHistory>;
     expirationDate: Maybe<Scalars['DateTime']['output']>;
@@ -999,12 +1005,13 @@ export type RentalContract = {
     id: Scalars['ID']['output'];
     locality: Locality;
     modifiedOn: Scalars['DateTime']['output'];
+    numberOfRentalDays: Scalars['Int']['output'];
     office: Office;
     rentalContractHistory: Array<RentalContractHistory>;
     rentalContractItems: Array<RentalContractItem>;
     /** Nombre de la calle donde vive el cliente */
     streetName: Scalars['String']['output'];
-    total: Maybe<Scalars['Decimal']['output']>;
+    total: Scalars['Int']['output'];
 };
 
 export type RentalContractHistory = {
@@ -1020,23 +1027,30 @@ export type RentalContractHistory = {
 export type RentalContractItem = {
     __typename?: 'RentalContractItem';
     createdOn: Scalars['DateTime']['output'];
+    discount: Scalars['Int']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
-    price: Maybe<Scalars['Decimal']['output']>;
+    price: Scalars['Int']['output'];
     product: Product;
     quantity: Scalars['Int']['output'];
     quantityReturned: Maybe<Scalars['Int']['output']>;
     rentalContract: RentalContract;
     service: Maybe<ProductService>;
-    servicePrice: Maybe<Scalars['Decimal']['output']>;
-    serviceTotal: Maybe<Scalars['Decimal']['output']>;
-    total: Maybe<Scalars['Decimal']['output']>;
+    servicePrice: Maybe<Scalars['Int']['output']>;
+    subtotal: Scalars['Int']['output'];
+    total: Scalars['Int']['output'];
 };
 
 export type RentalContractProductsItemInput = {
+    discount: Scalars['Int']['input'];
     id: Scalars['ID']['input'];
-    quantity: Scalars['Int']['input'];
+    officesOrders: Array<RentalContractProductsItemOfficeOrderInput>;
     service: InputMaybe<Scalars['String']['input']>;
+};
+
+export type RentalContractProductsItemOfficeOrderInput = {
+    officeId: Scalars['ID']['input'];
+    quantity: Scalars['Int']['input'];
 };
 
 /**
@@ -1152,12 +1166,12 @@ export type SupplierOrderProduct = {
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
-    price: Scalars['Decimal']['output'];
+    price: Scalars['Int']['output'];
     product: Product;
     quantity: Scalars['Int']['output'];
     quantityReceived: Scalars['Int']['output'];
     supplierOrder: OrderSupplier;
-    total: Scalars['Decimal']['output'];
+    total: Scalars['Int']['output'];
 };
 
 export type UpdateClient = {
@@ -1196,6 +1210,7 @@ export type User = {
     isSuperuser: Scalars['Boolean']['output'];
     lastLogin: Maybe<Scalars['DateTime']['output']>;
     lastName: Scalars['String']['output'];
+    rentalContractsCreated: Array<RentalContract>;
     supplierorderhistorymodelSet: Array<SupplierOrderHistory>;
 };
 
@@ -1300,7 +1315,7 @@ export type RentalContractsByClientIdQuery = {
         houseNumber: string;
         streetName: string;
         houseUnit: string | null;
-        total: any | null;
+        total: number;
         currentHistory: {
             __typename?: 'RentalContractHistory';
             status: RentalContractStatusChoices;
@@ -1313,7 +1328,7 @@ export type RentalContractsByClientIdQuery = {
             product: {
                 __typename?: 'Product';
                 name: string;
-                price: any | null;
+                price: number | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
         }>;
@@ -1330,7 +1345,7 @@ export type PurchasesByClientIdQuery = {
         __typename?: 'Purchase';
         id: string;
         createdOn: any;
-        total: any | null;
+        total: number;
         purchaseItems: Array<{
             __typename?: 'PurchaseItem';
             id: string;
@@ -1338,7 +1353,7 @@ export type PurchasesByClientIdQuery = {
             product: {
                 __typename?: 'Product';
                 name: string;
-                price: any | null;
+                price: number | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
         }>;
@@ -1400,7 +1415,9 @@ export type DeleteClientMutation = {
     deleteClient: { __typename?: 'DeleteClient'; success: boolean } | null;
 };
 
-export type AllClientsQueryVariables = Exact<{ [key: string]: never }>;
+export type AllClientsQueryVariables = Exact<{
+    query: InputMaybe<Scalars['String']['input']>;
+}>;
 
 export type AllClientsQuery = {
     __typename?: 'Query';
@@ -1473,7 +1490,8 @@ export type ContractByIdQuery = {
         houseNumber: string;
         houseUnit: string | null;
         streetName: string;
-        total: any | null;
+        total: number;
+        numberOfRentalDays: number;
         client: {
             __typename?: 'Client';
             firstName: string;
@@ -1505,15 +1523,15 @@ export type ContractByIdQuery = {
         rentalContractItems: Array<{
             __typename?: 'RentalContractItem';
             id: string;
-            serviceTotal: any | null;
-            servicePrice: any | null;
-            total: any | null;
-            price: any | null;
+            servicePrice: number | null;
+            price: number;
             quantity: number;
+            subtotal: number;
+            discount: number;
+            total: number;
             product: {
                 __typename?: 'Product';
                 name: string;
-                price: any | null;
                 sku: string | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
@@ -1673,7 +1691,7 @@ export type DashboardQuery = {
         __typename?: 'Purchase';
         id: string;
         createdOn: any;
-        total: any | null;
+        total: number;
         client: { __typename?: 'Client'; firstName: string; lastName: string };
     }>;
     allClients: Array<{ __typename?: 'Client'; id: string }>;
@@ -2048,7 +2066,7 @@ export type SupplierOrdersBySupplierIdQuery = {
                 __typename?: 'Product';
                 id: string;
                 name: string;
-                price: any | null;
+                price: number | null;
                 type: ProductTypeChoices;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
@@ -2148,14 +2166,14 @@ export type ProductListItemFragment = {
     __typename?: 'Product';
     id: string;
     name: string;
-    price: any | null;
+    price: number | null;
     type: ProductTypeChoices;
     brand: { __typename?: 'Brand'; name: string } | null;
     services: Array<{
         __typename?: 'ProductService';
         id: string;
         name: string;
-        price: any;
+        price: number;
     }>;
 };
 
@@ -2174,14 +2192,14 @@ export type ProductsQuery = {
             __typename?: 'Product';
             id: string;
             name: string;
-            price: any | null;
+            price: number | null;
             type: ProductTypeChoices;
             brand: { __typename?: 'Brand'; name: string } | null;
             services: Array<{
                 __typename?: 'ProductService';
                 id: string;
                 name: string;
-                price: any;
+                price: number;
             }>;
         }>;
     };
@@ -2199,7 +2217,7 @@ export type ProductByIdQuery = {
         name: string;
         description: string | null;
         type: ProductTypeChoices;
-        price: any | null;
+        price: number | null;
         brand: { __typename?: 'Brand'; name: string } | null;
         stock: Array<{
             __typename?: 'ProductStockInOffice';
@@ -2209,7 +2227,7 @@ export type ProductByIdQuery = {
                 locality: { __typename?: 'Locality'; name: string };
             };
         }>;
-        services: Array<{ __typename?: 'ProductService'; name: string; price: any }>;
+        services: Array<{ __typename?: 'ProductService'; name: string; price: number }>;
     } | null;
 };
 
@@ -2226,14 +2244,14 @@ export type CreateProductMutation = {
             __typename?: 'Product';
             id: string;
             name: string;
-            price: any | null;
+            price: number | null;
             type: ProductTypeChoices;
             brand: { __typename?: 'Brand'; name: string } | null;
             services: Array<{
                 __typename?: 'ProductService';
                 id: string;
                 name: string;
-                price: any;
+                price: number;
             }>;
         } | null;
     } | null;
@@ -2263,7 +2281,7 @@ export type ProductsSuppliedBySupplierIdQuery = {
         __typename?: 'Product';
         id: string;
         name: string;
-        price: any | null;
+        price: number | null;
     }>;
 };
 
@@ -2284,14 +2302,14 @@ export type AllProductsQuery = {
         __typename?: 'Product';
         id: string;
         name: string;
-        price: any | null;
+        price: number | null;
         type: ProductTypeChoices;
         brand: { __typename?: 'Brand'; name: string } | null;
         services: Array<{
             __typename?: 'ProductService';
             id: string;
             name: string;
-            price: any;
+            price: number;
         }>;
     }>;
 };
@@ -2313,17 +2331,17 @@ export type ProductsStocksByOfficeInDateRangeQuery = {
         __typename?: 'ProductStocksInDateRange';
         id: string;
         name: string;
-        price: any;
+        price: number;
         services: Array<{
             __typename?: 'ProductService';
             id: string;
             name: string;
-            price: any;
+            price: number;
         }>;
         stocksByOffice: Array<{
             __typename?: 'ProductsStocksInDateRangeStockByOffice';
-            stock: number | null;
-            office: { __typename?: 'Office'; id: string; name: string } | null;
+            stock: number;
+            office: { __typename?: 'Office'; id: string; name: string };
         }>;
     }>;
 };
@@ -2342,7 +2360,7 @@ export type PurchasesQuery = {
             __typename?: 'Purchase';
             id: string;
             createdOn: any;
-            total: any | null;
+            total: number;
             client: { __typename?: 'Client'; firstName: string; lastName: string };
         }>;
     };
@@ -2358,15 +2376,15 @@ export type PurchaseByIdQuery = {
         __typename?: 'Purchase';
         id: string;
         createdOn: any;
-        total: any | null;
+        total: number;
         purchaseItems: Array<{
             __typename?: 'PurchaseItem';
             quantity: number;
-            total: any | null;
+            total: number;
             product: {
                 __typename?: 'Product';
                 name: string;
-                price: any | null;
+                price: number | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
         }>;
@@ -2394,7 +2412,7 @@ export type CreatePurchaseMutation = {
             __typename?: 'Purchase';
             id: string;
             createdOn: any;
-            total: any | null;
+            total: number;
             client: { __typename?: 'Client'; firstName: string; lastName: string };
         } | null;
     } | null;
@@ -2404,7 +2422,7 @@ export type PurchaseListItemFragment = {
     __typename?: 'Purchase';
     id: string;
     createdOn: any;
-    total: any | null;
+    total: number;
     client: { __typename?: 'Client'; firstName: string; lastName: string };
 };
 
@@ -3646,12 +3664,32 @@ export const AllClientsDocument = {
             kind: 'OperationDefinition',
             operation: 'query',
             name: { kind: 'Name', value: 'allClients' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'query' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+            ],
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
                     {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'allClients' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'query' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'query' },
+                                },
+                            },
+                        ],
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
@@ -4108,6 +4146,10 @@ export const ContractByIdDocument = {
                                 { kind: 'Field', name: { kind: 'Name', value: 'total' } },
                                 {
                                     kind: 'Field',
+                                    name: { kind: 'Name', value: 'numberOfRentalDays' },
+                                },
+                                {
+                                    kind: 'Field',
                                     name: { kind: 'Name', value: 'rentalContractItems' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
@@ -4120,19 +4162,8 @@ export const ContractByIdDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'serviceTotal',
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
                                                     value: 'servicePrice',
                                                 },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'total' },
                                             },
                                             {
                                                 kind: 'Field',
@@ -4174,13 +4205,6 @@ export const ContractByIdDocument = {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'price',
-                                                            },
-                                                        },
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
                                                                 value: 'sku',
                                                             },
                                                         },
@@ -4213,6 +4237,18 @@ export const ContractByIdDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'quantity' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'subtotal' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'discount' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'total' },
                                             },
                                         ],
                                     },
