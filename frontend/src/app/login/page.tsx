@@ -12,7 +12,12 @@ const LoginPage = () => {
             <main className="flex min-h-screen items-center py-24">
                 <div className="container">
                     <div className="mb-8 text-center">
-                        <h1 className="mb-1 text-3xl font-bold">Hola de nuevo</h1>
+                        <h1
+                            data-cy="login-page-title"
+                            className="mb-1 text-3xl font-bold"
+                        >
+                            Hola de nuevo
+                        </h1>
                         <p className="text-gray-500 lg:text-base">
                             Ingresa tus credenciales para acceder a tu cuenta
                         </p>
