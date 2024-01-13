@@ -3,25 +3,37 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { DropdownMenuGroup } from '@radix-ui/react-dropdown-menu';
 import clsx from 'clsx';
+import { ChevronUp, LogOut, Settings, User } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { PropsWithChildren, useCallback, useState } from 'react';
 
+import { useOfficeContext } from '@/app/OfficeProvider';
 import { useUserContext } from '@/app/UserProvider';
 
 import styles from './DashboardLayout.module.scss';
-import BagShopping from './Icons/BagShopping';
-import ClipBoard from './Icons/ClipBoard';
+import BagShoppingIcon from './Icons/BagShopping';
+import ClipBoardIcon from './Icons/ClipBoard';
 import ClipBoardList from './Icons/ClipBoardList';
-import ClipBoardUser from './Icons/ClipBoardUser';
-import FileLines from './Icons/FileLines';
-import House from './Icons/House';
-import LocationDot from './Icons/LocationDot';
-import MoneyCheckDollar from './Icons/MoneyCheckDollar';
-import User from './Icons/User';
-import UserTie from './Icons/UserTie';
+import ClipBoardUserIcon from './Icons/ClipBoardUser';
+import FileLinesIcon from './Icons/FileLines';
+import HouseIcon from './Icons/House';
+import LocationDotIcon from './Icons/LocationDot';
+import MoneyCheckDollarIcon from './Icons/MoneyCheckDollar';
+import UserIcon from './Icons/User';
+import UserTieIcon from './Icons/UserTie';
 
-import { EmployeeUser } from '../auth/user-utils';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+import { CurrentUser, EmployeeUser, isAdmin } from '../auth/user-utils';
 
 export type DashboardIconProps = {
     isActive: boolean;
@@ -31,23 +43,29 @@ type NavLink = {
     href: string;
     label: string;
     Icon: React.FC<DashboardIconProps>;
+    userCanAccess?: (user: CurrentUser) => boolean;
 };
 
 const MAIN_LINKS: NavLink[] = [
-    { href: '/', label: 'Dashboard', Icon: House },
-    { href: '/productos', label: 'Productos', Icon: BagShopping },
-    { href: '/clientes', label: 'Clientes', Icon: User },
-    { href: '/empleados', label: 'Empleados', Icon: UserTie },
-    { href: '/proveedores', label: 'Proveedores', Icon: ClipBoard },
-    { href: '/localidades', label: 'Localidades', Icon: LocationDot },
-    { href: '/ventas', label: 'Ventas', Icon: MoneyCheckDollar },
+    { href: '/', label: 'Dashboard', Icon: HouseIcon },
+    { href: '/productos', label: 'Productos', Icon: BagShoppingIcon },
+    { href: '/clientes', label: 'Clientes', Icon: UserIcon },
+    {
+        href: '/empleados',
+        label: 'Empleados',
+        Icon: UserTieIcon,
+        userCanAccess: (user) => isAdmin(user),
+    },
+    { href: '/proveedores', label: 'Proveedores', Icon: ClipBoardIcon },
+    { href: '/localidades', label: 'Localidades', Icon: LocationDotIcon },
+    { href: '/ventas', label: 'Ventas', Icon: MoneyCheckDollarIcon },
     {
         href: '/pedidos-a-proveedores',
         label: 'Pedidos a proveedores',
         Icon: ClipBoardList,
     },
-    { href: '/pedidos-internos', label: 'Pedidos internos', Icon: ClipBoardUser },
-    { href: '/contratos', label: 'Contratos', Icon: FileLines },
+    { href: '/pedidos-internos', label: 'Pedidos internos', Icon: ClipBoardUserIcon },
+    { href: '/contratos', label: 'Contratos', Icon: FileLinesIcon },
 ];
 
 type NavigationLinkProps = PropsWithChildren<{
@@ -102,6 +120,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
 
     const { user } = useUserContext<EmployeeUser>();
 
+    const { office, resetOffice } = useOfficeContext();
+
     return (
         <div className="min-h-screen lg:flex">
             <aside className="lg:pl-container pointer-events-none fixed inset-x-0 flex h-screen flex-col overflow-y-scroll text-white lg:static lg:w-1/5 lg:bg-black lg:pr-6">
@@ -128,7 +148,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
                             isMenuOpen ? 'inset-0' : '-left-full right-full',
                         )}
                     >
-                        {MAIN_LINKS.map((link) => (
+                        {MAIN_LINKS.filter(
+                            (link) => !link.userCanAccess || link.userCanAccess(user),
+                        ).map((link) => (
                             <li className="pb-4" key={link.href}>
                                 <NavigationLink href={link.href} Icon={link.Icon}>
                                     {link.label}
@@ -136,20 +158,50 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
                             </li>
                         ))}
 
-                        <li className="mt-auto border-t border-white py-5 pt-4">
-                            <span className="mb-4 block text-sm text-gray-200">
-                                {user.email}
-                            </span>
-                            <button
-                                className="block w-full rounded bg-white p-2 text-sm font-bold text-black"
-                                onClick={() => {
-                                    signOut({
-                                        callbackUrl: '/login',
-                                    });
-                                }}
-                            >
-                                Cerrar sesión
-                            </button>
+                        <li className="mt-auto border-t border-white pt-4">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <button className="w-full rounded border border-white/20 p-3 text-white duration-200 hover:opacity-70">
+                                        <div className="mb-2.5 flex">
+                                            <User className="mr-2 h-4 w-4" />
+                                            <span>{user.email}</span>
+
+                                            <ChevronUp className="ml-auto h-4 w-4" />
+                                        </div>
+
+                                        <div className="flex w-full">
+                                            <span className="text-xs text-white/50">
+                                                {office
+                                                    ? office.name
+                                                    : 'Sin sucursal asignada'}
+                                            </span>
+                                        </div>
+                                    </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-56">
+                                    <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuGroup>
+                                        <DropdownMenuItem onClick={resetOffice}>
+                                            <Settings className="mr-2 h-4 w-4" />
+                                            <span>Cambiar de sucursal</span>
+                                        </DropdownMenuItem>
+                                    </DropdownMenuGroup>
+
+                                    <DropdownMenuSeparator />
+
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            signOut({
+                                                callbackUrl: '/login',
+                                            });
+                                        }}
+                                    >
+                                        <LogOut className="mr-2 h-4 w-4" />
+                                        <span>Cerrar sesión</span>
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </li>
                     </ul>
                 </nav>

@@ -11,6 +11,8 @@ type PortalProps = PropsWithChildren<{
     onClick?: (e: any) => void;
 }>;
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
 export const Portal: React.FC<PortalProps> = ({
     children,
     parent,

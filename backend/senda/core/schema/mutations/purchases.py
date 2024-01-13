@@ -8,7 +8,7 @@ from senda.core.models.offices import OfficeModel
 from senda.core.schema.custom_types import Product, PurchaseItem, Purchase
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class ErrorMessages:
@@ -22,6 +22,8 @@ class ErrorMessages:
 class PurchaseItemsInput(graphene.InputObjectType):
     product = graphene.String(required=True)
     quantity = graphene.Int(required=True)
+    total = graphene.Int(required=True)
+    discount = graphene.Int(required=True)
 
 
 class CreatePurchaseInput(graphene.InputObjectType):
@@ -46,7 +48,7 @@ class CreatePurchase(graphene.Mutation):
     class Arguments:
         data = CreatePurchaseInput(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, data: CreatePurchaseInput):
         data_dict = input_object_type_to_dict(data)
 
@@ -70,7 +72,7 @@ class DeletePurchase(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, id: str):
         try:
             purchase = PurchaseModel.objects.get(id=id)

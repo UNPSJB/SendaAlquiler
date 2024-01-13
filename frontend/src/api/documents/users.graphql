@@ -17,13 +17,16 @@ fragment CurrentUser on User {
     firstName
     lastName
     email
+    admin {
+        offices {
+            id
+            name
+        }
+    }
     employee {
         offices {
             id
-            office {
-                id
-                name
-            }
+            name
         }
     }
 }

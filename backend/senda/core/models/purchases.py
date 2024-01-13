@@ -11,6 +11,12 @@ from senda.core.managers import PurchaseModelManager
 from .clients import ClientModel
 from .products import ProductModel, ProductTypeChoices
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .order_internal import InternalOrderModel
+    from .offices import OfficeModel
+
 
 class PurchaseModel(TimeStampedModel):
     """
@@ -32,7 +38,10 @@ class PurchaseModel(TimeStampedModel):
 
     purchase_items: models.QuerySet["PurchaseItemModel"]
 
-    total = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
+    total = models.IntegerField(
+        default=0,
+        blank=True,
+    )
     client = models.ForeignKey(
         ClientModel, on_delete=models.CASCADE, related_name="purchases"
     )
@@ -49,7 +58,7 @@ class PurchaseModel(TimeStampedModel):
     def recalculate_total(self) -> None:
         self.total = self.purchase_items.aggregate(
             total=models.Sum(models.F("price") * models.F("quantity"))
-        )["total"]
+        )["total"] or 0
         self.save()
 
 
@@ -79,9 +88,14 @@ class PurchaseItemModel(TimeStampedModel):
     purchase = models.ForeignKey(
         PurchaseModel, on_delete=models.CASCADE, related_name="purchase_items"
     )
-    quantity = models.IntegerField()
-    price = models.DecimalField(blank=True, decimal_places=2, max_digits=10)
-    total = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
+    quantity = models.IntegerField(default=0)
+    price = models.IntegerField(
+        blank=True,
+    )
+    total = models.IntegerField(
+        default=0,
+        blank=True,
+    )
 
     class Meta(TimeStampedModel.Meta):
         constraints = [

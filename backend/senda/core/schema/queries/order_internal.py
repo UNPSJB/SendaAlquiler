@@ -9,12 +9,12 @@ from senda.core.schema.custom_types import (
 )
 from utils.graphene import get_paginated_model
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 import csv
 import io
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 from django.db import models
 
 
@@ -23,7 +23,7 @@ class Query(graphene.ObjectType):
         PaginatedInternalOrderQueryResult, page=graphene.Int()
     )
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_internal_orders(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
             InternalOrderModel.objects.filter(
@@ -41,13 +41,13 @@ class Query(graphene.ObjectType):
 
     internal_order_by_id = graphene.Field(InternalOrder, id=graphene.ID(required=True))
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_internal_order_by_id(self, info: CustomInfo, id: str):
         return InternalOrderModel.objects.filter(id=id).first()
 
     internal_orders_csv = graphene.NonNull(graphene.String)
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_internal_orders_csv(self, info: CustomInfo):
         internal_orders = InternalOrderModel.objects.all().prefetch_related(
             "current_history",

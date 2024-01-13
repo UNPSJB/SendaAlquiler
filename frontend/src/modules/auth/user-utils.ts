@@ -7,6 +7,8 @@ type BuildUserType<T extends keyof CurrentUser> = Omit<CurrentUser, T> & {
 };
 
 export type EmployeeUser = BuildUserType<'employee'>;
+export type AdminUser = BuildUserType<'admin'>;
 
-export const isEmployee = (user: CurrentUser): user is EmployeeUser =>
-    !!user.employee?.offices;
+export const isEmployee = (user: CurrentUser): user is EmployeeUser => !!user.employee;
+
+export const isAdmin = (user: CurrentUser): user is AdminUser => !!user.admin;

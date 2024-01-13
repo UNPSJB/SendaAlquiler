@@ -1,8 +1,7 @@
-from decimal import Decimal
 from typing import Any
 
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -65,7 +64,10 @@ class RentalContractModel(TimeStampedModel):
         blank=True,
         null=True,
     )
-    total = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
+    total = models.IntegerField(
+        default=0,
+        blank=True,
+    )
     expiration_date = models.DateTimeField(blank=True, null=True)
 
     contract_start_datetime = models.DateTimeField()
@@ -86,6 +88,13 @@ class RentalContractModel(TimeStampedModel):
         blank=True,
         null=True,
     )
+    number_of_rental_days = models.PositiveIntegerField()
+
+    created_by = models.ForeignKey(
+        "users.UserModel",
+        on_delete=models.CASCADE,
+        related_name="rental_contracts_created",
+    )
 
     objects: RentalContractManager = RentalContractManager()  # pyright: ignore
 
@@ -102,12 +111,10 @@ class RentalContractModel(TimeStampedModel):
 
         super().save(*args, **kwargs)
 
-    def calculate_total(self) -> Decimal:
-        total = Decimal(0)
+    def calculate_total(self):
+        total = 0
         for item in self.rental_contract_items.all():
             total += item.total
-            if item.service:
-                total += item.service_total
 
         return total
 
@@ -136,6 +143,8 @@ class RentalContractItemModel(TimeStampedModel):
         save: Overridden save method to include custom logic for setting price, total, and service total.
     """
 
+    offices_orders: models.QuerySet["RentalContractItemOfficeOrderModel"]
+
     rental_contract = models.ForeignKey(
         RentalContractModel,
         on_delete=models.CASCADE,
@@ -149,8 +158,10 @@ class RentalContractItemModel(TimeStampedModel):
         db_index=True,
     )
     quantity = models.PositiveIntegerField(default=1)
-    price = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
-    total = models.DecimalField(null=True, blank=True, decimal_places=2, max_digits=10)
+    price = models.IntegerField(
+        default=0,
+        blank=True,
+    )
     quantity_returned = models.PositiveIntegerField(default=0, blank=True, null=True)
     service = models.ForeignKey(
         ProductServiceModel,
@@ -159,11 +170,21 @@ class RentalContractItemModel(TimeStampedModel):
         null=True,
         blank=True,
     )
-    service_price = models.DecimalField(
-        blank=True, null=True, decimal_places=2, max_digits=10
+    service_price = models.IntegerField(
+        blank=True,
+        null=True,
     )
-    service_total = models.DecimalField(
-        null=True, blank=True, decimal_places=2, max_digits=10
+
+    subtotal = models.IntegerField(
+        default=0,
+    )
+
+    discount = models.IntegerField(
+        default=0,
+    )
+
+    total = models.IntegerField(
+        default=0,
     )
 
     def __str__(self) -> str:
@@ -197,6 +218,31 @@ class RentalContractItemModel(TimeStampedModel):
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
         return super().save(*args, **kwargs)
+
+
+class RentalContractItemOfficeOrderModel(models.Model):
+    item: "RentalContractItemModel"
+    office: "OfficeModel"
+
+    office = models.ForeignKey(
+        "OfficeModel",
+        on_delete=models.CASCADE,
+        related_name="rental_contract_items_offices_orders",
+    )
+    item = models.ForeignKey(
+        RentalContractItemModel,
+        on_delete=models.CASCADE,
+        related_name="offices_orders",
+    )
+    quantity = models.PositiveIntegerField()
+
+    objects = models.Manager()
+
+    class Meta:
+        unique_together = ("office", "item")
+
+    def __str__(self):
+        return f"{self.office.name} - {self.product.name}: {self.quantity}"
 
 
 class RentalContractStatusChoices(models.TextChoices):
@@ -272,28 +318,79 @@ def update_current_history(
 
 
 @receiver(post_save, sender=RentalContractItemModel)
-def update_purchase_total(
+@transaction.atomic
+def check_ordered_quantity(
+    sender: RentalContractItemModel, instance: RentalContractItemModel, **kwargs: Any
+) -> None:
+    if not instance.quantity:
+        for office_order in instance.offices_orders.all():
+            instance.quantity += office_order.quantity
+
+        instance.save()
+    else:
+        for order in instance.offices_orders.all():
+            product = instance.product
+            stock_in_office = product.get_office_available_stock_between_dates(
+                order.office,
+                instance.rental_contract.contract_start_datetime,
+                instance.rental_contract.contract_end_datetime,
+            )
+
+            if stock_in_office is None:
+                raise ValidationError(
+                    "No se puede agregar un producto que no esté en stock en una sucursal"
+                )
+
+            if stock_in_office < order.quantity:
+                raise ValidationError(
+                    "El stock disponible en la fecha de alquiler es menor al solicitado"
+                )
+
+            if order.office.pk != instance.rental_contract.office.pk:
+                from senda.core.models.order_internal import InternalOrderModel
+
+                InternalOrderModel.objects.create_internal_order(
+                    instance.rental_contract.office,
+                    order.office,
+                    instance.rental_contract.created_by,
+                    [
+                        {
+                            "id": str(instance.product.pk),
+                            "quantity": order.quantity,
+                        }
+                    ],
+                )
+
+
+@receiver(post_save, sender=RentalContractItemModel)
+def update_totals(
     sender: Any, instance: RentalContractItemModel, **kwargs: Any
 ) -> None:
-    days_of_rental = (
-        instance.rental_contract.contract_end_datetime.date()
-        - instance.rental_contract.contract_start_datetime.date()
-    ).days
-
     instance.price = instance.product.price
 
-    new_total = instance.quantity * instance.price * days_of_rental
+    product_subtotal = (
+        instance.quantity
+        * instance.price
+        * instance.rental_contract.number_of_rental_days
+    )
 
-    new_service_total = Decimal(0)
+    service_subtotal = 0
     if instance.service:
         instance.service_price = instance.service.price
-        new_service_total = instance.service.price * instance.quantity * days_of_rental
+        service_subtotal = (
+            instance.service.price
+            * instance.quantity
+            * instance.rental_contract.number_of_rental_days
+        )
     else:
         instance.service_price = None
 
-    if instance.total != new_total or instance.service_total != new_service_total:
+    new_subtotal = product_subtotal + service_subtotal
+    new_total = new_subtotal - instance.discount
+
+    if instance.subtotal != new_subtotal or instance.total != new_total:
+        instance.subtotal = new_subtotal
         instance.total = new_total
-        instance.service_total = new_service_total
         instance.save()
 
         instance.rental_contract.total = instance.rental_contract.calculate_total()

@@ -8,3 +8,31 @@ export const getCleanErrorMessage = (err: Error) => {
 
     return message;
 };
+
+type OnNumericInputChangeOptions = {
+    value: string;
+    max?: number;
+    min?: number;
+};
+
+export const getNumericInputValue = ({
+    value,
+    max,
+    min,
+}: OnNumericInputChangeOptions): number | null => {
+    const asNumber = value.length ? parseInt(value.replace(/[^0-9]/g, '')) : null;
+
+    if (asNumber === null || isNaN(asNumber)) {
+        return null;
+    }
+
+    if (typeof max !== 'undefined' && asNumber > max) {
+        return max;
+    }
+
+    if (typeof min !== 'undefined' && asNumber < min) {
+        return min;
+    }
+
+    return asNumber;
+};

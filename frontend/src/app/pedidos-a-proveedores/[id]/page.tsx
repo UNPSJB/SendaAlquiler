@@ -53,7 +53,7 @@ const useDashboardTitle = (
 
             {supplierOrder.currentHistory?.status ===
                 CoreSupplierOrderHistoryModelStatusChoices.Pending &&
-                supplierOrder.officeDestination.id === office && (
+                supplierOrder.officeDestination.id === office?.id && (
                     <ButtonWithSpinner
                         isLoading={isLoading}
                         onClick={() => {

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Control, Controller, FieldValues, Path } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import CreatableSelect from 'react-select/creatable';
 
@@ -13,10 +12,15 @@ type ClientOptionProps = {
     client: AllClientsQuery['allClients'][0];
 };
 
-const LocalityOption: React.FC<ClientOptionProps> = ({ client }) => (
-    <span>
-        {client.firstName} {client.lastName}
-    </span>
+const SelectOption: React.FC<ClientOptionProps> = ({ client }) => (
+    <div>
+        <p className="font-bold">
+            {client.firstName} {client.lastName}
+        </p>
+
+        <p className="text-gray-500">DNI: {client.dni}</p>
+        <p className="text-gray-500">Email: {client.email}</p>
+    </div>
 );
 
 export type ClientFieldValue = {
@@ -25,24 +29,12 @@ export type ClientFieldValue = {
     data: ClientOptionProps['client'];
 };
 
-// Define a custom SetValue type that allows setting a LocalityFieldValue
-type CustomSetValue<
-    TFieldValues extends FieldValues,
-    TName extends Path<TFieldValues>,
-> = (name: TName, value: ClientFieldValue) => void;
+type RHFProps = {
+    onChange: (value: ClientFieldValue | null) => void;
+    disabled?: boolean;
+};
 
-type RHFProps<TFieldValues extends FieldValues, TName extends Path<TFieldValues>> = {
-    name: TName;
-    control: Control<TFieldValues>;
-    setValue: CustomSetValue<TFieldValues, TName>;
-} & (TFieldValues[Extract<keyof TFieldValues, TName>] extends ClientFieldValue
-    ? object
-    : never);
-
-const ClientField = <TFieldValues extends FieldValues, TName extends Path<TFieldValues>>(
-    props: RHFProps<TFieldValues, TName>,
-) => {
-    const { name, control, setValue } = props;
+const CreatableSelectClientField = ({ disabled, onChange, ...props }: RHFProps) => {
     const { data, isLoading } = useAllClients();
 
     const [clientToCreate, setClientToCreate] = useState<string | null>(null);
@@ -72,7 +64,7 @@ const ClientField = <TFieldValues extends FieldValues, TName extends Path<TField
                     data: client,
                 };
 
-                setValue(name, nextValue);
+                onChange(nextValue);
                 setClientToCreate(null);
             }
         },
@@ -95,45 +87,61 @@ const ClientField = <TFieldValues extends FieldValues, TName extends Path<TField
 
     return (
         <>
-            <Controller
-                name={name}
-                control={control}
-                render={({ field: { onChange, value, ref, onBlur, disabled } }) => {
+            <CreatableSelect<
+                | ClientFieldValue
+                | {
+                      __isNew__: boolean;
+                      label: string;
+                      value: string;
+                  }
+            >
+                {...props}
+                onChange={(value) => {
+                    if (value) {
+                        onChange(value as ClientFieldValue);
+                    } else {
+                        onChange(null);
+                    }
+                }}
+                classNamePrefix="react-select"
+                isDisabled={!!clientToCreate || disabled}
+                isLoading={!!clientToCreate || isLoading}
+                options={getOptions()}
+                placeholder="Selecciona una localidad"
+                formatCreateLabel={(input) => {
                     return (
-                        <CreatableSelect<
-                            | ClientFieldValue
-                            | {
-                                  __isNew__: boolean;
-                                  label: string;
-                                  value: string;
-                              }
-                        >
-                            ref={ref}
-                            value={value}
-                            onBlur={onBlur}
-                            onChange={onChange}
-                            name={name}
-                            classNamePrefix="react-select"
-                            isDisabled={!!clientToCreate || disabled}
-                            isLoading={!!clientToCreate || isLoading}
-                            options={getOptions()}
-                            placeholder="Selecciona una localidad"
-                            formatCreateLabel={(input) => {
-                                return (
-                                    <span className="font-headings">
-                                        Crea el cliente <b>&quot;{input}&quot;</b>
-                                    </span>
-                                );
-                            }}
-                            formatOptionLabel={(val) => {
-                                if ('data' in val) {
-                                    return <LocalityOption client={val.data} />;
-                                }
+                        <span className="font-headings">
+                            Crea el cliente <b>&quot;{input}&quot;</b>
+                        </span>
+                    );
+                }}
+                formatOptionLabel={(val) => {
+                    if ('data' in val) {
+                        return <SelectOption client={val.data} />;
+                    }
 
-                                return <span>{val.label}</span>;
-                            }}
-                            onCreateOption={onCreateOption}
-                        />
+                    return <span>{val.label}</span>;
+                }}
+                onCreateOption={onCreateOption}
+                filterOption={(option, rawInput) => {
+                    if ('__isNew__' in option) {
+                        return true;
+                    }
+
+                    if (!('data' in option.data)) {
+                        return true;
+                    }
+
+                    const input = rawInput.toLowerCase();
+                    const client = option.data.data;
+                    const fullName = `${client.firstName} ${client.lastName}`;
+                    const dni = client.dni.toLowerCase();
+                    const email = client.email.toLowerCase();
+
+                    return (
+                        fullName.includes(input) ||
+                        dni.includes(input) ||
+                        email.includes(input)
                     );
                 }}
             />
@@ -173,4 +181,4 @@ const ClientField = <TFieldValues extends FieldValues, TName extends Path<TField
     );
 };
 
-export default ClientField;
+export default CreatableSelectClientField;

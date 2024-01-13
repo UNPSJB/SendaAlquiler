@@ -13,7 +13,7 @@ from senda.core.models.rental_contracts import (
 from senda.core.schema.custom_types import RentalContract
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class ErrorMessages:
@@ -26,10 +26,16 @@ class ErrorMessages:
     INVALID_LOCALITY = "No se ingreso ninguna localidad"
 
 
+class RentalContractProductsItemOfficeOrderInput(graphene.InputObjectType):
+    office_id = graphene.ID(required=True)
+    quantity = graphene.Int(required=True)
+
+
 class RentalContractProductsItemInput(graphene.InputObjectType):
     id = graphene.ID(required=True)
-    quantity = graphene.Int(required=True)
     service = graphene.String(Required=False)
+    offices_orders = non_null_list_of(RentalContractProductsItemOfficeOrderInput)
+    discount = graphene.Int(required=True)
 
 
 class CreateRentalContractInput(graphene.InputObjectType):
@@ -80,7 +86,7 @@ class CreateRentalContract(graphene.Mutation):
     class Arguments:
         data = CreateRentalContractInput(required=True)
 
-
+    @employee_or_admin_required
     def mutate(
         self, info: CustomInfo, data: CreateRentalContractInput
     ) -> "CreateRentalContract":
@@ -98,14 +104,18 @@ class CreateRentalContract(graphene.Mutation):
                 raise ValueError(ErrorMessages.INVALID_LOCALITY)
 
             rental_contract = RentalContractModel.objects.create_rental_contract(
+                created_by=info.context.user,
                 office=info.context.office_id,
                 client=client,
                 locality=locality,
                 **data_dict,
             )
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
+            print("Error al crear contrato")
+            print(e)
             return CreateRentalContract(error=str(e))
         except Exception as e:
+            print("Error al crear contrato:_ Exception")
             print(e)
             return CreateRentalContract(error="Error desconocido")
 
@@ -151,7 +161,6 @@ class BaseChangeContractStatus(graphene.Mutation):
 
 
 class PayContractDeposit(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "PayContractDeposit", info: Any, id: str
@@ -170,7 +179,6 @@ class PayContractDeposit(BaseChangeContractStatus):
 
 
 class PayTotalContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "PayTotalContract", info: Any, id: str
@@ -189,7 +197,6 @@ class PayTotalContract(BaseChangeContractStatus):
 
 
 class CancelContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "CancelContract", info: Any, id: str
@@ -211,7 +218,6 @@ class CancelContract(BaseChangeContractStatus):
 
 
 class StartContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "StartContract", info: Any, id: str
@@ -230,7 +236,6 @@ class StartContract(BaseChangeContractStatus):
 
 
 class ExpiredContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "ExpiredContract", info: Any, id: str
@@ -252,7 +257,6 @@ class ExpiredContract(BaseChangeContractStatus):
 
 
 class FinishContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "FinishContract", info: Any, id: str
@@ -271,7 +275,6 @@ class FinishContract(BaseChangeContractStatus):
 
 
 class FailedReturnContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "FailedReturnContract", info: Any, id: str
@@ -290,7 +293,6 @@ class FailedReturnContract(BaseChangeContractStatus):
 
 
 class SuccessfulReturnContract(BaseChangeContractStatus):
-
     @classmethod
     def mutate(
         cls, self: "SuccessfulReturnContract", info: Any, id: str
@@ -313,7 +315,6 @@ class DeleteRentalContract(graphene.Mutation):
 
     class Arguments:
         id = graphene.ID(required=True)
-
 
     def mutate(self, info: CustomInfo, id: str):
         try:

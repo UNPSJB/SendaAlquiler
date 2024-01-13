@@ -1,4 +1,4 @@
-from typing import Any
+from typing import List
 
 import graphene
 
@@ -7,19 +7,38 @@ from senda.core.models.products import (
     ProductModel,
     ProductStockInOfficeModel,
     ProductSupplierModel,
+    ProductTypeChoices,
+    OfficeModel,
 )
 from senda.core.schema.custom_types import (
     Brand,
     Product,
     ProductStockInOffice,
     PaginatedProductQueryResult,
+    Office,
+    ProductService,
 )
 from utils.graphene import non_null_list_of, get_paginated_model
 
 import csv
 import io
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
+
+from graphene import ObjectType
+
+
+class ProductsStocksInDateRangeStockByOffice(ObjectType):
+    office = graphene.Field(graphene.NonNull(Office))
+    stock = graphene.Field(graphene.NonNull(graphene.Int))
+
+
+class ProductStocksInDateRange(ObjectType):
+    id = graphene.NonNull(graphene.ID)
+    name = graphene.NonNull(graphene.String)
+    price = graphene.NonNull(graphene.Int)
+    stocks_by_office = non_null_list_of(ProductsStocksInDateRangeStockByOffice)
+    services = non_null_list_of(ProductService)
 
 
 class Query(graphene.ObjectType):
@@ -27,7 +46,7 @@ class Query(graphene.ObjectType):
         PaginatedProductQueryResult, page=graphene.Int(), query=graphene.String()
     )
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_products(self, info: CustomInfo, page: int, query: str = None):
         products = ProductModel.objects.all()
         if query:
@@ -46,13 +65,13 @@ class Query(graphene.ObjectType):
 
     all_products = non_null_list_of(Product)
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_all_products(self, info: CustomInfo):
         return ProductModel.objects.all()
 
     brands = non_null_list_of(Brand)
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_brands(self, info: CustomInfo):
         return BrandModel.objects.all()
 
@@ -60,13 +79,13 @@ class Query(graphene.ObjectType):
         non_null_list_of(ProductStockInOffice), office_id=graphene.ID(required=True)
     )
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_products_stocks_by_office_id(self, info: CustomInfo, office_id: int):
         return ProductStockInOfficeModel.objects.filter(office=office_id)
 
     product_by_id = graphene.Field(Product, id=graphene.ID(required=True))
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_product_by_id(self, info: CustomInfo, id: str):
         return ProductModel.objects.filter(id=id).first()
 
@@ -74,7 +93,7 @@ class Query(graphene.ObjectType):
         non_null_list_of(Product), supplier_id=graphene.ID(required=True)
     )
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_products_supplied_by_supplier_id(
         self, info: CustomInfo, supplier_id: int
     ):
@@ -88,13 +107,13 @@ class Query(graphene.ObjectType):
         graphene.NonNull(graphene.Boolean), sku=graphene.String(required=True)
     )
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_product_exists(self, info: CustomInfo, sku: str):
         return ProductModel.objects.filter(sku=sku).exists()
 
     products_csv = graphene.NonNull(graphene.String)
 
-    @employee_required
+    @employee_or_admin_required
     def resolve_products_csv(self, info: CustomInfo):
         products = ProductModel.objects.all().prefetch_related("brand")
         csv_buffer = io.StringIO()
@@ -128,3 +147,47 @@ class Query(graphene.ObjectType):
             )
 
         return csv_buffer.getvalue()
+
+    products_stocks_by_office_in_date_range = non_null_list_of(
+        ProductStocksInDateRange,
+        start_date=graphene.Date(required=True),
+        end_date=graphene.Date(required=True),
+    )
+
+    @employee_or_admin_required
+    def resolve_products_stocks_by_office_in_date_range(
+        self, info: CustomInfo, start_date: str, end_date: str
+    ):
+        products_queryset = ProductModel.objects.filter(
+            type=ProductTypeChoices.ALQUILABLE
+        ).prefetch_related(
+            "stock",
+            "stock__office",
+            "rental_contract_items",
+            "rental_contract_items__rental_contract",
+            "services",
+        )
+
+        result: List[ProductStocksInDateRange]
+        result = []
+
+        for product_from_db in products_queryset:
+            result.append(
+                ProductStocksInDateRange(
+                    id=product_from_db.id,
+                    name=product_from_db.name,
+                    price=product_from_db.price,
+                    services=product_from_db.services.all(),
+                    stocks_by_office=[
+                        ProductsStocksInDateRangeStockByOffice(
+                            office=office,
+                            stock=product_from_db.get_office_available_stock_between_dates(
+                                office, start_date, end_date
+                            ),
+                        )
+                        for office in OfficeModel.objects.all()
+                    ],
+                )
+            )
+
+        return result

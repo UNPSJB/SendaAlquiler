@@ -2,7 +2,7 @@
 
 import { CreateSupplierInput } from '@/api/graphql';
 
-import { LocalityFieldValue } from '@/modules/create-forms/components/fields/LocalityField';
+import { LocalityFieldValue } from '@/modules/create-forms/components/fields/CreatableSelectLocalityField';
 
 import SupplierFormContactFields from './SupplierFormContactFields';
 import SupplierFormLocationFields from './SupplierFormLocationFields';

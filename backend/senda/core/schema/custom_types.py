@@ -30,6 +30,7 @@ from senda.core.models.rental_contracts import (
     RentalContractStatusChoices,
 )
 from senda.core.models.suppliers import SupplierModel
+from senda.core.models.admin import AdminModel
 
 from utils.graphene import non_null_list_of
 
@@ -83,6 +84,11 @@ class PaginatedProductQueryResult(PaginatedQueryResult):
 
 
 class Employee(DjangoObjectType):
+    offices = non_null_list_of(Office)
+
+    def resolve_offices(parent: EmployeeModel, info):
+        return OfficeModel.objects.filter(employees__employee=parent)
+
     class Meta:
         model = EmployeeModel
 
@@ -197,3 +203,13 @@ class SupplierOrderProduct(DjangoObjectType):
 class EmployeeOffice(DjangoObjectType):
     class Meta:
         model = EmployeeOfficeModel
+
+
+class Admin(DjangoObjectType):
+    offices = non_null_list_of(Office)
+
+    def resolve_offices(self, info):
+        return OfficeModel.objects.all()
+
+    class Meta:
+        model = AdminModel

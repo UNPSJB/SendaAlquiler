@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Control, Controller, FieldValues, Path, SubmitHandler } from 'react-hook-form';
+import { SubmitHandler } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { Props as ReactSelectProps } from 'react-select';
 import CreatableSelect from 'react-select/creatable';
@@ -84,27 +84,12 @@ export type LocalityFieldValue = {
     data: LocalityOptionProps['locality'];
 };
 
-// Define a custom SetValue type that allows setting a LocalityFieldValue
-type CustomSetValue<
-    TFieldValues extends FieldValues,
-    TName extends Path<TFieldValues>,
-> = (name: TName, value: LocalityFieldValue) => void;
+type RHFProps = {
+    onChange: (value: LocalityFieldValue | null) => void;
+    disabled?: boolean;
+};
 
-type RHFProps<TFieldValues extends FieldValues, TName extends Path<TFieldValues>> = {
-    name: TName;
-    control: Control<TFieldValues>;
-    setValue: CustomSetValue<TFieldValues, TName>;
-} & (TFieldValues[Extract<keyof TFieldValues, TName>] extends LocalityFieldValue
-    ? object
-    : never);
-
-const LocalityField = <
-    TFieldValues extends FieldValues,
-    TName extends Path<TFieldValues>,
->(
-    props: RHFProps<TFieldValues, TName>,
-) => {
-    const { name, control, setValue } = props;
+const CreatableSelectLocalityField = ({ disabled, onChange, ...props }: RHFProps) => {
     const { data, isLoading } = useAllLocalities();
 
     const [localityToCreate, setLocalityToCreate] = useState<string | null>(null);
@@ -133,7 +118,7 @@ const LocalityField = <
                     data: locality,
                 };
 
-                setValue(name, nextValue);
+                onChange(nextValue);
                 setLocalityToCreate(null);
             }
         },
@@ -168,48 +153,36 @@ const LocalityField = <
 
     return (
         <>
-            <Controller
-                name={name}
-                control={control}
-                render={({ field: { onChange, value, ref, onBlur, disabled } }) => {
+            <CreatableSelect
+                {...props}
+                onChange={(value) => {
+                    if (value) {
+                        onChange(value as LocalityFieldValue);
+                    } else {
+                        onChange(null);
+                    }
+                }}
+                classNamePrefix="react-select"
+                isDisabled={!!localityToCreate || disabled}
+                isLoading={!!localityToCreate || isLoading}
+                options={getOptions()}
+                filterOption={customFilter}
+                placeholder="Selecciona una localidad"
+                formatCreateLabel={(input) => {
                     return (
-                        <CreatableSelect<
-                            | LocalityFieldValue
-                            | {
-                                  __isNew__: boolean;
-                                  label: string;
-                                  value: string;
-                              }
-                        >
-                            ref={ref}
-                            value={value}
-                            onBlur={onBlur}
-                            onChange={onChange}
-                            name={name}
-                            classNamePrefix="react-select"
-                            isDisabled={!!localityToCreate || disabled}
-                            isLoading={!!localityToCreate || isLoading}
-                            options={getOptions()}
-                            filterOption={customFilter}
-                            placeholder="Selecciona una localidad"
-                            formatCreateLabel={(input) => {
-                                return (
-                                    <span className="font-headings">
-                                        Crea la localidad <b>&quot;{input}&quot;</b>
-                                    </span>
-                                );
-                            }}
-                            formatOptionLabel={(val) => {
-                                if ('data' in val) {
-                                    return <LocalityOption locality={val.data} />;
-                                }
-
-                                return <span>{val.label}</span>;
-                            }}
-                            onCreateOption={onCreateOption}
-                        />
+                        <span className="font-headings">
+                            Crea la localidad <b>&quot;{input}&quot;</b>
+                        </span>
                     );
                 }}
+                formatOptionLabel={(val) => {
+                    if ('data' in val) {
+                        return <LocalityOption locality={val.data} />;
+                    }
+
+                    return <span>{val.label}</span>;
+                }}
+                onCreateOption={onCreateOption}
             />
 
             <ModalWithBox
@@ -230,4 +203,4 @@ const LocalityField = <
     );
 };
 
-export default LocalityField;
+export default CreatableSelectLocalityField;

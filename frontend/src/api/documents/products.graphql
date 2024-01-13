@@ -91,3 +91,23 @@ query allProducts {
 query productExists($sku: String!) {
     productExists(sku: $sku)
 }
+
+query productsStocksByOfficeInDateRange($startDate: Date!, $endDate: Date!) {
+    productsStocksByOfficeInDateRange(startDate: $startDate, endDate: $endDate) {
+        id
+        name
+        price
+        services {
+            id
+            name
+            price
+        }
+        stocksByOffice {
+            office {
+                id
+                name
+            }
+            stock
+        }
+    }
+}

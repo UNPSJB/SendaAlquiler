@@ -18,7 +18,7 @@ import DashboardLayout, {
 } from '@/modules/dashboard/DashboardLayout';
 import DataTable from '@/modules/data-table/DataTable';
 import DataTablePagination from '@/modules/data-table/DataTablePagination';
-import { Input } from '@/modules/forms/Input';
+import { Input } from '@/modules/forms/DeprecatedInput';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';

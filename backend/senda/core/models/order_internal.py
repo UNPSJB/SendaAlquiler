@@ -39,6 +39,14 @@ class InternalOrderModel(TimeStampedModel):
         related_name="internal_orders_destination",
     )
 
+    rental_contract_item_office_order = models.OneToOneField(
+        "RentalContractItemOfficeOrderModel",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="internal_order",
+    )
+
     current_history = models.OneToOneField(
         "InternalOrderHistoryModel",
         on_delete=models.SET_NULL,

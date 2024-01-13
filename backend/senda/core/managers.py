@@ -1,7 +1,9 @@
-from decimal import Decimal, InvalidOperation
 from typing import TYPE_CHECKING, Any, List, Optional, TypedDict
 
 from django.db import models, transaction
+
+from extensions.db.models import TimeStampedModel
+
 
 if TYPE_CHECKING:
     from senda.core.models.clients import ClientModel
@@ -238,18 +240,6 @@ ProductSupplierDict = TypedDict(
 ProductServiceDict = TypedDict("ProductServiceDict", {"name": str, "price": str})
 
 
-def parse_price(price_str: str) -> Decimal:
-    """
-    Parses a price string into a Decimal object, handling different formatting conventions.
-    """
-
-    standard_format_str = price_str.replace(".", "").replace(",", ".")
-    try:
-        return Decimal(standard_format_str)
-    except InvalidOperation:
-        raise ValueError(f"The price {price_str} is not a valid number format")
-
-
 class ProductModelManager(models.Manager["ProductModel"]):
     """
     Custom manager for the ProductModel, providing methods to create product instances with associated details.
@@ -279,7 +269,7 @@ class ProductModelManager(models.Manager["ProductModel"]):
             brand_id=brand_id,
             description=description,
             type=type,
-            price=parse_price(price),
+            price=price,
         )
 
         for stock_data in stock:
@@ -291,13 +281,13 @@ class ProductModelManager(models.Manager["ProductModel"]):
         for service_data in services:
             product.services.create(
                 name=service_data["name"],
-                price=parse_price(service_data["price"]),
+                price=service_data["price"],
             )
 
         for supplier_data in suppliers:
             product.suppliers.create(
                 supplier_id=supplier_data["supplier_id"],
-                price=parse_price(supplier_data["price"]),
+                price=supplier_data["price"],
             )
 
         return product
@@ -327,7 +317,8 @@ class ProductStockInOfficeManager(models.Manager["ProductStockInOfficeModel"]):
 
 
 PurchaseProductsItemDict = TypedDict(
-    "PurchaseProductsItemDict", {"product": str, "quantity": int}
+    "PurchaseProductsItemDict",
+    {"product": str, "quantity": int, "total": int, "discount": int},
 )
 
 
@@ -353,16 +344,25 @@ class PurchaseModelManager(models.Manager["PurchaseModel"]):
             purchase.purchase_items.create(
                 quantity=product["quantity"],
                 product_id=product["product"],
+                total=product["total"],
+                discount=product["discount"],
             )
-
-        purchase.recalculate_total()
 
         return purchase
 
 
+RentalContractProductsItemOfficeDict = TypedDict(
+    "RentalContractProductsItemOfficeDict",
+    {"quantity": int, "office_id": str},
+)
+
 RentalContractProductsItemDict = TypedDict(
     "RentalContractProductsItemDict",
-    {"id": str, "quantity": int, "service": Optional[str]},
+    {
+        "id": str,
+        "service": Optional[str],
+        "offices_orders": List[RentalContractProductsItemOfficeDict],
+    },
 )
 
 
@@ -374,6 +374,7 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
     @transaction.atomic
     def create_rental_contract(
         self,
+        created_by: "UserModel",
         client: "ClientModel",
         products: List[RentalContractProductsItemDict],
         office: str,
@@ -389,6 +390,8 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
         """
         from senda.core.models.rental_contracts import RentalContractStatusChoices
 
+        number_of_rental_days = (contract_end_datetime - contract_start_datetime).days
+
         rental_contract = self.create(
             client=client,
             office_id=office,
@@ -398,14 +401,21 @@ class RentalContractManager(models.Manager["RentalContractModel"]):
             house_unit=house_unit,
             contract_start_datetime=contract_start_datetime,
             contract_end_datetime=contract_end_datetime,
+            created_by=created_by,
+            number_of_rental_days=number_of_rental_days,
         )
 
         for product in products:
-            rental_contract.rental_contract_items.create(
+            rental_contract_item = rental_contract.rental_contract_items.create(
                 product_id=product["id"],
                 service_id=product["service"],
-                quantity=product["quantity"],
             )
+
+            for office_order in product["offices_orders"]:
+                rental_contract_item.offices_orders.create(
+                    office_id=office_order["office_id"],
+                    quantity=office_order["quantity"],
+                )
 
         rental_contract.rental_contract_history.create(
             status=RentalContractStatusChoices.PRESUPUESTADO,

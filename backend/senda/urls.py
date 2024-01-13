@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from django.views.decorators.csrf import csrf_exempt
 from graphene_django.views import GraphQLView
+from senda.core import urls as core_urls
 
 
 enable_graphiql = settings.ENVIRONMENT != "production"
@@ -15,6 +16,7 @@ urlpatterns = [
         r"^graphql/?$",
         csrf_exempt(GraphQLView.as_view(graphiql=enable_graphiql)),
     ),
+    path("api/", include(core_urls)),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.ENVIRONMENT != "production":

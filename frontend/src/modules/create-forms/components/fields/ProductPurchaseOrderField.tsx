@@ -10,8 +10,8 @@ import Label from '@/modules/forms/Label';
 import Button, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 
+import { Input } from '../../../forms/DeprecatedInput';
 import { FormField } from '../../../forms/FormField';
-import { Input } from '../../../forms/Input';
 import { CustomSelect } from '../../../forms/Select';
 
 type ProductDetails = ProductsQuery['products']['results'][0];
@@ -103,7 +103,7 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
                     {orderedProducts.map((item, index) => {
                         let subtotal = null;
                         if (item.product && item.quantity) {
-                            subtotal = item.product.data.price * item.quantity;
+                            subtotal = (item.product.data.price || 0) * item.quantity;
                         }
 
                         return (

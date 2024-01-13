@@ -28,6 +28,7 @@ from .models.rental_contracts import (
     RentalContractModel,
 )
 from .models.suppliers import SupplierModel
+from .models.admin import AdminModel
 
 
 @admin.register(BrandModel)
@@ -150,4 +151,9 @@ class InternalOrderHistoryModelAdmin(admin.ModelAdmin[InternalOrderHistoryModel]
 
 @admin.register(InternalOrderProductModel)
 class InternalOrderProductModelAdmin(admin.ModelAdmin[InternalOrderProductModel]):
+    pass
+
+
+@admin.register(AdminModel)
+class AdminModelAdmin(admin.ModelAdmin[AdminModel]):
     pass

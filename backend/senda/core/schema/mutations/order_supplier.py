@@ -13,7 +13,7 @@ from senda.core.schema.custom_types import OrderSupplier
 from senda.core.models.suppliers import SupplierModel
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class ErrorMessages:
@@ -61,7 +61,7 @@ class CreateSupplierOrder(graphene.Mutation):
     class Arguments:
         data = CreateSupplierOrderInput(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, data: CreateSupplierOrderInput):
         data_dict = input_object_type_to_dict(data)
 
@@ -162,7 +162,7 @@ class DeleteSupplierOrder(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, id: str):
         try:
             order_supplier = SupplierOrderModel.objects.get(id=id)

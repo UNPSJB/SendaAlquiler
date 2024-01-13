@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            max-width: 800px;
+            margin: auto;
+        }
+        .invoice-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .invoice-details, .client-details {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .total-amount {
+            text-align: right;
+            font-size: 20px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="invoice-title">Presupuesto</h1>
+    <div class="invoice-details">
+        <strong>Fecha:</strong> {{ invoice.date }}
+    </div>
+    <div class="client-details">
+        <strong>Cliente:</strong> {{ client.name }}<br>
+        <strong>Dirección:</strong> {{ client.address }}
+    </div>
+    <table>
+        <tr>
+            <th>Descripción</th>
+            <th>Cantidad</th>
+            <th>Precio</th>
+            <th>Descuento</th>
+            <th>Total</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.name }}</td>
+            <td>{{ item.units }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.discount }}</td>
+            <td>{{ item.total }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="total-amount">
+        <strong>Total:</strong> {{ total_amount }}
+    </div>
+</body>
+</html>

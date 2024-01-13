@@ -22,6 +22,7 @@ import {
     UpdateClientMutation,
     UpdateClientMutationVariables,
     UpdateClientDocument,
+    AllClientsQueryVariables,
 } from '../graphql';
 
 export const useDeleteClient = ({
@@ -111,10 +112,21 @@ export const useCreateClient = ({
     );
 };
 
-export const useAllClients = () => {
-    return useQuery(queryKeys.clientsNonPaginated, () => {
-        return fetchClient(AllClientsDocument, {});
-    });
+export const useAllClients = (props?: AllClientsQueryVariables) => {
+    const query = typeof props?.query === 'string' ? props.query : null;
+    const variables = props || {
+        query,
+    };
+
+    return useQuery(
+        queryKeys.clientsNonPaginated(variables),
+        () => {
+            return fetchClient(AllClientsDocument, variables);
+        },
+        {
+            enabled: query === null ? true : query.length >= 3,
+        },
+    );
 };
 
 export const useClients = () => {

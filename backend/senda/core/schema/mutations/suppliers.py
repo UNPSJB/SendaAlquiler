@@ -7,7 +7,7 @@ from senda.core.models.suppliers import SupplierModel, LocalityModel
 from senda.core.schema.custom_types import Supplier
 from utils.graphene import input_object_type_to_dict
 
-from senda.core.decorators import employee_required, CustomInfo
+from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 
@@ -60,7 +60,7 @@ class CreateSupplier(graphene.Mutation):
     class Arguments:
         data = CreateSupplierInput(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, data: CreateSupplierInput) -> "CreateSupplier":
         data_dict = input_object_type_to_dict(data)
 
@@ -87,7 +87,7 @@ class DeleteSupplier(graphene.Mutation):
     class Arguments:
         id = graphene.ID(required=True)
 
-    @employee_required
+    @employee_or_admin_required
     def mutate(self, info: CustomInfo, id: str):
         try:
             supplier = SupplierModel.objects.get(id=id)

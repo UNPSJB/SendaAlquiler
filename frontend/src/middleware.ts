@@ -45,8 +45,9 @@ export default withAuth(
         }
 
         const user = token?.user;
-        const isEmployee = !!user?.employee?.offices;
-        const userExists = !token?.error && isEmployee;
+        const isEmployee = !!user?.employee;
+        const isAdmin = !!user?.admin;
+        const userExists = !token?.error && (isEmployee || isAdmin);
 
         if (!token || !userExists) {
             if (!isGuestRoute) {

@@ -1,8 +1,16 @@
 import { useFormContext } from 'react-hook-form';
 
-import LocalityField from '@/modules/create-forms/components/fields/LocalityField';
+import CreatableSelectLocalityField from '@/modules/create-forms/components/fields/CreatableSelectLocalityField';
+import Input from '@/modules/forms/DeprecatedInput';
 import { RHFFormField } from '@/modules/forms/FormField';
-import Input from '@/modules/forms/Input';
+
+import {
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form';
 
 import { CreateOrUpdateClientFormValues } from '.';
 
@@ -10,14 +18,28 @@ const ClientLocationFormFields: React.FC = () => {
     const {
         formState: { errors },
         control,
-        setValue,
     } = useFormContext<CreateOrUpdateClientFormValues>();
 
     return (
         <>
-            <RHFFormField fieldID="locality" label="Localidad" showRequired>
-                <LocalityField name="locality" control={control} setValue={setValue} />
-            </RHFFormField>
+            <FormField
+                name="locality"
+                control={control}
+                rules={{
+                    required: true,
+                }}
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel required>Localidad</FormLabel>
+
+                        <FormControl>
+                            <CreatableSelectLocalityField {...field} />
+                        </FormControl>
+
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
 
             <div className="flex space-x-4">
                 <RHFFormField

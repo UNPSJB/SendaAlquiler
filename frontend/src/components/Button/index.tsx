@@ -61,6 +61,7 @@ const Button: React.FC<Props> = forwardRef<HTMLButtonElement | HTMLAnchorElement
             nativeAnchor,
             children,
             type = 'button',
+            disabled,
             className: extraClassName,
             ...rest
         } = props;
@@ -117,6 +118,7 @@ const Button: React.FC<Props> = forwardRef<HTMLButtonElement | HTMLAnchorElement
         // Button element for actions
         return (
             <button
+                disabled={disabled}
                 ref={ref as React.Ref<HTMLButtonElement>}
                 className={className}
                 type={type}

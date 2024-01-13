@@ -1,3 +1,5 @@
+import { AllClientsQueryVariables } from '../graphql';
+
 export const queryDomains = {
     clients: 'clients',
     employees: 'employees',
@@ -21,7 +23,12 @@ const buildDetailKey = (domain: string) => (key?: any) =>
     typeof key !== 'undefined' ? [domain, 'detail', key] : [domain, 'detail'];
 
 export const queryKeys = {
-    clientsNonPaginated: [queryDomains.clients, 'list', 'non-paginated'],
+    clientsNonPaginated: (variables: AllClientsQueryVariables) => [
+        queryDomains.clients,
+        'list',
+        'non-paginated',
+        variables,
+    ],
     clientsPaginatedList: buildPaginatedListkey(queryDomains.clients),
     clientDetailsById: buildDetailKey(queryDomains.clients),
 
@@ -71,6 +78,14 @@ export const queryKeys = {
     productsNonPaginated: [queryDomains.products, 'list', 'non-paginated'],
     productsPaginatedList: buildPaginatedListkey(queryDomains.products),
     productDetailsById: buildDetailKey(queryDomains.products),
-
+    productsStocksByOfficeInDateRange: (options: {
+        startDate: string | undefined;
+        endDate: string | undefined;
+    }) => [
+        queryDomains.products,
+        'list',
+        'with-number-of-available-stocks-between-dates',
+        options,
+    ],
     productsStocksByOfficeId: (id: string) => ['products-stocks-by-office-id', id],
 };

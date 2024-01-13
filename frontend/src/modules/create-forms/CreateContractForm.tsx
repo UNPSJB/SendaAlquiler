@@ -6,30 +6,41 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import dayjs from 'dayjs';
 import { useEffect } from 'react';
 import {
-    FormProvider,
     SubmitErrorHandler,
     SubmitHandler,
     useForm,
+    useFormState,
 } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
+import { CreateRentalContractInput } from '@/api/graphql';
 import { useAllClients, useCreateRentalContract } from '@/api/hooks';
 
-import ClientField, { ClientFieldValue } from './components/fields/ClientField';
-import LocalityField, { LocalityFieldValue } from './components/fields/LocalityField';
-import RHFProductOrderField, {
-    ProductQuantityAndService,
-} from './components/fields/ProductOrderField';
+import { ComboboxClients, ComboboxClientsProps } from './ComboboxClients';
+import {
+    ContractProductsField,
+    ContractProductsFieldFormValues,
+} from './components/fields/ContractProductsField';
+import CreatableSelectLocalityField, {
+    LocalityFieldValue,
+} from './components/fields/CreatableSelectLocalityField';
 
 import Button, { ButtonVariant } from '@/components/Button';
 import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
+import { DateTimePickerDemo } from '@/components/ui/date-time-picker-demo';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
-import { RHFCustomFlatpickr } from '../forms/Flatpickr';
-import { RHFFormField } from '../forms/FormField';
-import RHFInput, { Input } from '../forms/Input';
 import Label from '../forms/Label';
 
 type CreateContractFormProps = {
@@ -37,7 +48,7 @@ type CreateContractFormProps = {
 };
 
 type FormValues = {
-    client: ClientFieldValue;
+    client: ComboboxClientsProps['value'];
     billing: {
         firstName: string;
         lastName: string;
@@ -59,10 +70,9 @@ type FormValues = {
         houseUnit: string | null;
         note?: string;
     };
-    productsAndQuantity: ProductQuantityAndService[];
-    contractStartDatetime: Date[];
-    contractEndDatetime: Date[];
-};
+    contractStartDatetime: Date;
+    contractEndDatetime: Date;
+} & ContractProductsFieldFormValues;
 
 const getMinimumDatetimeValues = (startDatetime: Date | null) => {
     const tommorow = dayjs()
@@ -116,7 +126,10 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
 
     const queryResult = useAllClients();
     const formMethods = useForm<FormValues>();
-    const { watch, control, setValue } = formMethods;
+    const { isValid: formIsValid } = useFormState({
+        control: formMethods.control,
+    });
+    const { watch, setValue } = formMethods;
     const router = useRouter();
 
     const { mutate, isLoading: isMutating } = useCreateRentalContract({
@@ -137,20 +150,19 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
         },
     });
 
-    const client = watch('client')?.data;
-
+    const client = watch('client');
     const startDatetimeWatch = watch('contractStartDatetime');
     const endDatetimeWatch = watch('contractEndDatetime');
 
     const startDatetimeValue =
-        startDatetimeWatch && startDatetimeWatch.length ? startDatetimeWatch[0] : null;
+        startDatetimeWatch && startDatetimeWatch ? startDatetimeWatch : null;
     const endDatetimeValue =
-        endDatetimeWatch && endDatetimeWatch.length ? endDatetimeWatch[0] : null;
+        endDatetimeWatch && endDatetimeWatch ? endDatetimeWatch : null;
 
     const { minDateForContractStartDatetime, minDateForContractEndDatetime } =
         getMinimumDatetimeValues(startDatetimeValue);
 
-    const productsAndQuantity = watch('productsAndQuantity');
+    const productsOrders = watch('productsOrders');
 
     const numberOfRentalDays = calculateNumberOfRentalDays(
         startDatetimeValue,
@@ -159,25 +171,9 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
 
     const subtotal = !numberOfRentalDays
         ? 0
-        : productsAndQuantity?.reduce((acc, current) => {
-              const product = current.product?.data;
-              const service = current.service?.data;
-              const quantity = current.quantity;
-
-              let next = acc;
-
-              if (quantity) {
-                  if (product) {
-                      next += product.price * quantity;
-                  }
-
-                  if (service) {
-                      next += service.price * quantity;
-                  }
-              }
-
-              return next;
-          }, 0) * numberOfRentalDays;
+        : productsOrders?.reduce((acc, current) => {
+              return acc + (current.subtotal || 0);
+          }, 0);
 
     const copyClientDetailsOnDetails = () => {
         if (client) {
@@ -195,22 +191,44 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
         }
     };
 
-    const formIsValid = formMethods.formState.isValid;
-
     const onSubmit: SubmitHandler<FormValues> = (data) => {
-        const clientId = data.client?.data.id;
-        const contractStartDatetime = data.contractStartDatetime[0];
-        const contractEndDatetime = data.contractEndDatetime[0];
+        const clientId = data.client?.id;
+        const contractStartDatetime = data.contractStartDatetime;
+        const contractEndDatetime = data.contractEndDatetime;
         const houseNumber = data.details.houseNumber;
         const houseUnit = data.details.houseUnit;
         const localityId = data.details.locality?.data.id;
-        const products = data.productsAndQuantity
-            ? data.productsAndQuantity.map((productAndQuantity) => ({
-                  id: productAndQuantity.product?.data.id as string,
-                  quantity: productAndQuantity.quantity as number,
-                  service: productAndQuantity.service?.value.toString() || null,
-              }))
-            : null;
+
+        const products: CreateRentalContractInput['products'] = [];
+        for (const productAndQuantity of data.productsOrders || []) {
+            const productId = productAndQuantity.product?.data.id;
+            const officesOrders = [];
+
+            if (!productId) continue;
+
+            if (productAndQuantity.quantityByOffice) {
+                const officesIds = Object.keys(productAndQuantity.quantityByOffice);
+
+                for (const officeId of officesIds) {
+                    const quantity = productAndQuantity.quantityByOffice[officeId];
+                    if (!quantity) continue;
+
+                    officesOrders.push({
+                        officeId: officeId,
+                        quantity: quantity,
+                    });
+                }
+            }
+
+            const service = productAndQuantity.service?.value || null;
+
+            products.push({
+                id: productId,
+                officesOrders: officesOrders,
+                service: service,
+                discount: productAndQuantity.discount || 0,
+            });
+        }
         const streetName = data.details.streetName;
 
         if (
@@ -249,13 +267,12 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
 
         const matchingClient = data.allClients.find((client) => client.id === clientId);
         if (matchingClient) {
-            setValue('client', {
-                value: matchingClient.id,
-                label: matchingClient.firstName + ' ' + matchingClient.lastName,
-                data: matchingClient,
-            });
+            setValue('client', matchingClient);
         }
     }, [clientId, setValue, queryResult.data]);
+
+    console.log('formIsValid', formIsValid);
+    console.log('formIsValid', formMethods.formState.errors);
 
     return (
         <>
@@ -288,8 +305,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                             <ButtonWithSpinner
                                 onClick={formMethods.handleSubmit(onSubmit, onError)}
                                 variant={ButtonVariant.BLACK}
-                                href={cancelHref}
-                                disabled={formIsValid}
+                                // disabled={!formIsValid}
                                 isLoading={isMutating}
                             >
                                 Guardar
@@ -318,7 +334,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                 }
             >
                 {() => (
-                    <FormProvider {...formMethods}>
+                    <Form {...formMethods}>
                         <main className="container pb-16 pt-36">
                             <section className="flex pb-8">
                                 <div className="w-3/12">
@@ -328,31 +344,24 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                 </div>
 
                                 <div className="w-9/12 space-y-6">
-                                    <RHFFormField label="Cliente" fieldID="client">
-                                        <ClientField<FormValues, 'client'>
-                                            // placeholder="Selecciona un cliente"
-                                            name="client"
-                                            control={control}
-                                            setValue={formMethods.setValue}
-                                            // rules={{ required: true }}
-                                            // options={clients
-                                            //     .sort((a, b) => {
-                                            //         return (
-                                            //             a.firstName.localeCompare(
-                                            //                 b.firstName,
-                                            //             ) ||
-                                            //             a.lastName.localeCompare(
-                                            //                 b.lastName,
-                                            //             )
-                                            //         );
-                                            //     })
-                                            //     .map((client) => ({
-                                            //         label: `${client.firstName} ${client.lastName}`,
-                                            //         value: client.id,
-                                            //         data: client,
-                                            //     }))}
-                                        />
-                                    </RHFFormField>
+                                    <FormField
+                                        control={formMethods.control}
+                                        name="client"
+                                        rules={{
+                                            required: 'El cliente es requerido',
+                                        }}
+                                        render={({ field }) => (
+                                            <FormItem className="flex flex-col">
+                                                <FormLabel required>Cliente</FormLabel>
+
+                                                <FormControl>
+                                                    <ComboboxClients {...field} />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
                                     <div className="flex space-x-8">
                                         <div className="w-1/2">
@@ -362,6 +371,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                 readOnly
                                             >
                                                 <Input
+                                                    className="bg-muted text-muted-foreground"
                                                     id="client.firstName"
                                                     name="client.firstName"
                                                     type="text"
@@ -379,6 +389,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                 readOnly
                                             >
                                                 <Input
+                                                    className="bg-muted text-muted-foreground"
                                                     id="client.lastName"
                                                     name="client.lastName"
                                                     type="text"
@@ -398,6 +409,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                 readOnly
                                             >
                                                 <Input
+                                                    className="bg-muted text-muted-foreground"
                                                     id="client.phone"
                                                     name="client.phone"
                                                     type="text"
@@ -419,6 +431,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                 readOnly
                                             >
                                                 <Input
+                                                    className="bg-muted text-muted-foreground"
                                                     id="client.email"
                                                     name="client.email"
                                                     type="text"
@@ -432,6 +445,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
 
                                     <Label label="DNI" htmlFor="client.dni" readOnly>
                                         <Input
+                                            className="bg-muted text-muted-foreground"
                                             id="client.dni"
                                             name="client.dni"
                                             type="text"
@@ -447,6 +461,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         readOnly
                                     >
                                         <Input
+                                            className="bg-muted text-muted-foreground"
                                             id="client.state"
                                             name="client.state"
                                             type="text"
@@ -464,6 +479,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                 readOnly
                                             >
                                                 <Input
+                                                    className="bg-muted text-muted-foreground"
                                                     id="client.locality"
                                                     name="client.locality"
                                                     type="text"
@@ -481,6 +497,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                 readOnly
                                             >
                                                 <Input
+                                                    className="bg-muted text-muted-foreground"
                                                     id="client.postalCode"
                                                     name="client.postalCode"
                                                     type="text"
@@ -502,6 +519,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                 readOnly
                                             >
                                                 <Input
+                                                    className="bg-muted text-muted-foreground"
                                                     id="client.streetName"
                                                     name="client.streetName"
                                                     type="text"
@@ -519,6 +537,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                                 readOnly
                                             >
                                                 <Input
+                                                    className="bg-muted text-muted-foreground"
                                                     id="client.houseNumber"
                                                     name="client.houseNumber"
                                                     type="text"
@@ -536,6 +555,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         readOnly
                                     >
                                         <Input
+                                            className="bg-muted text-muted-foreground"
                                             id="client.houseUnit"
                                             name="client.houseUnit"
                                             type="text"
@@ -551,6 +571,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         readOnly
                                     >
                                         <Input
+                                            className="bg-muted text-muted-foreground"
                                             id="client.note"
                                             name="client.note"
                                             type="text"
@@ -578,112 +599,177 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                 </div>
 
                                 <div className="w-9/12 space-y-6">
-                                    <RHFFormField
-                                        label="Fecha y hora de inicio"
-                                        fieldID="contractStartDatetime"
-                                    >
-                                        <RHFCustomFlatpickr
-                                            data-enable-time
-                                            name="contractStartDatetime"
-                                            control={control}
-                                            rules={{ required: true }}
-                                            placeholder="Fecha y hora de inicio"
-                                            options={{
-                                                minDate: minDateForContractStartDatetime,
-                                            }}
-                                        />
-                                    </RHFFormField>
+                                    <FormField
+                                        rules={{
+                                            required: 'La localidad es requerida',
+                                        }}
+                                        control={formMethods.control}
+                                        name="details.locality"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel required>Localidad</FormLabel>
 
-                                    <RHFFormField
-                                        label="Fecha y hora de finalización"
-                                        fieldID="contractEndDatetime"
-                                    >
-                                        <RHFCustomFlatpickr
-                                            data-enable-time
-                                            name="contractEndDatetime"
-                                            control={control}
-                                            rules={{ required: true }}
-                                            placeholder="Fecha y hora de finalización"
-                                            options={{
-                                                minDate: minDateForContractEndDatetime,
-                                            }}
-                                        />
-                                    </RHFFormField>
+                                                <FormControl>
+                                                    <CreatableSelectLocalityField
+                                                        {...field}
+                                                    />
+                                                </FormControl>
 
-                                    <RHFFormField
-                                        label="Localidad"
-                                        fieldID="details.locality"
-                                    >
-                                        <LocalityField
-                                            name="details.locality"
-                                            control={control}
-                                            setValue={setValue}
-                                        />
-                                    </RHFFormField>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
 
                                     <div className="flex space-x-8">
                                         <div className="w-1/2">
-                                            <RHFFormField
-                                                label="Calle"
-                                                fieldID="details.streetName"
-                                            >
-                                                <RHFInput
-                                                    id="details.streetName"
-                                                    name="details.streetName"
-                                                    type="text"
-                                                    placeholder="Calle"
-                                                    control={control}
-                                                    rules={{
-                                                        required: true,
-                                                    }}
-                                                />
-                                            </RHFFormField>
+                                            <FormField
+                                                name="details.streetName"
+                                                rules={{
+                                                    required: 'La calle es requerida',
+                                                }}
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel required>
+                                                            Calle
+                                                        </FormLabel>
+
+                                                        <FormControl>
+                                                            <Input
+                                                                {...field}
+                                                                placeholder="Calle"
+                                                            />
+                                                        </FormControl>
+
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
                                         </div>
 
                                         <div className="w-1/2">
-                                            <RHFFormField
-                                                label="N° de casa"
-                                                fieldID="details.houseNumber"
-                                            >
-                                                <RHFInput
-                                                    id="details.houseNumber"
-                                                    name="details.houseNumber"
-                                                    type="text"
-                                                    placeholder="N° de casa"
-                                                    control={control}
-                                                    rules={{
-                                                        required: true,
-                                                    }}
-                                                />
-                                            </RHFFormField>
+                                            <FormField
+                                                name="details.houseNumber"
+                                                rules={{
+                                                    required:
+                                                        'El número de casa es requerido',
+                                                }}
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel required>
+                                                            N° de casa
+                                                        </FormLabel>
+
+                                                        <FormControl>
+                                                            <Input
+                                                                {...field}
+                                                                placeholder="N° de casa"
+                                                            />
+                                                        </FormControl>
+
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
                                         </div>
                                     </div>
 
-                                    <RHFFormField
-                                        label="Apartamento, habitación, unidad, etc"
-                                        fieldID="details.houseUnit"
-                                    >
-                                        <RHFInput
-                                            id="details.houseUnit"
-                                            name="details.houseUnit"
-                                            type="text"
-                                            placeholder="Apartamento, habitación, unidad, etc"
-                                            control={control}
-                                        />
-                                    </RHFFormField>
+                                    <FormField
+                                        name="details.houseUnit"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Apartamento, habitación, unidad, etc
+                                                </FormLabel>
 
-                                    <RHFFormField
-                                        label="Nota/Aclaración"
-                                        fieldID="details.note"
-                                    >
-                                        <RHFInput
-                                            id="details.note"
-                                            name="details.note"
-                                            type="text"
-                                            placeholder="Nota/aclaración"
-                                            control={control}
+                                                <FormControl>
+                                                    <Input
+                                                        {...field}
+                                                        placeholder="Apartamento, habitación, unidad, etc"
+                                                    />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        name="details.note"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Nota/Aclaración</FormLabel>
+
+                                                <FormControl>
+                                                    <Input
+                                                        {...field}
+                                                        placeholder="Nota/aclaración"
+                                                    />
+                                                </FormControl>
+
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <div className="flex space-x-8">
+                                        <FormField
+                                            name="contractStartDatetime"
+                                            rules={{
+                                                required:
+                                                    'La fecha de inicio es requerida',
+                                            }}
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col">
+                                                    <FormLabel required>
+                                                        Fecha y hora de inicio
+                                                    </FormLabel>
+
+                                                    <FormControl>
+                                                        <DateTimePickerDemo
+                                                            onChange={(date) => {
+                                                                field.onChange(date);
+                                                            }}
+                                                            value={field.value}
+                                                            fromDate={
+                                                                minDateForContractStartDatetime
+                                                            }
+                                                        />
+                                                    </FormControl>
+
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
                                         />
-                                    </RHFFormField>
+
+                                        <FormField
+                                            name="contractEndDatetime"
+                                            rules={{
+                                                required:
+                                                    'La fecha de finalización es requerida',
+                                            }}
+                                            render={({ field }) => (
+                                                <FormItem className="flex flex-col">
+                                                    <FormLabel required>
+                                                        Fecha y hora de finalización
+                                                    </FormLabel>
+
+                                                    <FormControl>
+                                                        <DateTimePickerDemo
+                                                            onChange={(date) => {
+                                                                field.onChange(date);
+                                                            }}
+                                                            value={field.value}
+                                                            fromDate={
+                                                                minDateForContractEndDatetime
+                                                            }
+                                                        />
+                                                    </FormControl>
+
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
                                 </div>
                             </section>
 
@@ -693,14 +779,28 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                 </h2>
 
                                 <div className="w-9/12 space-y-6">
-                                    <RHFProductOrderField<
-                                        FormValues,
-                                        'productsAndQuantity'
-                                    >
-                                        control={control}
-                                        name="productsAndQuantity"
-                                        numberOfRentalDays={numberOfRentalDays}
-                                    />
+                                    {startDatetimeValue && endDatetimeValue ? (
+                                        <ContractProductsField
+                                            numberOfRentalDays={numberOfRentalDays}
+                                            startDate={dayjs(startDatetimeValue).format(
+                                                'YYYY-MM-DD',
+                                            )}
+                                            endDate={dayjs(endDatetimeValue).format(
+                                                'YYYY-MM-DD',
+                                            )}
+                                            formMethods={{
+                                                control: formMethods.control,
+                                                setValue: formMethods.setValue,
+                                                watch: formMethods.watch,
+                                                getValues: formMethods.getValues,
+                                            }}
+                                        />
+                                    ) : (
+                                        <p>
+                                            Selecciona una fecha de inicio y fin para ver
+                                            los productos disponibles
+                                        </p>
+                                    )}
                                 </div>
                             </section>
 
@@ -723,7 +823,7 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                 </div>
                             </div>
                         </main>
-                    </FormProvider>
+                    </Form>
                 )}
             </FetchedDataRenderer>
         </>

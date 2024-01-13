@@ -6,6 +6,7 @@ import random
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "your_project.settings")
 django.setup()
 
+from senda.core.models.admin import AdminModel
 from senda.core.models.clients import ClientModel
 from senda.core.models.employees import EmployeeModel, EmployeeOfficeModel
 from senda.core.models.localities import LocalityModel, StateChoices
@@ -419,7 +420,7 @@ def create_alquilable_products():
         ProductStockInOfficeModel.objects.create(
             product=product,
             office=office,
-            stock=random.randint(1, 100),
+            stock=random.randint(3, 100),
         )
 
     # Create random suppliers
@@ -471,14 +472,24 @@ def create_alquilable_products():
     )
 
 
+from datetime import datetime
+
+
 def create_purchases():
     for _ in range(515):
         purchase = PurchaseModel.objects.create(
             client=ClientModel.objects.order_by("?").first(),
             office=OfficeModel.objects.order_by("?").first(),
+            total=0,
         )
 
-        purchase.created_on = fake.date_between(start_date="-1y", end_date="today")
+        date = fake.date_between(start_date="-1y", end_date="today")
+        datetime_object = datetime.combine(date, datetime.min.time())
+
+        purchase.created_on = timezone.make_aware(
+            datetime_object,
+            timezone.get_current_timezone(),
+        )
         purchase.save()
 
         # create random purchase items
@@ -491,6 +502,8 @@ def create_purchases():
         products_to_buy = products_to_buy[: random.randint(1, products_to_buy.count())]
         for product in products_to_buy:
             data = product.get_stock_for_office(purchase.office)
+            if data.stock == 0:
+                continue
             quantity = random.randint(1, data.stock)
 
             PurchaseItemModel.objects.create(
@@ -528,6 +541,7 @@ def create_supplier_orders():
         order = SupplierOrderModel.objects.create(
             supplier=SupplierModel.objects.order_by("?").first(),
             office_destination=OfficeModel.objects.order_by("?").first(),
+            total=0,
         )
 
         # create random supplier order items
@@ -544,9 +558,24 @@ def create_supplier_orders():
             status=SupplierOrderHistoryStatusChoices.PENDING,
         )
 
+        order.total = order.calculate_total()
+
+
+# make fake time between start_date and end_date timezone aware
+from django.utils import timezone
+
 
 def create_contracts():
     for _ in range(10):
+        start = timezone.make_aware(
+            fake.date_time_between(start_date="-1y", end_date="now"),
+            timezone.get_current_timezone(),
+        )
+        end = timezone.make_aware(
+            fake.date_time_between(start_date="now", end_date="now"),
+            timezone.get_current_timezone(),
+        )
+
         contract = RentalContractModel.objects.create(
             client=ClientModel.objects.order_by("?").first(),
             office=OfficeModel.objects.order_by("?").first(),
@@ -554,12 +583,10 @@ def create_contracts():
             street_name=fake.street_name(),
             house_unit=random.choice([str(fake.random_int(min=1, max=100)), ""]),
             locality=LocalityModel.objects.order_by("?").first(),
-            contract_start_datetime=fake.date_time_between(
-                start_date="-1y", end_date="now"
-            ),
-            contract_end_datetime=fake.date_time_between(
-                start_date="now", end_date="now"
-            ),
+            contract_start_datetime=start,
+            contract_end_datetime=end,
+            number_of_rental_days=(end - start).days,
+            created_by=EmployeeModel.objects.order_by("?").first().user,
         )
 
         # create random rental contract items
@@ -567,10 +594,21 @@ def create_contracts():
             type=ProductTypeChoices.ALQUILABLE
         ).order_by("?")[: random.randint(1, 10)]
         for product in products_to_rent:
+            service = (
+                ProductServiceModel.objects.filter(product=product)
+                .order_by("?")
+                .first()
+            )
+            add_service = random.randint(1, 2) == 1
+            print(f"service: {service if add_service else None}")
+            print(f"product: {product}")
+
             RentalContractItemModel.objects.create(
+                service=service if add_service else None,
                 product=product,
-                rental_contract=RentalContractModel.objects.order_by("?").first(),
+                rental_contract=contract,
                 quantity=random.randint(1, 10),
+                discount=random.randint(0, product.price),
             )
 
         RentalContractHistoryModel.objects.create(
@@ -580,6 +618,14 @@ def create_contracts():
 
 @transaction.atomic
 def create_fixture_data():
+    admin_user = UserModel.objects.create_superuser(
+        email="admin@admin.com",
+        password="admin",
+        first_name="Admin",
+        last_name="Admin",
+    )
+    AdminModel.objects.create(user=admin_user)
+
     create_localities()
     create_offices()
 

@@ -1,7 +1,7 @@
 import { useFormContext } from 'react-hook-form';
 
+import Input from '@/modules/forms/DeprecatedInput';
 import { RHFFormField } from '@/modules/forms/FormField';
-import Input from '@/modules/forms/Input';
 
 import { CreateOrUpdateClientFormValues } from '.';
 

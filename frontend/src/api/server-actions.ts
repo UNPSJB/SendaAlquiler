@@ -21,5 +21,6 @@ export const clearOfficeCookieAction = async () => {
 };
 
 export const gettOfficeCookieAction = async () => {
-    return cookies().get(OFFICE_COOKIE_NAME)?.value;
+    const value = cookies().get(OFFICE_COOKIE_NAME)?.value;
+    return value || null;
 };
