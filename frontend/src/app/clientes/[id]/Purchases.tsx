@@ -1,7 +1,5 @@
 import Link from 'next/link';
 
-import { PropsWithChildren } from 'react';
-
 import { usePurchasesByClientId } from '@/api/hooks';
 
 import { formatDateTime } from '@/modules/dayjs/utils';
@@ -18,10 +16,6 @@ import Button from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
-
-const UL: React.FC<PropsWithChildren> = ({ children }) => {
-    return <ul className="mt-8 ">{children}</ul>;
-};
 
 const ClientByIdPurchasesTab: React.FC<PurchasesByClientIdTabComponentProps> = ({
     id,
@@ -40,7 +34,7 @@ const ClientByIdPurchasesTab: React.FC<PurchasesByClientIdTabComponentProps> = (
             }
         >
             {({ purchasesByClientId }) => (
-                <div className="pr-container">
+                <div className="pr-container pb-8">
                     <div className="flex items-center justify-between">
                         <h1 className="pt-4 text-xl font-bold">
                             Compras{' '}
@@ -53,7 +47,7 @@ const ClientByIdPurchasesTab: React.FC<PurchasesByClientIdTabComponentProps> = (
                         </Button>
                     </div>
 
-                    <UL>
+                    <ul className="space-y-8">
                         {purchasesByClientId.map((purchase) => (
                             <div key={purchase.id}>
                                 <div className="flex">
@@ -120,7 +114,7 @@ const ClientByIdPurchasesTab: React.FC<PurchasesByClientIdTabComponentProps> = (
                                         <Link
                                             href={`/ventas/${purchase.id}`}
                                             passHref
-                                            className=" px-8 py-4  font-bold text-gray-500 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
+                                            className=" px-8 py-4  font-bold text-muted-foreground duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
                                         >
                                             Ver mas detalles
                                         </Link>
@@ -128,7 +122,7 @@ const ClientByIdPurchasesTab: React.FC<PurchasesByClientIdTabComponentProps> = (
                                 </div>
                             </div>
                         ))}
-                    </UL>
+                    </ul>
                 </div>
             )}
         </FetchedDataRenderer>

@@ -10,11 +10,15 @@ import NavigationButtons, {
     NavigationButtonsCancelProps,
 } from './components/NavigationButtons';
 
+export type ModableFormLayoutComponentProps = {
+    isEditing?: boolean;
+};
+
 export type ModableFormLayoutStep<T extends FieldValues> = {
     key: string;
     title: string;
     description: string | React.FC;
-    Component: React.FC;
+    Component: React.FC<ModableFormLayoutComponentProps>;
     fields: Path<T>[];
     isVisible?: (data: T) => boolean;
 };
@@ -88,7 +92,7 @@ const ModableFormLayout = <T extends FieldValues>({
                     <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-4">
                         <h1 className="text-2xl font-bold">{title}</h1>
 
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-muted-foreground">
                             Paso {activeStep + 1} de {visibleSteps.length}
                         </span>
                     </div>
@@ -116,7 +120,7 @@ const ModableFormLayout = <T extends FieldValues>({
                                     </p>
 
                                     <form className="space-y-4">
-                                        <Component />
+                                        <Component isEditing={!!defaultValues} />
                                     </form>
                                 </div>
                             ),

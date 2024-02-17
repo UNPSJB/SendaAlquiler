@@ -18,6 +18,9 @@ import {
     CreateEmployeeDocument,
     DeleteEmployeeDocument,
     DeleteEmployeeMutation,
+    UpdateEmployeeDocument,
+    UpdateEmployeeMutation,
+    UpdateEmployeeMutationVariables,
 } from '../graphql';
 
 export const useEmployees = () => {
@@ -94,6 +97,37 @@ export const useDeleteEmployee = ({
 
                 if (onSuccess) {
                     onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+type UseUpdateEmployeeOptions = UseMutationOptions<
+    UpdateEmployeeMutation,
+    Error,
+    UpdateEmployeeMutationVariables
+>;
+
+export const useUpdateEmployee = ({
+    onSuccess,
+    ...options
+}: UseUpdateEmployeeOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<UpdateEmployeeMutation, Error, UpdateEmployeeMutationVariables>(
+        (data) => {
+            return fetchClient(UpdateEmployeeDocument, data);
+        },
+        {
+            onSuccess: (data, context, variables) => {
+                if (data.updateEmployee?.employee) {
+                    client.invalidateQueries(queryKeys.employeesPaginatedList());
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, context, variables);
                 }
             },
             ...options,

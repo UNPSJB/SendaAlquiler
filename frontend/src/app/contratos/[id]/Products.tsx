@@ -39,7 +39,7 @@ const columns = [
             return (
                 <div>
                     <p className="font-bold">{value}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                         {cell.row.original.product.brand?.name || 'Sin marca'}
                     </p>
                 </div>

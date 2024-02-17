@@ -18,7 +18,7 @@ const LoginPage = () => {
                         >
                             Hola de nuevo
                         </h1>
-                        <p className="text-gray-500 lg:text-base">
+                        <p className="text-muted-foreground lg:text-base">
                             Ingresa tus credenciales para acceder a tu cuenta
                         </p>
                     </div>

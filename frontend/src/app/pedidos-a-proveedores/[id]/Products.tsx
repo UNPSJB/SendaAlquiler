@@ -15,11 +15,11 @@ const SupplierOrderByIdProductsTab: React.FC<SupplierOrderByIdTabComponentProps>
                     {supplierOrder.orders.map((item, index) => (
                         <div key={index}>
                             <div className="flex justify-between pb-2">
-                                <h2 className="text-gray-500">
+                                <h2 className="text-muted-foreground">
                                     <b className="font-medium">-</b> {item.product.name}{' '}
                                     {item.product.brand?.name}
                                 </h2>
-                                <p className=" text-gray-500">
+                                <p className=" text-muted-foreground">
                                     {item.quantity} u.{' '}
                                     <span className="font-bold">|</span>{' '}
                                     {item.quantityReceived} u.

@@ -81,11 +81,11 @@ const SupplierByIdOrdersTab: React.FC<SupplierOrderBySupplierIdTabComponentProps
                                                 key={orderItem.id}
                                                 className="flex justify-between"
                                             >
-                                                <div className="text-gray-500">
+                                                <div className="text-muted-foreground">
                                                     <b>-</b> {orderItem.product.name}{' '}
                                                     {orderItem.product.brand?.name}
                                                 </div>
-                                                <div className="text-gray-500">
+                                                <div className="text-muted-foreground">
                                                     {orderItem.quantity} .u x ${' '}
                                                     {orderItem.product.price}
                                                 </div>

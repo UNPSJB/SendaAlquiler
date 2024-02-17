@@ -18,8 +18,8 @@ const SelectOption: React.FC<ClientOptionProps> = ({ client }) => (
             {client.firstName} {client.lastName}
         </p>
 
-        <p className="text-gray-500">DNI: {client.dni}</p>
-        <p className="text-gray-500">Email: {client.email}</p>
+        <p className="text-muted-foreground">DNI: {client.dni}</p>
+        <p className="text-muted-foreground">Email: {client.email}</p>
     </div>
 );
 

@@ -121,7 +121,7 @@ const Home = () => {
                                 <div className="mb-4 grid grid-cols-3 gap-4">
                                     <div className="rounded border border-gray-300 p-5">
                                         <div>
-                                            <p className="mb-2 text-sm text-gray-500">
+                                            <p className="mb-2 text-sm text-muted-foreground">
                                                 Clientes
                                             </p>
                                             <p className="text-4xl font-bold">
@@ -132,7 +132,7 @@ const Home = () => {
 
                                     <div className="rounded border border-gray-300 p-5">
                                         <div>
-                                            <p className="mb-2 text-sm text-gray-500">
+                                            <p className="mb-2 text-sm text-muted-foreground">
                                                 Ventas
                                             </p>
                                             <p className="text-4xl font-bold">
@@ -149,7 +149,7 @@ const Home = () => {
                                         </h2>
 
                                         <div className="p-5">
-                                            <p className="mb-2 text-sm text-gray-500">
+                                            <p className="mb-2 text-sm text-muted-foreground">
                                                 Total generado
                                             </p>
                                             <p className="mb-8 text-2xl font-bold">
@@ -227,7 +227,7 @@ const Home = () => {
                                                             className="rounded border-b border-gray-200 p-5"
                                                         >
                                                             <div>
-                                                                <p className="mb-2 text-sm text-gray-500">
+                                                                <p className="mb-2 text-sm text-muted-foreground">
                                                                     {product.name}
                                                                 </p>
                                                                 <p className="text-4xl font-bold">

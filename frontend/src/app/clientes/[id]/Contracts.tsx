@@ -20,10 +20,6 @@ import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
 
-const UL: React.FC<PropsWithChildren> = ({ children }) => {
-    return <ul className="mt-8 ">{children}</ul>;
-};
-
 const LI: React.FC<PropsWithChildren> = ({ children }) => {
     return <li className="my-2">{children}</li>;
 };
@@ -105,7 +101,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({ status, id }) => {
                 onClick={() => {
                     payContractDeposit(id);
                 }}
-                className=" px-8 py-4  font-bold text-gray-500 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
+                className=" px-8 py-4  font-bold text-muted-foreground duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
             >
                 Señar contrato
             </button>
@@ -118,7 +114,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({ status, id }) => {
                 onClick={() => {
                     payContractTotal(id);
                 }}
-                className=" px-8 py-4  font-bold text-gray-500 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
+                className=" px-8 py-4  font-bold text-muted-foreground duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
             >
                 Pagar totalidad del contrato
             </button>
@@ -161,7 +157,7 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                         </Button>
                     </div>
 
-                    <UL>
+                    <ul className="mt-8 space-y-8">
                         {rentalContractsByClientId.map((contract) => (
                             <div
                                 className="mb-4 mr-4 mt-8 rounded-md border bg-white "
@@ -236,7 +232,7 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                                 </div>
                             </div>
                         ))}
-                    </UL>
+                    </ul>
                 </>
             )}
         </FetchedDataRenderer>

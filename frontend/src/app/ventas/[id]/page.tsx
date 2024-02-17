@@ -118,11 +118,11 @@ const Page = () => {
                                                 className="mb-2 mr-8 rounded-md border bg-white"
                                             >
                                                 <div className="flex justify-between border-b px-4 pb-2 pt-4">
-                                                    <h2 className="text-gray-500">
+                                                    <h2 className="text-muted-foreground">
                                                         {item.product.name}{' '}
                                                         {item.product.brand?.name}
                                                     </h2>
-                                                    <p className=" text-gray-500">
+                                                    <p className=" text-muted-foreground">
                                                         {item.quantity} u. x $
                                                         {item.product.price}
                                                     </p>

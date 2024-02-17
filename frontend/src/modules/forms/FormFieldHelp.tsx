@@ -13,7 +13,7 @@ type Props = PropsWithChildren<{
 const FormFieldHelp: React.FC<Props> = ({ fieldID, children }) => (
     <span
         id={getFormFieldHelpElementID(fieldID)}
-        className="block font-headings text-sm text-gray-500"
+        className="block font-headings text-sm text-muted-foreground"
     >
         {children}
     </span>

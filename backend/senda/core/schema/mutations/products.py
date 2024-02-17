@@ -12,7 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 class ServiceInput(graphene.InputObjectType):
     name = graphene.String(required=True)
-    price = graphene.String(required=True)
+    price = graphene.Int(required=True)
 
 
 class StockInput(graphene.InputObjectType):
@@ -22,7 +22,7 @@ class StockInput(graphene.InputObjectType):
 
 class ProductSupplierInput(graphene.InputObjectType):
     supplier_id = graphene.ID(required=True)
-    price = graphene.String(required=True)
+    price = graphene.Int(required=True)
 
 
 class CreateProductInput(graphene.InputObjectType):
@@ -31,7 +31,7 @@ class CreateProductInput(graphene.InputObjectType):
     description = graphene.String()
     brand_id = graphene.ID(required=True)
     type = ProductTypeChoicesEnum(required=True)
-    price = graphene.String(required=True)
+    price = graphene.Int(required=True)
     services = non_null_list_of(ServiceInput)
     stock = non_null_list_of(StockInput)
     suppliers = non_null_list_of(ProductSupplierInput)
@@ -44,7 +44,7 @@ class UpdateProductInput(graphene.InputObjectType):
     description = graphene.String()
     brand_id = graphene.ID()
     type = ProductTypeChoicesEnum()
-    price = graphene.String()
+    price = graphene.Int()
     services = non_null_list_of(ServiceInput)
     stock = non_null_list_of(StockInput)
     suppliers = non_null_list_of(ProductSupplierInput)
