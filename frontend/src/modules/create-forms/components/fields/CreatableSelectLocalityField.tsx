@@ -20,7 +20,7 @@ type LocalityOptionProps = {
 const LocalityOption: React.FC<LocalityOptionProps> = ({ locality }) => (
     <div>
         <span className="block font-bold">{locality.name}</span>
-        <div className="flex justify-between text-gray-500">
+        <div className="flex justify-between text-muted-foreground">
             <p>
                 <span>Provincia:</span> <span>{locality.state}</span>
             </p>

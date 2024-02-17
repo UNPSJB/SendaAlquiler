@@ -365,7 +365,7 @@ export const ContractProductsField = <
                                                                                 }
                                                                             </p>
 
-                                                                            <div className="text-sm text-gray-500">
+                                                                            <div className="text-sm text-muted-foreground">
                                                                                 <p>
                                                                                     <span className="font-bold">
                                                                                         Precio:
@@ -453,7 +453,7 @@ export const ContractProductsField = <
                                                                                 }
                                                                             </p>
 
-                                                                            <div className="text-sm text-gray-500">
+                                                                            <div className="text-sm text-muted-foreground">
                                                                                 <p>
                                                                                     <span className="font-bold">
                                                                                         Precio:
@@ -494,7 +494,7 @@ export const ContractProductsField = <
                                             </p>
 
                                             {!item.product && (
-                                                <p className="text-sm text-gray-500">
+                                                <p className="text-sm text-muted-foreground">
                                                     Selecciona un producto para ver su
                                                     stock por sucursal.
                                                 </p>

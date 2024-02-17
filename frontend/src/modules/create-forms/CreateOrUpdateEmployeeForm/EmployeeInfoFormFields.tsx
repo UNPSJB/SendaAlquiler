@@ -5,8 +5,11 @@ import { RHFFormField } from '@/modules/forms/FormField';
 
 import { CreateOrUpdateEmployeeFormValues } from '.';
 import RHFOfficesField from '../components/fields/OfficesField';
+import { ModableFormLayoutComponentProps } from '../ModableFormLayout';
 
-const EmployeeInfoFormFields: React.FC = () => {
+const EmployeeInfoFormFields: React.FC<ModableFormLayoutComponentProps> = ({
+    isEditing,
+}) => {
     const {
         control,
         formState: { errors },
@@ -61,41 +64,45 @@ const EmployeeInfoFormFields: React.FC = () => {
                 />
             </RHFFormField>
 
-            <RHFFormField fieldID="password" label="Contraseña" showRequired>
-                <RHFDeprecatedInput
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="**********"
-                    hasError={!!errors.password}
-                    minLength={8}
-                    control={control}
-                    rules={{ required: true }}
-                />
-            </RHFFormField>
+            {!isEditing && (
+                <>
+                    <RHFFormField fieldID="password" label="Contraseña" showRequired>
+                        <RHFDeprecatedInput
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="**********"
+                            hasError={!!errors.password}
+                            minLength={8}
+                            control={control}
+                            rules={{ required: true }}
+                        />
+                    </RHFFormField>
 
-            <RHFFormField
-                fieldID="confirmPassword"
-                label="Confirme contraseña"
-                showRequired
-            >
-                <RHFDeprecatedInput
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    placeholder="**********"
-                    hasError={!!errors.confirmPassword}
-                    control={control}
-                    rules={{
-                        required: true,
-                        minLength: 8,
-                        validate: (value) => {
-                            const isValid = value === getValues('password');
-                            return isValid || 'Las contraseñas no coinciden';
-                        },
-                    }}
-                />
-            </RHFFormField>
+                    <RHFFormField
+                        fieldID="confirmPassword"
+                        label="Confirme contraseña"
+                        showRequired
+                    >
+                        <RHFDeprecatedInput
+                            type="password"
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            placeholder="**********"
+                            hasError={!!errors.confirmPassword}
+                            control={control}
+                            rules={{
+                                required: true,
+                                minLength: 8,
+                                validate: (value) => {
+                                    const isValid = value === getValues('password');
+                                    return isValid || 'Las contraseñas no coinciden';
+                                },
+                            }}
+                        />
+                    </RHFFormField>
+                </>
+            )}
 
             <RHFFormField fieldID="offices" label="Oficinas" showRequired>
                 <RHFOfficesField<CreateOrUpdateEmployeeFormValues, 'offices', true>

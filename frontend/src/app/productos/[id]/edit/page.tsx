@@ -4,9 +4,9 @@ import { useParams, useRouter } from 'next/navigation';
 
 import toast from 'react-hot-toast';
 
-import { useClientById, useUpdateClient } from '@/api/hooks';
+import { useProductById, useUpdateClient } from '@/api/hooks';
 
-import CreateOrUpdateClientForm from '@/modules/create-forms/CreateOrUpdateClientForm';
+import CreateOrUpdateProductForm from '@/modules/create-forms/CreateOrUpdateProductForm';
 
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
@@ -14,7 +14,7 @@ import Spinner from '@/components/Spinner/Spinner';
 
 const Page = () => {
     const { id } = useParams();
-    const useClientByIdResult = useClientById(id as string);
+    const useProductByIdResult = useProductById(id as string);
 
     const router = useRouter();
     const { mutate, isLoading } = useUpdateClient({
@@ -30,14 +30,11 @@ const Page = () => {
                 router.push(`/clientes/${id}`);
             }
         },
-        onError: () => {
-            toast.error('Hubo un error al actualizar el empleado');
-        },
     });
 
     return (
         <FetchedDataRenderer
-            {...useClientByIdResult}
+            {...useProductByIdResult}
             Error={
                 <FetchStatusMessageWithButton
                     message="Hubo un error al cargar el cliente"
@@ -51,8 +48,8 @@ const Page = () => {
                 </div>
             }
         >
-            {({ clientById }) => {
-                if (!clientById) {
+            {({ productById }) => {
+                if (!productById) {
                     return (
                         <FetchStatusMessageWithButton
                             message="Parece que el cliente que buscas no existe."
@@ -63,39 +60,43 @@ const Page = () => {
                 }
 
                 return (
-                    <CreateOrUpdateClientForm
+                    <CreateOrUpdateProductForm
                         defaultValues={{
-                            dni: clientById.dni,
-                            email: clientById.email,
-                            firstName: clientById.firstName,
-                            houseNumber: clientById.houseNumber,
-                            houseUnit: clientById.houseUnit,
-                            lastName: clientById.lastName,
-                            phoneCode: clientById.phoneCode,
-                            phoneNumber: clientById.phoneNumber,
-                            streetName: clientById.streetName,
-                            locality: {
-                                label: clientById.locality.name,
-                                value: clientById.locality.id,
-                                data: clientById.locality,
+                            brand: {
+                                value: productById.brand.id,
+                                label: productById.brand.name,
+                            },
+                            description: productById.description,
+                            name: productById.name,
+                            price: productById.price,
+                            services: productById.services.map((service) => {
+                                return {
+                                    name: service.name,
+                                    price: service.price,
+                                };
+                            }),
+                            sku: productById.sku,
+                            stock: productById.stock.map((stock) => {
+                                return {
+                                    office: {
+                                        value: stock.office.id,
+                                        label: stock.office.name,
+                                    },
+                                    stock: stock.stock,
+                                };
+                            }),
+                            suppliers: [],
+                            type: {
+                                value: productById.type,
+                                label: productById.type,
                             },
                         }}
                         mutate={(data) => {
-                            mutate({
-                                id: id as string,
-                                clientData: {
-                                    dni: data.dni,
-                                    email: data.email,
-                                    firstName: data.firstName,
-                                    houseNumber: data.houseNumber,
-                                    houseUnit: data.houseUnit,
-                                    lastName: data.lastName,
-                                    phoneCode: data.phoneCode,
-                                    phoneNumber: data.phoneNumber,
-                                    streetName: data.streetName,
-                                    localityId: data.locality.value,
-                                },
-                            });
+                            // mutate({
+                            //     id: id as string,
+                            //     clientData: {
+                            //     },
+                            // });
                         }}
                         cancelHref={`/clientes/${id}`}
                         isMutating={isLoading}

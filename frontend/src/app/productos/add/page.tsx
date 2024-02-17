@@ -38,13 +38,14 @@ const Page = () => {
 
         if (!brand || !type || !stock || !suppliers) return;
         console.log(stock);
+        console.log(data);
 
         mutate({
             productData: {
                 description: data.description,
                 brandId: brand.value,
                 name: data.name,
-                price: data.price,
+                price: parseInt(data.price, 10),
                 sku: data.sku,
                 type: type.value,
                 stock: stock
@@ -63,14 +64,14 @@ const Page = () => {
                         ? data.services.map((service) => {
                               return {
                                   name: service.name,
-                                  price: service.price,
+                                  price: parseInt(service.price, 10),
                               };
                           })
                         : [],
                 suppliers: suppliers.map((data) => {
                     return {
                         supplierId: data.supplier.value,
-                        price: data.price.toString(),
+                        price: parseInt(data.price.toString(), 10),
                     };
                 }),
             },

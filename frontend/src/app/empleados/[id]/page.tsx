@@ -16,6 +16,7 @@ import ChevronRight from '@/modules/icons/ChevronRight';
 import EmployeeByIdDetailsTab from './Details';
 
 import Avatar from '@/components/Avatar';
+import Button from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -31,12 +32,16 @@ const getDasboardTitle = (employee: EmployeeByIdQuery['employeeById'] | undefine
     }
 
     return (
-        <div className="flex items-center space-x-4">
-            <DashboardLayoutBigTitle>Empleados</DashboardLayoutBigTitle>
-            <ChevronRight />
-            <span className="font-headings text-sm">
-                {employee.user.firstName} {employee.user.lastName}
-            </span>
+        <div className="flex justify-between">
+            <div className="flex items-center space-x-4">
+                <DashboardLayoutBigTitle>Empleados</DashboardLayoutBigTitle>
+                <ChevronRight />
+                <span className="font-headings text-sm">
+                    {employee.user.firstName} {employee.user.lastName}
+                </span>
+            </div>
+
+            <Button href={`/empleados/${employee.id}/edit`}>Editar</Button>
         </div>
     );
 };
@@ -104,6 +109,7 @@ const Page = () => {
                                             employee.user.lastName,
                                         )}
                                     </Avatar>
+
                                     <div className="pl-6">
                                         <h1 className="my-2 mt-10 text-xl font-bold">
                                             {employee.user.firstName}{' '}

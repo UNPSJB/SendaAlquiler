@@ -13,7 +13,7 @@ type OfficeOptionProps = {
 const OfficeOption: React.FC<OfficeOptionProps> = ({ office }) => (
     <div>
         <span className="block font-bold">{office.name}</span>
-        <div className="flex justify-between text-gray-500">
+        <div className="flex justify-between space-x-2 text-muted-foreground">
             <p>
                 <span>Provincia:</span> <span>{office.locality.state}</span>
             </p>
@@ -83,7 +83,7 @@ const customFilter: ReactSelectProps<
 export type OfficesFieldValue = {
     label: string;
     value: Office['id'];
-    data: OfficeOptionProps['office'];
+    data: Omit<OfficeOptionProps['office'], 'stock'>;
 };
 
 type Props<
@@ -131,9 +131,6 @@ const RHFOfficesField = <
             name={name}
             control={control}
             render={({ field: { onChange, value } }) => {
-                console.log(data);
-                console.log(value);
-
                 return (
                     <CustomSelect<OfficesSelectOption, TIsMulti>
                         isLoading={isLoading}

@@ -449,11 +449,24 @@ class EmployeeModelManager(models.Manager["EmployeeModel"]):
 
         return employee
 
-    def update_employee(self, employee: "EmployeeModel", **kwargs: Any):
+    def update_employee_offices(self, employee: "EmployeeModel", offices: List[str]):
+        from senda.core.models.offices import OfficeModel
+        from senda.core.models.employees import EmployeeOfficeModel
+
         """
-        Updates an existing employee instance with the provided details.
+        Updates the offices associated with the given employee.
         """
-        for field, value in kwargs.items():
-            setattr(employee, field, value)
-        employee.save()
+
+        EmployeeOfficeModel.objects.filter(employee=employee).exclude(
+            office_id__in=offices
+        ).delete()
+
+        for office_id in offices:
+            office = OfficeModel.objects.get(id=office_id)
+
+            if not EmployeeOfficeModel.objects.filter(
+                employee=employee, office=office
+            ).exists():
+                EmployeeOfficeModel.objects.create(employee=employee, office=office)
+
         return employee

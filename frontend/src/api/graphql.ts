@@ -169,7 +169,7 @@ export type CreateProductInput = {
     brandId: Scalars['ID']['input'];
     description: InputMaybe<Scalars['String']['input']>;
     name: Scalars['String']['input'];
-    price: Scalars['String']['input'];
+    price: Scalars['Int']['input'];
     services: Array<ServiceInput>;
     sku: Scalars['String']['input'];
     stock: Array<StockInput>;
@@ -431,11 +431,13 @@ export type Mutation = {
     receiveInternalOrder: Maybe<ReceiveInternalOrder>;
     receiveOrderSupplier: Maybe<ReceiveOrderSupplier>;
     refreshToken: Maybe<Refresh>;
+    resetEmployeePassword: Maybe<ResetEmployeePassword>;
     startContract: Maybe<StartContract>;
     successfulReturnContract: Maybe<SuccessfulReturnContract>;
     /** Obtain JSON Web Token mutation */
     tokenAuth: Maybe<ObtainJsonWebToken>;
     updateClient: Maybe<UpdateClient>;
+    updateEmployee: Maybe<UpdateEmployee>;
     verifyToken: Maybe<Verify>;
 };
 
@@ -570,6 +572,10 @@ export type MutationRefreshTokenArgs = {
     token: InputMaybe<Scalars['String']['input']>;
 };
 
+export type MutationResetEmployeePasswordArgs = {
+    id: Scalars['ID']['input'];
+};
+
 export type MutationStartContractArgs = {
     id: Scalars['ID']['input'];
 };
@@ -585,6 +591,11 @@ export type MutationTokenAuthArgs = {
 
 export type MutationUpdateClientArgs = {
     clientData: UpdateClientInput;
+    id: Scalars['ID']['input'];
+};
+
+export type MutationUpdateEmployeeArgs = {
+    employeeData: UpdateEmployeeInput;
     id: Scalars['ID']['input'];
 };
 
@@ -757,7 +768,7 @@ export type ProductStocksInDateRange = {
 };
 
 export type ProductSupplierInput = {
-    price: Scalars['String']['input'];
+    price: Scalars['Int']['input'];
     supplierId: Scalars['ID']['input'];
 };
 
@@ -1072,9 +1083,14 @@ export enum RentalContractStatusChoices {
     Vencido = 'VENCIDO',
 }
 
+export type ResetEmployeePassword = {
+    __typename?: 'ResetEmployeePassword';
+    success: Scalars['Boolean']['output'];
+};
+
 export type ServiceInput = {
     name: Scalars['String']['input'];
-    price: Scalars['String']['input'];
+    price: Scalars['Int']['input'];
 };
 
 export type StartContract = {
@@ -1191,6 +1207,19 @@ export type UpdateClientInput = {
     phoneCode: InputMaybe<Scalars['String']['input']>;
     phoneNumber: InputMaybe<Scalars['String']['input']>;
     streetName: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateEmployee = {
+    __typename?: 'UpdateEmployee';
+    employee: Maybe<Employee>;
+    error: Maybe<Scalars['String']['output']>;
+};
+
+export type UpdateEmployeeInput = {
+    email: Scalars['String']['input'];
+    firstName: Scalars['String']['input'];
+    lastName: Scalars['String']['input'];
+    offices: Array<Scalars['ID']['input']>;
 };
 
 export type User = {
@@ -1749,6 +1778,18 @@ export type EmployeeByIdQuery = {
     employeeById: {
         __typename?: 'Employee';
         id: string;
+        offices: Array<{
+            __typename?: 'Office';
+            id: string;
+            name: string;
+            locality: {
+                __typename?: 'Locality';
+                id: string;
+                name: string;
+                state: StateChoices;
+                postalCode: string;
+            };
+        }>;
         user: {
             __typename?: 'User';
             firstName: string;
@@ -1768,6 +1809,20 @@ export type DeleteEmployeeMutationVariables = Exact<{
 export type DeleteEmployeeMutation = {
     __typename?: 'Mutation';
     deleteEmployee: { __typename?: 'DeleteEmployee'; success: boolean } | null;
+};
+
+export type UpdateEmployeeMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+    employeeData: UpdateEmployeeInput;
+}>;
+
+export type UpdateEmployeeMutation = {
+    __typename?: 'Mutation';
+    updateEmployee: {
+        __typename?: 'UpdateEmployee';
+        error: string | null;
+        employee: { __typename?: 'Employee'; id: string } | null;
+    } | null;
 };
 
 export type LocalitiesQueryVariables = Exact<{
@@ -5138,6 +5193,60 @@ export const EmployeeByIdDocument = {
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 {
                                     kind: 'Field',
+                                    name: { kind: 'Name', value: 'offices' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'locality' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'state',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'postalCode',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
                                     name: { kind: 'Name', value: 'user' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
@@ -5234,6 +5343,86 @@ export const DeleteEmployeeDocument = {
         },
     ],
 } as unknown as DocumentNode<DeleteEmployeeMutation, DeleteEmployeeMutationVariables>;
+export const UpdateEmployeeDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'updateEmployee' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'employeeData' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'UpdateEmployeeInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updateEmployee' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'employeeData' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'employeeData' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'employee' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<UpdateEmployeeMutation, UpdateEmployeeMutationVariables>;
 export const LocalitiesDocument = {
     kind: 'Document',
     definitions: [

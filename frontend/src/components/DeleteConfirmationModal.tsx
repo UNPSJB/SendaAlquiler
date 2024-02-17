@@ -77,7 +77,7 @@ const DeleteConfirmationModal = ({
 
                             <div className="mb-8 text-center">
                                 <p className="mb-4 text-lg">{confirmationText}</p>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-muted-foreground">
                                     Esta acción es irreversible
                                 </p>
                             </div>
