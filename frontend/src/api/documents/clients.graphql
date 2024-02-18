@@ -1,5 +1,5 @@
-query clients($page: Int) {
-    clients(page: $page) {
+query clients($page: Int, $localities: [ID!], $query: String) {
+    clients(page: $page, localities: $localities, query: $query) {
         count
         numPages
         results {

@@ -18,7 +18,7 @@ import ClientByIdDetailsTab from './Details';
 import ClientByIdPurchasesTab from './Purchases';
 
 import Avatar from '@/components/Avatar';
-import Button from '@/components/Button';
+import DeprecatedButton from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -89,7 +89,9 @@ const Page = () => {
                 <div className="flex items-center justify-between">
                     {getDasboardTitle(client)}
 
-                    <Button href={`/clientes/${id}/edit`}>Editar cliente</Button>
+                    <DeprecatedButton href={`/clientes/${id}/edit`}>
+                        Editar cliente
+                    </DeprecatedButton>
                 </div>
             }
         >

@@ -12,7 +12,7 @@ import {
 
 import { PurchasesByClientIdTabComponentProps } from './page';
 
-import Button from '@/components/Button';
+import DeprecatedButton from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
@@ -42,9 +42,12 @@ const ClientByIdPurchasesTab: React.FC<PurchasesByClientIdTabComponentProps> = (
                                 ({purchasesByClientId.length})
                             </span>
                         </h1>
-                        <Button href={`/ventas/add?client=${id}`} className="mr-4 mt-8">
+                        <DeprecatedButton
+                            href={`/ventas/add?client=${id}`}
+                            className="mr-4 mt-8"
+                        >
                             + Añadir Compra
-                        </Button>
+                        </DeprecatedButton>
                     </div>
 
                     <ul className="space-y-8">

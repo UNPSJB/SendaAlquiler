@@ -55,7 +55,7 @@ const useDashboardTitle = (
                 CoreSupplierOrderHistoryModelStatusChoices.Pending &&
                 supplierOrder.officeDestination.id === office?.id && (
                     <ButtonWithSpinner
-                        isLoading={isLoading}
+                        showSpinner={isLoading}
                         onClick={() => {
                             mutate(supplierOrder.id, {
                                 onSuccess: () => {

@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import Skeleton from 'react-loading-skeleton';
 
-import { Product, ProductListItemFragment } from '@/api/graphql';
+import { ProductListItemFragment } from '@/api/graphql';
 import {
     useDeleteProduct,
     useExportProductsCsv,
@@ -16,82 +17,162 @@ import {
 import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
-import DataTable from '@/modules/data-table/DataTable';
-import DataTablePagination from '@/modules/data-table/DataTablePagination';
-import { Input } from '@/modules/forms/DeprecatedInput';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import { AdminDataTable } from '@/components/admin-data-table';
+import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
+import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import { TD, TR } from '@/components/Table';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 
-const columns = [
-    { key: 'name', label: 'Nombre' },
-    { key: 'brand', label: 'Marca' },
-    { key: 'type', label: 'Tipo' },
-    { key: 'price', label: 'Precio' },
-];
+const columnsHelper = createColumnHelper<ProductListItemFragment>();
 
-const SkeletonRowRenderer = () => {
-    const renderer = (key: number) => (
-        <TR key={key}>
-            {[...new Array(columns.length)].map((_, index) => (
-                <TD key={index}>
-                    <Skeleton width={100}></Skeleton>
-                </TD>
-            ))}
-        </TR>
-    );
+const columns: ColumnDef<ProductListItemFragment, any>[] = [
+    columnsHelper.accessor('name', {
+        id: 'name',
+        header: 'Producto',
+        cell: (props) => {
+            const product = props.row.original;
 
-    return renderer;
-};
-
-const ProductRowRenderer = (extraData: React.ReactNode) => {
-    const renderer = (product: ProductListItemFragment) => (
-        <TR key={product.id}>
-            <TD>
+            return (
                 <Link className="text-violet-600" href={`/productos/${product.id}`}>
                     {product.name}
                 </Link>
-            </TD>
-            <TD>{product.brand?.name || '-'}</TD>
-            <TD>{product.type}</TD>
-            <TD>$ {product.price}</TD>
-            {extraData}
-        </TR>
-    );
+            );
+        },
+    }),
+    columnsHelper.accessor('brand', {
+        id: 'brand',
+        header: 'Marca',
+        cell: (props) => props.row.original.brand?.name || '-',
+    }),
+    columnsHelper.accessor('type', {
+        id: 'type',
+        header: 'Tipo',
+        cell: (props) => {
+            const type = props.getValue();
+            return type;
+        },
+    }),
+    columnsHelper.accessor('price', {
+        id: 'price',
+        header: 'Precio',
+        cell: (props) => {
+            const price = props.getValue();
+            return `$ ${price}`;
+        },
+    }),
+    columnsHelper.display({
+        id: 'actions',
+        cell: (props) => {
+            return <RowActions product={props.row.original} />;
+        },
+    }),
+];
 
-    return renderer;
-};
-
-const Page = () => {
-    const {
-        hasPreviousPage,
-        hasNextPage,
-        queryResult,
-        activePage,
-        noPages,
-        variables,
-        setVariables,
-    } = usePaginatedProducts();
-
-    const { mutate, isLoading: isDeleting } = useDeleteProduct({
+const RowActions = ({ product }: { product: ProductListItemFragment }) => {
+    const deleteMutation = useDeleteProduct({
         onSuccess: () => {
             toast.success('Producto eliminado correctamente');
-            queryResult.refetch();
         },
         onError: () => {
-            toast.error('Hubo un error al eliminar el producto');
+            toast.error('Ha ocurrido un error al eliminar el producto');
         },
     });
 
-    const handleRemove = (id: Product['id']) => {
-        mutate(id);
-    };
+    const [open, setOpen] = useState(false);
+
+    return (
+        <Dialog
+            onOpenChange={(next) => {
+                if (deleteMutation.isLoading) {
+                    return;
+                }
+
+                setOpen(next);
+            }}
+            open={open}
+        >
+            <DropdownMenu>
+                <DropdownMenuTrigger>
+                    <MoreVertical className="h-5 w-5" />
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent>
+                    <DialogTrigger asChild>
+                        <DropdownMenuItem>Eliminar</DropdownMenuItem>
+                    </DialogTrigger>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Confirmar eliminación</DialogTitle>
+                    <DialogDescription>
+                        ¿Estás seguro de que quieres eliminar al producto &ldquo;
+                        <strong>
+                            <em>{product.name}</em>
+                        </strong>
+                        &rdquo;?
+                    </DialogDescription>
+                </DialogHeader>
+
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="secondary">Cancelar</Button>
+                    </DialogClose>
+
+                    <ButtonWithSpinner
+                        onClick={() => {
+                            deleteMutation.mutate(product.id, {
+                                onSuccess: () => {
+                                    toast.success(
+                                        `El producto ${product.name} ha sido eliminado.`,
+                                    );
+                                    setOpen(false);
+                                },
+                                onError: () => {
+                                    toast.error(
+                                        `No se pudo eliminar el producto ${product.name}`,
+                                    );
+                                },
+                            });
+                        }}
+                        variant="destructive"
+                        showSpinner={deleteMutation.isLoading}
+                    >
+                        Eliminar
+                    </ButtonWithSpinner>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+const Page = () => {
+    const { queryResult, activePage, noPages, variables, setVariables } =
+        usePaginatedProducts();
 
     const { exportCsv } = useExportProductsCsv();
-    const [query, setQuery] = useState(variables.query || '');
 
     return (
         <DashboardLayout
@@ -100,29 +181,38 @@ const Page = () => {
                     <DashboardLayoutBigTitle>Productos</DashboardLayoutBigTitle>
 
                     <div className="flex space-x-8">
-                        <Button
+                        <DeprecatedButton
                             variant={ButtonVariant.GRAY}
                             onClick={() => {
                                 exportCsv({});
                             }}
                         >
                             Exportar a CSV
-                        </Button>
+                        </DeprecatedButton>
 
-                        <Button href="/productos/add">+ Añadir producto</Button>
+                        <DeprecatedButton href="/productos/add">
+                            + Añadir producto
+                        </DeprecatedButton>
                     </div>
                 </div>
             }
         >
+            <div className="pr-container mb-4 flex space-x-2 pl-10 pt-5">
+                <Input
+                    placeholder="Buscar por nombre"
+                    value={variables.query || ''}
+                    onChange={(e) => {
+                        setVariables('query', e.target.value || '');
+                    }}
+                    className="max-w-xs"
+                />
+            </div>
+
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
-                    <div className="pr-container flex-1 py-5 pl-10">
-                        <DataTable
-                            columns={columns}
-                            data={[...new Array(5)].map((_, index) => index)}
-                            rowRenderer={SkeletonRowRenderer}
-                        />
+                    <div className="pr-container flex-1 pl-10">
+                        <AdminDataTableLoading columns={columns} />
                     </div>
                 }
                 Error={
@@ -138,7 +228,7 @@ const Page = () => {
                 {({ products: data }) => {
                     const edges = data?.results;
 
-                    if ((!edges || edges.length === 0) && query.length <= 0) {
+                    if ((!edges || edges.length === 0) && !variables.query) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay productos"
@@ -148,30 +238,13 @@ const Page = () => {
                         );
                     }
 
-                    if (query.length > 0 && (!edges || edges.length === 0)) {
+                    if (
+                        variables.query &&
+                        variables.query.length > 0 &&
+                        (!edges || edges.length === 0)
+                    ) {
                         return (
                             <div className="flex flex-1 flex-col">
-                                <div className="container py-8">
-                                    <form
-                                        onSubmit={() => {
-                                            setVariables({
-                                                page: null,
-                                                query,
-                                            });
-                                        }}
-                                    >
-                                        <Input
-                                            id="query"
-                                            name="query"
-                                            value={query}
-                                            placeholder="Ingresa un termino de busqueda"
-                                            onChange={(val) => {
-                                                setQuery(val);
-                                            }}
-                                        />
-                                    </form>
-                                </div>
-
                                 <div className="flex h-full w-full flex-1 items-center justify-center">
                                     <FetchStatusMessageWithDescription
                                         title="No se encontraron resultados"
@@ -183,54 +256,16 @@ const Page = () => {
                     }
 
                     return (
-                        <div>
-                            <div className="container pt-8">
-                                <form
-                                    onSubmit={() => {
-                                        setVariables({
-                                            page: null,
-                                            query,
-                                        });
-                                    }}
-                                >
-                                    <Input
-                                        id="query"
-                                        name="query"
-                                        value={query}
-                                        placeholder="Ingresa un termino de busqueda"
-                                        onChange={(val) => {
-                                            setQuery(val);
-                                        }}
-                                    />
-                                </form>
-                            </div>
-
-                            <div className="pr-container flex-1 py-5 pl-10">
-                                <DataTable
-                                    columns={columns}
-                                    data={edges.map((edge) => edge)}
-                                    rowRenderer={ProductRowRenderer}
-                                    deleteOptions={{
-                                        confirmationText: (product) => (
-                                            <>
-                                                ¿Estás seguro de que quieres eliminar el
-                                                producto <strong>{product.name}</strong>?
-                                            </>
-                                        ),
-                                        onDeleteClick: (product) => {
-                                            handleRemove(product.id);
-                                        },
-                                        isDeleting,
-                                    }}
-                                />
-
-                                <DataTablePagination
-                                    currentPage={activePage}
-                                    hasPrevious={hasPreviousPage}
-                                    hasNext={hasNextPage}
-                                    totalPages={noPages}
-                                />
-                            </div>
+                        <div className="pr-container flex-1 pl-10">
+                            <AdminDataTable
+                                columns={columns}
+                                data={edges}
+                                numberOfPages={noPages}
+                                currentPage={activePage}
+                                onPageChange={(page: number) => {
+                                    setVariables('page', page);
+                                }}
+                            />
                         </div>
                     );
                 }}

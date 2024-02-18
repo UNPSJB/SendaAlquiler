@@ -5,7 +5,7 @@ import Skeleton from 'react-loading-skeleton';
 import { Office, ProductsStocksByOfficeIdQuery } from '@/api/graphql';
 import { useProductsSuppliedBySupplierId } from '@/api/hooks';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 
 import Input from '../../../forms/DeprecatedInput';
@@ -130,13 +130,13 @@ const ProductsFromSupplierField: React.FC<Props> = ({ office }) => {
                 {({ productsSuppliedBySupplierId }) => {
                     if (ordersToCreate < productsSuppliedBySupplierId.length) {
                         return (
-                            <Button
+                            <DeprecatedButton
                                 fullWidth
                                 variant={ButtonVariant.OUTLINE_WHITE}
                                 onClick={handleAddOrder}
                             >
                                 + Añadir producto
-                            </Button>
+                            </DeprecatedButton>
                         );
                     }
 

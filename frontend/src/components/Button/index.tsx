@@ -51,85 +51,82 @@ const buttonClasses: Record<ButtonVariant, string> = {
     ),
 };
 
-const Button: React.FC<Props> = forwardRef<HTMLButtonElement | HTMLAnchorElement, Props>(
-    (props, ref) => {
-        const {
-            variant = ButtonVariant.BLACK,
-            fullWidth,
-            href,
-            external,
-            nativeAnchor,
-            children,
-            type = 'button',
-            disabled,
-            className: extraClassName,
-            ...rest
-        } = props;
-        const className = clsx(
-            buttonClasses[variant],
-            fullWidth && 'w-full',
-            extraClassName,
-        );
+const DeprecatedButton: React.FC<Props> = forwardRef<
+    HTMLButtonElement | HTMLAnchorElement,
+    Props
+>((props, ref) => {
+    const {
+        variant = ButtonVariant.BLACK,
+        fullWidth,
+        href,
+        external,
+        nativeAnchor,
+        children,
+        type = 'button',
+        disabled,
+        className: extraClassName,
+        ...rest
+    } = props;
+    const className = clsx(buttonClasses[variant], fullWidth && 'w-full', extraClassName);
 
-        if (href) {
-            // External link
-            if (external) {
-                return (
-                    <a
-                        ref={ref as React.Ref<HTMLAnchorElement>}
-                        href={href}
-                        className={clsx(className, 'text-center')}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        {...rest}
-                    >
-                        {children}
-                    </a>
-                );
-            }
-
-            // Simple native anchors
-            if (nativeAnchor) {
-                return (
-                    <a
-                        ref={ref as React.Ref<HTMLAnchorElement>}
-                        href={href}
-                        className={clsx(className, 'text-center')}
-                        {...rest}
-                    >
-                        {children}
-                    </a>
-                );
-            }
-
-            // Internal navigation using Next.js Link
+    if (href) {
+        // External link
+        if (external) {
             return (
-                <Link
-                    href={href}
+                <a
                     ref={ref as React.Ref<HTMLAnchorElement>}
+                    href={href}
+                    className={clsx(className, 'text-center')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    {...rest}
+                >
+                    {children}
+                </a>
+            );
+        }
+
+        // Simple native anchors
+        if (nativeAnchor) {
+            return (
+                <a
+                    ref={ref as React.Ref<HTMLAnchorElement>}
+                    href={href}
                     className={clsx(className, 'text-center')}
                     {...rest}
                 >
                     {children}
-                </Link>
+                </a>
             );
         }
 
-        // Button element for actions
+        // Internal navigation using Next.js Link
         return (
-            <button
-                disabled={disabled}
-                ref={ref as React.Ref<HTMLButtonElement>}
-                className={className}
-                type={type}
+            <Link
+                href={href}
+                ref={ref as React.Ref<HTMLAnchorElement>}
+                className={clsx(className, 'text-center')}
                 {...rest}
             >
                 {children}
-            </button>
+            </Link>
         );
-    },
-);
+    }
 
-Button.displayName = 'Button';
+    // Button element for actions
+    return (
+        <button
+            disabled={disabled}
+            ref={ref as React.Ref<HTMLButtonElement>}
+            className={className}
+            type={type}
+            {...rest}
+        >
+            {children}
+        </button>
+    );
+});
 
-export default Button;
+DeprecatedButton.displayName = 'Button';
+
+export default DeprecatedButton;

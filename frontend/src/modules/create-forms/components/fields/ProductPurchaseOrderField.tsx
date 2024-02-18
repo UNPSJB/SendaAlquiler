@@ -7,7 +7,7 @@ import { usePaginatedProducts } from '@/api/hooks';
 
 import Label from '@/modules/forms/Label';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 
 import { Input } from '../../../forms/DeprecatedInput';
@@ -166,13 +166,13 @@ const ProductOrderField: React.FC<Props> = ({ onChange, value = [] }) => {
                     })}
 
                     {canOrderMoreProducts && (
-                        <Button
+                        <DeprecatedButton
                             fullWidth
                             variant={ButtonVariant.OUTLINE_WHITE}
                             onClick={addProductToOrder}
                         >
                             + Añadir producto
-                        </Button>
+                        </DeprecatedButton>
                     )}
                 </div>
             )}

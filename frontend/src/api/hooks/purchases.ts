@@ -26,8 +26,9 @@ export const usePurchases = () => {
         queryKeys.purchasesPaginatedList,
         PurchasesDocument,
         'purchases',
+        {},
         {
-            page: 'number',
+            page: { type: 'int' },
         },
     );
 };

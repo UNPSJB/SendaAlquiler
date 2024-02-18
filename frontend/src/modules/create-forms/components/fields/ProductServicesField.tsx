@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 
 import Input from '../../../forms/DeprecatedInput';
 import { RHFFormField } from '../../../forms/FormField';
@@ -71,13 +71,13 @@ const ProductServicesField: React.FC = () => {
                 })}
             </div>
 
-            <Button
+            <DeprecatedButton
                 fullWidth
                 variant={ButtonVariant.OUTLINE_WHITE}
                 onClick={handleAddService}
             >
                 + Añadir servicio
-            </Button>
+            </DeprecatedButton>
         </div>
     );
 };

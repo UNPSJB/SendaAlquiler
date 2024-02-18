@@ -2,90 +2,200 @@
 
 import Link from 'next/link';
 
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { MoreVertical } from 'lucide-react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 
 import { ClientsQuery } from '@/api/graphql';
+import { useAllLocalities } from '@/api/hooks';
 import { useClients, useDeleteClient } from '@/api/hooks/clients';
 import { useExportClientsCsv } from '@/api/hooks/csv-export';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
-import DataTable from '@/modules/data-table/DataTable';
-import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import { AdminDataTable } from '@/components/admin-data-table';
+import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import { AdminTableFilter } from '@/components/admin-table-filter';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
+import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import { TD, TR } from '@/components/Table';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 
-const columns = [
-    { key: 'name', label: 'Nombre' },
-    { key: 'email', label: 'Correo' },
-    { key: 'phone', label: 'Celular' },
-    { key: 'address', label: 'Domicilio' },
-    { key: 'locality', label: 'Localidad' },
-];
+const columnsHelper = createColumnHelper<Client>();
 
-const SkeletonRowRenderer = () => {
-    const renderer = (data: number) => (
-        <TR key={data}>
-            {[...new Array(columns.length)].map((_, index) => (
-                <TD key={index}>
-                    <Skeleton width={100}></Skeleton>
-                </TD>
-            ))}
-        </TR>
-    );
+const columns: ColumnDef<Client, any>[] = [
+    columnsHelper.accessor('firstName', {
+        id: 'name',
+        header: 'Cliente',
+        cell: (props) => {
+            const client = props.row.original;
 
-    return renderer;
-};
-
-type Client = ArrayElement<ClientsQuery['clients']['results']>;
-
-const ClientRowRenderer = (extraData: React.ReactNode) => {
-    const renderer = (client: Client) => (
-        <TR key={client.id}>
-            <TD>
+            return (
                 <Link className="text-violet-600" href={`/clientes/${client.id}`}>
-                    {client.firstName} {client.lastName}
+                    <p>
+                        {client.firstName} {client.lastName}
+                    </p>
+
+                    <p>
+                        <span className="text-muted-foreground">{client.email}</span>
+                    </p>
                 </Link>
-            </TD>
-            <TD>{client.email}</TD>
-            <TD>
-                {client.phoneCode}
-                {client.phoneNumber}
-            </TD>
-            <TD>
-                {client.streetName} {client.houseNumber}
-            </TD>
-            <TD>{client.locality.name}</TD>
-            {extraData}
-        </TR>
-    );
+            );
+        },
+    }),
+    columnsHelper.accessor('phoneCode', {
+        id: 'phone',
+        header: 'Teléfono',
+        cell: (props) => {
+            const client = props.row.original;
 
-    return renderer;
-};
+            return (
+                <p>
+                    +{client.phoneCode}
+                    {client.phoneNumber}
+                </p>
+            );
+        },
+    }),
+    columnsHelper.accessor('locality', {
+        id: 'locality',
+        header: 'Ciudad',
+        cell: (props) => {
+            const client = props.row.original;
 
-const Page = () => {
-    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
-        useClients();
+            return <p>{client.locality.name}</p>;
+        },
+    }),
+    columnsHelper.accessor('streetName', {
+        id: 'address',
+        header: 'Dirección',
+        cell: (props) => {
+            const client = props.row.original;
 
-    const { mutate, isLoading: isDeleting } = useDeleteClient({
+            return (
+                <p>
+                    {client.streetName} {client.houseNumber}
+                </p>
+            );
+        },
+    }),
+    columnsHelper.display({
+        id: 'actions',
+        cell: (props) => {
+            const client = props.row.original;
+            return <RowActions client={client} />;
+        },
+    }),
+] as const;
+
+const RowActions = ({ client }: { client: Client }) => {
+    const deleteMutation = useDeleteClient({
         onSuccess: () => {
             toast.success('Cliente eliminado correctamente');
-            queryResult.refetch();
         },
         onError: () => {
             toast.error('Ha ocurrido un error al eliminar el cliente');
         },
     });
 
-    const handleRemove = (client: Client) => {
-        mutate(client.id);
-    };
+    const [open, setOpen] = useState(false);
+
+    return (
+        <Dialog
+            onOpenChange={(next) => {
+                if (deleteMutation.isLoading) {
+                    return;
+                }
+
+                setOpen(next);
+            }}
+            open={open}
+        >
+            <DropdownMenu>
+                <DropdownMenuTrigger>
+                    <MoreVertical className="h-5 w-5" />
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent>
+                    <DialogTrigger asChild>
+                        <DropdownMenuItem>Eliminar</DropdownMenuItem>
+                    </DialogTrigger>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Confirmar eliminación</DialogTitle>
+                    <DialogDescription>
+                        ¿Estás seguro de que quieres eliminar al cliente &ldquo;
+                        <strong>
+                            <em>{client.email}</em>
+                        </strong>
+                        &rdquo;?
+                    </DialogDescription>
+                </DialogHeader>
+
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="secondary">Cancelar</Button>
+                    </DialogClose>
+
+                    <ButtonWithSpinner
+                        onClick={() => {
+                            deleteMutation.mutate(client.id, {
+                                onSuccess: () => {
+                                    toast.success(
+                                        `El cliente ${client.email} ha sido eliminado.`,
+                                    );
+                                    setOpen(false);
+                                },
+                                onError: () => {
+                                    toast.error(
+                                        `No se pudo eliminar el cliente ${client.email}`,
+                                    );
+                                },
+                            });
+                        }}
+                        variant="destructive"
+                        showSpinner={deleteMutation.isLoading}
+                    >
+                        Eliminar
+                    </ButtonWithSpinner>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+type Client = ArrayElement<ClientsQuery['clients']['results']>;
+
+const Page = () => {
+    const { activePage, noPages, queryResult, variables, setVariables } = useClients();
+
+    const allLocalitiesQuery = useAllLocalities();
 
     const { exportCsv } = useExportClientsCsv();
 
@@ -96,28 +206,67 @@ const Page = () => {
                     <DashboardLayoutBigTitle>Clientes</DashboardLayoutBigTitle>
 
                     <div className="flex space-x-8">
-                        <Button
+                        <DeprecatedButton
                             onClick={() => {
                                 exportCsv({});
                             }}
                             variant={ButtonVariant.GRAY}
                         >
                             Exportar
-                        </Button>
-                        <Button href="/clientes/add">+ Añadir cliente</Button>
+                        </DeprecatedButton>
+                        <DeprecatedButton href="/clientes/add">
+                            + Añadir cliente
+                        </DeprecatedButton>
                     </div>
                 </div>
             }
         >
+            <div className="pr-container mb-4 flex space-x-2 pl-10 pt-5">
+                <Input
+                    placeholder="Buscar por email, nombre, apellido o dni"
+                    value={variables.query || ''}
+                    onChange={(e) => {
+                        setVariables('query', e.target.value || '');
+                    }}
+                    className="max-w-xs"
+                />
+
+                <FetchedDataRenderer
+                    {...allLocalitiesQuery}
+                    Loading={
+                        <div className="flex space-x-2">
+                            <Skeleton width={100}></Skeleton>
+                            <Skeleton width={100}></Skeleton>
+                        </div>
+                    }
+                    Error={null}
+                >
+                    {({ allLocalities }) => {
+                        return (
+                            <AdminTableFilter
+                                title="Filtrar por ciudad"
+                                options={allLocalities.map((locality) => ({
+                                    label: locality.name,
+                                    value: locality.id,
+                                }))}
+                                onSelect={(selected) => {
+                                    setVariables('localities', selected);
+                                }}
+                                selectedValues={(variables.localities as []) || []}
+                                onClear={() => {
+                                    setVariables('localities', []);
+                                }}
+                            />
+                        );
+                    }}
+                </FetchedDataRenderer>
+            </div>
+
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
-                        <DataTable
-                            columns={columns}
-                            data={[...new Array(5)].map((_, index) => index)}
-                            rowRenderer={SkeletonRowRenderer}
-                        />
+                        <AdminDataTableLoading columns={columns} />
                     </div>
                 }
                 Error={
@@ -131,7 +280,11 @@ const Page = () => {
                 }
             >
                 {({ clients: { results } }) => {
-                    if (results.length === 0) {
+                    if (
+                        results.length === 0 &&
+                        !variables.query &&
+                        (!variables.localities || variables.localities.length === 0)
+                    ) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay clientes"
@@ -142,30 +295,15 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 py-5 pl-10">
-                            <DataTable
+                        <div className="pr-container flex-1 pl-10">
+                            <AdminDataTable
                                 columns={columns}
                                 data={results}
-                                rowRenderer={ClientRowRenderer}
-                                deleteOptions={{
-                                    confirmationText: (client: Client) => (
-                                        <>
-                                            ¿Estás seguro que quieres eliminar a{' '}
-                                            <span className="font-bold">
-                                                {client.firstName} {client.lastName}
-                                            </span>
-                                        </>
-                                    ),
-                                    isDeleting: isDeleting,
-                                    onDeleteClick: handleRemove,
-                                }}
-                            />
-
-                            <DataTablePagination
+                                numberOfPages={noPages}
                                 currentPage={activePage}
-                                hasPrevious={hasPreviousPage}
-                                hasNext={hasNextPage}
-                                totalPages={noPages}
+                                onPageChange={(page: number) => {
+                                    setVariables('page', page);
+                                }}
                             />
                         </div>
                     );

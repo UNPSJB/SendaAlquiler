@@ -5,7 +5,7 @@ import Skeleton from 'react-loading-skeleton';
 import { SuppliersQuery } from '@/api/graphql';
 import { usePaginatedSuppliers } from '@/api/hooks';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 
 import Input from '../../../forms/DeprecatedInput';
@@ -112,13 +112,13 @@ const ProductsSuppliersField: React.FC = () => {
                 {({ suppliers }) => {
                     if (suppliersToCreate < suppliers.results.length) {
                         return (
-                            <Button
+                            <DeprecatedButton
                                 fullWidth
                                 variant={ButtonVariant.OUTLINE_WHITE}
                                 onClick={handleAddOrder}
                             >
                                 + Añadir proveedor
-                            </Button>
+                            </DeprecatedButton>
                         );
                     }
 

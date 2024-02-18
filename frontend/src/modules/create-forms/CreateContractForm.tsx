@@ -25,7 +25,7 @@ import CreatableSelectLocalityField, {
     LocalityFieldValue,
 } from './components/fields/CreatableSelectLocalityField';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -295,18 +295,18 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                         </h1>
 
                         <div className="space-x-4">
-                            <Button
+                            <DeprecatedButton
                                 variant={ButtonVariant.OUTLINE_WHITE}
                                 href={cancelHref}
                             >
                                 Cancelar
-                            </Button>
+                            </DeprecatedButton>
 
                             <ButtonWithSpinner
                                 onClick={formMethods.handleSubmit(onSubmit, onError)}
                                 variant={ButtonVariant.BLACK}
                                 // disabled={!formIsValid}
-                                isLoading={isMutating}
+                                showSpinner={isMutating}
                             >
                                 Guardar
                             </ButtonWithSpinner>
@@ -589,13 +589,13 @@ const CreateContractForm: React.FC<CreateContractFormProps> = ({ cancelHref }) =
                                         Detalles de contrato
                                     </h2>
 
-                                    <Button
+                                    <DeprecatedButton
                                         variant={ButtonVariant.OUTLINE_WHITE}
                                         onClick={copyClientDetailsOnDetails}
                                         disabled={!client}
                                     >
                                         Copiar detalles de cliente
-                                    </Button>
+                                    </DeprecatedButton>
                                 </div>
 
                                 <div className="w-9/12 space-y-6">

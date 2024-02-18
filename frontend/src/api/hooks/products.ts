@@ -55,8 +55,15 @@ export const usePaginatedProducts = () => {
         ProductsDocument,
         'products',
         {
-            page: 'number',
-            query: 'string',
+            query: null,
+        },
+        {
+            page: {
+                type: 'int',
+            },
+            query: {
+                type: 'string',
+            },
         },
     );
 };

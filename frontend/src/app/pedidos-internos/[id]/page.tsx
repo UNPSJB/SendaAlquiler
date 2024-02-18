@@ -59,7 +59,7 @@ const useHeader = (
                 InternalOrderHistoryStatusChoices.Pending &&
                 internalOrder.officeBranch.id === office?.id && (
                     <ButtonWithSpinner
-                        isLoading={isMarkAsInProgressLoading}
+                        showSpinner={isMarkAsInProgressLoading}
                         onClick={() => {
                             markAsInProgress(internalOrder.id, {
                                 onSuccess: () => {
@@ -79,7 +79,7 @@ const useHeader = (
                 InternalOrderHistoryStatusChoices.InProgress &&
                 internalOrder.officeDestination.id === office?.id && (
                     <ButtonWithSpinner
-                        isLoading={isMarkAsCompletedLoading}
+                        showSpinner={isMarkAsCompletedLoading}
                         onClick={() => {
                             markAsCompleted(internalOrder.id, {
                                 onSuccess: () => {

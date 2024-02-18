@@ -5,7 +5,7 @@ import Skeleton from 'react-loading-skeleton';
 import { OfficesQuery } from '@/api/graphql';
 import { useOffices } from '@/api/hooks';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 
 import Input from '../../../forms/DeprecatedInput';
@@ -109,13 +109,13 @@ const ProductsStockField: React.FC = () => {
                 {({ offices }) => {
                     if (officesToCreate < offices.length) {
                         return (
-                            <Button
+                            <DeprecatedButton
                                 fullWidth
                                 variant={ButtonVariant.OUTLINE_WHITE}
                                 onClick={handleAddOrder}
                             >
                                 + Añadir stock
-                            </Button>
+                            </DeprecatedButton>
                         );
                     }
 

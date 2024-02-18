@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { MoreVertical } from 'lucide-react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import Skeleton from 'react-loading-skeleton';
 
-import { OrderSupplier, SupplierOrdersQuery } from '@/api/graphql';
+import { SupplierOrdersQuery } from '@/api/graphql';
 import {
     useDeleteSupplierOrder,
     useExportSupplierOrdersCsv,
@@ -15,76 +17,147 @@ import {
 import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
-import DataTable from '@/modules/data-table/DataTable';
-import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import { AdminDataTable } from '@/components/admin-data-table';
+import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import { TD, TR } from '@/components/Table';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-const columns = [
-    { key: 'date', label: 'Fecha creado' },
-    { key: 'supplier', label: 'Proveedor' },
-    { key: 'office', label: 'Sucursal' },
-    { key: 'status', label: 'Estado' },
-];
+type OrderSupplier = SupplierOrdersQuery['supplierOrders']['results'][0];
 
-const SkeletonRowRenderer = () => {
-    const renderer = (key: number) => (
-        <TR key={key}>
-            {[...new Array(columns.length)].map((_, index) => (
-                <TD key={index}>
-                    <Skeleton width={100}></Skeleton>
-                </TD>
-            ))}
-        </TR>
-    );
+const columnsHelper = createColumnHelper<OrderSupplier>();
 
-    return renderer;
-};
+const columns: ColumnDef<OrderSupplier, any>[] = [
+    columnsHelper.accessor('createdOn', {
+        id: 'date',
+        header: 'Fecha creado',
+        cell: (props) => {
+            const supplierOrder = props.row.original;
 
-const SupplierOrderRowRenderer = (extraData: React.ReactNode) => {
-    const renderer = (
-        supplierOrder: ArrayElement<SupplierOrdersQuery['supplierOrders']['results']>,
-    ) => (
-        <TR key={supplierOrder.id}>
-            <TD>
+            return (
                 <Link
                     className="text-violet-600"
                     href={`/pedidos-a-proveedores/${supplierOrder.id}`}
                 >
                     {new Date(supplierOrder.createdOn).toLocaleDateString('es-ES')}
                 </Link>
-            </TD>
-            <TD>{supplierOrder.supplier.name}</TD>
-            <TD>{supplierOrder.officeDestination.name}</TD>
-            <TD>{supplierOrder.currentHistory?.status}</TD>
-            {extraData}
-        </TR>
-    );
+            );
+        },
+    }),
+    columnsHelper.accessor('supplier.name', {
+        id: 'supplier',
+        header: 'Proveedor',
+    }),
+    columnsHelper.accessor('officeDestination.name', {
+        id: 'office',
+        header: 'Sucursal',
+    }),
+    columnsHelper.accessor('currentHistory.status', {
+        id: 'status',
+        header: 'Estado',
+    }),
+    columnsHelper.display({
+        id: 'actions',
+        cell: (props) => {
+            const supplierOrder = props.row.original;
 
-    return renderer;
-};
+            return <RowActions supplierOrder={supplierOrder} />;
+        },
+    }),
+];
 
-const Page = () => {
-    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
-        useSupplierOrders();
-
-    const { mutate, isLoading: isDeleting } = useDeleteSupplierOrder({
+const RowActions = ({ supplierOrder }: { supplierOrder: OrderSupplier }) => {
+    const deleteMutation = useDeleteSupplierOrder({
         onSuccess: () => {
-            toast.success('El pedido a proveedor ha sido eliminado');
-            queryResult.refetch();
+            toast.success('Pedido a proveedor eliminado correctamente');
         },
         onError: () => {
             toast.error('Ha ocurrido un error al eliminar el pedido a proveedor');
         },
     });
 
-    const handleRemove = (id: OrderSupplier['id']) => {
-        mutate(id);
-    };
+    const [open, setOpen] = useState(false);
+
+    return (
+        <Dialog
+            onOpenChange={(next) => {
+                if (deleteMutation.isLoading) {
+                    return;
+                }
+
+                setOpen(next);
+            }}
+            open={open}
+        >
+            <DropdownMenu>
+                <DropdownMenuTrigger>
+                    <MoreVertical className="h-5 w-5" />
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent>
+                    <DialogTrigger asChild>
+                        <DropdownMenuItem>Eliminar</DropdownMenuItem>
+                    </DialogTrigger>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Confirmar eliminación</DialogTitle>
+                    <DialogDescription>
+                        ¿Estás seguro de que quieres eliminar el pedido a proveedor
+                        &ldquo;
+                        <strong>
+                            <em>
+                                {new Date(supplierOrder.createdOn).toLocaleDateString(
+                                    'es-ES',
+                                )}
+                            </em>
+                        </strong>
+                        &rdquo;?
+                    </DialogDescription>
+                </DialogHeader>
+
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="secondary">Cancelar</Button>
+                    </DialogClose>
+
+                    <Button
+                        onClick={() => {
+                            deleteMutation.mutate(supplierOrder.id);
+                        }}
+                        variant="destructive"
+                    >
+                        Eliminar
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+const Page = () => {
+    const { setVariables, activePage, noPages, queryResult } = useSupplierOrders();
 
     const { exportCsv } = useExportSupplierOrdersCsv();
 
@@ -97,16 +170,18 @@ const Page = () => {
                     </DashboardLayoutBigTitle>
 
                     <div className="flex space-x-8">
-                        <Button
+                        <DeprecatedButton
                             variant={ButtonVariant.GRAY}
                             onClick={() => {
                                 exportCsv({});
                             }}
                         >
                             Exportar a CSV
-                        </Button>
+                        </DeprecatedButton>
 
-                        <Button href="/pedidos-a-proveedores/add">+ Añadir pedido</Button>
+                        <DeprecatedButton href="/pedidos-a-proveedores/add">
+                            + Añadir pedido
+                        </DeprecatedButton>
                     </div>
                 </div>
             }
@@ -115,11 +190,7 @@ const Page = () => {
                 {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
-                        <DataTable
-                            columns={columns}
-                            data={[...new Array(5)].map((_, index) => index)}
-                            rowRenderer={SkeletonRowRenderer}
-                        />
+                        <AdminDataTableLoading columns={columns} />
                     </div>
                 }
                 Error={
@@ -145,27 +216,14 @@ const Page = () => {
 
                     return (
                         <div className="pr-container flex-1 py-5 pl-10">
-                            <DataTable
+                            <AdminDataTable
                                 columns={columns}
-                                data={supplierOrders}
-                                rowRenderer={SupplierOrderRowRenderer}
-                                deleteOptions={{
-                                    confirmationText: (supplierOrder) =>
-                                        `¿Estás seguro de eliminar el pedido a proveedor del ${new Date(
-                                            supplierOrder.createdOn,
-                                        ).toLocaleDateString('es-ES')}?`,
-                                    onDeleteClick: (supplierOrder) => {
-                                        handleRemove(supplierOrder.id);
-                                    },
-                                    isDeleting,
-                                }}
-                            />
-
-                            <DataTablePagination
                                 currentPage={activePage}
-                                hasPrevious={hasPreviousPage}
-                                hasNext={hasNextPage}
-                                totalPages={noPages}
+                                data={supplierOrders}
+                                numberOfPages={noPages}
+                                onPageChange={(page: number) => {
+                                    setVariables('page', page);
+                                }}
                             />
                         </div>
                     );

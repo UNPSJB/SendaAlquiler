@@ -57,8 +57,11 @@ export const usePaginatedSuppliers = () => {
         queryKeys.suppliersPaginatedList,
         SuppliersDocument,
         'suppliers',
+        {},
         {
-            page: 'number',
+            page: {
+                type: 'int',
+            },
         },
     );
 };

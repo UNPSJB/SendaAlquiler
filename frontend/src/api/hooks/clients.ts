@@ -130,9 +130,26 @@ export const useAllClients = (props?: AllClientsQueryVariables) => {
 };
 
 export const useClients = () => {
-    return usePaginatedQuery(queryKeys.clientsPaginatedList, ClientsDocument, 'clients', {
-        page: 'number',
-    });
+    return usePaginatedQuery(
+        queryKeys.clientsPaginatedList,
+        ClientsDocument,
+        'clients',
+        {
+            localities: null,
+            query: null,
+        },
+        {
+            localities: {
+                type: 'multiple-string',
+            },
+            page: {
+                type: 'int',
+            },
+            query: {
+                type: 'string',
+            },
+        },
+    );
 };
 
 export const useClientById = (id: string | undefined) => {

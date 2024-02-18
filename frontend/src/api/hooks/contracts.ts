@@ -29,7 +29,12 @@ export const useContracts = () => {
         ContractsDocument,
         'rentalContracts',
         {
-            page: 'number',
+            page: null,
+        },
+        {
+            page: {
+                type: 'int',
+            },
         },
     );
 };

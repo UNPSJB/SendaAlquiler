@@ -2,7 +2,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 import clsx from 'clsx';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 
 import ArrowLeft from '../icons/ArrowLeft';
 import ArrowRigth from '../icons/ArrowRight';
@@ -61,7 +61,7 @@ const DataTablePagination: React.FC<PaginationProps> = ({
 
     return (
         <div className="flex justify-center pt-8">
-            <Button
+            <DeprecatedButton
                 onClick={handlePrevious}
                 className={clsx(
                     'flex items-center justify-center space-x-2',
@@ -70,7 +70,7 @@ const DataTablePagination: React.FC<PaginationProps> = ({
                 variant={ButtonVariant.OUTLINE_WHITE}
             >
                 <ArrowLeft /> <span>Anterior</span>
-            </Button>
+            </DeprecatedButton>
 
             <div className="flex items-center justify-center px-8 text-center">
                 <span className="text-sm font-semibold">
@@ -78,7 +78,7 @@ const DataTablePagination: React.FC<PaginationProps> = ({
                 </span>
             </div>
 
-            <Button
+            <DeprecatedButton
                 onClick={handleNext}
                 className={clsx(
                     'flex items-center justify-center space-x-2',
@@ -87,7 +87,7 @@ const DataTablePagination: React.FC<PaginationProps> = ({
                 variant={ButtonVariant.OUTLINE_WHITE}
             >
                 <span>Siguiente</span> <ArrowRigth />
-            </Button>
+            </DeprecatedButton>
         </div>
     );
 };

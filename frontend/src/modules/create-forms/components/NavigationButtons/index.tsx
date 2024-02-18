@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import ChevronLeft from '@/modules/icons/ChevronLeft';
 
-import Button from '@/components/Button';
+import DeprecatedButton from '@/components/Button';
 
 export type NavigationButtonsCancelProps =
     | {
@@ -49,9 +49,9 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
             <div className="mt-auto flex items-center justify-end space-x-16 border-t border-gray-200 py-6">
                 <Cancel {...cancelProps}>Cancelar</Cancel>
 
-                <Button onClick={isUniqueStep ? onSubmit : onNext}>
+                <DeprecatedButton onClick={isUniqueStep ? onSubmit : onNext}>
                     {isUniqueStep ? 'Guardar' : 'Siguiente'}
-                </Button>
+                </DeprecatedButton>
             </div>
         );
     }
@@ -68,7 +68,7 @@ const NavigationButtons: React.FC<NavigationButtonsProps> = ({
             <div className="flex items-center justify-end space-x-16">
                 <Cancel {...cancelProps}>Cancelar</Cancel>
 
-                <Button onClick={onSubmit}>Guardar</Button>
+                <DeprecatedButton onClick={onSubmit}>Guardar</DeprecatedButton>
             </div>
         </div>
     );

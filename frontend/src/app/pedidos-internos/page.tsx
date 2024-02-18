@@ -2,14 +2,12 @@
 
 import Link from 'next/link';
 
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { MoreVertical } from 'lucide-react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import Skeleton from 'react-loading-skeleton';
 
-import {
-    InternalOrder,
-    InternalOrderHistoryStatusChoices,
-    InternalOrdersQuery,
-} from '@/api/graphql';
+import { InternalOrderHistoryStatusChoices, InternalOrdersQuery } from '@/api/graphql';
 import {
     useDeleteInternalOrder,
     useExportInternalOrdersCsv,
@@ -19,34 +17,149 @@ import {
 import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
-import DataTable from '@/modules/data-table/DataTable';
-import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import { AdminDataTable } from '@/components/admin-data-table';
+import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import { TD, TR } from '@/components/Table';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-const columns = [
-    { key: 'name', label: 'Fecha' },
-    { key: 'email', label: 'Origen' },
-    { key: 'phone', label: 'Destino' },
-    { key: 'address', label: 'Estado' },
+type InternalOrder = InternalOrdersQuery['internalOrders']['results'][0];
+
+const columnsHelper = createColumnHelper<InternalOrder>();
+
+const columns: ColumnDef<InternalOrder, any>[] = [
+    columnsHelper.accessor('createdOn', {
+        id: 'date',
+        header: 'Fecha',
+        cell: (props) => {
+            const internalOrder = props.row.original;
+
+            return (
+                <Link
+                    className="text-violet-600"
+                    href={`/pedidos-internos/${internalOrder.id}`}
+                >
+                    {new Date(internalOrder.createdOn).toLocaleDateString()}
+                </Link>
+            );
+        },
+    }),
+    columnsHelper.accessor('officeBranch.name', {
+        id: 'office',
+        header: 'Origen',
+    }),
+    columnsHelper.accessor('officeDestination.name', {
+        id: 'destination',
+        header: 'Destino',
+    }),
+    columnsHelper.accessor('currentHistory.status', {
+        id: 'status',
+        header: 'Estado',
+        cell: (props) => {
+            const internalOrder = props.row.original;
+
+            if (!internalOrder.currentHistory) {
+                return '-';
+            }
+
+            return <Status status={internalOrder.currentHistory.status} />;
+        },
+    }),
+    columnsHelper.display({
+        id: 'actions',
+        cell: (props) => {
+            const internalOrder = props.row.original;
+
+            return <RowActions internalOrder={internalOrder} />;
+        },
+    }),
 ];
 
-const SkeletonRowRenderer = () => {
-    const renderer = (key: number) => (
-        <TR key={key}>
-            {[...new Array(columns.length)].map((_, index) => (
-                <TD key={index}>
-                    <Skeleton width={100}></Skeleton>
-                </TD>
-            ))}
-        </TR>
-    );
+const RowActions = ({ internalOrder }: { internalOrder: InternalOrder }) => {
+    const deleteMutation = useDeleteInternalOrder({
+        onSuccess: () => {
+            toast.success('Pedido interno eliminado correctamente');
+        },
+        onError: () => {
+            toast.error('Ha ocurrido un error al eliminar el pedido interno');
+        },
+    });
 
-    return renderer;
+    const [open, setOpen] = useState(false);
+
+    return (
+        <Dialog
+            onOpenChange={(next) => {
+                if (deleteMutation.isLoading) {
+                    return;
+                }
+
+                setOpen(next);
+            }}
+            open={open}
+        >
+            <DropdownMenu>
+                <DropdownMenuTrigger>
+                    <MoreVertical className="h-5 w-5" />
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent>
+                    <DialogTrigger asChild>
+                        <DropdownMenuItem>Eliminar</DropdownMenuItem>
+                    </DialogTrigger>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Confirmar eliminación</DialogTitle>
+                    <DialogDescription>
+                        ¿Estás seguro de que quieres eliminar el pedido interno &ldquo;
+                        <strong>
+                            <em>
+                                {new Date(internalOrder.createdOn).toLocaleDateString()}
+                            </em>
+                        </strong>
+                        &rdquo;?
+                    </DialogDescription>
+                </DialogHeader>
+
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="secondary">Cancelar</Button>
+                    </DialogClose>
+
+                    <Button
+                        onClick={() => {
+                            deleteMutation.mutate(internalOrder.id);
+                        }}
+                        variant="destructive"
+                    >
+                        Eliminar
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
 };
 
 const Status = ({ status }: { status: InternalOrderHistoryStatusChoices }) => {
@@ -81,106 +194,8 @@ const Status = ({ status }: { status: InternalOrderHistoryStatusChoices }) => {
     );
 };
 
-const InternalOrderRowRenderer = (extraData: React.ReactNode) => {
-    const renderer = (
-        supplier: ArrayElement<InternalOrdersQuery['internalOrders']['results']>,
-    ) => {
-        const humanReadableDate = new Date(supplier.createdOn).toLocaleDateString();
-
-        return (
-            <TR key={supplier.id}>
-                <TD>
-                    <Link
-                        className="text-violet-600"
-                        href={`/pedidos-internos/${supplier.id}`}
-                    >
-                        {humanReadableDate}
-                    </Link>
-                </TD>
-                <TD>{supplier.officeBranch.name}</TD>
-                <TD>{supplier.officeDestination.name}</TD>
-                <TD>
-                    {supplier.currentHistory ? (
-                        <Status status={supplier.currentHistory.status} />
-                    ) : (
-                        '-'
-                    )}
-                </TD>
-                {extraData}
-            </TR>
-        );
-    };
-
-    return renderer;
-};
-
-type Props = {
-    internalOrders: ArrayElement<InternalOrdersQuery['internalOrders']['results']>[];
-    hasPreviousPage: boolean;
-    hasNextPage: boolean;
-    activePage: number;
-    noPages: number;
-    queryResult: ReturnType<typeof usePaginatedInternalOrders>['queryResult'];
-};
-
-const Content: React.FC<Props> = ({
-    internalOrders,
-    hasPreviousPage,
-    hasNextPage,
-    activePage,
-    noPages,
-    queryResult,
-}) => {
-    const { mutate, isLoading: isDeleting } = useDeleteInternalOrder({
-        onSuccess: () => {
-            toast.success('El pedido interno ha sido eliminado');
-            queryResult.refetch();
-        },
-        onError: () => {
-            toast.error('Ha ocurrido un error al eliminar el pedido interno');
-        },
-    });
-
-    const handleRemove = (id: InternalOrder['id']) => {
-        mutate(id);
-    };
-
-    return (
-        <div className="pr-container flex-1 py-5 pl-10">
-            <DataTable
-                columns={columns}
-                data={internalOrders}
-                rowRenderer={InternalOrderRowRenderer}
-                deleteOptions={{
-                    confirmationText: (internalOrder) => (
-                        <>
-                            ¿Estás seguro que deseas eliminar el pedido interno{' '}
-                            <span className="font-bold">
-                                {new Date(internalOrder.createdOn).toLocaleDateString()}
-                            </span>
-                            ?
-                        </>
-                    ),
-                    onDeleteClick: (internalOrder) => {
-                        handleRemove(internalOrder.id);
-                    },
-                    isDeleting,
-                }}
-                dropdownActions={[]}
-            />
-
-            <DataTablePagination
-                currentPage={activePage}
-                hasPrevious={hasPreviousPage}
-                hasNext={hasNextPage}
-                totalPages={noPages}
-            />
-        </div>
-    );
-};
-
 const Page = () => {
-    const { queryResult, ...usePaginatedInternalOrdersResult } =
+    const { setVariables, activePage, noPages, queryResult } =
         usePaginatedInternalOrders();
 
     const { exportCsv } = useExportInternalOrdersCsv();
@@ -192,16 +207,18 @@ const Page = () => {
                     <DashboardLayoutBigTitle>Pedidos Internos</DashboardLayoutBigTitle>
 
                     <div className="flex space-x-8">
-                        <Button
+                        <DeprecatedButton
                             variant={ButtonVariant.GRAY}
                             onClick={() => {
                                 exportCsv({});
                             }}
                         >
                             Exportar a CSV
-                        </Button>
+                        </DeprecatedButton>
 
-                        <Button href="/pedidos-internos/add">+ Añadir pedido</Button>
+                        <DeprecatedButton href="/pedidos-internos/add">
+                            + Añadir pedido
+                        </DeprecatedButton>
                     </div>
                 </div>
             }
@@ -210,11 +227,7 @@ const Page = () => {
                 {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
-                        <DataTable
-                            columns={columns}
-                            data={[...new Array(5)].map((_, index) => index)}
-                            rowRenderer={SkeletonRowRenderer}
-                        />
+                        <AdminDataTableLoading columns={columns} />
                     </div>
                 }
                 Error={
@@ -239,11 +252,17 @@ const Page = () => {
                     }
 
                     return (
-                        <Content
-                            internalOrders={internalOrders}
-                            queryResult={queryResult}
-                            {...usePaginatedInternalOrdersResult}
-                        />
+                        <div className="pr-container flex-1 py-5 pl-10">
+                            <AdminDataTable
+                                columns={columns}
+                                currentPage={activePage}
+                                data={internalOrders}
+                                numberOfPages={noPages}
+                                onPageChange={(page: number) => {
+                                    setVariables('page', page);
+                                }}
+                            />
+                        </div>
                     );
                 }}
             </FetchedDataRenderer>

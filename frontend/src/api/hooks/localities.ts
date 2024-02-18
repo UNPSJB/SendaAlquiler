@@ -25,8 +25,9 @@ export const useLocalities = () => {
         queryKeys.localitiesPaginatedList,
         LocalitiesDocument,
         'localities',
+        {},
         {
-            page: 'number',
+            page: { type: 'int' },
         },
     );
 };

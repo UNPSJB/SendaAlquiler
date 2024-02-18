@@ -16,7 +16,7 @@ import ChevronRight from '@/modules/icons/ChevronRight';
 import EmployeeByIdDetailsTab from './Details';
 
 import Avatar from '@/components/Avatar';
-import Button from '@/components/Button';
+import DeprecatedButton from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -41,7 +41,9 @@ const getDasboardTitle = (employee: EmployeeByIdQuery['employeeById'] | undefine
                 </span>
             </div>
 
-            <Button href={`/empleados/${employee.id}/edit`}>Editar</Button>
+            <DeprecatedButton href={`/empleados/${employee.id}/edit`}>
+                Editar
+            </DeprecatedButton>
         </div>
     );
 };
