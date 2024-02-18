@@ -14,10 +14,11 @@ export const queryDomains = {
     products: 'products',
 };
 
-const buildPaginatedListkey = (domain: string) => (filters?: any) =>
-    typeof filters !== 'undefined'
+const buildPaginatedListkey = (domain: string) => (filters?: any) => {
+    return typeof filters !== 'undefined'
         ? [domain, 'list', 'paginated', filters]
         : [domain, 'list', 'paginated'];
+};
 
 const buildDetailKey = (domain: string) => (key?: any) =>
     typeof key !== 'undefined' ? [domain, 'detail', key] : [domain, 'detail'];

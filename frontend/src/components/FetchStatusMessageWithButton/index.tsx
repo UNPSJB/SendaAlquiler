@@ -1,4 +1,4 @@
-import Button, { ButtonVariant } from '../Button';
+import DeprecatedButton, { ButtonVariant } from '../Button';
 
 type Props = {
     message: string;
@@ -12,9 +12,9 @@ const FetchStatusMessageWithButton: React.FC<Props> = ({ message, btnHref, btnTe
             <h2 className="mb-4 text-center text-3xl font-bold">{message}</h2>
 
             <div className="flex justify-center">
-                <Button variant={ButtonVariant.GRAY} href={btnHref}>
+                <DeprecatedButton variant={ButtonVariant.GRAY} href={btnHref}>
                     {btnText}
-                </Button>
+                </DeprecatedButton>
             </div>
         </div>
     </div>

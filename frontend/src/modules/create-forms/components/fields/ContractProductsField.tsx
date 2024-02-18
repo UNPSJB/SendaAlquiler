@@ -8,7 +8,7 @@ import { getNumericInputValue } from '@/modules/utils';
 
 import { useOfficeContext } from '@/app/OfficeProvider';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
@@ -711,13 +711,13 @@ export const ContractProductsField = <
                     })}
 
                     {canOrderMoreProducts && (
-                        <Button
+                        <DeprecatedButton
                             fullWidth
                             variant={ButtonVariant.OUTLINE_WHITE}
                             onClick={addProductToOrder}
                         >
                             + Añadir producto
-                        </Button>
+                        </DeprecatedButton>
                     )}
                 </div>
             )}

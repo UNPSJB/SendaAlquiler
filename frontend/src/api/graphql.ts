@@ -884,7 +884,9 @@ export type QueryClientExistsArgs = {
 };
 
 export type QueryClientsArgs = {
+    localities: InputMaybe<Array<Scalars['ID']['input']>>;
     page: InputMaybe<Scalars['Int']['input']>;
+    query: InputMaybe<Scalars['String']['input']>;
 };
 
 export type QueryContractByIdArgs = {
@@ -1270,6 +1272,8 @@ export type BrandsQuery = {
 
 export type ClientsQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
+    localities: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+    query: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type ClientsQuery = {
@@ -2416,7 +2420,12 @@ export type PurchasesQuery = {
             id: string;
             createdOn: any;
             total: number;
-            client: { __typename?: 'Client'; firstName: string; lastName: string };
+            client: {
+                __typename?: 'Client';
+                firstName: string;
+                lastName: string;
+                email: string;
+            };
         }>;
     };
 };
@@ -2468,7 +2477,12 @@ export type CreatePurchaseMutation = {
             id: string;
             createdOn: any;
             total: number;
-            client: { __typename?: 'Client'; firstName: string; lastName: string };
+            client: {
+                __typename?: 'Client';
+                firstName: string;
+                lastName: string;
+                email: string;
+            };
         } | null;
     } | null;
 };
@@ -2478,7 +2492,7 @@ export type PurchaseListItemFragment = {
     id: string;
     createdOn: any;
     total: number;
-    client: { __typename?: 'Client'; firstName: string; lastName: string };
+    client: { __typename?: 'Client'; firstName: string; lastName: string; email: string };
 };
 
 export type DeletePurchaseMutationVariables = Exact<{
@@ -2730,6 +2744,7 @@ export const PurchaseListItemFragmentDoc = {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'lastName' },
                                 },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
                             ],
                         },
                     },
@@ -2912,6 +2927,31 @@ export const ClientsDocument = {
                     variable: { kind: 'Variable', name: { kind: 'Name', value: 'page' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'localities' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: { kind: 'Name', value: 'ID' },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'query' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -2926,6 +2966,22 @@ export const ClientsDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'page' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'localities' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'localities' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'query' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'query' },
                                 },
                             },
                         ],
@@ -8132,6 +8188,7 @@ export const PurchasesDocument = {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'lastName' },
                                 },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
                             ],
                         },
                     },
@@ -8379,6 +8436,7 @@ export const CreatePurchaseDocument = {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'lastName' },
                                 },
+                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
                             ],
                         },
                     },

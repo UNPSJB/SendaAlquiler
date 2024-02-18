@@ -15,7 +15,7 @@ import { formatDateTime } from '@/modules/dayjs/utils';
 
 import { RentalContractsByClientIdTabComponentProps } from './page';
 
-import Button from '@/components/Button';
+import DeprecatedButton from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
@@ -149,12 +149,12 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                                 ({rentalContractsByClientId.length})
                             </span>
                         </h1>
-                        <Button
+                        <DeprecatedButton
                             href={`/contratos/add?client=${id}`}
                             className="mr-4 mt-8"
                         >
                             + Añadir Contrato
-                        </Button>
+                        </DeprecatedButton>
                     </div>
 
                     <ul className="mt-8 space-y-8">

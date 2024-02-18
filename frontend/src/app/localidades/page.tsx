@@ -1,76 +1,136 @@
 'use client';
 
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { MoreVertical } from 'lucide-react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import Skeleton from 'react-loading-skeleton';
 
-import { LocalitiesQuery, Locality } from '@/api/graphql';
+import { LocalitiesQuery } from '@/api/graphql';
 import { useDeleteLocality, useExportLocalitiesCsv, useLocalities } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
-import DataTable from '@/modules/data-table/DataTable';
-import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import { AdminDataTable } from '@/components/admin-data-table';
+import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import { TD, TR } from '@/components/Table';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-const columns = [
-    { key: 'name', label: 'Nombre' },
-    { key: 'cp', label: 'Código Postal' },
-    { key: 'state', label: 'Provincia' },
+type Locality = LocalitiesQuery['localities']['results'][0];
+
+const columnsHelper = createColumnHelper<Locality>();
+
+const columns: ColumnDef<Locality, any>[] = [
+    columnsHelper.accessor('name', {
+        id: 'name',
+        header: 'Nombre',
+    }),
+    columnsHelper.accessor('postalCode', {
+        id: 'cp',
+        header: 'Código Postal',
+    }),
+    columnsHelper.accessor('state', {
+        id: 'state',
+        header: 'Provincia',
+    }),
+    columnsHelper.display({
+        id: 'actions',
+        cell: (props) => {
+            const locality = props.row.original;
+
+            return <RowActions locality={locality} />;
+        },
+    }),
 ];
 
-const SkeletonRowRenderer = () => {
-    const renderer = (key: number) => (
-        <TR key={key}>
-            {[...new Array(columns.length)].map((_, index) => (
-                <TD key={index}>
-                    <Skeleton width={100}></Skeleton>
-                </TD>
-            ))}
-        </TR>
-    );
-
-    return renderer;
-};
-
-const LocalityRowRenderer = (extraData: React.ReactNode) => {
-    const renderer = (
-        locality: ArrayElement<LocalitiesQuery['localities']['results']>,
-    ) => (
-        <TR key={locality.id}>
-            <TD>{locality.name}</TD>
-            <TD>{locality.postalCode}</TD>
-            <TD>{locality.state}</TD>
-
-            {extraData}
-        </TR>
-    );
-
-    return renderer;
-};
-
-const Page = () => {
-    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
-        useLocalities();
-
-    const { mutate, isLoading: isDeleting } = useDeleteLocality({
+const RowActions = ({ locality }: { locality: Locality }) => {
+    const deleteMutation = useDeleteLocality({
         onSuccess: () => {
             toast.success('Localidad eliminada correctamente');
-            queryResult.refetch();
         },
         onError: () => {
-            toast.error('Hubo un error al eliminar la localidad');
+            toast.error('Ha ocurrido un error al eliminar la localidad');
         },
     });
 
-    const handleRemove = (id: Locality['id']) => {
-        mutate(id);
-    };
+    const [open, setOpen] = useState(false);
+
+    return (
+        <Dialog
+            onOpenChange={(next) => {
+                if (deleteMutation.isLoading) {
+                    return;
+                }
+
+                setOpen(next);
+            }}
+            open={open}
+        >
+            <DropdownMenu>
+                <DropdownMenuTrigger>
+                    <MoreVertical className="h-5 w-5" />
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent>
+                    <DialogTrigger asChild>
+                        <DropdownMenuItem>Eliminar</DropdownMenuItem>
+                    </DialogTrigger>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Confirmar eliminación</DialogTitle>
+                    <DialogDescription>
+                        ¿Estás seguro de que quieres eliminar la localidad &ldquo;
+                        <strong>
+                            <em>{locality.name}</em>
+                        </strong>
+                        &rdquo;?
+                    </DialogDescription>
+                </DialogHeader>
+
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="secondary">Cancelar</Button>
+                    </DialogClose>
+
+                    <Button
+                        onClick={() => {
+                            deleteMutation.mutate(locality.id);
+                        }}
+                        variant="destructive"
+                    >
+                        Eliminar
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+const Page = () => {
+    const { setVariables, activePage, noPages, queryResult } = useLocalities();
 
     const { exportCsv } = useExportLocalitiesCsv();
 
@@ -81,16 +141,18 @@ const Page = () => {
                     <DashboardLayoutBigTitle>Localidades</DashboardLayoutBigTitle>
 
                     <div className="flex space-x-8">
-                        <Button
+                        <DeprecatedButton
                             variant={ButtonVariant.GRAY}
                             onClick={() => {
                                 exportCsv({});
                             }}
                         >
                             Exportar a CSV
-                        </Button>
+                        </DeprecatedButton>
 
-                        <Button href="/localidades/add">+ Añadir localidad</Button>
+                        <DeprecatedButton href="/localidades/add">
+                            + Añadir localidad
+                        </DeprecatedButton>
                     </div>
                 </div>
             }
@@ -99,11 +161,7 @@ const Page = () => {
                 {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
-                        <DataTable
-                            columns={columns}
-                            data={[...new Array(5)].map((_, index) => index)}
-                            rowRenderer={SkeletonRowRenderer}
-                        />
+                        <AdminDataTableLoading columns={columns} />
                     </div>
                 }
                 Error={
@@ -129,29 +187,14 @@ const Page = () => {
 
                     return (
                         <div className="pr-container flex-1 py-5 pl-10">
-                            <DataTable
+                            <AdminDataTable
                                 columns={columns}
-                                data={localities}
-                                rowRenderer={LocalityRowRenderer}
-                                deleteOptions={{
-                                    confirmationText: (locality) => (
-                                        <>
-                                            ¿Estás seguro que deseas eliminar la localidad{' '}
-                                            <b>{locality.name}</b>?
-                                        </>
-                                    ),
-                                    onDeleteClick: (locality) => {
-                                        handleRemove(locality.id);
-                                    },
-                                    isDeleting,
-                                }}
-                            />
-
-                            <DataTablePagination
                                 currentPage={activePage}
-                                hasPrevious={hasPreviousPage}
-                                hasNext={hasNextPage}
-                                totalPages={noPages}
+                                data={localities}
+                                numberOfPages={noPages}
+                                onPageChange={(page: number) => {
+                                    setVariables('page', page);
+                                }}
                             />
                         </div>
                     );

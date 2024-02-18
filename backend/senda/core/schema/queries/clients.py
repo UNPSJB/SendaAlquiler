@@ -20,15 +20,42 @@ from django.db.models.functions import Concat
 
 from senda.core.decorators import employee_or_admin_required, CustomInfo
 
+from typing import List
+
 
 class Query(graphene.ObjectType):
-    clients = graphene.NonNull(PaginatedClientQueryResult, page=graphene.Int())
+    clients = graphene.NonNull(
+        PaginatedClientQueryResult,
+        page=graphene.Int(),
+        localities=graphene.List(graphene.NonNull(graphene.ID)),
+        query=graphene.String(),
+    )
 
     @employee_or_admin_required
-    def resolve_clients(self, info: CustomInfo, page: int):
-        paginator, selected_page = get_paginated_model(
-            ClientModel.objects.all().order_by("-created_on"), page
-        )
+    def resolve_clients(
+        self,
+        info: CustomInfo,
+        page: int,
+        localities: List[str] = None,
+        query: str = None,
+    ):
+        results = ClientModel.objects.all().order_by("-created_on")
+
+        if localities is not None and len(localities) > 0:
+            results = results.filter(locality__in=localities)
+
+        if query is not None:
+            results = results.annotate(
+                full_name=Concat("first_name", Value(" "), "last_name")
+            ).filter(
+                models.Q(first_name__icontains=query)
+                | models.Q(last_name__icontains=query)
+                | models.Q(email__icontains=query)
+                | models.Q(dni__icontains=query)
+                | models.Q(full_name__icontains=query)
+            )
+
+        paginator, selected_page = get_paginated_model(results, page)
 
         return PaginatedClientQueryResult(
             count=paginator.count,

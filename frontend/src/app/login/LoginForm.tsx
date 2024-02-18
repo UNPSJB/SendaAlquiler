@@ -11,7 +11,7 @@ import Input from '@/modules/forms/DeprecatedInput';
 import { RHFFormField } from '@/modules/forms/FormField';
 import { getCleanErrorMessage } from '@/modules/utils';
 
-import Button from '@/components/Button';
+import DeprecatedButton from '@/components/Button';
 
 import { useUserContext } from '../UserProvider';
 
@@ -110,9 +110,9 @@ const LoginForm = () => {
                     </RHFFormField>
                 </div>
 
-                <Button data-cy="login-submit-button" fullWidth type="submit">
+                <DeprecatedButton data-cy="login-submit-button" fullWidth type="submit">
                     Iniciar sesión
-                </Button>
+                </DeprecatedButton>
             </form>
         </FormProvider>
     );

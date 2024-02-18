@@ -50,6 +50,7 @@ fragment PurchaseListItem on Purchase {
     client {
         firstName
         lastName
+        email
     }
 }
 

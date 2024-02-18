@@ -19,7 +19,7 @@ import ProductPurchaseOrderField, {
     ProductQuantityPair,
 } from './components/fields/ProductPurchaseOrderField';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -140,19 +140,19 @@ const CreatePurchaseForm: React.FC<CreatePurchaseFormProps> = ({ cancelHref }) =
                         <h1 className="py-8 pl-10 text-3xl font-black">Venta</h1>
 
                         <div className="space-x-4">
-                            <Button
+                            <DeprecatedButton
                                 variant={ButtonVariant.OUTLINE_WHITE}
                                 href={cancelHref}
                             >
                                 Cancelar
-                            </Button>
+                            </DeprecatedButton>
 
                             <ButtonWithSpinner
                                 onClick={formMethods.handleSubmit(onSubmit, onError)}
                                 variant={ButtonVariant.BLACK}
                                 href={cancelHref}
                                 disabled={formIsValid}
-                                isLoading={isMutating}
+                                showSpinner={isMutating}
                             >
                                 Guardar
                             </ButtonWithSpinner>

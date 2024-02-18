@@ -18,7 +18,7 @@ import { AdminUser, EmployeeUser, isAdmin, isEmployee } from '@/modules/auth/use
 
 import { useUserContext } from './UserProvider';
 
-import Button from '@/components/Button';
+import DeprecatedButton from '@/components/Button';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
 
@@ -117,13 +117,13 @@ const EmployeeContent: React.FC<EmployeeContentProps> = ({
                 <header className="absolute top-0 w-full py-8">
                     <div className="container flex items-center justify-end space-x-4">
                         <span>{user?.email}</span>
-                        <Button
+                        <DeprecatedButton
                             onClick={() => {
                                 signOut();
                             }}
                         >
                             Cerrar sesión
-                        </Button>
+                        </DeprecatedButton>
                     </div>
                 </header>
 

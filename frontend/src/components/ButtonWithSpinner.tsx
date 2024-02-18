@@ -1,14 +1,18 @@
 import clsx from 'clsx';
 import { ComponentProps } from 'react';
 
-import Button from './Button';
 import Spinner from './Spinner/Spinner';
+import { Button } from './ui/button';
 
 type Props = ComponentProps<typeof Button> & {
-    isLoading: boolean;
+    showSpinner: boolean;
 };
 
-const ButtonWithSpinner: React.FC<Props> = ({ isLoading, children, ...props }) => (
+const ButtonWithSpinner: React.FC<Props> = ({
+    showSpinner: isLoading,
+    children,
+    ...props
+}) => (
     <Button className="relative" {...props}>
         <span className={clsx(isLoading && 'invisible')}>{children}</span>
         <span

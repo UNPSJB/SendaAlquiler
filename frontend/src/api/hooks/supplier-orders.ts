@@ -29,8 +29,9 @@ export const useSupplierOrders = () => {
         queryKeys.supplierOrdersPaginatedList,
         SupplierOrdersDocument,
         'supplierOrders',
+        {},
         {
-            page: 'number',
+            page: { type: 'int' },
         },
     );
 };

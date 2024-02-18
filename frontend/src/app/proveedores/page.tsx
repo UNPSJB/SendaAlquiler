@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { MoreVertical } from 'lucide-react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import Skeleton from 'react-loading-skeleton';
 
-import { Supplier, SuppliersQuery } from '@/api/graphql';
+import { SuppliersQuery } from '@/api/graphql';
 import {
     useDeleteSupplier,
     useExportSuppliersCsv,
@@ -15,78 +17,163 @@ import {
 import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
-import DataTable from '@/modules/data-table/DataTable';
-import DataTablePagination from '@/modules/data-table/DataTablePagination';
 
-import Button, { ButtonVariant } from '@/components/Button';
+import { AdminDataTable } from '@/components/admin-data-table';
+import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import { TD, TR } from '@/components/Table';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-const columns = [
-    { key: 'name', label: 'Nombre' },
-    { key: 'email', label: 'Correo' },
-    { key: 'phone', label: 'Celular' },
-    { key: 'address', label: 'Domicilio' },
-    { key: 'locality', label: 'Localidad' },
+type Supplier = SuppliersQuery['suppliers']['results'][0];
+const columnsHelper = createColumnHelper<Supplier>();
+
+const columns: ColumnDef<Supplier, any>[] = [
+    columnsHelper.accessor('name', {
+        id: 'name',
+        header: 'Nombre',
+        cell: (props) => {
+            const supplier = props.row.original;
+
+            return (
+                <Link href={`/proveedores/${supplier.id}`}>
+                    <p className="text-violet-600">{supplier.name}</p>
+
+                    <p className="text-muted-foreground">{supplier.email}</p>
+                </Link>
+            );
+        },
+    }),
+    columnsHelper.accessor('phoneCode', {
+        id: 'phone',
+        header: 'Celular',
+        cell: (props) => {
+            const supplier = props.row.original;
+
+            return (
+                <>
+                    +{supplier.phoneCode}
+                    {supplier.phoneNumber}
+                </>
+            );
+        },
+    }),
+    columnsHelper.accessor('streetName', {
+        id: 'address',
+        header: 'Domicilio',
+        cell: (props) => {
+            const supplier = props.row.original;
+
+            return (
+                <>
+                    {supplier.streetName} {supplier.houseNumber}
+                </>
+            );
+        },
+    }),
+    columnsHelper.accessor('locality', {
+        id: 'locality',
+        header: 'Localidad',
+        cell: (props) => {
+            const supplier = props.row.original;
+
+            return supplier.locality.name;
+        },
+    }),
+    columnsHelper.display({
+        id: 'actions',
+        cell: (props) => {
+            const supplier = props.row.original;
+            return <RowActions supplier={supplier} />;
+        },
+    }),
 ];
 
-const SkeletonRowRenderer = () => {
-    const renderer = (key: number) => (
-        <TR key={key}>
-            {[...new Array(columns.length)].map((_, index) => (
-                <TD key={index}>
-                    <Skeleton width={100}></Skeleton>
-                </TD>
-            ))}
-        </TR>
-    );
-
-    return renderer;
-};
-
-const SupplierRowRenderer = (extraData: React.ReactNode) => {
-    const renderer = (supplier: ArrayElement<SuppliersQuery['suppliers']['results']>) => (
-        <TR key={supplier.id}>
-            <TD>
-                <Link className="text-violet-600" href={`/proveedores/${supplier.id}`}>
-                    {supplier.name}
-                </Link>
-            </TD>
-            <TD>{supplier.email}</TD>
-            <TD>
-                {supplier.phoneCode}
-                {supplier.phoneNumber}
-            </TD>
-            <TD>
-                {supplier.streetName} {supplier.houseNumber}
-            </TD>
-            <TD>{supplier.locality.name}</TD>
-            {extraData}
-        </TR>
-    );
-
-    return renderer;
-};
-
-const Page = () => {
-    const { hasPreviousPage, hasNextPage, activePage, noPages, queryResult } =
-        usePaginatedSuppliers();
-
-    const { mutate, isLoading: isDeleting } = useDeleteSupplier({
+const RowActions = ({ supplier }: { supplier: Supplier }) => {
+    const deleteMutation = useDeleteSupplier({
         onSuccess: () => {
             toast.success('Proveedor eliminado correctamente');
-            queryResult.refetch();
         },
         onError: () => {
-            toast.error('Hubo un error al eliminar el proveedor');
+            toast.error('Ha ocurrido un error al eliminar el proveedor');
         },
     });
 
-    const handleRemove = (id: Supplier['id']) => {
-        mutate(id);
-    };
+    const [open, setOpen] = useState(false);
+
+    return (
+        <Dialog
+            onOpenChange={(next) => {
+                if (deleteMutation.isLoading) {
+                    return;
+                }
+
+                setOpen(next);
+            }}
+            open={open}
+        >
+            <DropdownMenu>
+                <DropdownMenuTrigger>
+                    <MoreVertical className="h-5 w-5" />
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent>
+                    <DialogTrigger asChild>
+                        <DropdownMenuItem>Eliminar</DropdownMenuItem>
+                    </DialogTrigger>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Confirmar eliminación</DialogTitle>
+                    <DialogDescription>
+                        ¿Estás seguro de que quieres eliminar el proveedor &ldquo;
+                        <strong>
+                            <em>{supplier.name}</em>
+                        </strong>
+                        &rdquo;?
+                    </DialogDescription>
+                </DialogHeader>
+
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="secondary">Cancelar</Button>
+                    </DialogClose>
+
+                    <Button
+                        onClick={() => {
+                            deleteMutation.mutate(supplier.id);
+                        }}
+                        variant="destructive"
+                    >
+                        Eliminar
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    );
+};
+
+const Page = () => {
+    const { setVariables, activePage, noPages, queryResult } = usePaginatedSuppliers();
 
     const { exportCsv } = useExportSuppliersCsv();
 
@@ -97,16 +184,18 @@ const Page = () => {
                     <DashboardLayoutBigTitle>Proveedores</DashboardLayoutBigTitle>
 
                     <div className="flex space-x-8">
-                        <Button
+                        <DeprecatedButton
                             variant={ButtonVariant.GRAY}
                             onClick={() => {
                                 exportCsv({});
                             }}
                         >
                             Exportar a CSV
-                        </Button>
+                        </DeprecatedButton>
 
-                        <Button href="/proveedores/add">+ Añadir proveedor</Button>
+                        <DeprecatedButton href="/proveedores/add">
+                            + Añadir proveedor
+                        </DeprecatedButton>
                     </div>
                 </div>
             }
@@ -115,11 +204,7 @@ const Page = () => {
                 {...queryResult}
                 Loading={
                     <div className="pr-container flex-1 py-5 pl-10">
-                        <DataTable
-                            columns={columns}
-                            data={[...new Array(5)].map((_, index) => index)}
-                            rowRenderer={SkeletonRowRenderer}
-                        />
+                        <AdminDataTableLoading columns={columns} />
                     </div>
                 }
                 Error={
@@ -145,29 +230,14 @@ const Page = () => {
 
                     return (
                         <div className="pr-container flex-1 py-5 pl-10">
-                            <DataTable
+                            <AdminDataTable
                                 columns={columns}
-                                data={suppliers}
-                                rowRenderer={SupplierRowRenderer}
-                                deleteOptions={{
-                                    confirmationText: (supplier) => (
-                                        <>
-                                            ¿Estás seguro de que quieres eliminar el
-                                            proveedor <strong>{supplier.name}</strong>?
-                                        </>
-                                    ),
-                                    onDeleteClick: (supplier) => {
-                                        handleRemove(supplier.id);
-                                    },
-                                    isDeleting,
-                                }}
-                            />
-
-                            <DataTablePagination
                                 currentPage={activePage}
-                                hasPrevious={hasPreviousPage}
-                                hasNext={hasNextPage}
-                                totalPages={noPages}
+                                data={suppliers}
+                                numberOfPages={noPages}
+                                onPageChange={(page: number) => {
+                                    setVariables('page', page);
+                                }}
                             />
                         </div>
                     );

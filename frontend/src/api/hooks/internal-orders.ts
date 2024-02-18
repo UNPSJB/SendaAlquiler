@@ -44,8 +44,9 @@ export const usePaginatedInternalOrders = () => {
         queryKeys.internalOrdersPaginatedList,
         InternalOrdersDocument,
         'internalOrders',
+        {},
         {
-            page: 'number',
+            page: { type: 'int' },
         },
     );
 };
