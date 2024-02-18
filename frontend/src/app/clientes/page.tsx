@@ -106,7 +106,11 @@ const columns: ColumnDef<Client, any>[] = [
         id: 'actions',
         cell: (props) => {
             const client = props.row.original;
-            return <RowActions client={client} />;
+            return (
+                <div className="flex justify-end">
+                    <RowActions client={client} />
+                </div>
+            );
         },
     }),
 ] as const;

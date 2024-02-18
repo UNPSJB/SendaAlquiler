@@ -89,7 +89,11 @@ const columns: ColumnDef<InternalOrder, any>[] = [
         cell: (props) => {
             const internalOrder = props.row.original;
 
-            return <RowActions internalOrder={internalOrder} />;
+            return (
+                <div className="flex justify-end">
+                    <RowActions internalOrder={internalOrder} />
+                </div>
+            );
         },
     }),
 ];

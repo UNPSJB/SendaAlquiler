@@ -86,7 +86,11 @@ const columns: ColumnDef<Purchase, any>[] = [
         id: 'actions',
         cell: (props) => {
             const purchase = props.row.original;
-            return <RowActions purchase={purchase} />;
+            return (
+                <div className="flex justify-end">
+                    <RowActions purchase={purchase} />
+                </div>
+            );
         },
     }),
 ];

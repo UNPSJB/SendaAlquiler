@@ -78,7 +78,11 @@ const columns: ColumnDef<Employee, any>[] = [
         id: 'actions',
         cell: (props) => {
             const employee = props.row.original;
-            return <RowActions employee={employee} />;
+            return (
+                <div className="flex justify-end">
+                    <RowActions employee={employee} />
+                </div>
+            );
         },
     }),
 ];

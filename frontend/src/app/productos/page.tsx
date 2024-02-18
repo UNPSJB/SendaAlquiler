@@ -84,7 +84,11 @@ const columns: ColumnDef<ProductListItemFragment, any>[] = [
     columnsHelper.display({
         id: 'actions',
         cell: (props) => {
-            return <RowActions product={props.row.original} />;
+            return (
+                <div className="flex justify-end">
+                    <RowActions product={props.row.original} />
+                </div>
+            );
         },
     }),
 ];

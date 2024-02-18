@@ -101,7 +101,11 @@ const columns: ColumnDef<Supplier, any>[] = [
         id: 'actions',
         cell: (props) => {
             const supplier = props.row.original;
-            return <RowActions supplier={supplier} />;
+            return (
+                <div className="flex justify-end">
+                    <RowActions supplier={supplier} />
+                </div>
+            );
         },
     }),
 ];

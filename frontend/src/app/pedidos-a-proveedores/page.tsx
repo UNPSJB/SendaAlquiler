@@ -80,7 +80,11 @@ const columns: ColumnDef<OrderSupplier, any>[] = [
         cell: (props) => {
             const supplierOrder = props.row.original;
 
-            return <RowActions supplierOrder={supplierOrder} />;
+            return (
+                <div className="flex justify-end">
+                    <RowActions supplierOrder={supplierOrder} />
+                </div>
+            );
         },
     }),
 ];

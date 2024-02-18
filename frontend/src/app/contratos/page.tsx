@@ -73,7 +73,11 @@ const columns: ColumnDef<RentalContract, any>[] = [
         cell: (props) => {
             const contract = props.row.original;
 
-            return <RowActions contract={contract} />;
+            return (
+                <div className="flex justify-end">
+                    <RowActions contract={contract} />
+                </div>
+            );
         },
     }),
 ];

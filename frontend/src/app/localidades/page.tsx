@@ -58,7 +58,11 @@ const columns: ColumnDef<Locality, any>[] = [
         cell: (props) => {
             const locality = props.row.original;
 
-            return <RowActions locality={locality} />;
+            return (
+                <div className="flex justify-end">
+                    <RowActions locality={locality} />
+                </div>
+            );
         },
     }),
 ];
