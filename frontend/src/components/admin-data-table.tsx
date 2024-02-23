@@ -18,6 +18,7 @@ import {
     Table,
     TableBody,
     TableCell,
+    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
@@ -97,6 +98,23 @@ export const AdminDataTable = <TData, TValue>({
                             </TableRow>
                         )}
                     </TableBody>
+
+                    <TableFooter>
+                        {table.getFooterGroups().map((footerGroup) => (
+                            <TableRow key={footerGroup.id}>
+                                {footerGroup.headers.map((footer) => {
+                                    return (
+                                        <TableCell key={footer.id}>
+                                            {flexRender(
+                                                footer.column.columnDef.footer,
+                                                footer.getContext(),
+                                            )}
+                                        </TableCell>
+                                    );
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableFooter>
                 </Table>
             </div>
 
