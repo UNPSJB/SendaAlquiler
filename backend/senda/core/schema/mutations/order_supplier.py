@@ -3,13 +3,15 @@ from typing import Any, List
 import graphene
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
-from senda.core.models.offices import OfficeModel
+from senda.core.models.offices import Office
 from senda.core.models.order_supplier import (
-    SupplierOrderModel,
-    SupplierOrderHistoryModel,
+    SupplierOrder,
+    SupplierOrderHistory,
     SupplierOrderHistoryStatusChoices,
+    SupplierOrderDetailsDict,
+    SupplierOrderItemDetailsDict,
 )
-from senda.core.schema.custom_types import OrderSupplier
+from senda.core.schema.custom_types import OrderSupplierType
 from senda.core.models.suppliers import SupplierModel
 from utils.graphene import input_object_type_to_dict, non_null_list_of
 
@@ -34,28 +36,8 @@ class CreateSupplierOrderInput(graphene.InputObjectType):
     products = non_null_list_of(CreateSupplierOrderProductInput)
 
 
-def get_office(office_id: str):
-    if office_id:
-        try:
-            return OfficeModel.objects.get(id=office_id)
-        except ObjectDoesNotExist:
-            raise ValueError(ErrorMessages.OFFICE_NOT_FOUND)
-    else:
-        return None
-
-
-def get_supplier(supplier_id: str):
-    if supplier_id:
-        try:
-            return SupplierModel.objects.get(id=supplier_id)
-        except ObjectDoesNotExist:
-            raise ValueError(ErrorMessages.SUPPLIER_NOT_FOUND)
-    else:
-        return None
-
-
 class CreateSupplierOrder(graphene.Mutation):
-    supplier_order = graphene.Field(OrderSupplier)
+    supplier_order = graphene.Field(OrderSupplierType)
     error = graphene.String()
 
     class Arguments:
@@ -63,24 +45,31 @@ class CreateSupplierOrder(graphene.Mutation):
 
     @employee_or_admin_required
     def mutate(self, info: CustomInfo, data: CreateSupplierOrderInput):
-        data_dict = input_object_type_to_dict(data)
+        office_id = info.context.office_id
+
+        products: List[CreateSupplierOrderProductInput] = data.products
+        items_data_dicts: List[SupplierOrderItemDetailsDict] = []
+        for product in products:
+            if product.quantity <= 0:
+                return CreateSupplierOrder(error="La cantidad de productos debe ser mayor a 0")
+
+            items_data_dicts.append(
+                SupplierOrderItemDetailsDict(
+                    product_id=product.id,
+                    quantity_ordered=product.quantity,
+                )
+            )
 
         try:
-            office_destination_id = data_dict.pop("office_destination_id")
-            office_destination = get_office(office_destination_id)
-            if office_destination is None:
-                raise ValueError(ErrorMessages.INVALID_OFFICE)
-
-            supplier_id = data_dict.pop("supplier_id")
-            supplier = get_supplier(supplier_id)
-            if supplier is None:
-                raise ValueError(ErrorMessages.INVALID_SUPPLIER)
-
-            order_supplier = SupplierOrderModel.objects.create_supplier_order(
-                supplier=supplier,
-                office_destination=office_destination,
-                user=info.context.user,
-                **data_dict,
+            order_supplier = SupplierOrder.objects.create_supplier_order(
+                items_data=items_data_dicts,
+                order_data=SupplierOrderDetailsDict(
+                    supplier_id=data.supplier_id,
+                    target_office_id=int(office_id),
+                    requested_for_date=None,
+                    approximate_delivery_date=None,
+                    note=None,
+                ),
             )
         except (ValidationError, ValueError, ObjectDoesNotExist) as e:
             return CreateSupplierOrder(error=str(e))
@@ -99,7 +88,7 @@ class BaseChangeOrderSupplierStatus(graphene.Mutation):
 
     @classmethod
     def get_order_supplier(cls, id: str):
-        order_supplier = SupplierOrderModel.objects.filter(id=id).first()
+        order_supplier = SupplierOrder.objects.filter(id=id).first()
         if order_supplier is None:
             raise Exception("No existe un pedido con ese ID")
 
@@ -108,16 +97,17 @@ class BaseChangeOrderSupplierStatus(graphene.Mutation):
     @classmethod
     def check_order_supplier_status_is_one_of_and_update_status(
         cls,
-        order: SupplierOrderModel,
+        order: SupplierOrder,
         status: List[SupplierOrderHistoryStatusChoices],
         new_status: SupplierOrderHistoryStatusChoices,
     ):
-        if not order.current_history or order.current_history.status not in status:
+        if (
+            not order.latest_history_entry
+            or order.latest_history_entry.status not in status
+        ):
             raise Exception("La orden no esta en un estado valido")
 
-        SupplierOrderHistoryModel.objects.create(
-            supplier_order=order, status=new_status
-        )
+        SupplierOrderHistory.objects.create(supplier_order=order, status=new_status)
 
     @classmethod
     def mutate(cls, self: "ReceiveOrderSupplier", info: Any, order_supplier_id: str):
@@ -165,7 +155,7 @@ class DeleteSupplierOrder(graphene.Mutation):
     @employee_or_admin_required
     def mutate(self, info: CustomInfo, id: str):
         try:
-            order_supplier = SupplierOrderModel.objects.get(id=id)
+            order_supplier = SupplierOrder.objects.get(id=id)
             order_supplier.delete()
         except ObjectDoesNotExist:
             return DeleteSupplierOrder(success=False)

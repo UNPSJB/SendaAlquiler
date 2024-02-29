@@ -107,12 +107,12 @@ const ProductsFromSupplierField: React.FC<Props> = ({ office }) => {
                                     type="number"
                                     placeholder="1"
                                     min={1}
-                                    max={currentData?.stock}
+                                    max={currentData?.quantity}
                                     control={control}
                                     rules={{
                                         required: true,
                                         min: 1,
-                                        max: currentData?.stock,
+                                        max: currentData?.quantity,
                                         valueAsNumber: true,
                                     }}
                                 />

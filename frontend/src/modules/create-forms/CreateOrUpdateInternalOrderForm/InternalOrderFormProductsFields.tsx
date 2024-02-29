@@ -8,11 +8,11 @@ import ProductsFromOfficeField from '../components/fields/ProductsFromOfficeFiel
 
 const InternalOrderFormProductsFields: React.FC = () => {
     const { watch, setValue } = useFormContext<CreateOrUpdateInternalOrderFormValues>();
-    const officeBranch = watch('officeBranch')?.value;
+    const sourceOffice = watch('sourceOffice')?.value;
 
     useEffect(() => {
         const subscription = watch((value, { name }) => {
-            if (name === 'officeBranch') {
+            if (name === 'sourceOffice') {
                 setValue('products', []);
             }
         });
@@ -20,7 +20,7 @@ const InternalOrderFormProductsFields: React.FC = () => {
         return () => subscription.unsubscribe();
     }, [watch, setValue]);
 
-    if (typeof officeBranch === 'undefined') {
+    if (typeof sourceOffice === 'undefined') {
         return (
             <FetchStatusMessageWithDescription
                 title="Selecciona una sucursal de origen"
@@ -29,7 +29,7 @@ const InternalOrderFormProductsFields: React.FC = () => {
         );
     }
 
-    return <ProductsFromOfficeField office={officeBranch} />;
+    return <ProductsFromOfficeField office={sourceOffice} />;
 };
 
 export default InternalOrderFormProductsFields;

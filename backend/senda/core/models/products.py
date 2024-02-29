@@ -1,77 +1,176 @@
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, TypedDict, List
 
-from django.db import models
+from django.db import models, transaction
 
 from extensions.db.models import TimeStampedModel
-from senda.core.managers import ProductModelManager
-from senda.core.models.offices import OfficeModel
+from senda.core.models.offices import Office
 from senda.core.models.suppliers import SupplierModel
 from datetime import datetime
+from django.core.exceptions import ValidationError
 
 if TYPE_CHECKING:
-    from senda.core.models.rental_contracts import (
-        RentalContractItemModel,
-    )
+    from senda.core.models.contract import ContractItem
+
+
+class ProductDataDict(TypedDict):
+    sku: str
+    name: str
+    description: Optional[str]
+    brand_id: Optional[int]
+    type: "ProductTypeChoices"
+    price: Optional[int]
+
+
+class ProductStockItemDataDict(TypedDict):
+    product_id: int
+    office_id: int
+    quantity: int
+
+
+class ProductSupplierDataDict(TypedDict):
+    product_id: int
+    supplier_id: int
+    price: int
+
+
+class ProductServiceDataDict(TypedDict):
+    product_id: int
+    service_id: Optional[int]
+    name: str
+    price: int
+    billing_type: "ProductServiceBillingTypeChoices"
+    billing_period: Optional[int]
+
+
+class ProductManager(models.Manager["Product"]):
+    def create_product(self, product_data: ProductDataDict) -> "Product":
+        try:
+            product = self.create(
+                sku=product_data.get("sku"),
+                name=product_data.get("name"),
+                description=product_data.get("description"),
+                brand_id=product_data.get("brand_id"),
+                type=product_data.get("type"),
+                price=product_data.get("price"),
+            )
+
+            return product
+        except ValidationError as e:
+            raise ValueError(f"Invalid product data: {e}")
+
+    def edit_product(self, product_id: int, product_data: ProductDataDict) -> "Product":
+        try:
+            product = self.get(pk=product_id)
+            product.sku = product_data.get("sku")
+            product.name = product_data.get("name")
+            product.description = product_data.get("description")
+            product.brand_id = product_data.get("brand_id")
+            product.type = product_data.get("type")
+            product.price = product_data.get("price")
+            product.full_clean()
+            product.save()
+
+            return product
+        except self.model.DoesNotExist:
+            raise ValueError("Product with the given ID does not exist.")
+        except ValidationError as e:
+            raise ValueError(f"Invalid product data: {e}")
+
+    def update_or_create_stock_items(
+        self, product_id: int, stocks_data: List[ProductStockItemDataDict]
+    ) -> None:
+        with transaction.atomic():
+            product = self.get(pk=product_id)
+            for item_data in stocks_data:
+                office_id = item_data["office_id"]
+                quantity = item_data["quantity"]
+
+                # Validate quantity
+                if quantity < 0:
+                    raise ValueError("Quantity cannot be negative.")
+
+                stock_item, created = StockItem.objects.get_or_create(
+                    product=product,
+                    office_id=office_id,
+                    defaults={"quantity": quantity},
+                )
+
+                if not created:
+                    stock_item.quantity = quantity
+                    stock_item.save()
+
+    def update_or_create_product_suppliers(
+        self, product_id: int, suppliers_data: List[ProductSupplierDataDict]
+    ) -> None:
+        with transaction.atomic():
+            product = self.get(pk=product_id)
+            for supplier_data in suppliers_data:
+                supplier_id = supplier_data["supplier_id"]
+                price = supplier_data["price"]
+
+                # Validate price
+                if price < 0:
+                    raise ValueError("Price cannot be negative.")
+
+                product_supplier, created = ProductSupplier.objects.get_or_create(
+                    product=product, supplier_id=supplier_id, defaults={"price": price}
+                )
+
+                if not created:
+                    product_supplier.price = price
+                    product_supplier.save()
+
+    def update_or_create_product_services(
+        self, product_id: int, services_data: List[ProductServiceDataDict]
+    ) -> None:
+        with transaction.atomic():
+            product = self.get(pk=product_id)
+            for service_data in services_data:
+                service_id = service_data.get("service_id")
+                name = service_data["name"]
+                price = service_data["price"]
+
+                # Validate price
+                if price < 0:
+                    raise ValueError("Price cannot be negative.")
+
+                if service_id:
+                    product_service = product.services.get(pk=service_id)
+                    product_service.name = name
+                    product_service.price = price
+                    product_service.billing_type = service_data["billing_type"]
+                    product_service.billing_period = service_data.get("billing_period")
+                    product_service.save()
+                else:
+                    product_service = ProductService.objects.create(
+                        product=product,
+                        name=name,
+                        price=price,
+                        billing_type=service_data.get("billing_type"),
+                        billing_period=service_data.get("billing_period"),
+                    )
 
 
 class ProductTypeChoices(models.TextChoices):
-    """
-    Enum-like class representing choices for product types. Inherits from models.TextChoices.
-
-    Provides predefined choices like ALQUILABLE and COMERCIABLE, each being a tuple with the internal identifier and the human-readable name.
-    """
-
     ALQUILABLE = "ALQUILABLE", "ALQUILABLE"
     COMERCIABLE = "COMERCIABLE", "COMERCIABLE"
 
 
-class BrandModel(TimeStampedModel):
-    """
-    Represents a brand in the Senda system. Inherits from TimeStampedModel for creation and modification timestamps.
-
-    Attributes:
-        name (models.CharField): The name of the brand.
-
-    Methods:
-        __str__: Returns the string representation of the brand, which is its name.
-    """
-
+class Brand(TimeStampedModel):
     name = models.CharField(max_length=50)
 
     def __str__(self) -> str:
         return self.name
 
+    objects = models.Manager()
 
-class ProductModel(TimeStampedModel):
-    """
-    Represents a product in the Senda system. Inherits from TimeStampedModel for timestamps.
 
-    Attributes:
-        stock (models.QuerySet["ProductStockInOfficeModel"]): A queryset for accessing the product's stock in different offices.
-        suppliers (models.QuerySet["ProductSupplierModel"]): A queryset for accessing the product's suppliers.
-        services (models.QuerySet["ProductServiceModel"]): A queryset for accessing the services related to the product.
-        sku (models.CharField): The unique SKU of the product.
-        name (models.CharField): The name of the product.
-        description (models.TextField): The description of the product.
-        brand (models.ForeignKey): A foreign key to BrandModel, representing the product's brand.
-        type (models.CharField): The type of the product, using choices from ProductTypeChoices.
-        price (models.DecimalField): The price of the product.
-
-    Meta:
-        Defines a check constraint to ensure the price is greater than or equal to 0.
-
-    Methods:
-        __str__: Returns the string representation of the product, which is its name.
-        clean: Custom validation logic before saving the product.
-        save: Overridden save method to include custom validation.
-
-    objects (ProductModelManager): Custom manager for additional functionalities.
-    """
-
-    stock: models.QuerySet["ProductStockInOfficeModel"]
-    suppliers: models.QuerySet["ProductSupplierModel"]
-    services: models.QuerySet["ProductServiceModel"]
-    rental_contract_items: models.QuerySet["RentalContractItemModel"]
+class Product(TimeStampedModel):
+    stock_items: models.QuerySet["StockItem"]
+    suppliers: models.QuerySet["SupplierModel"]
+    services: models.QuerySet["ProductService"]
+    contract_items: models.QuerySet["ContractItem"]
+    brand_id: int
 
     sku = models.CharField(
         max_length=10, null=True, blank=True, unique=True, db_index=True
@@ -79,27 +178,20 @@ class ProductModel(TimeStampedModel):
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     brand = models.ForeignKey(
-        BrandModel,
+        Brand,
         on_delete=models.CASCADE,
         related_name="products",
         null=True,
         blank=True,
     )
     type = models.CharField(max_length=50, choices=ProductTypeChoices.choices)
-    price = models.IntegerField(null=True, blank=True,)
+    price = models.IntegerField(
+        null=True,
+        blank=True,
+    )
 
     def __str__(self) -> str:
         return self.name
-
-    def clean(self, *args: Any, **kwargs: Any) -> None:
-        if not self.brand and self.type == ProductTypeChoices.COMERCIABLE:
-            raise ValueError("Brand is required for COMERCIABLE products")
-
-        return super().clean(*args, **kwargs)
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        self.clean()
-        super().save(*args, **kwargs)
 
     class Meta(TimeStampedModel.Meta):
         constraints = [
@@ -108,97 +200,88 @@ class ProductModel(TimeStampedModel):
             ),
         ]
 
-    objects: ProductModelManager = ProductModelManager()  # pyright: ignore
+    objects: ProductManager = ProductManager()
 
-    def get_stock_for_office(
-        self, office: OfficeModel
-    ) -> Optional["ProductStockInOfficeModel"]:
-        stock_data = self.stock.filter(office=office).first()
-
-        if not stock_data:
-            return None
-
-        return stock_data
-
-    def get_office_available_stock_between_dates(
-        self, office: "OfficeModel", start_date: datetime, end_date: datetime
-    ) -> int:
-        from senda.core.models.rental_contracts import (
-            RentalContractStatusChoices,
-            RentalContractItemOfficeOrderModel,
-        )
-
-        available_stock = (
-            self.stock.filter(office=office).aggregate(total=models.Sum("stock"))[
-                "total"
+    @property
+    def available_stock(self) -> int:
+        return (
+            self.stock_items.aggregate(total_stock=models.Sum("quantity"))[
+                "total_stock"
             ]
             or 0
         )
 
-        reserved_stock = (
-            RentalContractItemOfficeOrderModel.objects.filter(
-                models.Q(
-                    item__rental_contract__current_history__status=RentalContractStatusChoices.CON_DEPOSITO
-                )
-                | models.Q(
-                    item__rental_contract__current_history__status=RentalContractStatusChoices.ACTIVO
-                ),
-                item__product=self,
-                item__rental_contract__contract_start_datetime__date__gte=start_date,
-                item__rental_contract__contract_start_datetime__date__lte=end_date,
-                office=office,
-            ).aggregate(total=models.Sum("quantity"))["total"]
-            or 0
+    def get_stock_for_office(self, office_id: int) -> Optional[int]:
+        stock_item = self.stock_items.filter(office_id=office_id).first()
+
+        if not stock_item:
+            return None
+
+        return stock_item.quantity
+
+    def calculate_stock_availability(
+        self, office_id: int, start_date: str, end_date: str
+    ) -> int:
+        """Calculates available stock subtracting reserved items within a date range for a specific office."""
+
+        # TODO: TAKE INTO ACCOUNT INTERNAL ORDERS
+
+        from senda.core.models.contract import (
+            ContractStatusChoices,
+            ContractItemProductAllocation,
         )
+
+        available_stock = self.get_stock_for_office(office_id) or 0
+
+        # take into account ContractItemProductAllocation "office_id" field
+        allocated_stock_qs = ContractItemProductAllocation.objects.filter(
+            item__product_id=self.id,
+            item__contract__latest_history_entry__status__in=[
+                ContractStatusChoices.CON_DEPOSITO,
+                ContractStatusChoices.ACTIVO,
+            ],
+            item__contract__contract_start_datetime__date__range=(
+                start_date,
+                end_date,
+            ),
+            office_id=office_id,
+        ).aggregate(total_allocated=models.Sum("quantity"))
+
+        allocated_stock = allocated_stock_qs["total_allocated"] or 0
+
+        return available_stock - allocated_stock
+
+    def calculate_global_stock_availability(
+        self, start_date: datetime, end_date: datetime
+    ) -> int:
+        """Calculates global available stock subtracting reserved items within a date range across all offices."""
+        from senda.core.models.contract import ContractStatusChoices
+
+        available_stock = self.available_stock
+        reserved_stock_qs = self.contract_items.filter(
+            contract__latest_history_entry__status__in=[
+                ContractStatusChoices.CON_DEPOSITO,
+                ContractStatusChoices.ACTIVO,
+            ],
+            contract__contract_start_datetime__date__range=(
+                start_date,
+                end_date,
+            ),
+        ).aggregate(total_reserved=models.Sum("quantity"))
+
+        reserved_stock = reserved_stock_qs["total_reserved"] or 0
 
         return available_stock - reserved_stock
 
-    def get_global_available_stock_between_dates(self, start_date, end_date) -> int:
-        from senda.core.models.rental_contracts import (
-            RentalContractStatusChoices,
-        )
 
-        available_stock_among_offices = (
-            self.stock.aggregate(total=models.Sum("stock"))["total"] or 0
-        )
-
-        reserved_stock = (
-            self.rental_contract_items.filter(
-                models.Q(
-                    rental_contract__current_history__status=RentalContractStatusChoices.CON_DEPOSITO
-                )
-                | models.Q(
-                    rental_contract__current_history__status=RentalContractStatusChoices.ACTIVO
-                ),
-                rental_contract__contract_start_datetime__date__gte=start_date,
-                rental_contract__contract_start_datetime__date__lte=end_date,
-            ).aggregate(total=models.Sum("quantity"))["total"]
-            or 0
-        )
-
-        return available_stock_among_offices - reserved_stock
-
-
-class ProductStockInOfficeModel(TimeStampedModel):
-    """
-    Represents the stock of a specific product in a specific office. Inherits from TimeStampedModel.
-
-    Attributes:
-        office (models.ForeignKey): A foreign key to OfficeModel, representing the office where the stock is located.
-        product (models.ForeignKey): A foreign key to ProductModel, linking to the specific product.
-        stock (models.IntegerField): The quantity of the product in stock at the specified office.
-
-    Meta:
-        Defines a unique constraint to ensure uniqueness of the product-office combination.
-    """
-
+class StockItem(TimeStampedModel):
     office = models.ForeignKey(
-        OfficeModel, on_delete=models.CASCADE, related_name="stock", db_index=True
+        Office, on_delete=models.CASCADE, related_name="stock_items", db_index=True
     )
     product = models.ForeignKey(
-        ProductModel, on_delete=models.CASCADE, related_name="stock", db_index=True
+        Product, on_delete=models.CASCADE, related_name="stock_items", db_index=True
     )
-    stock = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField()
 
     class Meta(TimeStampedModel.Meta):
         constraints = [
@@ -208,23 +291,12 @@ class ProductStockInOfficeModel(TimeStampedModel):
     def __str__(self) -> str:
         return f"{self.product} - {self.office}"
 
-    def reduce_stock(self, quantity: int) -> None:
-        self.stock -= quantity
-        self.save()
+    objects = models.Manager()
 
 
-class ProductSupplierModel(TimeStampedModel):
-    """
-    Represents a supplier's offering for a specific product. Inherits from TimeStampedModel.
-
-    Attributes:
-        product (models.ForeignKey): A foreign key to ProductModel, linking to the product.
-        supplier (models.ForeignKey): A foreign key to SupplierModel, linking to the supplier.
-        price (models.DecimalField): The price at which the supplier offers the product.
-    """
-
+class ProductSupplier(TimeStampedModel):
     product = models.ForeignKey(
-        ProductModel, on_delete=models.CASCADE, related_name="suppliers"
+        Product, on_delete=models.CASCADE, related_name="suppliers"
     )
     supplier = models.ForeignKey(
         SupplierModel, on_delete=models.CASCADE, related_name="products"
@@ -234,29 +306,29 @@ class ProductSupplierModel(TimeStampedModel):
     def __str__(self) -> str:
         return f"{self.product} - {self.supplier}"
 
+    objects = models.Manager()
 
-class ProductServiceModel(TimeStampedModel):
-    """
-    Represents a service associated with a product. Inherits from TimeStampedModel.
 
-    Attributes:
-        product (models.ForeignKey): A foreign key to ProductModel, linking to the product.
-        name (models.CharField): The name of the service.
-        price (models.DecimalField): The price of the service.
+class ProductServiceBillingTypeChoices(models.TextChoices):
+    ONE_TIME = "ONE_TIME", "ONE_TIME"
+    WEEKLY = "WEEKLY", "WEEKLY"
+    MONTHLY = "MONTHLY", "MONTHLY"
+    CUSTOM = "CUSTOM", "CUSTOM"
 
-    Meta:
-        Defines unique constraint for the combination of product and service name, and a check constraint to ensure the price is greater than or equal to 0.
 
-    Methods:
-        __str__: Returns a string representation of the service, showing the product and service name.
-    """
-
+class ProductService(TimeStampedModel):
     product = models.ForeignKey(
-        ProductModel, on_delete=models.CASCADE, related_name="services"
+        Product, on_delete=models.CASCADE, related_name="services"
     )
 
     name = models.CharField(max_length=100)
     price = models.IntegerField()
+    billing_type = models.CharField(
+        max_length=50, choices=ProductServiceBillingTypeChoices.choices
+    )
+    billing_period = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Periodo de facturación en días"
+    )
 
     def __str__(self) -> str:
         return f"{self.product} - {self.name}"
@@ -270,3 +342,5 @@ class ProductServiceModel(TimeStampedModel):
             ),
             models.CheckConstraint(check=models.Q(price__gte=0), name="price_gte_0"),
         ]
+
+    objects = models.Manager()

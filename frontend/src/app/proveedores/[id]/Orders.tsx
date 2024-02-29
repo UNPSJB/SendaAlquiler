@@ -57,7 +57,7 @@ const SupplierByIdOrdersTab: React.FC<SupplierOrderBySupplierIdTabComponentProps
                                     </LI>
                                     <LI>
                                         <SN>Estado: </SN>
-                                        {order.currentHistory?.status}
+                                        {order.latestHistoryEntry?.status}
                                     </LI>
                                     <UL>
                                         <h2 className="text-xl font-bold">
@@ -65,18 +65,18 @@ const SupplierByIdOrdersTab: React.FC<SupplierOrderBySupplierIdTabComponentProps
                                         </h2>
                                         <LI>
                                             <SN>Nombre: </SN>
-                                            {order.officeDestination.name}{' '}
+                                            {order.targetOffice.name}{' '}
                                         </LI>
                                         <LI>
                                             <SN>Direccion : </SN>
-                                            {order.officeDestination.street}{' '}
-                                            {order.officeDestination.houseNumber}
+                                            {order.targetOffice.street}{' '}
+                                            {order.targetOffice.houseNumber}
                                         </LI>
                                     </UL>
                                 </div>
                                 <div className="border-t">
                                     <div className="p-4">
-                                        {order.orders.map((orderItem) => (
+                                        {order.orderItems.map((orderItem) => (
                                             <div
                                                 key={orderItem.id}
                                                 className="flex justify-between"
@@ -86,7 +86,7 @@ const SupplierByIdOrdersTab: React.FC<SupplierOrderBySupplierIdTabComponentProps
                                                     {orderItem.product.brand?.name}
                                                 </div>
                                                 <div className="text-muted-foreground">
-                                                    {orderItem.quantity} .u x ${' '}
+                                                    {orderItem.quantityOrdered} .u x ${' '}
                                                     {orderItem.product.price}
                                                 </div>
                                             </div>

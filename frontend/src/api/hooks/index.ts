@@ -5,7 +5,7 @@ export * from './employees';
 export * from './localities';
 export * from './offices';
 export * from './products';
-export * from './purchases';
+export * from './sales';
 export * from './supplier-orders';
 export * from './suppliers';
 export * from './internal-orders';

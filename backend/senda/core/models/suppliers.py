@@ -5,26 +5,14 @@ from senda.core.models.localities import LocalityModel
 from senda.core.managers import SupplierModelManager
 from senda.core.validators import only_digits_validator
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from senda.core.models.order_supplier import SupplierOrder
+
 
 class SupplierModel(TimeStampedModel):
-    """
-    Represents a supplier in the Senda system. Inherits from TimeStampedModel for creation and modification timestamps.
-
-    Attributes:
-        cuit (models.CharField): The CUIT (unique tax identification code) of the supplier.
-        name (models.CharField): The name of the supplier.
-        email (models.EmailField): The unique email address of the supplier.
-        locality (models.ForeignKey): A foreign key to LocalityModel, representing the locality where the supplier is located.
-        house_number (models.CharField): The house number of the supplier's address, with a helper text explaining its purpose.
-        street_name (models.CharField): The street name of the supplier's address, with a helper text explaining its purpose.
-        house_unit (models.CharField): The house unit number, which can be blank or null, with a helper text explaining its purpose.
-        phone_code (models.CharField): The area code of the supplier's phone number, validated to ensure only digits are present.
-        phone_number (models.CharField): The phone number of the supplier, validated to ensure only digits are present.
-        note (models.TextField): An optional field for additional notes about the supplier.
-
-    Methods:
-        __str__: Returns a string representation of the supplier, which is its name.
-    """
+    outgoing_supplier_orders: "models.QuerySet[SupplierOrder]"
 
     cuit = models.CharField(max_length=12)
     name = models.CharField(max_length=30)

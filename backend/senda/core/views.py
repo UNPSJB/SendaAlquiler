@@ -3,7 +3,7 @@ from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 import pdfkit
 
-from .models.rental_contracts import RentalContractModel
+from .models.contract import Contract
 from django.http import HttpResponseNotFound
 
 from django.shortcuts import render
@@ -11,12 +11,12 @@ from django.http import HttpResponse  # new
 
 
 def download_pdf(request, contract_id: str):
-    contract = RentalContractModel.objects.filter(id=contract_id).first()
+    contract = Contract.objects.filter(id=contract_id).first()
 
     if not contract:
         return HttpResponseNotFound("Contract not found")
 
-    items = contract.rental_contract_items.all()
+    items = contract.contract_items.all()
 
     pdf_template = "core/proposal_pdf.html"
 
@@ -32,7 +32,7 @@ def download_pdf(request, contract_id: str):
             {
                 "name": item.product.name,
                 "units": item.quantity,
-                "price": item.price,
+                "price": item.product_price,
                 "discount": 0,
                 "total": item.total,
             }

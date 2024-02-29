@@ -63,25 +63,25 @@ const columns: ColumnDef<InternalOrder, any>[] = [
             );
         },
     }),
-    columnsHelper.accessor('officeBranch.name', {
+    columnsHelper.accessor('sourceOffice.name', {
         id: 'office',
         header: 'Origen',
     }),
-    columnsHelper.accessor('officeDestination.name', {
+    columnsHelper.accessor('targetOffice.name', {
         id: 'destination',
         header: 'Destino',
     }),
-    columnsHelper.accessor('currentHistory.status', {
+    columnsHelper.accessor('latestHistoryEntry.status', {
         id: 'status',
         header: 'Estado',
         cell: (props) => {
             const internalOrder = props.row.original;
 
-            if (!internalOrder.currentHistory) {
+            if (!internalOrder.latestHistoryEntry) {
                 return '-';
             }
 
-            return <Status status={internalOrder.currentHistory.status} />;
+            return <Status status={internalOrder.latestHistoryEntry.status} />;
         },
     }),
     columnsHelper.display({
@@ -230,7 +230,7 @@ const Page = () => {
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
-                    <div className="pr-container flex-1 py-5 pl-10">
+                    <div className="pr-container flex-1 py-5 pl-8">
                         <AdminDataTableLoading columns={columns} />
                     </div>
                 }
@@ -256,7 +256,7 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 py-5 pl-10">
+                        <div className="pr-container flex-1 pl-8">
                             <AdminDataTable
                                 columns={columns}
                                 currentPage={activePage}

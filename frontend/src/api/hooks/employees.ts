@@ -28,10 +28,15 @@ export const useEmployees = () => {
         queryKeys.employeesPaginatedList,
         EmployeesDocument,
         'employees',
-        {},
+        {
+            query: null,
+        },
         {
             page: {
                 type: 'int',
+            },
+            query: {
+                type: 'string',
             },
         },
     );

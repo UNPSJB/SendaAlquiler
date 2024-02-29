@@ -18,8 +18,8 @@ This document describes the database models.
 
 ::: senda.core.models.products
 
-::: senda.core.models.purchases
+::: senda.core.models.sales
 
-::: senda.core.models.rental_contracts
+::: senda.core.models.contract
 
 ::: senda.core.models.suppliers

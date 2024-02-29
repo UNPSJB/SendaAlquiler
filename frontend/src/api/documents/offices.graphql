@@ -9,8 +9,8 @@ query offices {
             postalCode
             name
         }
-        stock {
-            stock
+        stockItems {
+            quantity
         }
     }
 }

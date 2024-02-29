@@ -6,7 +6,7 @@ export const queryDomains = {
     brands: 'brands',
     contracts: 'contracts',
     localities: 'localities',
-    purchases: 'purchases',
+    sales: 'sales',
     suppliers: 'suppliers',
     supplierOrders: 'supplier-orders',
     internalOrders: 'internal-orders',
@@ -50,10 +50,10 @@ export const queryKeys = {
     localitiesPaginatedList: buildPaginatedListkey(queryDomains.localities),
     localitiesNonPaginated: [queryDomains.localities, 'list', 'non-paginated'],
 
-    purchasesPaginatedList: buildPaginatedListkey(queryDomains.purchases),
-    purchaseDetailsById: buildDetailKey(queryDomains.purchases),
-    purchasesListByClientId: (id: string | undefined) => [
-        queryDomains.purchases,
+    salesPaginatedList: buildPaginatedListkey(queryDomains.sales),
+    saleDetailsById: buildDetailKey(queryDomains.sales),
+    salesListByClientId: (id: string | undefined) => [
+        queryDomains.sales,
         'list',
         'by-client-id',
         id,
@@ -79,14 +79,18 @@ export const queryKeys = {
     productsNonPaginated: [queryDomains.products, 'list', 'non-paginated'],
     productsPaginatedList: buildPaginatedListkey(queryDomains.products),
     productDetailsById: buildDetailKey(queryDomains.products),
-    productsStocksByOfficeInDateRange: (options: {
-        startDate: string | undefined;
-        endDate: string | undefined;
+    productStocksInDateRange: (options: {
+        productId: string | undefined | null;
+        startDate: string | undefined | null;
+        endDate: string | undefined | null;
     }) => [
         queryDomains.products,
         'list',
         'with-number-of-available-stocks-between-dates',
         options,
     ],
-    productsStocksByOfficeId: (id: string) => ['products-stocks-by-office-id', id],
+    productsStocksByOfficeId: (id: string | undefined) => [
+        'products-stocks-by-office-id',
+        id,
+    ],
 };

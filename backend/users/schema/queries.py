@@ -1,5 +1,3 @@
-from typing import Any
-
 import graphene
 
 from users.models import UserModel

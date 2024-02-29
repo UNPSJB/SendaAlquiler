@@ -12,8 +12,8 @@ import {
     LocalitiesCsvDocument,
     ProductsCsvDocument,
     OfficesCsvDocument,
-    PurchasesCsvDocument,
-    RentalContractsCsvDocument,
+    SalesCsvDocument,
+    ContractsCsvDocument,
 } from '../graphql';
 
 type UseCsvExporterOptions<TData extends Record<string, string>, TVariables> = {
@@ -128,19 +128,19 @@ export const useExportOfficesCsv = () => {
     });
 };
 
-export const useExportPurchasesCsv = () => {
+export const useExportSalesCsv = () => {
     return useCsvExporter({
-        query: PurchasesCsvDocument,
-        csvKey: 'purchasesCsv',
+        query: SalesCsvDocument,
+        csvKey: 'salesCsv',
         variables: {},
         filename: 'compras',
     });
 };
 
-export const useExportRentalContractsCsv = () => {
+export const useExportContractsCsv = () => {
     return useCsvExporter({
-        query: RentalContractsCsvDocument,
-        csvKey: 'rentalContractsCsv',
+        query: ContractsCsvDocument,
+        csvKey: 'contractsCsv',
         variables: {},
         filename: 'contratos-de-alquiler',
     });

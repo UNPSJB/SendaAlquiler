@@ -8,11 +8,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { ContractsQuery } from '@/api/graphql';
-import {
-    useContracts,
-    useDeleteRentalContract,
-    useExportRentalContractsCsv,
-} from '@/api/hooks';
+import { useContracts, useDeleteContract, useExportContractsCsv } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -42,11 +38,11 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-type RentalContract = ContractsQuery['rentalContracts']['results'][0];
+type Contract = ContractsQuery['contracts']['results'][0];
 
-const columnsHelper = createColumnHelper<RentalContract>();
+const columnsHelper = createColumnHelper<Contract>();
 
-const columns: ColumnDef<RentalContract, any>[] = [
+const columns: ColumnDef<Contract, any>[] = [
     columnsHelper.accessor('createdOn', {
         id: 'date',
         header: 'Fecha',
@@ -64,7 +60,7 @@ const columns: ColumnDef<RentalContract, any>[] = [
         id: 'office',
         header: 'Sucursal',
     }),
-    columnsHelper.accessor('currentHistory.status', {
+    columnsHelper.accessor('latestHistoryEntry.status', {
         id: 'status',
         header: 'Estado',
     }),
@@ -82,8 +78,8 @@ const columns: ColumnDef<RentalContract, any>[] = [
     }),
 ];
 
-const RowActions = ({ contract }: { contract: RentalContract }) => {
-    const deleteMutation = useDeleteRentalContract({
+const RowActions = ({ contract }: { contract: Contract }) => {
+    const deleteMutation = useDeleteContract({
         onSuccess: () => {
             toast.success('Contrato eliminado correctamente');
         },
@@ -151,7 +147,7 @@ const RowActions = ({ contract }: { contract: RentalContract }) => {
 const Page = () => {
     const { setVariables, activePage, noPages, queryResult } = useContracts();
 
-    const { exportCsv } = useExportRentalContractsCsv();
+    const { exportCsv } = useExportContractsCsv();
 
     return (
         <DashboardLayout
@@ -179,7 +175,7 @@ const Page = () => {
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
-                    <div className="pr-container flex-1 py-5 pl-10">
+                    <div className="pr-container flex-1 py-5 pl-8">
                         <AdminDataTableLoading columns={columns} />{' '}
                     </div>
                 }
@@ -193,8 +189,8 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ rentalContracts }) => {
-                    if (rentalContracts.results.length === 0) {
+                {({ contracts }) => {
+                    if (contracts.results.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay contratos"
@@ -205,11 +201,11 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 py-5 pl-10">
+                        <div className="pr-container flex-1 pl-8">
                             <AdminDataTable
                                 columns={columns}
                                 currentPage={activePage}
-                                data={rentalContracts.results}
+                                data={contracts.results}
                                 numberOfPages={noPages}
                                 onPageChange={(page: number) => {
                                     setVariables('page', page);

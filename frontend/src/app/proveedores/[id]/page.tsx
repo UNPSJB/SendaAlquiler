@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
 import { useState } from 'react';
@@ -21,21 +22,31 @@ import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
+import { Button } from '@/components/ui/button';
 
 const getAvatarText = (firstName: string) => {
     return firstName[0].toUpperCase();
 };
 
-const getDasboardTitle = (supplier: SupplierByIdQuery['supplierById'] | undefined) => {
+const getDasboardTitle = (
+    supplier: SupplierByIdQuery['supplierById'] | undefined,
+    id: string,
+) => {
     if (!supplier) {
         return <DashboardLayoutBigTitle>Proveedores</DashboardLayoutBigTitle>;
     }
 
     return (
-        <div className="flex items-center space-x-4">
-            <DashboardLayoutBigTitle>Proveedores</DashboardLayoutBigTitle>
-            <ChevronRight />
-            <span className="font-headings text-sm">{supplier.name}</span>
+        <div className="flex items-center justify-between space-x-4">
+            <div className="flex items-center space-x-4">
+                <DashboardLayoutBigTitle>Proveedores</DashboardLayoutBigTitle>
+                <ChevronRight />
+                <span className="font-headings text-sm">{supplier.name}</span>
+            </div>
+
+            <Button asChild>
+                <Link href={`/proveedores/${id}/edit`}>Editar</Link>
+            </Button>
         </div>
     );
 };
@@ -71,7 +82,7 @@ const Page = () => {
     const Component = tabs.find((tab) => tab.key === activeTab)!.Component;
 
     return (
-        <DashboardLayout header={getDasboardTitle(supplier)}>
+        <DashboardLayout header={getDasboardTitle(supplier, id as string)}>
             <FetchedDataRenderer
                 {...useSupplierByIdResult}
                 Loading={
@@ -104,7 +115,7 @@ const Page = () => {
 
                     return (
                         <div className="flex  flex-1 flex-col">
-                            <header className="border-b pl-10">
+                            <header className="border-b pl-8">
                                 <div className="mb-10 flex items-center">
                                     <Avatar>{getAvatarText(supplier.name)}</Avatar>
                                     <div className="pl-6">
@@ -126,8 +137,8 @@ const Page = () => {
                                 />
                             </header>
 
-                            <div className="flex-1 bg-gray-100 px-0">
-                                <section className="pl-10 ">
+                            <div className="flex-1 bg-gray-100">
+                                <section className="pl-8 ">
                                     <Component id={id as string} supplier={supplier} />
                                 </section>
                             </div>

@@ -4,14 +4,21 @@ import { useSearchParams, useRouter } from 'next/navigation';
 
 import { signIn } from 'next-auth/react';
 import { useCallback, useEffect, useState } from 'react';
-import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import Input from '@/modules/forms/DeprecatedInput';
-import { RHFFormField } from '@/modules/forms/FormField';
 import { getCleanErrorMessage } from '@/modules/utils';
 
 import DeprecatedButton from '@/components/Button';
+import {
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+    Form,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 import { useUserContext } from '../UserProvider';
 
@@ -22,8 +29,7 @@ export type LoginFormValues = {
 
 const LoginForm = () => {
     const router = useRouter();
-    const useFormMethods = useForm<LoginFormValues>();
-    const { control, handleSubmit } = useFormMethods;
+    const formMethods = useForm<LoginFormValues>();
     const { update } = useUserContext();
 
     const searchParams = useSearchParams();
@@ -76,45 +82,71 @@ const LoginForm = () => {
     );
 
     return (
-        <FormProvider {...useFormMethods}>
+        <Form {...formMethods}>
             <form
                 data-cy="login-form"
                 className="mx-auto lg:w-6/12"
-                onSubmit={handleSubmit(onSubmit)}
+                onSubmit={formMethods.handleSubmit(onSubmit)}
             >
                 <div className="mb-4 space-y-4">
-                    <RHFFormField fieldID="email" label="Correo electrónico">
-                        <Input
-                            data-cy="login-email-input"
-                            type="email"
-                            id="email"
-                            name="email"
-                            placeholder="brunodiaz@gmail.com"
-                            hasError={!!useFormMethods.formState.errors.email}
-                            control={control}
-                            rules={{ required: true }}
-                        />
-                    </RHFFormField>
+                    <FormField
+                        name="email"
+                        rules={{
+                            required: true,
+                            pattern: {
+                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                                message: 'Correo electrónico inválido',
+                            },
+                        }}
+                        control={formMethods.control}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Correo electrónico</FormLabel>
 
-                    <RHFFormField fieldID="password" label="Contraseña">
-                        <Input
-                            data-cy="login-password-input"
-                            type="password"
-                            id="password"
-                            name="password"
-                            placeholder="********"
-                            hasError={!!useFormMethods.formState.errors.password}
-                            control={control}
-                            rules={{ required: true }}
-                        />
-                    </RHFFormField>
+                                <FormControl>
+                                    <Input
+                                        data-cy="login-email-input"
+                                        type="email"
+                                        placeholder="brunodiaz@gmail.com"
+                                        {...field}
+                                        value={field.value || ''}
+                                    />
+                                </FormControl>
+
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        name="password"
+                        rules={{ required: true }}
+                        control={formMethods.control}
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Contraseña</FormLabel>
+
+                                <FormControl>
+                                    <Input
+                                        data-cy="login-password-input"
+                                        type="password"
+                                        placeholder="********"
+                                        {...field}
+                                        value={field.value || ''}
+                                    />
+                                </FormControl>
+
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                 </div>
 
                 <DeprecatedButton data-cy="login-submit-button" fullWidth type="submit">
                     Iniciar sesión
                 </DeprecatedButton>
             </form>
-        </FormProvider>
+        </Form>
     );
 };
 

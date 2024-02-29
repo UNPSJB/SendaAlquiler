@@ -1,14 +1,14 @@
 import graphene
 
-from .clients import Mutation as ClientMutation
-from .internal_orders import Mutation as InternalOrdersMutation
+from .client import Mutation as ClientMutation
+from .order_internal import Mutation as InternalOrdersMutation
 from .order_supplier import Mutation as OrderSupplierMutation
-from .localities import Mutation as LocalitiesMutation
-from .products import Mutation as ProductMutation
-from .rental_contract import Mutation as RentalContractMutation
-from .employees import Mutation as EmployeeMutation
-from .purchases import Mutation as PurchaseMutation
-from .suppliers import Mutation as SupplierMutation
+from .locality import Mutation as LocalitiesMutation
+from .product import Mutation as ProductMutation
+from .contract import Mutation as ContractMutation
+from .employee import Mutation as EmployeeMutation
+from .sale import Mutation as SaleMutation
+from .supplier import Mutation as SupplierMutation
 
 
 class Mutation(
@@ -18,8 +18,8 @@ class Mutation(
     OrderSupplierMutation,
     InternalOrdersMutation,
     ProductMutation,
-    PurchaseMutation,
-    RentalContractMutation,
+    SaleMutation,
+    ContractMutation,
     SupplierMutation,
     graphene.ObjectType,
 ):

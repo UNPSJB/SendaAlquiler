@@ -1,5 +1,5 @@
 query dashboard {
-    allPurchases {
+    allSales {
         id
         createdOn
         total
@@ -14,7 +14,7 @@ query dashboard {
     allProducts {
         id
         name
-        purchaseItems {
+        saleItems {
             quantity
         }
     }

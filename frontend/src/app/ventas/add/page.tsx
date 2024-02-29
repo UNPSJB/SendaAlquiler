@@ -1,13 +1,7 @@
-'use client';
+import { SaleFormEditor } from '@/modules/editors/sale/sale-form-editor';
 
-import CreatePurchaseForm from '@/modules/create-forms/CreatePurchase';
-
-const Page = ({ searchParams }: { searchParams: { client?: string } }) => {
-    const clientId = searchParams.client;
-
-    return (
-        <CreatePurchaseForm cancelHref={clientId ? `/clientes/${clientId}` : '/ventas'} />
-    );
+const Page = () => {
+    return <SaleFormEditor cancelHref="/ventas" />;
 };
 
 export default Page;

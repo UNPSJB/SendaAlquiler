@@ -55,9 +55,9 @@ const useHeader = (
                 <span className="font-headings text-sm">Pedido #{internalOrder.id}</span>
             </div>
 
-            {internalOrder.currentHistory?.status ===
+            {internalOrder.latestHistoryEntry?.status ===
                 InternalOrderHistoryStatusChoices.Pending &&
-                internalOrder.officeBranch.id === office?.id && (
+                internalOrder.sourceOffice.id === office?.id && (
                     <ButtonWithSpinner
                         showSpinner={isMarkAsInProgressLoading}
                         onClick={() => {
@@ -75,9 +75,9 @@ const useHeader = (
                     </ButtonWithSpinner>
                 )}
 
-            {internalOrder.currentHistory?.status ===
+            {internalOrder.latestHistoryEntry?.status ===
                 InternalOrderHistoryStatusChoices.InProgress &&
-                internalOrder.officeDestination.id === office?.id && (
+                internalOrder.targetOffice.id === office?.id && (
                     <ButtonWithSpinner
                         showSpinner={isMarkAsCompletedLoading}
                         onClick={() => {
@@ -160,18 +160,18 @@ const Page = () => {
 
                     return (
                         <div className="flex flex-1 flex-col">
-                            <header className="border-b pl-10">
+                            <header className="border-b pl-8">
                                 <div className="mb-10 flex items-center">
                                     <Avatar>
-                                        {getAvatarText(internalOrder.officeBranch.name)}
+                                        {getAvatarText(internalOrder.sourceOffice.name)}
                                     </Avatar>
                                     <div className="pl-6">
                                         <h1 className="my-2 mt-10 text-xl font-bold">
-                                            {internalOrder.officeBranch.name}
+                                            {internalOrder.sourceOffice.name}
                                         </h1>
                                         <p>
-                                            {internalOrder.officeBranch.street}{' '}
-                                            {internalOrder.officeBranch.houseNumber}
+                                            {internalOrder.sourceOffice.street}{' '}
+                                            {internalOrder.sourceOffice.houseNumber}
                                         </p>
                                     </div>
                                 </div>
@@ -187,8 +187,8 @@ const Page = () => {
                                 />
                             </header>
 
-                            <div className="flex-1 bg-gray-100 px-0">
-                                <section className="pl-10">
+                            <div className="flex-1 bg-gray-100">
+                                <section className="px-8">
                                     <Component internalOrder={internalOrder} />
                                 </section>
                             </div>

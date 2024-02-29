@@ -47,16 +47,16 @@ const InternalOrderByIdProductsTab: React.FC<InternalOrderByIdTabComponentProps>
         <div className="mb-4 mr-8 mt-8 rounded-md border border-gray-300 bg-white">
             <TableSecondary
                 headers={['Producto', 'Marca', 'Tipo', 'Pedido', 'Recibido']}
-                data={internalOrder.orders.map((item, index) => (
+                data={internalOrder.orderItems.map((item, index) => (
                     <TableSecondaryTRow key={index}>
                         <TableSecondaryTData>{item.product.name}</TableSecondaryTData>
                         <TableSecondaryTData>
                             {item.product.brand?.name}
                         </TableSecondaryTData>
                         <TableSecondaryTData>{item.product.type}</TableSecondaryTData>
-                        <TableSecondaryTData>{item.quantity}</TableSecondaryTData>
+                        <TableSecondaryTData>{item.quantityOrdered}</TableSecondaryTData>
                         <TableSecondaryTData>
-                            {internalOrder.currentHistory?.status ===
+                            {internalOrder.latestHistoryEntry?.status ===
                             InternalOrderHistoryStatusChoices.Completed
                                 ? item.quantityReceived
                                 : '-'}

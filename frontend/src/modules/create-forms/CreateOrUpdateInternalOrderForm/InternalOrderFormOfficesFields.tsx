@@ -7,30 +7,26 @@ import RHFOfficesField from '../components/fields/OfficesField';
 
 const InternalOrderFormOfficesFields: React.FC = () => {
     const { watch, control } = useFormContext<CreateOrUpdateInternalOrderFormValues>();
-    const officeBranch = watch('officeBranch');
-    const officeDestination = watch('officeDestination');
+    const sourceOffice = watch('sourceOffice');
+    const targetOffice = watch('targetOffice');
 
     return (
         <>
-            <RHFFormField fieldID="officeBranch" label="Sucursal de origen" showRequired>
-                <RHFOfficesField<CreateOrUpdateInternalOrderFormValues, 'officeBranch'>
+            <RHFFormField fieldID="sourceOffice" label="Sucursal de origen" showRequired>
+                <RHFOfficesField<CreateOrUpdateInternalOrderFormValues, 'sourceOffice'>
                     control={control}
                     placeholder="Selecciona una sucursal"
-                    name="officeBranch"
-                    officeToExclude={officeDestination?.value}
+                    name="sourceOffice"
+                    officeToExclude={targetOffice?.value}
                 />
             </RHFFormField>
 
-            <RHFFormField
-                fieldID="officeDestination"
-                label="Sucursal de destino"
-                showRequired
-            >
+            <RHFFormField fieldID="targetOffice" label="Sucursal de destino" showRequired>
                 <RHFOfficesField
                     control={control}
                     placeholder="Selecciona una sucursal"
-                    name="officeDestination"
-                    officeToExclude={officeBranch?.value}
+                    name="targetOffice"
+                    officeToExclude={sourceOffice?.value}
                 />
             </RHFFormField>
         </>

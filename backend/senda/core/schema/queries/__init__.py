@@ -1,15 +1,16 @@
 import graphene
 
-from .clients import Query as ClientQuery
-from .localities import Query as LocalityQuery
-from .offices import Query as OfficeQuery
+from .client import Query as ClientQuery
+from .locality import Query as LocalityQuery
+from .office import Query as OfficeQuery
 from .order_internal import Query as InteralOrderQuery
-from .products import Query as ProductQuery
-from .purchases import Query as PurchaseQuery
-from .rental_contracts import Query as RentalContractQuery
-from .suppliers import Query as SupplierQuery
-from .employees import Query as EmployeeQuery
-from .supplier_orders import Query as SupplierOrderQuery
+from .product import Query as ProductQuery
+from .sale import Query as SaleQuery
+from .contract import Query as ContractQuery
+from .supplier import Query as SupplierQuery
+from .employee import Query as EmployeeQuery
+from .order_supplier import Query as SupplierOrderQuery
+
 
 class Query(
     ClientQuery,
@@ -17,11 +18,11 @@ class Query(
     LocalityQuery,
     OfficeQuery,
     ProductQuery,
-    PurchaseQuery,
+    SaleQuery,
     SupplierQuery,
     SupplierOrderQuery,
     InteralOrderQuery,
-    RentalContractQuery,
+    ContractQuery,
     graphene.ObjectType,
 ):
     pass

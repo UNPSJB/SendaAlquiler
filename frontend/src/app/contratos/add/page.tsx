@@ -1,13 +1,7 @@
-import CreateContractForm from '@/modules/create-forms/CreateContractForm';
+import { ContractFormEditor } from '@/modules/editors/contract/contract-form-editor';
 
-const Page = ({ searchParams }: { searchParams: { client?: string } }) => {
-    const clientId = searchParams.client;
-
-    return (
-        <CreateContractForm
-            cancelHref={clientId ? `/clientes/${clientId}` : '/contratos'}
-        />
-    );
+const Page = () => {
+    return <ContractFormEditor cancelHref="/contratos" />;
 };
 
 export default Page;

@@ -6,25 +6,7 @@ from senda.core.models.localities import LocalityModel
 from senda.core.validators import only_digits_validator
 
 
-class ClientModel(TimeStampedModel):
-    """
-    Represents a client in the system. Inherits from TimeStampedModel to include creation and modification timestamps.
-
-    Attributes:
-        email (models.EmailField): The client's unique email address.
-        first_name (models.CharField): The client's first name.
-        last_name (models.CharField): The client's last name.
-        locality (models.ForeignKey): A foreign key to the LocalityModel, representing the client's locality.
-        house_number (models.CharField): The house number of the client's address, with a helper text explaining its purpose.
-        street_name (models.CharField): The street name of the client's address, with a helper text explaining its purpose.
-        house_unit (models.CharField): The house unit number, which can be blank or null, with a helper text explaining its purpose.
-        dni (models.CharField): The client's unique document identification number, validated to ensure only digits are present.
-        phone_code (models.CharField): The area code of the client's phone number, validated to ensure only digits are present.
-        phone_number (models.CharField): The client's phone number, validated to ensure only digits are present.
-
-    The `objects` attribute is an instance of ClientModelManager, which provides additional methods for managing client instances.
-    """
-
+class Client(TimeStampedModel):
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
@@ -64,6 +46,12 @@ class ClientModel(TimeStampedModel):
         validators=[
             only_digits_validator,
         ],
+    )
+
+    note = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Notas adicionales sobre el cliente",
     )
 
     objects: ClientModelManager = ClientModelManager()  # pyright: ignore

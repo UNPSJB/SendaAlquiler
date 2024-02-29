@@ -62,7 +62,7 @@ const ContractsByIdDetailsTab: React.FC<ContractByIdTabComponentProps> = ({
                     <h1 className="mb-3 text-xl font-bold">Detalles del Contrato</h1>
                     <LI>
                         <b>Estado: </b>
-                        {contract.currentHistory?.status}
+                        {contract.latestHistoryEntry?.status}
                     </LI>
                     <LI>
                         <b>Vencimiento: </b> {formatDateTime(contract.expirationDate)}

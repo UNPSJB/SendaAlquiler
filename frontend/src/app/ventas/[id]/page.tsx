@@ -2,8 +2,8 @@
 
 import { useParams } from 'next/navigation';
 
-import { PurchaseByIdQuery } from '@/api/graphql';
-import { usePurchaseById } from '@/api/hooks';
+import { SaleByIdQuery } from '@/api/graphql';
+import { useSaleById } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -21,8 +21,8 @@ const getAvatarText = (firstName: string, lastName: string) => {
     return (firstName[0] + lastName[0]).toUpperCase();
 };
 
-const getDasboardTitle = (purchase: PurchaseByIdQuery['purchaseById'] | undefined) => {
-    if (!purchase) {
+const getDasboardTitle = (sale: SaleByIdQuery['saleById'] | undefined) => {
+    if (!sale) {
         return <DashboardLayoutBigTitle>Ventas</DashboardLayoutBigTitle>;
     }
 
@@ -31,7 +31,7 @@ const getDasboardTitle = (purchase: PurchaseByIdQuery['purchaseById'] | undefine
             <DashboardLayoutBigTitle>Ventas</DashboardLayoutBigTitle>
             <ChevronRight />
             <span className="font-headings text-sm">
-                {purchase.client.firstName} {purchase.client.lastName} / #{purchase.id}
+                {sale.client.firstName} {sale.client.lastName} / #{sale.id}
             </span>
         </div>
     );
@@ -39,14 +39,14 @@ const getDasboardTitle = (purchase: PurchaseByIdQuery['purchaseById'] | undefine
 
 const Page = () => {
     const { id } = useParams();
-    const usePurchaseByIdResult = usePurchaseById(id as string);
+    const useSaleByIdResult = useSaleById(id as string);
 
-    const purchase = usePurchaseByIdResult.data?.purchaseById;
+    const sale = useSaleByIdResult.data?.saleById;
 
     return (
-        <DashboardLayout header={getDasboardTitle(purchase)}>
+        <DashboardLayout header={getDasboardTitle(sale)}>
             <FetchedDataRenderer
-                {...usePurchaseByIdResult}
+                {...useSaleByIdResult}
                 Loading={
                     <div className="flex w-full flex-1 items-center justify-center">
                         <Spinner />
@@ -62,8 +62,8 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ purchaseById: purchase }) => {
-                    if (!purchase) {
+                {({ saleById: sale }) => {
+                    if (!sale) {
                         return (
                             <div className="flex w-full flex-1 items-center justify-center">
                                 <FetchStatusMessageWithButton
@@ -77,42 +77,40 @@ const Page = () => {
 
                     return (
                         <div className="flex  flex-1 flex-col">
-                            <header className="border-b pl-10">
+                            <header className="border-b pl-8">
                                 <div className="mb-10 flex items-center">
                                     <Avatar>
                                         {getAvatarText(
-                                            purchase.client.firstName,
-                                            purchase.client.lastName,
+                                            sale.client.firstName,
+                                            sale.client.lastName,
                                         )}
                                     </Avatar>
                                     <div className="pl-6">
                                         <h1 className="my-2 mt-10 text-xl font-bold">
-                                            {purchase.client.firstName}{' '}
-                                            {purchase.client.lastName}
+                                            {sale.client.firstName} {sale.client.lastName}
                                         </h1>
                                         <p>
-                                            {purchase.client.email} |{' '}
-                                            {purchase.client.phoneCode}
-                                            {purchase.client.phoneNumber}
+                                            {sale.client.email} | {sale.client.phoneCode}
+                                            {sale.client.phoneNumber}
                                         </p>
                                     </div>
                                 </div>
                             </header>
 
-                            <div className="flex-1 bg-gray-100 px-0">
-                                <section className="mt-8 items-center pl-10">
+                            <div className="flex-1 bg-gray-100">
+                                <section className="mt-8 items-center pl-8">
                                     <div className="mb-4 flex">
                                         <div className="pl-4">
                                             <h1 className="text-xl font-bold">
-                                                Venta #{purchase.id}
+                                                Venta #{sale.id}
                                             </h1>
                                             <p className=" text-base">
-                                                {formatDateTime(purchase.createdOn)}
+                                                {formatDateTime(sale.createdOn)}
                                             </p>
                                         </div>
                                     </div>
                                     <div>
-                                        {purchase.purchaseItems.map((item, index) => (
+                                        {sale.saleItems.map((item, index) => (
                                             <div
                                                 key={index}
                                                 className="mb-2 mr-8 rounded-md border bg-white"
@@ -138,7 +136,7 @@ const Page = () => {
                                     </div>
                                     <div className="mr-8 mt-8 flex justify-between border-t pr-2 pt-2">
                                         <p className="ml-4 text-lg font-bold">Total</p>
-                                        <b className="text-xl">${purchase.total}</b>
+                                        <b className="text-xl">${sale.total}</b>
                                     </div>
                                 </section>
                             </div>

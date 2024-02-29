@@ -26,7 +26,10 @@ import {
     DeleteProductDocument,
     DeleteProductMutation,
     AllProductsDocument,
-    ProductsStocksByOfficeInDateRangeDocument,
+    UpdateProductDocument,
+    UpdateProductMutation,
+    UpdateProductMutationVariables,
+    ProductStocksInDateRangeDocument,
 } from '../graphql';
 
 export const useAllProducts = () => {
@@ -178,12 +181,18 @@ export const useDeleteProduct = ({
     );
 };
 
-export const useProductsStocksByOfficeId = (officeId: string) => {
-    return useQuery(queryKeys.productsStocksByOfficeId(officeId), () => {
-        return fetchClient(ProductsStocksByOfficeIdDocument, {
-            officeId,
-        });
-    });
+export const useProductsStocksByOfficeId = (officeId: string | undefined) => {
+    return useQuery(
+        queryKeys.productsStocksByOfficeId(officeId),
+        () => {
+            return fetchClient(ProductsStocksByOfficeIdDocument, {
+                officeId: officeId as string,
+            });
+        },
+        {
+            enabled: typeof officeId === 'string',
+        },
+    );
 };
 
 export const useProductsSuppliedBySupplierId = (id: string | undefined) => {
@@ -200,23 +209,60 @@ export const useProductsSuppliedBySupplierId = (id: string | undefined) => {
     );
 };
 
-export const useProductsStocksByOfficeInDateRange = ({
+export const useProductStocksInDateRange = ({
+    productId,
     startDate,
     endDate,
 }: {
-    startDate: string | undefined;
-    endDate: string | undefined;
+    productId: string | undefined | null;
+    startDate: string | undefined | null;
+    endDate: string | undefined | null;
 }) => {
     return useQuery(
-        queryKeys.productsStocksByOfficeInDateRange({ startDate, endDate }),
+        queryKeys.productStocksInDateRange({ productId, startDate, endDate }),
         () => {
-            return fetchClient(ProductsStocksByOfficeInDateRangeDocument, {
+            return fetchClient(ProductStocksInDateRangeDocument, {
+                productId: productId as string,
                 startDate: startDate as string,
                 endDate: endDate as string,
             });
         },
         {
-            enabled: typeof startDate === 'string' && typeof endDate === 'string',
+            enabled:
+                typeof startDate === 'string' &&
+                typeof endDate === 'string' &&
+                typeof productId === 'string',
+        },
+    );
+};
+
+export const useUpdateProduct = ({
+    onSuccess,
+    ...options
+}: UseMutationOptions<
+    UpdateProductMutation,
+    Error,
+    UpdateProductMutationVariables
+> = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<UpdateProductMutation, Error, UpdateProductMutationVariables>(
+        (data) => {
+            return fetchClient(UpdateProductDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                const product = data.updateProduct?.product;
+
+                if (product) {
+                    client.invalidateQueries([queryDomains.products]);
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
         },
     );
 };

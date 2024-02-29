@@ -1,5 +1,5 @@
-query employees($page: Int) {
-    employees(page: $page) {
+query employees($page: Int, $query: String) {
+    employees(page: $page, query: $query) {
         count
         numPages
         results {

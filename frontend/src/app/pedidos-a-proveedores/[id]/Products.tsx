@@ -12,7 +12,7 @@ const SupplierOrderByIdProductsTab: React.FC<SupplierOrderByIdTabComponentProps>
                 </div>
 
                 <div className="px-4 py-2">
-                    {supplierOrder.orders.map((item, index) => (
+                    {supplierOrder.orderItems.map((item, index) => (
                         <div key={index}>
                             <div className="flex justify-between pb-2">
                                 <h2 className="text-muted-foreground">
@@ -20,7 +20,7 @@ const SupplierOrderByIdProductsTab: React.FC<SupplierOrderByIdTabComponentProps>
                                     {item.product.brand?.name}
                                 </h2>
                                 <p className=" text-muted-foreground">
-                                    {item.quantity} u.{' '}
+                                    {item.quantityOrdered} u.{' '}
                                     <span className="font-bold">|</span>{' '}
                                     {item.quantityReceived} u.
                                 </p>

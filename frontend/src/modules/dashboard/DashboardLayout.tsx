@@ -107,7 +107,7 @@ export const DashboardLayoutBigTitle: React.FC<PropsWithChildren> = ({ children 
 };
 
 type DashboardLayoutProps = PropsWithChildren<{
-    header: React.ReactNode;
+    header?: React.ReactNode;
 }>;
 
 /**
@@ -125,8 +125,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
     return (
         <div className="min-h-screen lg:flex">
             <aside className="lg:pl-container pointer-events-none fixed inset-x-0 flex h-screen flex-col overflow-y-scroll text-white lg:static lg:w-1/5 lg:bg-black lg:pr-6">
-                <header className="container pointer-events-auto flex max-h-[5.625rem] min-h-[5.625rem] items-center justify-between border-b border-b-[#444C40] bg-black py-5 lg:static lg:mx-0 lg:max-w-full lg:px-0">
-                    <span className="block font-headings text-3xl font-black tracking-widest">
+                <header className="container pointer-events-auto flex items-center justify-between bg-black pt-6 lg:static lg:mx-0 lg:max-w-full lg:px-0">
+                    <span className="block font-headings text-xl font-black tracking-widest">
                         SENDA
                     </span>
 
@@ -208,11 +208,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
             </aside>
 
             <main className="flex flex-col pt-20 lg:h-screen lg:w-4/5 lg:pt-0">
-                <header className="lg:pr-container flex h-[5.625rem] items-center border-b border-black py-5 lg:pl-10">
-                    <div className="container w-full lg:mx-0 lg:max-w-full lg:px-0">
-                        {header}
-                    </div>
-                </header>
+                {header && (
+                    <header className="lg:pr-container flex h-[5.625rem] items-center border-b border-black py-5 lg:px-8">
+                        <div className="container w-full lg:mx-0 lg:max-w-full lg:px-0">
+                            {header}
+                        </div>
+                    </header>
+                )}
 
                 <div className="flex flex-1 flex-col overflow-y-scroll">{children}</div>
             </main>

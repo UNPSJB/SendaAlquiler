@@ -99,12 +99,7 @@ const FormLabel = React.forwardRef<
             {...props}
         >
             {children}
-            {required && (
-                <>
-                    {' '}
-                    <span className="text-destructive">*</span>
-                </>
-            )}
+            {required && <span className="text-destructive">*</span>}
         </Label>
     );
 });

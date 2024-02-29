@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 import clsx from 'clsx';
 import { useState } from 'react';
 import { DefaultValues, FieldValues, FormProvider, Path, useForm } from 'react-hook-form';
@@ -9,6 +7,8 @@ import { DefaultValues, FieldValues, FormProvider, Path, useForm } from 'react-h
 import NavigationButtons, {
     NavigationButtonsCancelProps,
 } from './components/NavigationButtons';
+
+import DashboardLayout from '../dashboard/DashboardLayout';
 
 export type ModableFormLayoutComponentProps = {
     isEditing?: boolean;
@@ -77,67 +77,47 @@ const ModableFormLayout = <T extends FieldValues>({
     );
 
     return (
-        <main className="flex min-h-screen items-center justify-center bg-gray-100 py-14">
-            <div className="container flex flex-1">
-                <div className="w-3/12 rounded-l-xl bg-gray-300 pl-8 pt-6">
-                    <Link
-                        href="/"
-                        className="block font-headings text-3xl font-black tracking-widest text-gray-700"
-                    >
-                        SENDA
-                    </Link>
-                </div>
-
-                <div className="flex w-9/12 flex-col rounded-r-xl bg-white px-14 pt-6">
-                    <div className="mb-4 flex items-center justify-between border-b border-gray-200 pb-4">
-                        <h1 className="text-2xl font-bold">{title}</h1>
-
-                        <span className="text-xs text-muted-foreground">
-                            Paso {activeStep + 1} de {visibleSteps.length}
-                        </span>
-                    </div>
-
-                    <FormProvider {...useFormMethods}>
-                        {visibleSteps.map(
-                            (
-                                { title, description: Description, Component, key },
-                                index,
-                            ) => (
-                                <div
-                                    className={clsx(
-                                        'mb-20 w-9/12',
-                                        activeStep !== index && 'hidden',
-                                    )}
-                                    key={key}
-                                >
-                                    <h2 className="text-lg font-bold">{title}</h2>
-                                    <p className="mb-6 text-gray-600">
-                                        {typeof Description === 'string' ? (
-                                            Description
-                                        ) : (
-                                            <Description />
-                                        )}
-                                    </p>
-
-                                    <form className="space-y-4">
-                                        <Component isEditing={!!defaultValues} />
-                                    </form>
-                                </div>
-                            ),
-                        )}
-                    </FormProvider>
-
-                    <NavigationButtons
-                        isUniqueStep={visibleSteps.length === 1}
-                        isLastStep={activeStep === visibleSteps.length - 1}
-                        onPrevious={handlePreviousStep}
-                        onNext={handleNextStep}
-                        onSubmit={handleSubmit(mutate)}
-                        {...props}
-                    />
-                </div>
+        <DashboardLayout>
+            <div className="flex items-center justify-between px-8 py-6">
+                <h1 className="text-3xl font-bold">{title}</h1>
             </div>
-        </main>
+
+            <FormProvider {...useFormMethods}>
+                {visibleSteps.map(
+                    ({ title, description: Description, Component, key }, index) => (
+                        <div
+                            className={clsx(
+                                'mb-20 px-8',
+                                activeStep !== index && 'hidden',
+                            )}
+                            key={key}
+                        >
+                            {/* <h2 className="text-lg font-bold">{title}</h2>
+                            <p className="mb-6 text-gray-600">
+                                {typeof Description === 'string' ? (
+                                    Description
+                                ) : (
+                                    <Description />
+                                )}
+                            </p> */}
+
+                            <form className="space-y-4">
+                                <Component isEditing={!!defaultValues} />
+                            </form>
+                        </div>
+                    ),
+                )}
+            </FormProvider>
+
+            <NavigationButtons
+                isUniqueStep={visibleSteps.length === 1}
+                isLastStep={activeStep === visibleSteps.length - 1}
+                onPrevious={handlePreviousStep}
+                onNext={handleNextStep}
+                onSubmit={handleSubmit(mutate)}
+                {...props}
+            />
+        </DashboardLayout>
     );
 };
 

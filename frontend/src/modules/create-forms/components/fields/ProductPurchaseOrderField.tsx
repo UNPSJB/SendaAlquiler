@@ -187,7 +187,7 @@ type RHFProps<TFieldValues extends FieldValues, TName extends Path<TFieldValues>
     ? object
     : never);
 
-const ProductPurchaseOrderField = <
+const ProductSaleOrderField = <
     TFieldValues extends FieldValues,
     TName extends Path<TFieldValues>,
 >(
@@ -209,4 +209,4 @@ const ProductPurchaseOrderField = <
     );
 };
 
-export default ProductPurchaseOrderField;
+export default ProductSaleOrderField;

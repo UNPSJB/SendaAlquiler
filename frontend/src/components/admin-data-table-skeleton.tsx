@@ -1,4 +1,4 @@
-import { ColumnDef, flexRender } from '@tanstack/react-table';
+import { ColumnDef } from '@tanstack/react-table';
 import Skeleton from 'react-loading-skeleton';
 
 import {

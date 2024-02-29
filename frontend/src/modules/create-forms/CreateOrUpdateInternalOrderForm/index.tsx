@@ -13,15 +13,15 @@ import ModableFormLayout, {
 } from '../ModableFormLayout';
 
 export type CreateOrUpdateInternalOrderFormValues = {
-    officeBranch: OfficesFieldValue;
-    officeDestination: OfficesFieldValue;
+    sourceOffice: OfficesFieldValue;
+    targetOffice: OfficesFieldValue;
     products: ProductsFromOfficeFieldValue['products'];
 };
 
 const ProductsDataStepDescription = () => {
     const { watch } = useFormContext<CreateOrUpdateInternalOrderFormValues>();
-    const originOffice = watch('officeBranch');
-    const destinationOffice = watch('officeDestination');
+    const originOffice = watch('sourceOffice');
+    const destinationOffice = watch('targetOffice');
 
     return (
         <>
@@ -43,7 +43,7 @@ const STEPS: ModableFormLayoutStep<CreateOrUpdateInternalOrderFormValues>[] = [
         title: 'Origen y destino',
         description: () => 'Información de origen y destino del pedido',
         Component: InternalOrderFormOfficesFields,
-        fields: ['officeBranch', 'officeDestination'],
+        fields: ['sourceOffice', 'targetOffice'],
     },
     {
         key: 'products-data',

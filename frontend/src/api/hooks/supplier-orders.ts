@@ -20,8 +20,8 @@ import {
     DeleteSupplierOrderDocument,
     DeleteSupplierOrderMutation,
     ReceiveOrderSupplierDocument,
-    CoreSupplierOrderHistoryModelStatusChoices,
     SupplierOrderByIdQuery,
+    CoreSupplierOrderHistoryStatusChoices,
 } from '../graphql';
 
 export const useSupplierOrders = () => {
@@ -153,9 +153,9 @@ export const useReceiveOrderSupplierOrder = () => {
                             ...prev,
                             supplierOrderById: {
                                 ...order,
-                                currentHistory: {
-                                    status: CoreSupplierOrderHistoryModelStatusChoices.Completed,
-                                    user: order.currentHistory?.user || null,
+                                latestHistoryEntry: {
+                                    status: CoreSupplierOrderHistoryStatusChoices.Completed,
+                                    user: order.latestHistoryEntry?.user || null,
                                 },
                             },
                         };

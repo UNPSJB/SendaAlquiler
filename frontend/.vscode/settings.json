@@ -1,6 +1,6 @@
 {
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "typescript.enablePromptUseWorkspaceTsdk": true,
+    // "typescript.tsdk": "node_modules/typescript/lib",
+    // "typescript.enablePromptUseWorkspaceTsdk": true,
     "tailwindCSS.classAttributes": ["class", "classes", "className", "ngClass"],
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit"

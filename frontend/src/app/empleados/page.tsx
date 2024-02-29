@@ -38,6 +38,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 
 type Employee = EmployeesQuery['employees']['results'][0];
 
@@ -169,7 +170,7 @@ const RowActions = ({ employee }: { employee: Employee }) => {
 };
 
 const Page = () => {
-    const { setVariables, activePage, noPages, queryResult } = useEmployees();
+    const { setVariables, activePage, noPages, queryResult, variables } = useEmployees();
 
     const { exportCsv } = useExportEmployeesCsv();
 
@@ -196,10 +197,21 @@ const Page = () => {
                 </div>
             }
         >
+            <div className="pr-container mb-4 flex space-x-2 pl-8 pt-5">
+                <Input
+                    placeholder="Buscar por email, nombre o apellido"
+                    value={variables.query || ''}
+                    onChange={(e) => {
+                        setVariables('query', e.target.value || '');
+                    }}
+                    className="max-w-xs"
+                />
+            </div>
+
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
-                    <div className="pr-container flex-1 py-5 pl-10">
+                    <div className="pr-container flex-1 py-5 pl-8">
                         <AdminDataTableLoading columns={columns} />{' '}
                     </div>
                 }
@@ -214,7 +226,7 @@ const Page = () => {
                 }
             >
                 {({ employees: { results: employees } }) => {
-                    if (employees.length === 0) {
+                    if (employees.length === 0 && !variables.query) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay empleados"
@@ -225,7 +237,7 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 py-5 pl-10">
+                        <div className="pr-container flex-1 pl-8">
                             <AdminDataTable
                                 columns={columns}
                                 data={employees}

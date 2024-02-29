@@ -2,10 +2,10 @@ from typing import Any
 
 import graphene
 
-from senda.core.models.order_internal import InternalOrderModel
+from senda.core.models.order_internal import InternalOrder
 from senda.core.schema.custom_types import (
     PaginatedInternalOrderQueryResult,
-    InternalOrder,
+    InternalOrderType,
 )
 from utils.graphene import get_paginated_model
 
@@ -26,9 +26,9 @@ class Query(graphene.ObjectType):
     @employee_or_admin_required
     def resolve_internal_orders(self, info: CustomInfo, page: int):
         paginator, selected_page = get_paginated_model(
-            InternalOrderModel.objects.filter(
-                models.Q(office_branch=info.context.office_id)
-                | models.Q(office_destination=info.context.office_id)
+            InternalOrder.objects.filter(
+                models.Q(source_office=info.context.office_id)
+                | models.Q(target_office=info.context.office_id)
             ).order_by("-created_on"),
             page,
         )
@@ -39,20 +39,22 @@ class Query(graphene.ObjectType):
             num_pages=paginator.num_pages,
         )
 
-    internal_order_by_id = graphene.Field(InternalOrder, id=graphene.ID(required=True))
+    internal_order_by_id = graphene.Field(
+        InternalOrderType, id=graphene.ID(required=True)
+    )
 
     @employee_or_admin_required
     def resolve_internal_order_by_id(self, info: CustomInfo, id: str):
-        return InternalOrderModel.objects.filter(id=id).first()
+        return InternalOrder.objects.filter(id=id).first()
 
     internal_orders_csv = graphene.NonNull(graphene.String)
 
     @employee_or_admin_required
     def resolve_internal_orders_csv(self, info: CustomInfo):
-        internal_orders = InternalOrderModel.objects.all().prefetch_related(
-            "current_history",
-            "office_branch",
-            "office_destination",
+        internal_orders = InternalOrder.objects.all().prefetch_related(
+            "latest_history_entry",
+            "source_office",
+            "target_office",
             "orders",
             "orders__product",
         )
@@ -74,17 +76,17 @@ class Query(graphene.ObjectType):
         writer.writeheader()
 
         for internal_order in internal_orders:
-            for order_item in internal_order.orders.all():
+            for order_item in internal_order.order_items.all():
                 writer.writerow(
                     {
                         "ID de orden": internal_order.id,
                         "Fecha de creacion": internal_order.created_on,
-                        "Sucursal de origen": internal_order.office_branch.name,
-                        "Sucursal de destino": internal_order.office_destination.name,
-                        "Estado actual": internal_order.current_history.get_status_display(),
+                        "Sucursal de origen": internal_order.source_office.name,
+                        "Sucursal de destino": internal_order.target_office.name,
+                        "Estado actual": internal_order.latest_history_entry.get_status_display(),
                         "SKU de producto": order_item.product.sku,
                         "Nombre de producto": order_item.product.name,
-                        "Cantidad pedida": order_item.quantity,
+                        "Cantidad pedida": order_item.quantity_ordered,
                         "Cantidad recibida": order_item.quantity_received,
                     }
                 )

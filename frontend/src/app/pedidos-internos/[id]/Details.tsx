@@ -26,7 +26,7 @@ const InternalOrderByIddDetailsTab: React.FC<InternalOrderByIdTabComponentProps>
 
                 <LI>
                     <SN>Estado: </SN>
-                    {internalOrder.currentHistory?.status}
+                    {internalOrder.latestHistoryEntry?.status}
                 </LI>
                 <LI>
                     <SN>Fecha pedido: </SN>
@@ -37,34 +37,34 @@ const InternalOrderByIddDetailsTab: React.FC<InternalOrderByIdTabComponentProps>
                 <h2 className="mb-3 text-xl font-bold">Sucursal Remitente: </h2>
                 <LI>
                     <SN>Nombre: </SN>
-                    {internalOrder.officeBranch.name}
+                    {internalOrder.sourceOffice.name}
                 </LI>
                 <LI>
                     <SN>Dirección: </SN>
-                    {internalOrder.officeBranch.street}{' '}
-                    {internalOrder.officeBranch.houseNumber}
+                    {internalOrder.sourceOffice.street}{' '}
+                    {internalOrder.sourceOffice.houseNumber}
                 </LI>
                 <LI>
                     <SN>Ciudad: </SN>
-                    {internalOrder.officeBranch.locality.name} |{' '}
-                    {internalOrder.officeBranch.locality.postalCode}
+                    {internalOrder.sourceOffice.locality.name} |{' '}
+                    {internalOrder.sourceOffice.locality.postalCode}
                 </LI>
             </UL>
             <UL>
                 <h2 className="mb-3 text-xl font-bold">Sucursal Destino: </h2>
                 <LI>
                     <SN>Nombre: </SN>
-                    {internalOrder.officeDestination.name}
+                    {internalOrder.targetOffice.name}
                 </LI>
                 <LI>
                     <SN>Dirección: </SN>
-                    {internalOrder.officeDestination.street}{' '}
-                    {internalOrder.officeDestination.houseNumber}
+                    {internalOrder.targetOffice.street}{' '}
+                    {internalOrder.targetOffice.houseNumber}
                 </LI>
                 <LI>
                     <SN>Ciudad: </SN>
-                    {internalOrder.officeDestination.locality.name} |{' '}
-                    {internalOrder.officeDestination.locality.postalCode}
+                    {internalOrder.targetOffice.locality.name} |{' '}
+                    {internalOrder.targetOffice.locality.postalCode}
                 </LI>
             </UL>
         </>

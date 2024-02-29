@@ -19,6 +19,7 @@ query clients($page: Int, $localities: [ID!], $query: String) {
             houseUnit
             houseNumber
             dni
+            note
         }
     }
 }
@@ -43,11 +44,11 @@ query clientById($id: ID!) {
     }
 }
 
-query rentalContractsByClientId($id: ID!) {
-    rentalContractsByClientId(id: $id) {
+query contractsByClientId($id: ID!) {
+    contractsByClientId(id: $id) {
         id
         createdOn
-        currentHistory {
+        latestHistoryEntry {
             status
         }
         expirationDate
@@ -60,7 +61,7 @@ query rentalContractsByClientId($id: ID!) {
         houseNumber
         streetName
         houseUnit
-        rentalContractItems {
+        contractItems {
             id
             product {
                 name
@@ -75,12 +76,12 @@ query rentalContractsByClientId($id: ID!) {
     }
 }
 
-query purchasesByClientId($id: ID!) {
-    purchasesByClientId(id: $id) {
+query salesByClientId($id: ID!) {
+    salesByClientId(id: $id) {
         id
         createdOn
         total
-        purchaseItems {
+        saleItems {
             id
             product {
                 name

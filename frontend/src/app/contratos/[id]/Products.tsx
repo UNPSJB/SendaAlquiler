@@ -8,8 +8,6 @@ import {
     HeaderContext,
 } from '@tanstack/react-table';
 
-import { formatNumberAsPrice } from '@/modules/forms/DeprecatedInput';
-
 import { ContractByIdTabComponentProps } from './page';
 
 import {
@@ -21,13 +19,14 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { formatNumberAsPrice } from '@/lib/utils';
 
 type CellContext<TData extends RowData, TValue> = TanCellContext<TData, TValue> & {
     numberOfRentalDays: number;
     numberOfContractItems: number;
 };
 
-type Item = ContractByIdTabComponentProps['contract']['rentalContractItems'][0];
+type Item = ContractByIdTabComponentProps['contract']['contractItems'][0];
 
 const columnHelper = createColumnHelper<Item>();
 
@@ -49,7 +48,7 @@ const columns = [
     columnHelper.accessor('quantity', {
         header: 'Cantidad',
     }),
-    columnHelper.accessor('price', {
+    columnHelper.accessor('productPrice', {
         header: 'Precio u. x día',
         cell: (cell) => {
             const value = cell.getValue();
@@ -70,7 +69,7 @@ const columns = [
             return value ? `$${formatNumberAsPrice(value)}` : '-';
         },
     }),
-    columnHelper.accessor('subtotal', {
+    columnHelper.accessor('productSubtotal', {
         id: 'subtotalPerDay',
         header: 'Subtotal x día',
         cell: (cell) => {
@@ -87,7 +86,11 @@ const columns = [
         },
         footer: (info) => {
             const total = info.table.getFilteredRowModel().rows.reduce((acc, row) => {
-                const subtotal = row.original.subtotal;
+                const subtotal =
+                    row.original.productSubtotal +
+                    row.original.serviceSubtotal +
+                    row.original.shippingSubtotal;
+
                 const { numberOfRentalDays } = info as HeaderContext<Item, unknown> & {
                     numberOfRentalDays: number;
                 };
@@ -134,36 +137,36 @@ const columns = [
             return `$${formatNumberAsPrice(total)}`;
         },
     }),
-    columnHelper.accessor('subtotal', {
-        header: 'Subtotal',
-        cell: (cell) => {
-            const value = cell.getValue();
-            return value ? `$${formatNumberAsPrice(value)}` : '-';
-        },
-        footer: (info) => {
-            const total = info.table.getFilteredRowModel().rows.reduce((acc, row) => {
-                const value = row.original.subtotal;
-                return value ? acc + value : acc;
-            }, 0);
+    // columnHelper.accessor('subtotal', {
+    //     header: 'Subtotal',
+    //     cell: (cell) => {
+    //         const value = cell.getValue();
+    //         return value ? `$${formatNumberAsPrice(value)}` : '-';
+    //     },
+    //     footer: (info) => {
+    //         const total = info.table.getFilteredRowModel().rows.reduce((acc, row) => {
+    //             const value = row.original.subtotal;
+    //             return value ? acc + value : acc;
+    //         }, 0);
 
-            return `$${formatNumberAsPrice(total)}`;
-        },
-    }),
-    columnHelper.accessor('discount', {
-        header: 'Descuento',
-        cell: (cell) => {
-            const value = cell.getValue();
-            return value ? `$${formatNumberAsPrice(value)}` : '-';
-        },
-        footer: (info) => {
-            const total = info.table.getFilteredRowModel().rows.reduce((acc, row) => {
-                const value = row.original.discount;
-                return value ? acc + value : acc;
-            }, 0);
+    //         return `$${formatNumberAsPrice(total)}`;
+    //     },
+    // }),
+    // columnHelper.accessor('discount', {
+    //     header: 'Descuento',
+    //     cell: (cell) => {
+    //         const value = cell.getValue();
+    //         return value ? `$${formatNumberAsPrice(value)}` : '-';
+    //     },
+    //     footer: (info) => {
+    //         const total = info.table.getFilteredRowModel().rows.reduce((acc, row) => {
+    //             const value = row.original.discount;
+    //             return value ? acc + value : acc;
+    //         }, 0);
 
-            return `$${formatNumberAsPrice(total)}`;
-        },
-    }),
+    //         return `$${formatNumberAsPrice(total)}`;
+    //     },
+    // }),
     columnHelper.accessor('total', {
         header: 'Total',
         cell: (cell) => {
@@ -185,7 +188,7 @@ const ContractsByIdProductsTab: React.FC<ContractByIdTabComponentProps> = ({
     contract,
 }) => {
     const table = useReactTable({
-        data: contract.rentalContractItems,
+        data: contract.contractItems,
         columns,
         getCoreRowModel: getCoreRowModel(),
     });
@@ -230,7 +233,7 @@ const ContractsByIdProductsTab: React.FC<ContractByIdTabComponentProps> = ({
                                                 numberOfRentalDays:
                                                     contract.numberOfRentalDays,
                                                 numberOfContractItems:
-                                                    contract.rentalContractItems.length,
+                                                    contract.contractItems.length,
                                             })}
                                         </TableCell>
                                     ))}

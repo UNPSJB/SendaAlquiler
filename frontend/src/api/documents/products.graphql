@@ -3,6 +3,7 @@ fragment ProductListItem on Product {
     name
     price
     type
+    sku
     brand {
         name
     }
@@ -10,6 +11,8 @@ fragment ProductListItem on Product {
         id
         name
         price
+        billingType
+        billingPeriod
     }
 }
 
@@ -29,27 +32,69 @@ query productById($id: ID!) {
         name
         description
         brand {
+            id
             name
         }
         type
         price
-        stock {
+        stockItems {
             office {
+                id
+                name
                 locality {
                     name
                 }
             }
-            stock
+            quantity
         }
         services {
+            id
             name
+            price
+        }
+        suppliers {
+            supplier {
+                id
+                name
+            }
             price
         }
     }
 }
 
-mutation createProduct($productData: CreateProductInput!) {
-    createProduct(productData: $productData) {
+mutation createProduct(
+    $productData: ProductDataInput!
+    $stockItems: [ProductStockItemInput!]!
+    $suppliers: [ProductSupplierInput!]!
+    $services: [ProductServiceInput!]!
+) {
+    createProduct(
+        productData: $productData
+        stockItems: $stockItems
+        suppliers: $suppliers
+        services: $services
+    ) {
+        product {
+            ...ProductListItem
+        }
+        error
+    }
+}
+
+mutation updateProduct(
+    $id: ID!
+    $productData: ProductDataInput!
+    $stockItems: [ProductStockItemInput!]!
+    $suppliers: [ProductSupplierInput!]!
+    $services: [ProductServiceInput!]!
+) {
+    updateProduct(
+        id: $id
+        productData: $productData
+        stockItems: $stockItems
+        suppliers: $suppliers
+        services: $services
+    ) {
         product {
             ...ProductListItem
         }
@@ -64,7 +109,7 @@ query productsStocksByOfficeId($officeId: ID!) {
             id
             name
         }
-        stock
+        quantity
     }
 }
 
@@ -92,22 +137,16 @@ query productExists($sku: String!) {
     productExists(sku: $sku)
 }
 
-query productsStocksByOfficeInDateRange($startDate: Date!, $endDate: Date!) {
-    productsStocksByOfficeInDateRange(startDate: $startDate, endDate: $endDate) {
-        id
-        name
-        price
-        services {
+query productStocksInDateRange($productId: ID!, $startDate: Date!, $endDate: Date!) {
+    productStocksInDateRange(
+        productId: $productId
+        startDate: $startDate
+        endDate: $endDate
+    ) {
+        office {
             id
             name
-            price
         }
-        stocksByOffice {
-            office {
-                id
-                name
-            }
-            stock
-        }
+        quantity
     }
 }

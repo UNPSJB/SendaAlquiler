@@ -85,33 +85,30 @@ const Home = () => {
                     }
                     Error={<div>Error</div>}
                 >
-                    {({ allPurchases, allClients, allProducts }) => {
-                        const purchasesByMonth = allPurchases.reduce(
-                            (acc, purchase) => {
-                                const dateDayjs = dayjs(purchase.createdOn);
+                    {({ allSales, allClients, allProducts }) => {
+                        const salesByMonth = allSales.reduce(
+                            (acc, sale) => {
+                                const dateDayjs = dayjs(sale.createdOn);
                                 const monthNameInSpanish =
                                     getMonthNameFromDayjs(dateDayjs);
 
                                 if (acc[monthNameInSpanish]) {
-                                    acc[monthNameInSpanish].push(purchase);
+                                    acc[monthNameInSpanish].push(sale);
                                 } else {
-                                    acc[monthNameInSpanish] = [purchase];
+                                    acc[monthNameInSpanish] = [sale];
                                 }
                                 return acc;
                             },
-                            {} as Record<
-                                string,
-                                Array<DashboardQuery['allPurchases'][0]>
-                            >,
+                            {} as Record<string, Array<DashboardQuery['allSales'][0]>>,
                         );
 
-                        const purchasesMonths = Object.keys(purchasesByMonth).sort(
+                        const salesMonths = Object.keys(salesByMonth).sort(
                             (a, b) => new Date(a).getTime() - new Date(b).getTime(),
                         );
 
-                        const purchasesTotals = allPurchases
-                            .reduce((acc, purchase) => {
-                                return acc + purchase.total;
+                        const salesTotals = allSales
+                            .reduce((acc, sale) => {
+                                return acc + sale.total;
                             }, 0)
                             .toString()
                             .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -136,7 +133,7 @@ const Home = () => {
                                                 Ventas
                                             </p>
                                             <p className="text-4xl font-bold">
-                                                {allPurchases.length}
+                                                {allSales.length}
                                             </p>
                                         </div>
                                     </div>
@@ -153,28 +150,25 @@ const Home = () => {
                                                 Total generado
                                             </p>
                                             <p className="mb-8 text-2xl font-bold">
-                                                ${purchasesTotals} ARS
+                                                ${salesTotals} ARS
                                             </p>
 
                                             <Line
                                                 options={options}
                                                 data={{
-                                                    labels: purchasesMonths,
+                                                    labels: salesMonths,
                                                     datasets: [
                                                         {
                                                             label: 'Ventas',
-                                                            data: purchasesMonths.map(
+                                                            data: salesMonths.map(
                                                                 (date) => {
-                                                                    return purchasesByMonth[
+                                                                    return salesByMonth[
                                                                         date
                                                                     ].reduce(
-                                                                        (
-                                                                            acc,
-                                                                            purchase,
-                                                                        ) => {
+                                                                        (acc, sale) => {
                                                                             return (
                                                                                 acc +
-                                                                                purchase.total
+                                                                                sale.total
                                                                             );
                                                                         },
                                                                         0,
@@ -201,7 +195,7 @@ const Home = () => {
                                             {allProducts
                                                 .sort((a, b) => {
                                                     return (
-                                                        b.purchaseItems.reduce(
+                                                        b.saleItems.reduce(
                                                             (acc, item) => {
                                                                 return (
                                                                     acc + item.quantity
@@ -209,7 +203,7 @@ const Home = () => {
                                                             },
                                                             0,
                                                         ) -
-                                                        a.purchaseItems.reduce(
+                                                        a.saleItems.reduce(
                                                             (acc, item) => {
                                                                 return (
                                                                     acc + item.quantity
@@ -231,7 +225,7 @@ const Home = () => {
                                                                     {product.name}
                                                                 </p>
                                                                 <p className="text-4xl font-bold">
-                                                                    {product.purchaseItems.reduce(
+                                                                    {product.saleItems.reduce(
                                                                         (acc, item) => {
                                                                             return (
                                                                                 acc +

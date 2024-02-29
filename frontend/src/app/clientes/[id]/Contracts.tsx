@@ -3,17 +3,17 @@ import Link from 'next/link';
 import clsx from 'clsx';
 import { PropsWithChildren } from 'react';
 
-import { RentalContractStatusChoices } from '@/api/graphql';
+import { ContractStatusChoices } from '@/api/graphql';
 import {
     usePayContractDepositMutation,
     usePayTotalContractMutation,
-    useRentalContractsByClientId,
+    useContractsByClientId,
 } from '@/api/hooks';
 
 import { formatDateTimeHr } from '@/modules/dayjs/utils';
 import { formatDateTime } from '@/modules/dayjs/utils';
 
-import { RentalContractsByClientIdTabComponentProps } from './page';
+import { ContractsByClientIdTabComponentProps } from './page';
 
 import DeprecatedButton from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
@@ -29,51 +29,51 @@ const SN: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 const dataByStatus: Record<
-    RentalContractStatusChoices,
+    ContractStatusChoices,
     {
         bg: string;
         text: string;
     }
 > = {
-    [RentalContractStatusChoices.Presupuestado]: {
+    [ContractStatusChoices.Presupuestado]: {
         bg: 'bg-orange-500',
         text: 'Presupuestado',
     },
-    [RentalContractStatusChoices.ConDeposito]: {
+    [ContractStatusChoices.ConDeposito]: {
         bg: 'bg-yellow-500',
         text: 'Señado',
     },
-    [RentalContractStatusChoices.Activo]: {
+    [ContractStatusChoices.Activo]: {
         bg: 'bg-blue-500',
         text: 'Enviado',
     },
-    [RentalContractStatusChoices.Pagado]: {
+    [ContractStatusChoices.Pagado]: {
         bg: 'bg-green-500',
         text: 'Aceptado',
     },
-    [RentalContractStatusChoices.Cancelado]: {
+    [ContractStatusChoices.Cancelado]: {
         bg: 'bg-red-500',
         text: 'Rechazado',
     },
-    [RentalContractStatusChoices.DevolucionExitosa]: {
+    [ContractStatusChoices.DevolucionExitosa]: {
         bg: '',
         text: '',
     },
-    [RentalContractStatusChoices.DevolucionFallida]: {
+    [ContractStatusChoices.DevolucionFallida]: {
         bg: '',
         text: '',
     },
-    [RentalContractStatusChoices.Finalizado]: {
+    [ContractStatusChoices.Finalizado]: {
         bg: '',
         text: '',
     },
-    [RentalContractStatusChoices.Vencido]: {
+    [ContractStatusChoices.Vencido]: {
         bg: '',
         text: '',
     },
 };
 
-type StatusIndicatorProps = { status: RentalContractStatusChoices };
+type StatusIndicatorProps = { status: ContractStatusChoices };
 
 const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status }) => {
     return (
@@ -89,13 +89,13 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status }) => {
     );
 };
 
-type StatusButtonProps = { status: RentalContractStatusChoices; id: string };
+type StatusButtonProps = { status: ContractStatusChoices; id: string };
 
 const StatusButton: React.FC<StatusButtonProps> = ({ status, id }) => {
     const { mutate: payContractDeposit } = usePayContractDepositMutation();
     const { mutate: payContractTotal } = usePayTotalContractMutation();
 
-    if (status === RentalContractStatusChoices.Presupuestado) {
+    if (status === ContractStatusChoices.Presupuestado) {
         return (
             <button
                 onClick={() => {
@@ -108,7 +108,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({ status, id }) => {
         );
     }
 
-    if (status === RentalContractStatusChoices.ConDeposito) {
+    if (status === ContractStatusChoices.ConDeposito) {
         return (
             <button
                 onClick={() => {
@@ -124,14 +124,14 @@ const StatusButton: React.FC<StatusButtonProps> = ({ status, id }) => {
     return null;
 };
 
-const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProps> = ({
+const ClientByIdContractsTab: React.FC<ContractsByClientIdTabComponentProps> = ({
     id,
 }) => {
-    const useRentalContractsByClientIdResult = useRentalContractsByClientId(id);
+    const useContractsByClientIdResult = useContractsByClientId(id);
 
     return (
         <FetchedDataRenderer
-            {...useRentalContractsByClientIdResult}
+            {...useContractsByClientIdResult}
             Loading={<Spinner />}
             Error={
                 <FetchStatusMessageWithDescription
@@ -140,13 +140,13 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                 />
             }
         >
-            {({ rentalContractsByClientId }) => (
+            {({ contractsByClientId }) => (
                 <>
                     <div className="flex items-center justify-between">
                         <h1 className="pt-4 text-xl font-bold">
                             Contratos{' '}
                             <span className="text-base font-extralight">
-                                ({rentalContractsByClientId.length})
+                                ({contractsByClientId.length})
                             </span>
                         </h1>
                         <DeprecatedButton
@@ -158,7 +158,7 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                     </div>
 
                     <ul className="mt-8 space-y-8">
-                        {rentalContractsByClientId.map((contract) => (
+                        {contractsByClientId.map((contract) => (
                             <div
                                 className="mb-4 mr-4 mt-8 rounded-md border bg-white "
                                 key={contract.id}
@@ -171,7 +171,7 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
 
                                     <div className="mb-3 flex rounded-full border border-black px-4 py-1 ">
                                         <StatusIndicator
-                                            status={contract.currentHistory!.status}
+                                            status={contract.latestHistoryEntry!.status}
                                         />
                                     </div>
                                 </div>
@@ -192,7 +192,7 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
                                 </div>
                                 <div>
                                     <div className="mt-2 px-4">
-                                        {contract.rentalContractItems.map((item) => {
+                                        {contract.contractItems.map((item) => {
                                             return (
                                                 <li
                                                     key={item.id}
@@ -227,7 +227,7 @@ const ClientByIdContractsTab: React.FC<RentalContractsByClientIdTabComponentProp
 
                                     <StatusButton
                                         id={contract.id}
-                                        status={contract.currentHistory!.status}
+                                        status={contract.latestHistoryEntry!.status}
                                     />
                                 </div>
                             </div>

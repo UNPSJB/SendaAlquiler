@@ -1,109 +1,102 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 
-import toast from 'react-hot-toast';
+import { useProductById } from '@/api/hooks';
 
-import { useProductById, useUpdateClient } from '@/api/hooks';
-
-import CreateOrUpdateProductForm from '@/modules/create-forms/CreateOrUpdateProductForm';
-
-import FetchedDataRenderer from '@/components/FetchedDataRenderer';
-import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
-import Spinner from '@/components/Spinner/Spinner';
+import DashboardLayout from '@/modules/dashboard/DashboardLayout';
+import { ProductFormEditor } from '@/modules/editors/product/product-form-editor';
 
 const Page = () => {
     const { id } = useParams();
-    const useProductByIdResult = useProductById(id as string);
+    const productByIdQuery = useProductById(id as string);
 
-    const router = useRouter();
-    const { mutate, isLoading } = useUpdateClient({
-        onSuccess: (data) => {
-            const error = data.updateClient?.error;
-            const client = data.updateClient?.client;
-            if (error) {
-                toast.error(error);
-            }
+    if (productByIdQuery.isLoading) {
+        return (
+            <DashboardLayout>
+                <div className="flex h-64 items-center justify-center">
+                    <div className="text-2xl font-bold text-gray-500">Cargando...</div>
+                </div>
+            </DashboardLayout>
+        );
+    }
 
-            if (client) {
-                toast.success('Cliente actualizado exitosamente');
-                router.push(`/clientes/${id}`);
-            }
-        },
-    });
+    if (productByIdQuery.isError) {
+        return (
+            <DashboardLayout>
+                <div className="flex h-64 items-center justify-center">
+                    <div className="text-2xl font-bold text-gray-500">
+                        Error al cargar el producto
+                    </div>
+                </div>
+            </DashboardLayout>
+        );
+    }
+
+    if (!productByIdQuery.data.productById) {
+        return (
+            <DashboardLayout>
+                <div className="flex h-64 items-center justify-center">
+                    <div className="text-2xl font-bold text-gray-500">
+                        No se encontró el producto
+                    </div>
+                </div>
+            </DashboardLayout>
+        );
+    }
+
+    const product = productByIdQuery.data.productById;
 
     return (
-        <FetchedDataRenderer
-            {...useProductByIdResult}
-            Error={
-                <FetchStatusMessageWithButton
-                    message="Hubo un error al cargar el cliente"
-                    btnText="Volver a intentar"
-                    btnHref={`/clientes/${id}`}
-                />
-            }
-            Loading={
-                <div className="flex w-full flex-1 items-center justify-center">
-                    <Spinner />
-                </div>
-            }
-        >
-            {({ productById }) => {
-                if (!productById) {
-                    return (
-                        <FetchStatusMessageWithButton
-                            message="Parece que el cliente que buscas no existe."
-                            btnHref="/clientes"
-                            btnText='Volver a "Clientes"'
-                        />
-                    );
-                }
-
-                return (
-                    <CreateOrUpdateProductForm
-                        defaultValues={{
-                            brand: {
-                                value: productById.brand.id,
-                                label: productById.brand.name,
+        <DashboardLayout>
+            <ProductFormEditor
+                cancelHref={`/productos/${id}`}
+                idToUpdate={id as string}
+                defaultValues={{
+                    sku: product.sku,
+                    description: product.description,
+                    name: product.name,
+                    price: product.price,
+                    brand: product.brand
+                        ? {
+                              value: product.brand.id,
+                              label: product.brand.name,
+                          }
+                        : null,
+                    type: {
+                        value: product.type,
+                        label: product.type,
+                    },
+                    stocks: product.stockItems.map((item) => {
+                        return {
+                            office: {
+                                value: item.office.id,
+                                label: item.office.name,
                             },
-                            description: productById.description,
-                            name: productById.name,
-                            price: productById.price,
-                            services: productById.services.map((service) => {
-                                return {
-                                    name: service.name,
-                                    price: service.price,
-                                };
-                            }),
-                            sku: productById.sku,
-                            stock: productById.stock.map((stock) => {
-                                return {
-                                    office: {
-                                        value: stock.office.id,
-                                        label: stock.office.name,
-                                    },
-                                    stock: stock.stock,
-                                };
-                            }),
-                            suppliers: [],
-                            type: {
-                                value: productById.type,
-                                label: productById.type,
+                            stock: item.quantity,
+                        };
+                    }),
+                    suppliers: product.suppliers.map((item) => {
+                        return {
+                            supplier: {
+                                value: item.supplier.id,
+                                label: item.supplier.name,
                             },
-                        }}
-                        mutate={(data) => {
-                            // mutate({
-                            //     id: id as string,
-                            //     clientData: {
-                            //     },
-                            // });
-                        }}
-                        cancelHref={`/clientes/${id}`}
-                        isMutating={isLoading}
-                    />
-                );
-            }}
-        </FetchedDataRenderer>
+                            price: item.price,
+                        };
+                    }),
+                    services: product.services.map((service) => {
+                        return {
+                            price: service.price,
+                            service: {
+                                label: service.name,
+                                value: service.id,
+                            },
+                        };
+                    }),
+                }}
+            />
+        </DashboardLayout>
     );
 };
 

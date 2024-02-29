@@ -15,7 +15,7 @@ import ChevronRight from '@/modules/icons/ChevronRight';
 
 import ClientByIdContractsTab from './Contracts';
 import ClientByIdDetailsTab from './Details';
-import ClientByIdPurchasesTab from './Purchases';
+import ClientByIdSalesTab from './Sales';
 
 import Avatar from '@/components/Avatar';
 import DeprecatedButton from '@/components/Button';
@@ -48,11 +48,11 @@ export type ClientByIdTabComponentProps = {
     client: NonNullable<ClientByIdQuery['clientById']>;
 };
 
-export type RentalContractsByClientIdTabComponentProps = {
+export type ContractsByClientIdTabComponentProps = {
     id: string;
 };
 
-export type PurchasesByClientIdTabComponentProps = {
+export type SalesByClientIdTabComponentProps = {
     id: string;
 };
 
@@ -64,8 +64,8 @@ const tabs = [
     },
     {
         label: 'Compras',
-        key: 'purchases',
-        Component: ClientByIdPurchasesTab,
+        key: 'sales',
+        Component: ClientByIdSalesTab,
     },
     {
         label: 'Contratos',
@@ -127,7 +127,7 @@ const Page = () => {
 
                     return (
                         <div className="flex  flex-1 flex-col">
-                            <header className="border-b pl-10">
+                            <header className="border-b pl-8">
                                 <div className="mb-10 flex items-center">
                                     <Avatar>
                                         {getAvatarText(client.firstName, client.lastName)}
@@ -151,8 +151,8 @@ const Page = () => {
                                 />
                             </header>
 
-                            <div className="flex-1 bg-gray-100 px-0">
-                                <section className="pl-10 ">
+                            <div className="flex-1 bg-gray-100">
+                                <section className="pl-8 ">
                                     <Component client={client} id={id as string} />
                                 </section>
                             </div>

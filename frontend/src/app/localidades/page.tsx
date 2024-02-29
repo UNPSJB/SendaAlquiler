@@ -15,6 +15,7 @@ import DashboardLayout, {
 import { AdminDataTable } from '@/components/admin-data-table';
 import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
 import DeprecatedButton, { ButtonVariant } from '@/components/Button';
+import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -119,14 +120,19 @@ const RowActions = ({ locality }: { locality: Locality }) => {
                         <Button variant="secondary">Cancelar</Button>
                     </DialogClose>
 
-                    <Button
+                    <ButtonWithSpinner
+                        showSpinner={deleteMutation.isLoading}
                         onClick={() => {
-                            deleteMutation.mutate(locality.id);
+                            deleteMutation.mutate(locality.id, {
+                                onSuccess: () => {
+                                    setOpen(false);
+                                },
+                            });
                         }}
                         variant="destructive"
                     >
                         Eliminar
-                    </Button>
+                    </ButtonWithSpinner>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
@@ -164,7 +170,7 @@ const Page = () => {
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
-                    <div className="pr-container flex-1 py-5 pl-10">
+                    <div className="pr-container flex-1 py-5 pl-8">
                         <AdminDataTableLoading columns={columns} />
                     </div>
                 }
@@ -190,7 +196,7 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 py-5 pl-10">
+                        <div className="pr-container flex-1 pl-8">
                             <AdminDataTable
                                 columns={columns}
                                 currentPage={activePage}

@@ -2,7 +2,7 @@ import { UseFormReturn } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
 import { ProductsStocksByOfficeInDateRangeQuery } from '@/api/graphql';
-import { useProductsStocksByOfficeInDateRange } from '@/api/hooks';
+import { useProductStocksInDateRange } from '@/api/hooks';
 
 import { getNumericInputValue } from '@/modules/utils';
 
@@ -20,8 +20,8 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { formatNumberAsPrice } from '@/lib/utils';
 
-import { formatNumberAsPrice } from '../../../forms/DeprecatedInput';
 import { CustomSelect } from '../../../forms/Select';
 
 type ProductDetails =
@@ -104,7 +104,7 @@ export const ContractProductsField = <
 }: Props<FormValues>) => {
     const formMethods =
         form as unknown as Props<ContractProductsFieldFormValues>['formMethods'];
-    const useProductsResult = useProductsStocksByOfficeInDateRange({
+    const useProductsResult = useProductStocksInDateRange({
         startDate: startDate,
         endDate: endDate,
     });
@@ -216,8 +216,6 @@ export const ContractProductsField = <
                                       };
                                   })
                                 : null;
-
-                        console.log(item);
 
                         return (
                             <div className="relative" key={index}>

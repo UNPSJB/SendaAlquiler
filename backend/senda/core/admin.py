@@ -1,57 +1,51 @@
 from django.contrib import admin
 
-from .models.clients import ClientModel
-from .models.employees import EmployeeModel, EmployeeOfficeModel
+from .models.clients import Client
+from .models.employees import EmployeeModel, EmployeeOffice
 from .models.localities import LocalityModel
-from .models.offices import OfficeModel
+from .models.offices import Office
 from .models.order_internal import (
-    InternalOrderModel,
-    InternalOrderHistoryModel,
-    InternalOrderProductModel,
+    InternalOrder,
+    InternalOrderHistory,
+    InternalOrderLineItem,
 )
 from .models.order_supplier import (
-    SupplierOrderModel,
-    SupplierOrderProductModel,
-    SupplierOrderHistoryModel,
+    SupplierOrder,
+    SupplierOrderLineItem,
+    SupplierOrderHistory,
 )
-from .models.products import (
-    BrandModel,
-    ProductModel,
-    ProductServiceModel,
-    ProductStockInOfficeModel,
-    ProductSupplierModel,
-)
-from .models.purchases import PurchaseItemModel, PurchaseModel
-from .models.rental_contracts import (
-    RentalContractHistoryModel,
-    RentalContractItemModel,
-    RentalContractModel,
+from .models.products import Brand, Product, ProductService, StockItem, ProductSupplier
+from .models.sale import SaleItemModel, Sale
+from .models.contract import (
+    ContractHistory,
+    ContractItem,
+    Contract,
 )
 from .models.suppliers import SupplierModel
 from .models.admin import AdminModel
 
 
-@admin.register(BrandModel)
-class BrandModelAdmin(admin.ModelAdmin[BrandModel]):
+@admin.register(Brand)
+class BrandModelAdmin(admin.ModelAdmin[Brand]):
     search_fields = ("name",)
 
 
-@admin.register(ClientModel)
-class ClientModelAdmin(admin.ModelAdmin[ClientModel]):
+@admin.register(Client)
+class ClientModelAdmin(admin.ModelAdmin[Client]):
     search_fields = ("email",)
 
 
-class EmployeeOfficeModelInline(
-    admin.TabularInline[EmployeeOfficeModel, EmployeeModel]
+class EmployeeOfficeInline(
+    admin.TabularInline[EmployeeOffice, EmployeeModel]
 ):
-    model = EmployeeOfficeModel
+    model = EmployeeOffice
 
 
 @admin.register(EmployeeModel)
 class EmployeeModelAdmin(admin.ModelAdmin[EmployeeModel]):
     search_fields = ("user",)
     inlines = [
-        EmployeeOfficeModelInline,
+        EmployeeOfficeInline,
     ]
 
 
@@ -60,17 +54,17 @@ class LocalityModelAdmin(admin.ModelAdmin[LocalityModel]):
     list_display = ("name",)
 
 
-@admin.register(OfficeModel)
-class OfficeModelAdmin(admin.ModelAdmin[OfficeModel]):
+@admin.register(Office)
+class OfficeAdmin(admin.ModelAdmin[Office]):
     list_display = ("name",)
 
 
-class ServiceModelInline(admin.TabularInline[ProductServiceModel, ProductModel]):
-    model = ProductServiceModel
+class ServiceModelInline(admin.TabularInline[ProductService, Product]):
+    model = ProductService
 
 
-@admin.register(ProductModel)
-class ProductModelAdmin(admin.ModelAdmin[ProductModel]):
+@admin.register(Product)
+class ProductModelAdmin(admin.ModelAdmin[Product]):
     inlines = [
         ServiceModelInline,
     ]
@@ -83,74 +77,74 @@ class SupplierModelAdmin(admin.ModelAdmin[SupplierModel]):
     list_display = ("name",)
 
 
-@admin.register(SupplierOrderModel)
-class OrderSupplierModelAdmin(admin.ModelAdmin[SupplierOrderModel]):
+@admin.register(SupplierOrder)
+class OrderSupplierModelAdmin(admin.ModelAdmin[SupplierOrder]):
     list_display = ("id",)
 
 
-@admin.register(InternalOrderModel)
-class InternalOrderModelAdmin(admin.ModelAdmin[InternalOrderModel]):
+@admin.register(InternalOrder)
+class InternalOrderModelAdmin(admin.ModelAdmin[InternalOrder]):
     list_display = ("id",)
 
 
-@admin.register(ProductStockInOfficeModel)
-class ProductStockInOfficeModelAdmin(admin.ModelAdmin[ProductStockInOfficeModel]):
-    list_display = ("product", "office", "stock")
+@admin.register(StockItem)
+class ProductStockInOfficeAdmin(admin.ModelAdmin[StockItem]):
+    list_display = ("product", "office")
 
 
-@admin.register(RentalContractModel)
-class RentalContractModelAdmin(admin.ModelAdmin[RentalContractModel]):
+@admin.register(Contract)
+class ContractModelAdmin(admin.ModelAdmin[Contract]):
     readonly_fields = ("total",)
     raw_id_fields = ("client", "office")
 
 
-@admin.register(RentalContractItemModel)
-class RentalContractItemModelAdmin(admin.ModelAdmin[RentalContractItemModel]):
-    list_display = ("id", "rental_contract", "product", "quantity")
+@admin.register(ContractItem)
+class ContractItemModelAdmin(admin.ModelAdmin[ContractItem]):
+    list_display = ("id", "contract", "product", "quantity")
 
 
-@admin.register(RentalContractHistoryModel)
-class RentalContractHistoryModelAdmin(admin.ModelAdmin[RentalContractHistoryModel]):
-    raw_id_fields = ("rental_contract",)
+@admin.register(ContractHistory)
+class ContractHistoryModelAdmin(admin.ModelAdmin[ContractHistory]):
+    raw_id_fields = ("contract",)
 
 
-@admin.register(ProductServiceModel)
-class ServiceModelAdmin(admin.ModelAdmin[ProductServiceModel]):
+@admin.register(ProductService)
+class ServiceModelAdmin(admin.ModelAdmin[ProductService]):
     pass
 
 
-@admin.register(PurchaseItemModel)
-class PurchaseItemModelAdmin(admin.ModelAdmin[PurchaseItemModel]):
+@admin.register(SaleItemModel)
+class SaleItemModelAdmin(admin.ModelAdmin[SaleItemModel]):
     pass
 
 
-@admin.register(PurchaseModel)
-class PurchaseModelAdmin(admin.ModelAdmin[PurchaseModel]):
+@admin.register(Sale)
+class SaleModelAdmin(admin.ModelAdmin[Sale]):
     pass
 
 
-@admin.register(SupplierOrderProductModel)
-class SupplierOrderProductAdmin(admin.ModelAdmin[SupplierOrderProductModel]):
+@admin.register(SupplierOrderLineItem)
+class SupplierOrderProductAdmin(admin.ModelAdmin[SupplierOrderLineItem]):
     pass
 
 
-@admin.register(SupplierOrderHistoryModel)
-class SupplierOrderHistoryModelAdmin(admin.ModelAdmin[SupplierOrderHistoryModel]):
+@admin.register(SupplierOrderHistory)
+class SupplierOrderHistoryModelAdmin(admin.ModelAdmin[SupplierOrderHistory]):
     pass
 
 
-@admin.register(ProductSupplierModel)
-class ProductSupplierModelAdmin(admin.ModelAdmin[ProductSupplierModel]):
+@admin.register(ProductSupplier)
+class ProductSupplierModelAdmin(admin.ModelAdmin[ProductSupplier]):
     pass
 
 
-@admin.register(InternalOrderHistoryModel)
-class InternalOrderHistoryModelAdmin(admin.ModelAdmin[InternalOrderHistoryModel]):
+@admin.register(InternalOrderHistory)
+class InternalOrderHistoryModelAdmin(admin.ModelAdmin[InternalOrderHistory]):
     pass
 
 
-@admin.register(InternalOrderProductModel)
-class InternalOrderProductModelAdmin(admin.ModelAdmin[InternalOrderProductModel]):
+@admin.register(InternalOrderLineItem)
+class InternalOrderProductModelAdmin(admin.ModelAdmin[InternalOrderLineItem]):
     pass
 
 

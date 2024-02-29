@@ -6,7 +6,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 
 import {
-    CoreSupplierOrderHistoryModelStatusChoices,
+    CoreSupplierOrderHistoryStatusChoices,
     SupplierOrderByIdQuery,
 } from '@/api/graphql';
 import { useReceiveOrderSupplierOrder, useSupplierOrderById } from '@/api/hooks';
@@ -51,9 +51,9 @@ const useDashboardTitle = (
                 <span className="font-headings text-sm">Pedido #{supplierOrder.id}</span>
             </div>
 
-            {supplierOrder.currentHistory?.status ===
-                CoreSupplierOrderHistoryModelStatusChoices.Pending &&
-                supplierOrder.officeDestination.id === office?.id && (
+            {supplierOrder.latestHistoryEntry?.status ===
+                CoreSupplierOrderHistoryStatusChoices.Pending &&
+                supplierOrder.targetOffice.id === office?.id && (
                     <ButtonWithSpinner
                         showSpinner={isLoading}
                         onClick={() => {
@@ -134,7 +134,7 @@ const Page = () => {
 
                     return (
                         <div className="flex flex-1 flex-col">
-                            <header className="border-b pl-10">
+                            <header className="border-b pl-8">
                                 <div className="mb-10 flex items-center">
                                     <Avatar>
                                         {getAvatarText(supplierOrder.supplier.name)}
@@ -158,8 +158,8 @@ const Page = () => {
                                 />
                             </header>
 
-                            <div className="flex-1 bg-gray-100 px-0">
-                                <section className="pl-10">
+                            <div className="flex-1 bg-gray-100">
+                                <section className="px-8">
                                     <Component supplierOrder={supplierOrder} />
                                 </section>
                             </div>

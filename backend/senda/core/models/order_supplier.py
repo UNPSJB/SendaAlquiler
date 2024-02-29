@@ -1,114 +1,181 @@
+from datetime import datetime
+from typing import List, Optional, TypedDict, Tuple
 
-from typing import Any
+from django.db import models, transaction
 
-
-from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.core.exceptions import ValidationError
 
 from extensions.db.models import TimeStampedModel
-from senda.core.managers import SupplierOrderManager
-from senda.core.models.offices import OfficeModel
-from senda.core.models.products import ProductModel
+from senda.core.models.offices import Office
+from senda.core.models.products import Product, ProductSupplier
 from senda.core.models.suppliers import SupplierModel
+from users.models import UserModel
 
 
-class SupplierOrderModel(TimeStampedModel):
-    """
-    Represents a supplier order in the Senda system. Inherits from TimeStampedModel for creation and modification timestamps.
+class SupplierOrderCreationError(Exception):
+    """Excepción personalizada para errores de creación de orden de proveedor."""
 
-    Attributes:
-        orders (models.QuerySet["SupplierOrderProduct"]): A queryset for accessing the products associated with the supplier order.
-        history (models.QuerySet["SupplierOrderHistoryModel"]): A queryset for accessing the order's history.
-        supplier (models.ForeignKey): A foreign key to the SupplierModel, representing the supplier of the order.
-        office_destination (models.ForeignKey): A foreign key to the OfficeModel, representing the destination office for the order.
-        current_history (models.OneToOneField): A one-to-one relationship to the most current history item of the order.
-        total (models.DecimalField): The total cost of the supplier order.
-        objects (SupplierOrderManager): Custom manager providing additional functionalities.
 
-    Methods:
-        __str__: Returns the string representation of the order, which is its primary key.
-        calculate_total: Calculates and returns the total cost of the order.
-    """
+class SupplierOrderDetailsDict(TypedDict):
+    supplier_id: int
+    target_office_id: int
+    requested_for_date: Optional[datetime]
+    approximate_delivery_date: Optional[datetime]
+    note: Optional[str]
 
-    orders: models.QuerySet["SupplierOrderProductModel"]
-    history: models.QuerySet["SupplierOrderHistoryModel"]
+
+class SupplierOrderItemDetailsDict(TypedDict):
+    product_id: int
+    quantity_ordered: int
+
+
+class SupplierOrderManager(models.Manager["SupplierOrder"]):
+    def _validate_supplier_office_and_product(
+        self, supplier_id: int, target_office_id: int, product_id: int
+    ) -> Tuple[SupplierModel, Office, Product, ProductSupplier]:
+        supplier = SupplierModel.objects.filter(id=supplier_id).first()
+        if not supplier:
+            raise ValidationError(f"Supplier with ID {supplier_id} not found.")
+
+        target_office = Office.objects.filter(id=target_office_id).first()
+        if not target_office:
+            raise ValidationError(
+                f"Target Office with ID {target_office_id} not found."
+            )
+
+        product = Product.objects.filter(id=product_id).first()
+        if not product:
+            raise ValidationError(f"Product with ID {product_id} not found.")
+
+        product_supplier_relation = ProductSupplier.objects.filter(
+            supplier=supplier, product=product
+        ).first()
+        if not product_supplier_relation:
+            raise ValidationError(
+                f"Product with ID {product_id} is not related to supplier with ID {supplier_id}."
+            )
+
+        return supplier, target_office, product, product_supplier_relation
+
+    def create_supplier_order(
+        self,
+        order_data: SupplierOrderDetailsDict,
+        items_data: List[SupplierOrderItemDetailsDict],
+        user: Optional["UserModel"] = None,
+    ) -> "SupplierOrder":
+        try:
+            with transaction.atomic():
+                supplier_order = self.create(
+                    supplier_id=order_data["supplier_id"],
+                    target_office_id=order_data["target_office_id"],
+                    requested_for_date=order_data["requested_for_date"],
+                    approximate_delivery_date=order_data.get(
+                        "approximate_delivery_date"
+                    ),
+                )
+
+                order_items = []
+
+                for item_data in items_data:
+                    supplier, office, product, product_supplier_relation = (
+                        self._validate_supplier_office_and_product(
+                            order_data["supplier_id"],
+                            order_data["target_office_id"],
+                            item_data["product_id"],
+                        )
+                    )
+
+                    total_item = item_data["quantity_ordered"] * product_supplier_relation.price
+
+                    order_item = SupplierOrderLineItem(
+                        supplier_order=supplier_order,
+                        product=product,
+                        quantity_ordered=item_data["quantity_ordered"],
+                        product_price=product_supplier_relation.price,
+                        total=total_item,
+                    )
+                    order_items.append(order_item)
+
+                SupplierOrderLineItem.objects.bulk_create(order_items)
+
+                # Actualizar el total de la orden
+                supplier_order.update_totals()
+
+                # Crear la entrada inicial en el historial
+                supplier_order.set_status(
+                    status=SupplierOrderHistoryStatusChoices.PENDING, user=user
+                )
+
+                return supplier_order
+        except ValidationError as e:
+            raise SupplierOrderCreationError(f"Validation failed: {e}")
+        except Exception as e:
+            raise SupplierOrderCreationError(f"Failed to create supplier order: {e}")
+
+
+class SupplierOrder(TimeStampedModel):
+    order_items: models.QuerySet["SupplierOrderLineItem"]
+    history_entries: models.QuerySet["SupplierOrderHistory"]
 
     supplier = models.ForeignKey(
-        SupplierModel, on_delete=models.CASCADE, related_name="supplier_orders_branch"
+        SupplierModel, on_delete=models.CASCADE, related_name="outgoing_supplier_orders"
     )
-    office_destination = models.ForeignKey(
-        OfficeModel,
+    target_office = models.ForeignKey(
+        Office,
         on_delete=models.CASCADE,
-        related_name="supplier_orders_destination",
+        related_name="incoming_supplier_orders",
     )
 
-    current_history = models.OneToOneField(
-        "SupplierOrderHistoryModel",
+    requested_for_date = models.DateField(blank=True, null=True)
+    approximate_delivery_date = models.DateField(blank=True, null=True)
+
+    latest_history_entry = models.OneToOneField(
+        "SupplierOrderHistory",
         on_delete=models.SET_NULL,
         related_name="current_order",
         blank=True,
         null=True,
     )
 
-    total = models.IntegerField()
+    total = models.PositiveBigIntegerField(default=0)
 
-    objects: SupplierOrderManager = SupplierOrderManager()  # pyright: ignore
+    objects: SupplierOrderManager = SupplierOrderManager()
 
     def __str__(self) -> str:
         return str(self.pk)
 
-    def calculate_total(self):
-        total = 0
-        for order in self.orders.all():
-            total += order.total
+    def update_totals(self):
+        self.total = self.order_items.aggregate(models.Sum("total"))["total__sum"]
+        self.save()
 
-        return total
+    def set_status(
+        self,
+        status: str,
+        user: Optional["UserModel"] = None,
+    ):
+        SupplierOrderHistory.objects.create(
+            user=user, supplier_order=self, status=status
+        )
 
 
-class SupplierOrderProductModel(TimeStampedModel):
-    """
-    Represents a product within a supplier order in the Senda system. Inherits from TimeStampedModel.
-
-    Attributes:
-        product (models.ForeignKey): A foreign key to ProductModel, representing the product in the order.
-        price (models.DecimalField): The price of the product in the order.
-        total (models.DecimalField): The total cost for this product in the order.
-        quantity (models.PositiveIntegerField): The quantity of the product ordered.
-        quantity_received (models.PositiveIntegerField): The quantity of the product that has been received.
-        supplier_order (models.ForeignKey): A foreign key to SupplierOrderModel, linking it to the supplier order.
-
-    Meta:
-        Defines several constraints, including uniqueness of product per order and validation checks on quantities.
-
-    Methods:
-        __str__: Returns a string representation of the supplier order product, showing product name and quantity.
-        save: Overridden save method to auto-calculate price and total if not provided.
-    """
-
+class SupplierOrderLineItem(TimeStampedModel):
     product = models.ForeignKey(
-        ProductModel, on_delete=models.CASCADE, related_name="related_supplier_orders"
+        Product, on_delete=models.CASCADE, related_name="related_supplier_orders"
+    )
+    supplier_order = models.ForeignKey(
+        SupplierOrder, on_delete=models.CASCADE, related_name="order_items"
     )
 
-    quantity = models.PositiveIntegerField(default=0)
+    quantity_ordered = models.PositiveIntegerField(default=0)
     quantity_received = models.PositiveIntegerField(default=0)
-    supplier_order = models.ForeignKey(
-        SupplierOrderModel, on_delete=models.CASCADE, related_name="orders"
-    )
-    price = models.IntegerField(blank=True)
-    total = models.IntegerField(blank=True)
+
+    product_price = models.PositiveBigIntegerField(blank=True)
+    total = models.PositiveBigIntegerField(blank=True)
+
+    objects = models.Manager()
 
     def __str__(self) -> str:
-        return f"{self.product.name} - {self.quantity}"
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        if not self.price and self.product.price:
-            self.price = self.product.price
-
-        if not self.total:
-            self.total = self.price * self.quantity
-
-        super().save(*args, **kwargs)
+        return f"{self.product.name} - Qty: {self.quantity_ordered}"
 
     class Meta(TimeStampedModel.Meta):
         constraints = [
@@ -117,79 +184,37 @@ class SupplierOrderProductModel(TimeStampedModel):
                 name="order_supplier_unique_product",
             ),
             models.CheckConstraint(
-                check=models.Q(quantity__gte=0),
-                name="order_supplier_quantity_must_be_positive",
-            ),
-            models.CheckConstraint(
                 check=models.Q(quantity_received__gte=0),
                 name="order_supplier_quantity_received_must_be_positive",
             ),
             models.CheckConstraint(
-                check=models.Q(quantity_received__lte=models.F("quantity")),
+                check=models.Q(quantity_received__lte=models.F("quantity_ordered")),
                 name="order_supplier_quantity_received_must_be_lte_to_quantity",
             ),
         ]
 
 
 class SupplierOrderHistoryStatusChoices(models.TextChoices):
-    """
-    Enum-like class representing status choices for supplier order history. Inherits from models.TextChoices.
-
-    It provides a set of predefined status choices such as PENDING, IN_PROGRESS, COMPLETED, and CANCELED.
-    """
-
     PENDING = "PENDING", "Pendiente"
     IN_PROGRESS = "IN_PROGRESS", "En progreso"
     COMPLETED = "COMPLETED", "Completado"
     CANCELED = "CANCELED", "Cancelado"
 
 
-class SupplierOrderHistoryModel(TimeStampedModel):
-    """
-    Represents the history of a supplier order, tracking its status changes. Inherits from TimeStampedModel.
-
-    Attributes:
-        status (models.CharField): The current status of the order, using choices from SupplierOrderHistoryStatusChoices.
-        supplier_order (models.ForeignKey): A foreign key to SupplierOrderModel, linking to the related order.
-        date (models.DateTimeField): The date and time of the status record.
-        user (models.ForeignKey): A foreign key to UserModel, representing the user associated with the status change.
-    """
+class SupplierOrderHistory(TimeStampedModel):
+    supplier_order = models.ForeignKey(
+        SupplierOrder, on_delete=models.CASCADE, related_name="history_entries"
+    )
+    user = models.ForeignKey(
+        UserModel,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="supplier_order_histories",
+    )
 
     status = models.CharField(
         max_length=20, choices=SupplierOrderHistoryStatusChoices.choices
     )
-    supplier_order = models.ForeignKey(
-        SupplierOrderModel, on_delete=models.CASCADE, related_name="history"
-    )
-    user = models.ForeignKey(
-        "users.UserModel", on_delete=models.SET_NULL, null=True, blank=True
-    )
 
-
-@receiver(post_save, sender=SupplierOrderHistoryModel)
-def update_current_history(
-    sender: SupplierOrderHistoryModel,
-    instance: SupplierOrderHistoryModel,
-    created: bool,
-    **kwargs: Any,
-) -> None:
-    """
-    Signal receiver that updates the current history of a SupplierOrderModel when a new SupplierOrderHistoryModel instance is created.
-
-    Parameters:
-        sender (SupplierOrderHistoryModel): The model class sending the signal.
-        instance (SupplierOrderHistoryModel): The instance of the model that was saved.
-        created (bool): A boolean flag indicating whether this instance is newly created.
-        kwargs (Any): Additional keyword arguments.
-    """
-    if created:
-        supplier_order = instance.supplier_order
-        supplier_order.current_history = instance
-        supplier_order.save()
-
-        if instance.status == SupplierOrderHistoryStatusChoices.COMPLETED:
-            for order in supplier_order.orders.all():
-                order.product.stock.filter(
-                    office=supplier_order.office_destination
-                ).update(stock=models.F("stock") + order.quantity)
-                order.product.save()
+    objects = models.Manager()

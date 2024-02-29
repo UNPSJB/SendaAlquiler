@@ -37,3 +37,20 @@ query allLocalities {
         postalCode
     }
 }
+
+mutation updateLocality(
+    $id: ID!
+    $name: String
+    $state: StateChoices
+    $postalCode: String
+) {
+    updateLocality(id: $id, name: $name, state: $state, postalCode: $postalCode) {
+        locality {
+            id
+            name
+            state
+            postalCode
+        }
+        error
+    }
+}

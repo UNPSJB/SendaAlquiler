@@ -1,0 +1,61 @@
+query sales($page: Int) {
+    sales(page: $page) {
+        count
+        numPages
+        results {
+            ...SaleListItem
+        }
+    }
+}
+
+query saleById($id: ID!) {
+    saleById(id: $id) {
+        id
+        createdOn
+        total
+        saleItems {
+            product {
+                name
+                brand {
+                    name
+                }
+                price
+            }
+            quantity
+            total
+        }
+        client {
+            firstName
+            lastName
+            email
+            phoneCode
+            phoneNumber
+        }
+    }
+}
+
+mutation createSale($saleData: CreateSaleInput!) {
+    createSale(data: $saleData) {
+        sale {
+            ...SaleListItem
+        }
+        error
+    }
+}
+
+fragment SaleListItem on Sale {
+    id
+    createdOn
+    total
+    client {
+        firstName
+        lastName
+        email
+    }
+}
+
+mutation deleteSale($id: ID!) {
+    deleteSale(id: $id) {
+        success
+    }
+}

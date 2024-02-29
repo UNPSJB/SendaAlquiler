@@ -67,11 +67,11 @@ const columns: ColumnDef<OrderSupplier, any>[] = [
         id: 'supplier',
         header: 'Proveedor',
     }),
-    columnsHelper.accessor('officeDestination.name', {
+    columnsHelper.accessor('targetOffice.name', {
         id: 'office',
         header: 'Sucursal',
     }),
-    columnsHelper.accessor('currentHistory.status', {
+    columnsHelper.accessor('latestHistoryEntry.status', {
         id: 'status',
         header: 'Estado',
     }),
@@ -193,7 +193,7 @@ const Page = () => {
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
-                    <div className="pr-container flex-1 py-5 pl-10">
+                    <div className="pr-container flex-1 py-5 pl-8">
                         <AdminDataTableLoading columns={columns} />
                     </div>
                 }
@@ -219,7 +219,7 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 py-5 pl-10">
+                        <div className="pr-container flex-1 pl-8">
                             <AdminDataTable
                                 columns={columns}
                                 currentPage={activePage}

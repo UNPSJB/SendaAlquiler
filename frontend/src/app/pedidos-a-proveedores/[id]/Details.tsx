@@ -24,25 +24,25 @@ const SupplierOrderByIddDetailsTab: React.FC<SupplierOrderByIdTabComponentProps>
 
                 <LI>
                     <SN>Sucursal: </SN>
-                    {supplierOrder.officeDestination.name}
+                    {supplierOrder.targetOffice.name}
                 </LI>
                 <LI>
                     <SN>Dirección: </SN>
-                    {supplierOrder.officeDestination.street}{' '}
-                    {supplierOrder.officeDestination.houseNumber}
+                    {supplierOrder.targetOffice.street}{' '}
+                    {supplierOrder.targetOffice.houseNumber}
                 </LI>
                 <LI>
                     <SN>Ciudad: </SN>
-                    {supplierOrder.officeDestination.locality.name}
+                    {supplierOrder.targetOffice.locality.name}
                 </LI>
                 <LI>
                     <SN>Empleado: </SN>
-                    {supplierOrder.currentHistory?.user?.firstName}{' '}
-                    {supplierOrder.currentHistory?.user?.lastName}
+                    {supplierOrder.latestHistoryEntry?.user?.firstName}{' '}
+                    {supplierOrder.latestHistoryEntry?.user?.lastName}
                 </LI>
                 <LI>
                     <SN>Estado: </SN>
-                    {supplierOrder.currentHistory?.status}
+                    {supplierOrder.latestHistoryEntry?.status}
                 </LI>
             </UL>
             <UL>

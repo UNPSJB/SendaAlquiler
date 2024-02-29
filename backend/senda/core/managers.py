@@ -2,28 +2,19 @@ from typing import TYPE_CHECKING, Any, List, Optional, TypedDict
 
 from django.db import models, transaction
 
-from extensions.db.models import TimeStampedModel
-
 
 if TYPE_CHECKING:
-    from senda.core.models.clients import ClientModel
+    from senda.core.models.clients import Client
     from senda.core.models.localities import LocalityModel, StateChoices
-    from senda.core.models.offices import OfficeModel
-    from senda.core.models.order_internal import InternalOrderModel
-    from senda.core.models.order_supplier import SupplierOrderModel
-    from senda.core.models.products import (
-        ProductModel,
-        ProductTypeChoices,
-        ProductStockInOfficeModel,
-    )
-    from senda.core.models.purchases import PurchaseModel
-    from senda.core.models.rental_contracts import RentalContractModel
+    from senda.core.models.offices import Office
+    from senda.core.models.order_internal import InternalOrder
+    from senda.core.models.order_supplier import SupplierOrder
     from senda.core.models.suppliers import SupplierModel
-    from senda.core.models.employees import EmployeeModel, EmployeeOfficeModel
+    from senda.core.models.employees import EmployeeModel
     from users.models import UserModel
 
 
-class ClientModelManager(models.Manager["ClientModel"]):
+class ClientModelManager(models.Manager["Client"]):
     """
     Custom manager for the ClientModel, providing methods to create and update client instances.
     """
@@ -40,7 +31,7 @@ class ClientModelManager(models.Manager["ClientModel"]):
         dni: str,
         phone_code: str,
         phone_number: str,
-    ) -> "ClientModel":
+    ) -> "Client":
         """
         Creates a new client instance with the given details. Validates to ensure the email and DNI are unique.
         """
@@ -65,8 +56,8 @@ class ClientModelManager(models.Manager["ClientModel"]):
         )
 
     def update_client(
-        self, client: "ClientModel", locality: "LocalityModel", **kwargs: Any
-    ) -> "ClientModel":
+        self, client: "Client", locality: "LocalityModel", **kwargs: Any
+    ) -> "Client":
         """
         Updates an existing client instance with the provided details.
         """
@@ -96,6 +87,23 @@ class LocalityModelManager(models.Manager["LocalityModel"]):
 
         return self.create(name=name, postal_code=postal_code, state=state)
 
+    def update_locality(
+        self,
+        locality: "LocalityModel",
+        name: str,
+        postal_code: str,
+        state: "StateChoices",
+    ) -> "LocalityModel":
+        """
+        Updates an existing locality instance with the provided details.
+        """
+
+        locality.name = name
+        locality.postal_code = postal_code
+        locality.state = state
+        locality.save()
+        return locality
+
     def get_or_create_locality(
         self, name: str, postal_code: int, state: "StateChoices"
     ) -> "LocalityModel":
@@ -121,11 +129,11 @@ class InternalOrderManager(models.Manager["InternalOrderModel"]):
     @transaction.atomic
     def create_internal_order(
         self,
-        office_branch: "OfficeModel",
-        office_destination: "OfficeModel",
+        office_branch: "Office",
+        office_destination: "Office",
         user: "UserModel",
         products: List[InternalOrderProductsDict],
-    ) -> "InternalOrderModel":
+    ) -> "InternalOrder":
         """
         Creates a new internal order with associated products and history. This process is atomic.
         """
@@ -184,6 +192,37 @@ class SupplierModelManager(models.Manager["SupplierModel"]):
             note=note,
         )
 
+    def update_supplier(
+        self,
+        supplier: "SupplierModel",
+        cuit: str,
+        name: str,
+        email: str,
+        locality: "LocalityModel",
+        house_number: str,
+        street_name: str,
+        house_unit: str,
+        phone_code: str,
+        phone_number: str,
+        note: str,
+    ) -> "SupplierModel":
+        """
+        Updates an existing supplier instance with the provided details.
+        """
+
+        supplier.cuit = cuit
+        supplier.name = name
+        supplier.email = email
+        supplier.locality = locality
+        supplier.house_number = house_number
+        supplier.street_name = street_name
+        supplier.house_unit = house_unit
+        supplier.phone_code = phone_code
+        supplier.phone_number = phone_number
+        supplier.note = note
+        supplier.save()
+        return supplier
+
 
 SupplierOrderProductsDict = TypedDict(
     "SupplierOrderProductsDict", {"id": str, "quantity": int}
@@ -199,10 +238,10 @@ class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
     def create_supplier_order(
         self,
         supplier: "SupplierModel",
-        office_destination: "OfficeModel",
+        office_destination: "Office",
         user: "UserModel",
         products: List[SupplierOrderProductsDict],
-    ) -> "SupplierOrderModel":
+    ) -> "SupplierOrder":
         """
         Creates a new supplier order with associated products, history, and total cost calculation. This process is atomic.
         """
@@ -229,200 +268,37 @@ class SupplierOrderManager(models.Manager["SupplierOrderModel"]):
         return supplier_order
 
 
-ProductStockInOfficeModelDict = TypedDict(
-    "ProductStockInOfficeModelDict", {"office_id": str, "stock": int}
+ProductStockInOfficeDict = TypedDict(
+    "ProductStockInOfficeDict", {"office_id": str, "stock": int}
 )
 
 ProductSupplierDict = TypedDict(
     "ProductSupplierDict", {"supplier_id": str, "price": str}
 )
 
-ProductServiceDict = TypedDict("ProductServiceDict", {"name": str, "price": str})
+ProductServiceDict = TypedDict(
+    "ProductServiceDict", {"service_id": Optional[str], "name": str, "price": str}
+)
 
 
-class ProductModelManager(models.Manager["ProductModel"]):
-    """
-    Custom manager for the ProductModel, providing methods to create product instances with associated details.
-    """
-
-    def create_product(
-        self,
-        sku: str,
-        name: str,
-        brand_id: str,
-        description: str,
-        type: "ProductTypeChoices",
-        price: str,
-        stock: List[ProductStockInOfficeModelDict],
-        services: List[ProductServiceDict],
-        suppliers: List[ProductSupplierDict],
-    ) -> "ProductModel":
-        """
-        Creates a new product instance with various associated data like stock, services, and suppliers.
-        """
-        if self.filter(sku=sku).exists():
-            raise ValueError("Ya existe un producto con ese sku")
-
-        product = self.create(
-            sku=sku,
-            name=name,
-            brand_id=brand_id,
-            description=description,
-            type=type,
-            price=price,
-        )
-
-        for stock_data in stock:
-            product.stock.create(
-                office_id=stock_data["office_id"],
-                stock=stock_data["stock"],
-            )
-
-        for service_data in services:
-            product.services.create(
-                name=service_data["name"],
-                price=service_data["price"],
-            )
-
-        for supplier_data in suppliers:
-            product.suppliers.create(
-                supplier_id=supplier_data["supplier_id"],
-                price=supplier_data["price"],
-            )
-
-        return product
-
-    def get_products_with_stock_in_office(self, office: "OfficeModel", **kwargs: Any):
-        """
-        Returns all products with associated stock in the given office.
-        """
-        return self.filter(stock__office=office, **kwargs)
-
-
-class ProductStockInOfficeManager(models.Manager["ProductStockInOfficeModel"]):
-    """
-    Custom manager for the ProductStockInOfficeModel, providing methods to create and update stock instances.
-    """
-
-    def create_stock(
-        self, product: "ProductModel", office: "OfficeModel", stock: int
-    ) -> "ProductStockInOfficeModel":
-        """
-        Creates a new stock instance for the given product and office.
-        """
-        if self.filter(product=product, office=office).exists():
-            raise ValueError("Ya existe un stock para ese producto en esa sucursal")
-
-        return self.create(product=product, office=office, stock=stock)
-
-
-PurchaseProductsItemDict = TypedDict(
-    "PurchaseProductsItemDict",
+SaleProductsItemDict = TypedDict(
+    "SaleProductsItemDict",
     {"product": str, "quantity": int, "total": int, "discount": int},
 )
 
-
-class PurchaseModelManager(models.Manager["PurchaseModel"]):
-    """
-    Custom manager for the PurchaseModel, handling the creation of purchase instances.
-    """
-
-    @transaction.atomic
-    def create_purchase(
-        self,
-        client: "ClientModel",
-        office: str,
-        products: List[PurchaseProductsItemDict],
-    ) -> "PurchaseModel":
-        """
-        Creates a new purchase instance with associated purchase items. This process is atomic.
-        """
-        purchase = self.create(client=client, office_id=office)
-        purchase.save()
-
-        for product in products:
-            purchase.purchase_items.create(
-                quantity=product["quantity"],
-                product_id=product["product"],
-                total=product["total"],
-                discount=product["discount"],
-            )
-
-        return purchase
-
-
-RentalContractProductsItemOfficeDict = TypedDict(
-    "RentalContractProductsItemOfficeDict",
+ContractProductsItemOfficeDict = TypedDict(
+    "ContractProductsItemOfficeDict",
     {"quantity": int, "office_id": str},
 )
 
-RentalContractProductsItemDict = TypedDict(
-    "RentalContractProductsItemDict",
+ContractProductsItemDict = TypedDict(
+    "ContractProductsItemDict",
     {
         "id": str,
         "service": Optional[str],
-        "offices_orders": List[RentalContractProductsItemOfficeDict],
+        "offices_orders": List[ContractProductsItemOfficeDict],
     },
 )
-
-
-class RentalContractManager(models.Manager["RentalContractModel"]):
-    """
-    Custom manager for the RentalContractModel, handling the creation of rental contract instances.
-    """
-
-    @transaction.atomic
-    def create_rental_contract(
-        self,
-        created_by: "UserModel",
-        client: "ClientModel",
-        products: List[RentalContractProductsItemDict],
-        office: str,
-        locality: "LocalityModel",
-        house_number: str,
-        street_name: str,
-        house_unit: str,
-        contract_start_datetime: str,
-        contract_end_datetime: str,
-    ) -> "RentalContractModel":
-        """
-        Creates a new rental contract with associated items and history. This process is atomic.
-        """
-        from senda.core.models.rental_contracts import RentalContractStatusChoices
-
-        number_of_rental_days = (contract_end_datetime - contract_start_datetime).days
-
-        rental_contract = self.create(
-            client=client,
-            office_id=office,
-            locality=locality,
-            house_number=house_number,
-            street_name=street_name,
-            house_unit=house_unit,
-            contract_start_datetime=contract_start_datetime,
-            contract_end_datetime=contract_end_datetime,
-            created_by=created_by,
-            number_of_rental_days=number_of_rental_days,
-        )
-
-        for product in products:
-            rental_contract_item = rental_contract.rental_contract_items.create(
-                product_id=product["id"],
-                service_id=product["service"],
-            )
-
-            for office_order in product["offices_orders"]:
-                rental_contract_item.offices_orders.create(
-                    office_id=office_order["office_id"],
-                    quantity=office_order["quantity"],
-                )
-
-        rental_contract.rental_contract_history.create(
-            status=RentalContractStatusChoices.PRESUPUESTADO,
-            rental_contract=rental_contract,
-        )
-
-        return rental_contract
 
 
 class EmployeeModelManager(models.Manager["EmployeeModel"]):
@@ -432,8 +308,8 @@ class EmployeeModelManager(models.Manager["EmployeeModel"]):
 
     @transaction.atomic
     def create_employee(self, user: "UserModel", offices: List[str]):
-        from senda.core.models.offices import OfficeModel
-        from senda.core.models.employees import EmployeeOfficeModel
+        from senda.core.models.offices import Office
+        from senda.core.models.employees import EmployeeOffice
 
         """
         Creates a new employee instance, ensuring the user does not already have an associated employee.
@@ -444,29 +320,29 @@ class EmployeeModelManager(models.Manager["EmployeeModel"]):
         employee = self.create(user=user)
 
         for office_id in offices:
-            office = OfficeModel.objects.get(id=office_id)
-            EmployeeOfficeModel.objects.create(employee=employee, office=office)
+            office = Office.objects.get(id=office_id)
+            EmployeeOffice.objects.create(employee=employee, office=office)
 
         return employee
 
     def update_employee_offices(self, employee: "EmployeeModel", offices: List[str]):
-        from senda.core.models.offices import OfficeModel
-        from senda.core.models.employees import EmployeeOfficeModel
+        from senda.core.models.offices import Office
+        from senda.core.models.employees import EmployeeOffice
 
         """
         Updates the offices associated with the given employee.
         """
 
-        EmployeeOfficeModel.objects.filter(employee=employee).exclude(
+        EmployeeOffice.objects.filter(employee=employee).exclude(
             office_id__in=offices
         ).delete()
 
         for office_id in offices:
-            office = OfficeModel.objects.get(id=office_id)
+            office = Office.objects.get(id=office_id)
 
-            if not EmployeeOfficeModel.objects.filter(
+            if not EmployeeOffice.objects.filter(
                 employee=employee, office=office
             ).exists():
-                EmployeeOfficeModel.objects.create(employee=employee, office=office)
+                EmployeeOffice.objects.create(employee=employee, office=office)
 
         return employee

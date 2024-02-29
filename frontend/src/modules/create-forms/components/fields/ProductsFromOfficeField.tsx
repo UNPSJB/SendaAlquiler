@@ -1,16 +1,4 @@
-import { useState } from 'react';
-import { useFormContext } from 'react-hook-form';
-import Skeleton from 'react-loading-skeleton';
-
 import { Office, ProductsStocksByOfficeIdQuery } from '@/api/graphql';
-import { useProductsStocksByOfficeId } from '@/api/hooks';
-
-import DeprecatedButton, { ButtonVariant } from '@/components/Button';
-import FetchedDataRenderer from '@/components/FetchedDataRenderer';
-
-import Input from '../../../forms/DeprecatedInput';
-import { RHFFormField } from '../../../forms/FormField';
-import RHFSelect from '../../../forms/Select';
 
 type Props = {
     office: Office['id'];
@@ -27,7 +15,13 @@ export type ProductsFromOfficeFieldValue = {
     }[];
 };
 
-const ProductsFromOfficeField: React.FC<Props> = ({ office }) => {
+const ProductsFromOfficeField: React.FC<Props> = () => {
+    return null;
+};
+
+export default ProductsFromOfficeField;
+
+/* const ProductsFromOfficeField: React.FC<Props> = ({ office }) => {
     const { control, getValues, watch } = useFormContext<ProductsFromOfficeFieldValue>();
     const useProductsStocksByOfficeIdResult = useProductsStocksByOfficeId(office);
     const { data, isLoading } = useProductsStocksByOfficeIdResult;
@@ -174,3 +168,4 @@ const ProductsFromOfficeField: React.FC<Props> = ({ office }) => {
 };
 
 export default ProductsFromOfficeField;
+ */

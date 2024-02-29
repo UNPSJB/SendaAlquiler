@@ -41,6 +41,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 
 type Supplier = SuppliersQuery['suppliers']['results'][0];
 const columnsHelper = createColumnHelper<Supplier>();
@@ -177,7 +178,8 @@ const RowActions = ({ supplier }: { supplier: Supplier }) => {
 };
 
 const Page = () => {
-    const { setVariables, activePage, noPages, queryResult } = usePaginatedSuppliers();
+    const { setVariables, activePage, noPages, queryResult, variables } =
+        usePaginatedSuppliers();
 
     const { exportCsv } = useExportSuppliersCsv();
 
@@ -204,10 +206,21 @@ const Page = () => {
                 </div>
             }
         >
+            <div className="pr-container mb-4 flex space-x-2 pl-8 pt-5">
+                <Input
+                    placeholder="Buscar por email, nombre o cuit"
+                    value={variables.query || ''}
+                    onChange={(e) => {
+                        setVariables('query', e.target.value || '');
+                    }}
+                    className="max-w-xs"
+                />
+            </div>
+
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
-                    <div className="pr-container flex-1 py-5 pl-10">
+                    <div className="pr-container flex-1 py-5 pl-8">
                         <AdminDataTableLoading columns={columns} />
                     </div>
                 }
@@ -222,7 +235,7 @@ const Page = () => {
                 }
             >
                 {({ suppliers: { results: suppliers } }) => {
-                    if (suppliers.length === 0) {
+                    if (suppliers.length === 0 && !variables.query) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay proveedores"
@@ -233,7 +246,7 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 py-5 pl-10">
+                        <div className="pr-container flex-1 pl-8">
                             <AdminDataTable
                                 columns={columns}
                                 currentPage={activePage}

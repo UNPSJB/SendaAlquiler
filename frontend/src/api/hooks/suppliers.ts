@@ -19,6 +19,9 @@ import {
     AllSuppliersDocument,
     DeleteSupplierDocument,
     DeleteSupplierMutation,
+    UpdateSupplierDocument,
+    UpdateSupplierMutation,
+    UpdateSupplierMutationVariables,
 } from '../graphql';
 
 export const useDeleteSupplier = ({
@@ -57,10 +60,15 @@ export const usePaginatedSuppliers = () => {
         queryKeys.suppliersPaginatedList,
         SuppliersDocument,
         'suppliers',
-        {},
+        {
+            query: null,
+        },
         {
             page: {
                 type: 'int',
+            },
+            query: {
+                type: 'string',
             },
         },
     );
@@ -99,6 +107,37 @@ export const useCreateSupplier = ({
         {
             onSuccess: (data, context, variables) => {
                 if (data.createSupplier?.supplier) {
+                    client.invalidateQueries(queryKeys.suppliersPaginatedList());
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, context, variables);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+type UseUpdateSupplierOptions = UseMutationOptions<
+    UpdateSupplierMutation,
+    Error,
+    UpdateSupplierMutationVariables
+>;
+
+export const useUpdateSupplier = ({
+    onSuccess,
+    ...options
+}: UseUpdateSupplierOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<UpdateSupplierMutation, Error, UpdateSupplierMutationVariables>(
+        (data) => {
+            return fetchClient(UpdateSupplierDocument, data);
+        },
+        {
+            onSuccess: (data, context, variables) => {
+                if (data.updateSupplier?.supplier) {
                     client.invalidateQueries(queryKeys.suppliersPaginatedList());
                 }
 

@@ -225,7 +225,7 @@ const Page = () => {
                 </div>
             }
         >
-            <div className="pr-container mb-4 flex space-x-2 pl-10 pt-5">
+            <div className="pr-container mb-4 flex space-x-2 pl-8 pt-5">
                 <Input
                     placeholder="Buscar por email, nombre, apellido o dni"
                     value={variables.query || ''}
@@ -269,7 +269,7 @@ const Page = () => {
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
-                    <div className="pr-container flex-1 py-5 pl-10">
+                    <div className="pr-container flex-1 py-5 pl-8">
                         <AdminDataTableLoading columns={columns} />
                     </div>
                 }
@@ -299,7 +299,7 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 pl-10">
+                        <div className="pr-container flex-1 pl-8">
                             <AdminDataTable
                                 columns={columns}
                                 data={results}

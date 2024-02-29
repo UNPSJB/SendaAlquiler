@@ -14,7 +14,7 @@ import ModableFormLayout, {
 
 export type CreateOrUpdateSupplierOrderFormValues = {
     supplier: SupplierFieldValue;
-    officeDestination: OfficesFieldValue;
+    targetOffice: OfficesFieldValue;
     products: {
         product: {
             value: string;
@@ -27,7 +27,7 @@ export type CreateOrUpdateSupplierOrderFormValues = {
 const ProductsDataStepDescription = () => {
     const { watch } = useFormContext<CreateOrUpdateSupplierOrderFormValues>();
     const supplier = watch('supplier');
-    const destinationOffice = watch('officeDestination');
+    const destinationOffice = watch('targetOffice');
 
     return (
         <>
@@ -49,7 +49,7 @@ const STEPS: ModableFormLayoutStep<CreateOrUpdateSupplierOrderFormValues>[] = [
         title: 'Origen y destino',
         description: () => 'Información de origen y destino del pedido',
         Component: SupplierOrderFormOfficeFields,
-        fields: ['supplier', 'officeDestination'],
+        fields: ['supplier', 'targetOffice'],
     },
     {
         key: 'products-data',

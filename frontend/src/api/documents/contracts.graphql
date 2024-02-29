@@ -1,5 +1,5 @@
 query contracts($page: Int) {
-    rentalContracts(page: $page) {
+    contracts(page: $page) {
         count
         numPages
         results {
@@ -14,7 +14,7 @@ query contracts($page: Int) {
             createdOn
             contractStartDatetime
             contractEndDatetime
-            currentHistory {
+            latestHistoryEntry {
                 status
             }
         }
@@ -41,7 +41,7 @@ query contractById($id: ID!) {
         }
         contractEndDatetime
         contractStartDatetime
-        currentHistory {
+        latestHistoryEntry {
             status
         }
         expirationDate
@@ -55,10 +55,9 @@ query contractById($id: ID!) {
         streetName
         total
         numberOfRentalDays
-        rentalContractItems {
+        contractItems {
             id
-            servicePrice
-            price
+
             product {
                 brand {
                     name
@@ -66,51 +65,51 @@ query contractById($id: ID!) {
                 name
                 sku
             }
-            service {
-                name
+            productPrice
+
+            serviceItems {
+                service {
+                    name
+                    price
+                }
             }
-            servicePrice
+
             quantity
-            subtotal
-            discount
+
+            productSubtotal
+            servicesSubtotal
+            shippingSubtotal
+
+            productDiscount
+            servicesDiscount
+            shippingDiscount
+
             total
         }
     }
 }
 
-mutation CreateRentalContract($data: CreateRentalContractInput!) {
-    createRentalContract(data: $data) {
-        rentalContract {
-            id
-            client {
-                firstName
-                lastName
-            }
-            office {
-                name
-            }
-            createdOn
-            contractStartDatetime
-            contractEndDatetime
-            currentHistory {
-                status
-            }
-        }
+mutation CreateContract(
+    $contractData: ContractInput!
+    $itemsData: [ContractItemInput!]!
+) {
+    createContract(contractData: $contractData, itemsData: $itemsData) {
+        contractId
         error
     }
 }
 
-mutation deleteRentalContract($id: ID!) {
-    deleteRentalContract(id: $id) {
+mutation deleteContract($id: ID!) {
+    deleteContract(id: $id) {
         success
     }
 }
 
 mutation payContractDeposit($id: ID!) {
     payContractDeposit(id: $id) {
-        rentalContract {
+        contract {
             id
-            currentHistory {
+            latestHistoryEntry {
                 status
             }
         }
@@ -120,9 +119,9 @@ mutation payContractDeposit($id: ID!) {
 
 mutation payTotalContract($id: ID!) {
     payTotalContract(id: $id) {
-        rentalContract {
+        contract {
             id
-            currentHistory {
+            latestHistoryEntry {
                 status
             }
         }
@@ -132,9 +131,9 @@ mutation payTotalContract($id: ID!) {
 
 mutation cancelContract($id: ID!) {
     cancelContract(id: $id) {
-        rentalContract {
+        contract {
             id
-            currentHistory {
+            latestHistoryEntry {
                 status
             }
         }

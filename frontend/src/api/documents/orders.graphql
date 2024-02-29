@@ -4,14 +4,14 @@ query internalOrders($page: Int) {
         numPages
         results {
             id
-            officeBranch {
+            sourceOffice {
                 name
             }
-            officeDestination {
+            targetOffice {
                 name
             }
             createdOn
-            currentHistory {
+            latestHistoryEntry {
                 status
             }
         }
@@ -22,7 +22,7 @@ query internalOrderById($id: ID!) {
     internalOrderById(id: $id) {
         id
         createdOn
-        officeBranch {
+        sourceOffice {
             id
             houseNumber
             name
@@ -32,7 +32,7 @@ query internalOrderById($id: ID!) {
                 postalCode
             }
         }
-        officeDestination {
+        targetOffice {
             id
             houseNumber
             name
@@ -42,11 +42,11 @@ query internalOrderById($id: ID!) {
                 postalCode
             }
         }
-        currentHistory {
+        latestHistoryEntry {
             status
         }
-        orders {
-            quantity
+        orderItems {
+            quantityOrdered
             quantityReceived
             product {
                 brand {
@@ -86,11 +86,11 @@ query supplierOrders($page: Int) {
             supplier {
                 name
             }
-            officeDestination {
+            targetOffice {
                 name
             }
             createdOn
-            currentHistory {
+            latestHistoryEntry {
                 status
             }
         }
@@ -114,7 +114,7 @@ query supplierOrderById($id: ID!) {
             phoneCode
             phoneNumber
         }
-        officeDestination {
+        targetOffice {
             id
             name
             street
@@ -123,7 +123,7 @@ query supplierOrderById($id: ID!) {
                 name
             }
         }
-        currentHistory {
+        latestHistoryEntry {
             status
             user {
                 firstName
@@ -131,7 +131,7 @@ query supplierOrderById($id: ID!) {
                 email
             }
         }
-        orders {
+        orderItems {
             id
             product {
                 id
@@ -141,7 +141,7 @@ query supplierOrderById($id: ID!) {
                 }
                 type
             }
-            quantity
+            quantityOrdered
             quantityReceived
         }
     }
@@ -151,12 +151,12 @@ query supplierOrdersBySupplierId($id: ID!) {
     supplierOrdersBySupplierId(id: $id) {
         id
         createdOn
-        officeDestination {
+        targetOffice {
             name
             street
             houseNumber
         }
-        currentHistory {
+        latestHistoryEntry {
             status
             user {
                 email
@@ -165,7 +165,7 @@ query supplierOrdersBySupplierId($id: ID!) {
             }
             createdOn
         }
-        orders {
+        orderItems {
             id
             product {
                 id
@@ -177,7 +177,7 @@ query supplierOrdersBySupplierId($id: ID!) {
                 price
                 type
             }
-            quantity
+            quantityOrdered
             quantityReceived
         }
     }

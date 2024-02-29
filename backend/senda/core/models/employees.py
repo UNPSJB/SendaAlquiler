@@ -27,23 +27,12 @@ class EmployeeModel(TimeStampedModel):
     objects: EmployeeModelManager = EmployeeModelManager()
 
 
-class EmployeeOfficeModel(TimeStampedModel):
-    """
-    Represents an employee office in the system, extending the TimeStampedModel to include timestamps for creation and modification.
-
-    Attributes:
-        employee (models.ForeignKey): A many-to-one relationship with the EmployeeModel. This field represents the employee associated with the office. The related name 'offices' is used for reverse querying.
-        office (models.ForeignKey): A many-to-one relationship with the OfficeModel. This field represents the office associated with the employee. The related name 'employees' is used for reverse querying.
-
-    Methods:
-        __str__: Returns a string representation of the EmployeeOfficeModel instance, which is the email of the associated user.
-    """
-
+class EmployeeOffice(TimeStampedModel):
     employee = models.ForeignKey(
         EmployeeModel, on_delete=models.CASCADE, related_name="offices"
     )
     office = models.ForeignKey(
-        "core.OfficeModel", on_delete=models.CASCADE, related_name="employees"
+        "core.Office", on_delete=models.CASCADE, related_name="employees"
     )
 
     def __str__(self) -> str:

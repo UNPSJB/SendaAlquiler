@@ -21,6 +21,7 @@ export type Scalars = {
     Boolean: { input: boolean; output: boolean };
     Int: { input: number; output: number };
     Float: { input: number; output: number };
+    BigInt: { input: any; output: any };
     Date: { input: string; output: string };
     DateTime: { input: any; output: any };
     GenericScalar: { input: any; output: any };
@@ -44,8 +45,8 @@ export type Brand = {
 
 export type CancelContract = {
     __typename?: 'CancelContract';
+    contract: Maybe<Contract>;
     error: Maybe<Scalars['String']['output']>;
-    rentalContract: Maybe<RentalContract>;
 };
 
 export type CancelInternalOrder = {
@@ -62,6 +63,7 @@ export type CancelOrderSupplier = {
 
 export type Client = {
     __typename?: 'Client';
+    contracts: Array<Contract>;
     createdOn: Scalars['DateTime']['output'];
     /** Número de documento de identidad del cliente */
     dni: Scalars['String']['output'];
@@ -75,18 +77,143 @@ export type Client = {
     lastName: Scalars['String']['output'];
     locality: Locality;
     modifiedOn: Scalars['DateTime']['output'];
+    /** Notas adicionales sobre el cliente */
+    note: Maybe<Scalars['String']['output']>;
     /** Código de área del teléfono del cliente */
     phoneCode: Scalars['String']['output'];
     /** Número de teléfono del cliente */
     phoneNumber: Scalars['String']['output'];
-    purchases: Array<Purchase>;
-    rentalContracts: Array<RentalContract>;
+    sales: Array<Sale>;
     /** Nombre de la calle donde vive el cliente */
     streetName: Scalars['String']['output'];
 };
 
+export type Contract = {
+    __typename?: 'Contract';
+    client: Client;
+    contractEndDatetime: Scalars['DateTime']['output'];
+    contractItems: Array<ContractItem>;
+    contractStartDatetime: Scalars['DateTime']['output'];
+    createdBy: User;
+    createdOn: Scalars['DateTime']['output'];
+    discountAmount: Scalars['BigInt']['output'];
+    expirationDate: Maybe<Scalars['DateTime']['output']>;
+    history: Array<ContractHistory>;
+    /** Número de la calle donde vive el cliente */
+    houseNumber: Scalars['String']['output'];
+    /** Número de la casa o departamento */
+    houseUnit: Maybe<Scalars['String']['output']>;
+    id: Scalars['ID']['output'];
+    latestHistoryEntry: Maybe<ContractHistory>;
+    locality: Locality;
+    modifiedOn: Scalars['DateTime']['output'];
+    numberOfRentalDays: Scalars['Int']['output'];
+    office: Office;
+    /** Nombre de la calle donde vive el cliente */
+    streetName: Scalars['String']['output'];
+    subtotal: Scalars['BigInt']['output'];
+    total: Scalars['BigInt']['output'];
+};
+
+export type ContractHistory = {
+    __typename?: 'ContractHistory';
+    contract: Contract;
+    createdOn: Scalars['DateTime']['output'];
+    currentContract: Maybe<Contract>;
+    id: Scalars['ID']['output'];
+    modifiedOn: Scalars['DateTime']['output'];
+    status: ContractStatusChoices;
+};
+
+export type ContractInput = {
+    clientId: Scalars['ID']['input'];
+    contractEnd: Scalars['DateTime']['input'];
+    contractStart: Scalars['DateTime']['input'];
+    houseNumber: Scalars['String']['input'];
+    houseUnit: InputMaybe<Scalars['String']['input']>;
+    localityId: Scalars['ID']['input'];
+    streetName: Scalars['String']['input'];
+};
+
+export type ContractItem = {
+    __typename?: 'ContractItem';
+    contract: Contract;
+    createdOn: Scalars['DateTime']['output'];
+    id: Scalars['ID']['output'];
+    modifiedOn: Scalars['DateTime']['output'];
+    product: Product;
+    productDiscount: Scalars['BigInt']['output'];
+    productPrice: Scalars['BigInt']['output'];
+    productSubtotal: Scalars['BigInt']['output'];
+    quantity: Scalars['Int']['output'];
+    quantityReturned: Scalars['Int']['output'];
+    serviceItems: Array<ContractItemService>;
+    servicesDiscount: Scalars['BigInt']['output'];
+    servicesSubtotal: Scalars['Int']['output'];
+    shippingDiscount: Scalars['BigInt']['output'];
+    shippingSubtotal: Scalars['Int']['output'];
+    total: Scalars['BigInt']['output'];
+};
+
+export type ContractItemInput = {
+    allocations: Array<InputMaybe<ContractItemProductAllocationInput>>;
+    productDiscount: InputMaybe<Scalars['Int']['input']>;
+    productId: Scalars['ID']['input'];
+    serviceItems: InputMaybe<Array<InputMaybe<ContractItemServiceItemInput>>>;
+};
+
+export type ContractItemProductAllocationInput = {
+    officeId: Scalars['ID']['input'];
+    quantity: Scalars['Int']['input'];
+    shippingCost: InputMaybe<Scalars['Int']['input']>;
+    shippingDiscount: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ContractItemService = {
+    __typename?: 'ContractItemService';
+    createdOn: Scalars['DateTime']['output'];
+    discount: Scalars['BigInt']['output'];
+    id: Scalars['ID']['output'];
+    item: ContractItem;
+    modifiedOn: Scalars['DateTime']['output'];
+    price: Scalars['BigInt']['output'];
+    service: ProductService;
+    subtotal: Scalars['BigInt']['output'];
+    total: Scalars['BigInt']['output'];
+};
+
+export type ContractItemServiceItemInput = {
+    discount: InputMaybe<Scalars['Int']['input']>;
+    serviceId: Scalars['ID']['input'];
+};
+
 /** An enumeration. */
-export enum CoreSupplierOrderHistoryModelStatusChoices {
+export enum ContractStatusChoices {
+    Activo = 'ACTIVO',
+    Cancelado = 'CANCELADO',
+    ConDeposito = 'CON_DEPOSITO',
+    DevolucionExitosa = 'DEVOLUCION_EXITOSA',
+    DevolucionFallida = 'DEVOLUCION_FALLIDA',
+    Finalizado = 'FINALIZADO',
+    Pagado = 'PAGADO',
+    Presupuestado = 'PRESUPUESTADO',
+    Vencido = 'VENCIDO',
+}
+
+/** An enumeration. */
+export enum CoreProductServiceBillingTypeChoices {
+    /** CUSTOM */
+    Custom = 'CUSTOM',
+    /** MONTHLY */
+    Monthly = 'MONTHLY',
+    /** ONE_TIME */
+    OneTime = 'ONE_TIME',
+    /** WEEKLY */
+    Weekly = 'WEEKLY',
+}
+
+/** An enumeration. */
+export enum CoreSupplierOrderHistoryStatusChoices {
     /** Cancelado */
     Canceled = 'CANCELED',
     /** Completado */
@@ -122,6 +249,13 @@ export type CreateClientInput = {
     streetName: Scalars['String']['input'];
 };
 
+export type CreateContract = {
+    __typename?: 'CreateContract';
+    contractId: Maybe<Scalars['ID']['output']>;
+    error: Maybe<Scalars['String']['output']>;
+    ok: Maybe<Scalars['Boolean']['output']>;
+};
+
 export type CreateEmployee = {
     __typename?: 'CreateEmployee';
     employee: Maybe<Employee>;
@@ -133,7 +267,6 @@ export type CreateEmployeeInput = {
     firstName: Scalars['String']['input'];
     lastName: Scalars['String']['input'];
     offices: Array<Scalars['ID']['input']>;
-    password: Scalars['String']['input'];
 };
 
 export type CreateInternalOrder = {
@@ -143,9 +276,9 @@ export type CreateInternalOrder = {
 };
 
 export type CreateInternalOrderInput = {
-    officeBranchId: Scalars['ID']['input'];
-    officeDestinationId: Scalars['ID']['input'];
     products: Array<CreateInternalOrderProductInput>;
+    sourceOfficeId: Scalars['ID']['input'];
+    targetOfficeId: Scalars['ID']['input'];
 };
 
 export type CreateInternalOrderProductInput = {
@@ -165,44 +298,15 @@ export type CreateProduct = {
     product: Maybe<Product>;
 };
 
-export type CreateProductInput = {
-    brandId: Scalars['ID']['input'];
-    description: InputMaybe<Scalars['String']['input']>;
-    name: Scalars['String']['input'];
-    price: Scalars['Int']['input'];
-    services: Array<ServiceInput>;
-    sku: Scalars['String']['input'];
-    stock: Array<StockInput>;
-    suppliers: Array<ProductSupplierInput>;
-    type: ProductTypeChoices;
-};
-
-export type CreatePurchase = {
-    __typename?: 'CreatePurchase';
+export type CreateSale = {
+    __typename?: 'CreateSale';
     error: Maybe<Scalars['String']['output']>;
-    purchase: Maybe<Purchase>;
+    sale: Maybe<Sale>;
 };
 
-export type CreatePurchaseInput = {
+export type CreateSaleInput = {
     client: Scalars['ID']['input'];
-    products: Array<PurchaseItemsInput>;
-};
-
-export type CreateRentalContract = {
-    __typename?: 'CreateRentalContract';
-    error: Maybe<Scalars['String']['output']>;
-    rentalContract: Maybe<RentalContract>;
-};
-
-export type CreateRentalContractInput = {
-    clientId: Scalars['ID']['input'];
-    contractEndDatetime: Scalars['DateTime']['input'];
-    contractStartDatetime: Scalars['DateTime']['input'];
-    houseNumber: Scalars['String']['input'];
-    houseUnit: InputMaybe<Scalars['String']['input']>;
-    localityId: Scalars['ID']['input'];
-    products: Array<RentalContractProductsItemInput>;
-    streetName: Scalars['String']['input'];
+    orders: Array<SaleOrderItemInput>;
 };
 
 export type CreateSupplier = {
@@ -246,6 +350,11 @@ export type DeleteClient = {
     success: Scalars['Boolean']['output'];
 };
 
+export type DeleteContract = {
+    __typename?: 'DeleteContract';
+    success: Scalars['Boolean']['output'];
+};
+
 export type DeleteEmployee = {
     __typename?: 'DeleteEmployee';
     success: Scalars['Boolean']['output'];
@@ -266,13 +375,8 @@ export type DeleteProduct = {
     success: Scalars['Boolean']['output'];
 };
 
-export type DeletePurchase = {
-    __typename?: 'DeletePurchase';
-    success: Scalars['Boolean']['output'];
-};
-
-export type DeleteRentalContract = {
-    __typename?: 'DeleteRentalContract';
+export type DeleteSale = {
+    __typename?: 'DeleteSale';
     success: Scalars['Boolean']['output'];
 };
 
@@ -306,20 +410,20 @@ export type EmployeeOffice = {
 
 export type ExpiredContract = {
     __typename?: 'ExpiredContract';
+    contract: Maybe<Contract>;
     error: Maybe<Scalars['String']['output']>;
-    rentalContract: Maybe<RentalContract>;
 };
 
 export type FailedReturnContract = {
     __typename?: 'FailedReturnContract';
+    contract: Maybe<Contract>;
     error: Maybe<Scalars['String']['output']>;
-    rentalContract: Maybe<RentalContract>;
 };
 
 export type FinishContract = {
     __typename?: 'FinishContract';
+    contract: Maybe<Contract>;
     error: Maybe<Scalars['String']['output']>;
-    rentalContract: Maybe<RentalContract>;
 };
 
 export type InProgressInternalOrder = {
@@ -330,35 +434,31 @@ export type InProgressInternalOrder = {
 
 export type InternalOrder = {
     __typename?: 'InternalOrder';
+    approximateDeliveryDate: Maybe<Scalars['Date']['output']>;
     createdOn: Scalars['DateTime']['output'];
-    currentHistory: Maybe<InternalOrderHistory>;
-    history: Array<InternalOrderHistory>;
+    historyEntries: Array<InternalOrderHistory>;
     id: Scalars['ID']['output'];
+    latestHistoryEntry: Maybe<InternalOrderHistory>;
     modifiedOn: Scalars['DateTime']['output'];
-    officeBranch: Office;
-    officeDestination: Office;
-    orders: Array<InternalOrderProduct>;
+    orderItems: Array<InternalOrderItem>;
+    requestedForDate: Scalars['Date']['output'];
+    sourceOffice: Office;
+    targetOffice: Office;
 };
 
 export type InternalOrderHistory = {
     __typename?: 'InternalOrderHistory';
     createdOn: Scalars['DateTime']['output'];
     currentOrder: Maybe<InternalOrder>;
-    date: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     internalOrder: InternalOrder;
     modifiedOn: Scalars['DateTime']['output'];
+    note: Maybe<Scalars['String']['output']>;
+    responsibleUser: Maybe<User>;
     status: InternalOrderHistoryStatusChoices;
-    user: Maybe<User>;
 };
 
-/**
- *
- *     Enum-like class representing status choices for internal order history. Inherits from models.TextChoices.
- *
- *     It provides a set of predefined status choices such as PENDING, IN_PROGRESS, COMPLETED, and CANCELED.
- *
- */
+/** An enumeration. */
 export enum InternalOrderHistoryStatusChoices {
     Canceled = 'CANCELED',
     Completed = 'COMPLETED',
@@ -366,27 +466,27 @@ export enum InternalOrderHistoryStatusChoices {
     Pending = 'PENDING',
 }
 
-export type InternalOrderProduct = {
-    __typename?: 'InternalOrderProduct';
+export type InternalOrderItem = {
+    __typename?: 'InternalOrderItem';
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     internalOrder: InternalOrder;
     modifiedOn: Scalars['DateTime']['output'];
     product: Product;
-    quantity: Scalars['Int']['output'];
+    quantityOrdered: Scalars['Int']['output'];
     quantityReceived: Scalars['Int']['output'];
 };
 
 export type Locality = {
     __typename?: 'Locality';
     clients: Array<Client>;
+    contracts: Array<Contract>;
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
-    officemodelSet: Array<Office>;
+    officeSet: Array<Office>;
     postalCode: Scalars['String']['output'];
-    rentalContracts: Array<RentalContract>;
     state: StateChoices;
     suppliers: Array<Supplier>;
 };
@@ -404,21 +504,21 @@ export type Mutation = {
     cancelOrderSupplier: Maybe<CancelOrderSupplier>;
     createBrand: Maybe<CreateBrand>;
     createClient: Maybe<CreateClient>;
+    createContract: Maybe<CreateContract>;
     createEmployee: Maybe<CreateEmployee>;
     createInternalOrder: Maybe<CreateInternalOrder>;
     createLocality: Maybe<CreateLocality>;
     createProduct: Maybe<CreateProduct>;
-    createPurchase: Maybe<CreatePurchase>;
-    createRentalContract: Maybe<CreateRentalContract>;
+    createSale: Maybe<CreateSale>;
     createSupplier: Maybe<CreateSupplier>;
     createSupplierOrder: Maybe<CreateSupplierOrder>;
     deleteClient: Maybe<DeleteClient>;
+    deleteContract: Maybe<DeleteContract>;
     deleteEmployee: Maybe<DeleteEmployee>;
     deleteInternalOrder: Maybe<DeleteInternalOrder>;
     deleteLocality: Maybe<DeleteLocality>;
     deleteProduct: Maybe<DeleteProduct>;
-    deletePurchase: Maybe<DeletePurchase>;
-    deleteRentalContract: Maybe<DeleteRentalContract>;
+    deleteSale: Maybe<DeleteSale>;
     deleteSupplier: Maybe<DeleteSupplier>;
     deleteSupplierOrder: Maybe<DeleteSupplierOrder>;
     expiredContract: Maybe<ExpiredContract>;
@@ -438,6 +538,9 @@ export type Mutation = {
     tokenAuth: Maybe<ObtainJsonWebToken>;
     updateClient: Maybe<UpdateClient>;
     updateEmployee: Maybe<UpdateEmployee>;
+    updateLocality: Maybe<UpdateLocality>;
+    updateProduct: Maybe<UpdateProduct>;
+    updateSupplier: Maybe<UpdateSupplier>;
     verifyToken: Maybe<Verify>;
 };
 
@@ -461,6 +564,11 @@ export type MutationCreateClientArgs = {
     clientData: CreateClientInput;
 };
 
+export type MutationCreateContractArgs = {
+    contractData: ContractInput;
+    itemsData: Array<ContractItemInput>;
+};
+
 export type MutationCreateEmployeeArgs = {
     employeeData: CreateEmployeeInput;
 };
@@ -476,15 +584,14 @@ export type MutationCreateLocalityArgs = {
 };
 
 export type MutationCreateProductArgs = {
-    productData: CreateProductInput;
+    productData: ProductDataInput;
+    services: InputMaybe<Array<InputMaybe<ProductServiceInput>>>;
+    stockItems: InputMaybe<Array<InputMaybe<ProductStockItemInput>>>;
+    suppliers: InputMaybe<Array<InputMaybe<ProductSupplierInput>>>;
 };
 
-export type MutationCreatePurchaseArgs = {
-    data: CreatePurchaseInput;
-};
-
-export type MutationCreateRentalContractArgs = {
-    data: CreateRentalContractInput;
+export type MutationCreateSaleArgs = {
+    data: CreateSaleInput;
 };
 
 export type MutationCreateSupplierArgs = {
@@ -496,6 +603,10 @@ export type MutationCreateSupplierOrderArgs = {
 };
 
 export type MutationDeleteClientArgs = {
+    id: Scalars['ID']['input'];
+};
+
+export type MutationDeleteContractArgs = {
     id: Scalars['ID']['input'];
 };
 
@@ -515,11 +626,7 @@ export type MutationDeleteProductArgs = {
     id: Scalars['ID']['input'];
 };
 
-export type MutationDeletePurchaseArgs = {
-    id: Scalars['ID']['input'];
-};
-
-export type MutationDeleteRentalContractArgs = {
+export type MutationDeleteSaleArgs = {
     id: Scalars['ID']['input'];
 };
 
@@ -599,6 +706,26 @@ export type MutationUpdateEmployeeArgs = {
     id: Scalars['ID']['input'];
 };
 
+export type MutationUpdateLocalityArgs = {
+    id: Scalars['ID']['input'];
+    name: InputMaybe<Scalars['String']['input']>;
+    postalCode: InputMaybe<Scalars['String']['input']>;
+    state: InputMaybe<StateChoices>;
+};
+
+export type MutationUpdateProductArgs = {
+    id: Scalars['ID']['input'];
+    productData: ProductDataInput;
+    services: Array<ProductServiceInput>;
+    stockItems: Array<ProductStockItemInput>;
+    suppliers: Array<ProductSupplierInput>;
+};
+
+export type MutationUpdateSupplierArgs = {
+    id: Scalars['ID']['input'];
+    input: UpdateSupplierInput;
+};
+
 export type MutationVerifyTokenArgs = {
     token: InputMaybe<Scalars['String']['input']>;
 };
@@ -613,34 +740,36 @@ export type ObtainJsonWebToken = {
 
 export type Office = {
     __typename?: 'Office';
+    contracts: Array<Contract>;
     createdOn: Scalars['DateTime']['output'];
     employees: Array<EmployeeOffice>;
     houseNumber: Scalars['String']['output'];
     id: Scalars['ID']['output'];
-    internalOrdersBranch: Array<InternalOrder>;
-    internalOrdersDestination: Array<InternalOrder>;
+    incomingInternalOrders: Array<InternalOrder>;
+    incomingSupplierOrders: Array<OrderSupplier>;
     locality: Locality;
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
     note: Maybe<Scalars['String']['output']>;
-    purchases: Array<Purchase>;
-    rentalContracts: Array<RentalContract>;
-    stock: Array<ProductStockInOffice>;
+    outgoingInternalOrders: Array<InternalOrder>;
+    sales: Array<Sale>;
+    stockItems: Array<ProductStockInOffice>;
     street: Scalars['String']['output'];
-    supplierOrdersDestination: Array<OrderSupplier>;
 };
 
 export type OrderSupplier = {
     __typename?: 'OrderSupplier';
+    approximateDeliveryDate: Maybe<Scalars['Date']['output']>;
     createdOn: Scalars['DateTime']['output'];
-    currentHistory: Maybe<SupplierOrderHistory>;
-    history: Array<SupplierOrderHistory>;
+    historyEntries: Array<SupplierOrderHistory>;
     id: Scalars['ID']['output'];
+    latestHistoryEntry: Maybe<SupplierOrderHistory>;
     modifiedOn: Scalars['DateTime']['output'];
-    officeDestination: Office;
-    orders: Array<SupplierOrderProduct>;
+    orderItems: Array<SupplierOrderProduct>;
+    requestedForDate: Maybe<Scalars['Date']['output']>;
     supplier: Supplier;
-    total: Scalars['Int']['output'];
+    targetOffice: Office;
+    total: Scalars['BigInt']['output'];
 };
 
 export type PaginatedClientQueryResult = {
@@ -648,6 +777,13 @@ export type PaginatedClientQueryResult = {
     count: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<Client>;
+};
+
+export type PaginatedContractQueryResult = {
+    __typename?: 'PaginatedContractQueryResult';
+    count: Scalars['Int']['output'];
+    numPages: Scalars['Int']['output'];
+    results: Array<Contract>;
 };
 
 export type PaginatedEmployeeQueryResult = {
@@ -685,18 +821,11 @@ export type PaginatedProductQueryResult = {
     results: Array<Product>;
 };
 
-export type PaginatedPurchaseQueryResult = {
-    __typename?: 'PaginatedPurchaseQueryResult';
+export type PaginatedSaleQueryResult = {
+    __typename?: 'PaginatedSaleQueryResult';
     count: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
-    results: Array<Purchase>;
-};
-
-export type PaginatedRentalContractQueryResult = {
-    __typename?: 'PaginatedRentalContractQueryResult';
-    count: Scalars['Int']['output'];
-    numPages: Scalars['Int']['output'];
-    results: Array<RentalContract>;
+    results: Array<Sale>;
 };
 
 export type PaginatedSupplierQueryResult = {
@@ -708,44 +837,73 @@ export type PaginatedSupplierQueryResult = {
 
 export type PayContractDeposit = {
     __typename?: 'PayContractDeposit';
+    contract: Maybe<Contract>;
     error: Maybe<Scalars['String']['output']>;
-    rentalContract: Maybe<RentalContract>;
 };
 
 export type PayTotalContract = {
     __typename?: 'PayTotalContract';
+    contract: Maybe<Contract>;
     error: Maybe<Scalars['String']['output']>;
-    rentalContract: Maybe<RentalContract>;
 };
 
 export type Product = {
     __typename?: 'Product';
     brand: Maybe<Brand>;
+    contractItems: Array<ContractItem>;
     createdOn: Scalars['DateTime']['output'];
     description: Maybe<Scalars['String']['output']>;
     id: Scalars['ID']['output'];
+    internalOrders: Array<InternalOrderItem>;
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
     price: Maybe<Scalars['Int']['output']>;
-    purchaseItems: Array<PurchaseItem>;
-    relatedOrders: Array<InternalOrderProduct>;
     relatedSupplierOrders: Array<SupplierOrderProduct>;
-    rentalContractItems: Array<RentalContractItem>;
+    saleItems: Array<SaleItem>;
     services: Array<ProductService>;
     sku: Maybe<Scalars['String']['output']>;
-    stock: Array<ProductStockInOffice>;
+    stockItems: Array<ProductStockInOffice>;
+    suppliers: Array<ProductSupplier>;
     type: ProductTypeChoices;
+};
+
+export type ProductDataInput = {
+    brandId: InputMaybe<Scalars['ID']['input']>;
+    description: InputMaybe<Scalars['String']['input']>;
+    name: Scalars['String']['input'];
+    price: InputMaybe<Scalars['Float']['input']>;
+    sku: InputMaybe<Scalars['String']['input']>;
+    type: Scalars['String']['input'];
 };
 
 export type ProductService = {
     __typename?: 'ProductService';
+    /** Periodo de facturación en días */
+    billingPeriod: Maybe<Scalars['Int']['output']>;
+    billingType: CoreProductServiceBillingTypeChoices;
+    contractItems: Array<ContractItemService>;
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
     price: Scalars['Int']['output'];
     product: Product;
-    rentalContractItems: Array<RentalContractItem>;
+};
+
+/** An enumeration. */
+export enum ProductServiceBillingTypeChoices {
+    Custom = 'CUSTOM',
+    Monthly = 'MONTHLY',
+    OneTime = 'ONE_TIME',
+    Weekly = 'WEEKLY',
+}
+
+export type ProductServiceInput = {
+    billingPeriod: InputMaybe<Scalars['Int']['input']>;
+    billingType: ProductServiceBillingTypeChoices;
+    name: Scalars['String']['input'];
+    price: Scalars['Float']['input'];
+    serviceId: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type ProductStockInOffice = {
@@ -755,84 +913,57 @@ export type ProductStockInOffice = {
     modifiedOn: Scalars['DateTime']['output'];
     office: Office;
     product: Product;
-    stock: Scalars['Int']['output'];
+    quantity: Scalars['Int']['output'];
+};
+
+export type ProductStockItemInput = {
+    officeId: Scalars['ID']['input'];
+    quantity: Scalars['Int']['input'];
 };
 
 export type ProductStocksInDateRange = {
     __typename?: 'ProductStocksInDateRange';
-    id: Scalars['ID']['output'];
-    name: Scalars['String']['output'];
-    price: Scalars['Int']['output'];
-    services: Array<ProductService>;
-    stocksByOffice: Array<ProductsStocksInDateRangeStockByOffice>;
-};
-
-export type ProductSupplierInput = {
-    price: Scalars['Int']['input'];
-    supplierId: Scalars['ID']['input'];
-};
-
-/**
- *
- *     Enum-like class representing choices for product types. Inherits from models.TextChoices.
- *
- *     Provides predefined choices like ALQUILABLE and COMERCIABLE, each being a tuple with the internal identifier and the human-readable name.
- *
- */
-export enum ProductTypeChoices {
-    Alquilable = 'ALQUILABLE',
-    Comerciable = 'COMERCIABLE',
-}
-
-export type ProductsStocksInDateRangeStockByOffice = {
-    __typename?: 'ProductsStocksInDateRangeStockByOffice';
     office: Office;
-    stock: Scalars['Int']['output'];
+    quantity: Scalars['Int']['output'];
 };
 
-export type Purchase = {
-    __typename?: 'Purchase';
-    client: Client;
-    createdOn: Scalars['DateTime']['output'];
-    id: Scalars['ID']['output'];
-    modifiedOn: Scalars['DateTime']['output'];
-    office: Office;
-    purchaseItems: Array<PurchaseItem>;
-    total: Scalars['Int']['output'];
-};
-
-export type PurchaseItem = {
-    __typename?: 'PurchaseItem';
+export type ProductSupplier = {
+    __typename?: 'ProductSupplier';
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     price: Scalars['Int']['output'];
     product: Product;
-    purchase: Purchase;
-    quantity: Scalars['Int']['output'];
-    total: Scalars['Int']['output'];
+    supplier: Supplier;
 };
 
-export type PurchaseItemsInput = {
-    discount: Scalars['Int']['input'];
-    product: Scalars['String']['input'];
-    quantity: Scalars['Int']['input'];
-    total: Scalars['Int']['input'];
+export type ProductSupplierInput = {
+    price: Scalars['Float']['input'];
+    supplierId: Scalars['ID']['input'];
 };
+
+/** An enumeration. */
+export enum ProductTypeChoices {
+    Alquilable = 'ALQUILABLE',
+    Comerciable = 'COMERCIABLE',
+}
 
 export type Query = {
     __typename?: 'Query';
     allClients: Array<Client>;
     allLocalities: Array<Locality>;
     allProducts: Array<Product>;
-    allPurchases: Array<Purchase>;
+    allSales: Array<Sale>;
     allSuppliers: Array<Supplier>;
     brands: Array<Brand>;
     clientById: Maybe<Client>;
     clientExists: Scalars['Boolean']['output'];
     clients: PaginatedClientQueryResult;
     clientsCsv: Scalars['String']['output'];
-    contractById: Maybe<RentalContract>;
+    contractById: Maybe<Contract>;
+    contracts: PaginatedContractQueryResult;
+    contractsByClientId: Array<Contract>;
+    contractsCsv: Scalars['String']['output'];
     employeeById: Maybe<Employee>;
     employees: PaginatedEmployeeQueryResult;
     employeesCsv: Scalars['String']['output'];
@@ -846,19 +977,16 @@ export type Query = {
     officesCsv: Scalars['String']['output'];
     productById: Maybe<Product>;
     productExists: Scalars['Boolean']['output'];
+    productStocksInDateRange: Array<ProductStocksInDateRange>;
     products: PaginatedProductQueryResult;
     productsCsv: Scalars['String']['output'];
     productsStocksByOfficeId: Array<ProductStockInOffice>;
-    productsStocksByOfficeInDateRange: Array<ProductStocksInDateRange>;
     productsSuppliedBySupplierId: Array<Product>;
-    purchaseById: Maybe<Purchase>;
-    purchaseItems: Array<PurchaseItem>;
-    purchases: PaginatedPurchaseQueryResult;
-    purchasesByClientId: Array<Purchase>;
-    purchasesCsv: Scalars['String']['output'];
-    rentalContracts: PaginatedRentalContractQueryResult;
-    rentalContractsByClientId: Array<RentalContract>;
-    rentalContractsCsv: Scalars['String']['output'];
+    saleById: Maybe<Sale>;
+    saleItems: Array<SaleItem>;
+    sales: PaginatedSaleQueryResult;
+    salesByClientId: Array<Sale>;
+    salesCsv: Scalars['String']['output'];
     supplierById: Maybe<Supplier>;
     supplierOrderById: Maybe<OrderSupplier>;
     supplierOrders: PaginatedOrderSupplierQueryResult;
@@ -893,12 +1021,21 @@ export type QueryContractByIdArgs = {
     id: Scalars['ID']['input'];
 };
 
+export type QueryContractsArgs = {
+    page: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type QueryContractsByClientIdArgs = {
+    id: Scalars['ID']['input'];
+};
+
 export type QueryEmployeeByIdArgs = {
     id: Scalars['ID']['input'];
 };
 
 export type QueryEmployeesArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
+    query: InputMaybe<Scalars['String']['input']>;
 };
 
 export type QueryInternalOrderByIdArgs = {
@@ -925,6 +1062,12 @@ export type QueryProductExistsArgs = {
     sku: Scalars['String']['input'];
 };
 
+export type QueryProductStocksInDateRangeArgs = {
+    endDate: Scalars['Date']['input'];
+    productId: Scalars['ID']['input'];
+    startDate: Scalars['Date']['input'];
+};
+
 export type QueryProductsArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
     query: InputMaybe<Scalars['String']['input']>;
@@ -934,32 +1077,19 @@ export type QueryProductsStocksByOfficeIdArgs = {
     officeId: Scalars['ID']['input'];
 };
 
-export type QueryProductsStocksByOfficeInDateRangeArgs = {
-    endDate: Scalars['Date']['input'];
-    startDate: Scalars['Date']['input'];
-};
-
 export type QueryProductsSuppliedBySupplierIdArgs = {
     supplierId: Scalars['ID']['input'];
 };
 
-export type QueryPurchaseByIdArgs = {
+export type QuerySaleByIdArgs = {
     id: Scalars['ID']['input'];
 };
 
-export type QueryPurchasesArgs = {
+export type QuerySalesArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
 };
 
-export type QueryPurchasesByClientIdArgs = {
-    id: Scalars['ID']['input'];
-};
-
-export type QueryRentalContractsArgs = {
-    page: InputMaybe<Scalars['Int']['input']>;
-};
-
-export type QueryRentalContractsByClientIdArgs = {
+export type QuerySalesByClientIdArgs = {
     id: Scalars['ID']['input'];
 };
 
@@ -981,6 +1111,7 @@ export type QuerySupplierOrdersBySupplierIdArgs = {
 
 export type QuerySuppliersArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
+    query: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ReceiveInternalOrder = {
@@ -1002,103 +1133,48 @@ export type Refresh = {
     token: Scalars['String']['output'];
 };
 
-export type RentalContract = {
-    __typename?: 'RentalContract';
-    client: Client;
-    contractEndDatetime: Scalars['DateTime']['output'];
-    contractStartDatetime: Scalars['DateTime']['output'];
-    createdBy: User;
-    createdOn: Scalars['DateTime']['output'];
-    currentHistory: Maybe<RentalContractHistory>;
-    expirationDate: Maybe<Scalars['DateTime']['output']>;
-    /** Número de la calle donde vive el cliente */
-    houseNumber: Scalars['String']['output'];
-    /** Número de la casa o departamento */
-    houseUnit: Maybe<Scalars['String']['output']>;
-    id: Scalars['ID']['output'];
-    locality: Locality;
-    modifiedOn: Scalars['DateTime']['output'];
-    numberOfRentalDays: Scalars['Int']['output'];
-    office: Office;
-    rentalContractHistory: Array<RentalContractHistory>;
-    rentalContractItems: Array<RentalContractItem>;
-    /** Nombre de la calle donde vive el cliente */
-    streetName: Scalars['String']['output'];
-    total: Scalars['Int']['output'];
-};
-
-export type RentalContractHistory = {
-    __typename?: 'RentalContractHistory';
-    createdOn: Scalars['DateTime']['output'];
-    currentRentalContract: Maybe<RentalContract>;
-    id: Scalars['ID']['output'];
-    modifiedOn: Scalars['DateTime']['output'];
-    rentalContract: RentalContract;
-    status: RentalContractStatusChoices;
-};
-
-export type RentalContractItem = {
-    __typename?: 'RentalContractItem';
-    createdOn: Scalars['DateTime']['output'];
-    discount: Scalars['Int']['output'];
-    id: Scalars['ID']['output'];
-    modifiedOn: Scalars['DateTime']['output'];
-    price: Scalars['Int']['output'];
-    product: Product;
-    quantity: Scalars['Int']['output'];
-    quantityReturned: Maybe<Scalars['Int']['output']>;
-    rentalContract: RentalContract;
-    service: Maybe<ProductService>;
-    servicePrice: Maybe<Scalars['Int']['output']>;
-    subtotal: Scalars['Int']['output'];
-    total: Scalars['Int']['output'];
-};
-
-export type RentalContractProductsItemInput = {
-    discount: Scalars['Int']['input'];
-    id: Scalars['ID']['input'];
-    officesOrders: Array<RentalContractProductsItemOfficeOrderInput>;
-    service: InputMaybe<Scalars['String']['input']>;
-};
-
-export type RentalContractProductsItemOfficeOrderInput = {
-    officeId: Scalars['ID']['input'];
-    quantity: Scalars['Int']['input'];
-};
-
-/**
- *
- *     Enum-like class representing status choices for rental contract history. Inherits from models.TextChoices.
- *
- *     Provides predefined status choices like PRESUPUESTADO, CON_DEPOSITO, PAGADO, CANCELADO, etc.
- *
- */
-export enum RentalContractStatusChoices {
-    Activo = 'ACTIVO',
-    Cancelado = 'CANCELADO',
-    ConDeposito = 'CON_DEPOSITO',
-    DevolucionExitosa = 'DEVOLUCION_EXITOSA',
-    DevolucionFallida = 'DEVOLUCION_FALLIDA',
-    Finalizado = 'FINALIZADO',
-    Pagado = 'PAGADO',
-    Presupuestado = 'PRESUPUESTADO',
-    Vencido = 'VENCIDO',
-}
-
 export type ResetEmployeePassword = {
     __typename?: 'ResetEmployeePassword';
     success: Scalars['Boolean']['output'];
 };
 
-export type ServiceInput = {
-    name: Scalars['String']['input'];
-    price: Scalars['Int']['input'];
+export type Sale = {
+    __typename?: 'Sale';
+    client: Client;
+    createdOn: Scalars['DateTime']['output'];
+    discount: Scalars['BigInt']['output'];
+    id: Scalars['ID']['output'];
+    modifiedOn: Scalars['DateTime']['output'];
+    office: Office;
+    saleItems: Array<SaleItem>;
+    subtotal: Scalars['BigInt']['output'];
+    total: Scalars['BigInt']['output'];
+};
+
+export type SaleItem = {
+    __typename?: 'SaleItem';
+    createdOn: Scalars['DateTime']['output'];
+    discount: Scalars['BigInt']['output'];
+    id: Scalars['ID']['output'];
+    modifiedOn: Scalars['DateTime']['output'];
+    product: Product;
+    productPrice: Scalars['BigInt']['output'];
+    quantity: Scalars['Int']['output'];
+    sale: Sale;
+    subtotal: Scalars['BigInt']['output'];
+    total: Scalars['BigInt']['output'];
+};
+
+export type SaleOrderItemInput = {
+    discount: Scalars['Int']['input'];
+    product: Scalars['String']['input'];
+    quantity: Scalars['Int']['input'];
 };
 
 export type StartContract = {
     __typename?: 'StartContract';
+    contract: Maybe<Contract>;
     error: Maybe<Scalars['String']['output']>;
-    rentalContract: Maybe<RentalContract>;
 };
 
 /**
@@ -1134,15 +1210,10 @@ export enum StateChoices {
     Tucuman = 'TUCUMAN',
 }
 
-export type StockInput = {
-    officeId: Scalars['ID']['input'];
-    stock: Scalars['Int']['input'];
-};
-
 export type SuccessfulReturnContract = {
     __typename?: 'SuccessfulReturnContract';
+    contract: Maybe<Contract>;
     error: Maybe<Scalars['String']['output']>;
-    rentalContract: Maybe<RentalContract>;
 };
 
 export type Supplier = {
@@ -1159,13 +1230,14 @@ export type Supplier = {
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
     note: Maybe<Scalars['String']['output']>;
+    outgoingSupplierOrders: Array<OrderSupplier>;
     /** Código de área del teléfono del proveedor */
     phoneCode: Scalars['String']['output'];
     /** Número de teléfono del proveedor */
     phoneNumber: Scalars['String']['output'];
+    products: Array<ProductSupplier>;
     /** Nombre de la calle donde vive el proveedor */
     streetName: Scalars['String']['output'];
-    supplierOrdersBranch: Array<OrderSupplier>;
 };
 
 export type SupplierOrderHistory = {
@@ -1174,7 +1246,7 @@ export type SupplierOrderHistory = {
     currentOrder: Maybe<OrderSupplier>;
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
-    status: CoreSupplierOrderHistoryModelStatusChoices;
+    status: CoreSupplierOrderHistoryStatusChoices;
     supplierOrder: OrderSupplier;
     user: Maybe<User>;
 };
@@ -1184,12 +1256,12 @@ export type SupplierOrderProduct = {
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
-    price: Scalars['Int']['output'];
     product: Product;
-    quantity: Scalars['Int']['output'];
+    productPrice: Scalars['BigInt']['output'];
+    quantityOrdered: Scalars['Int']['output'];
     quantityReceived: Scalars['Int']['output'];
     supplierOrder: OrderSupplier;
-    total: Scalars['Int']['output'];
+    total: Scalars['BigInt']['output'];
 };
 
 export type UpdateClient = {
@@ -1224,15 +1296,47 @@ export type UpdateEmployeeInput = {
     offices: Array<Scalars['ID']['input']>;
 };
 
+export type UpdateLocality = {
+    __typename?: 'UpdateLocality';
+    error: Maybe<Scalars['String']['output']>;
+    locality: Maybe<Locality>;
+};
+
+export type UpdateProduct = {
+    __typename?: 'UpdateProduct';
+    error: Maybe<Scalars['String']['output']>;
+    product: Maybe<Product>;
+};
+
+export type UpdateSupplier = {
+    __typename?: 'UpdateSupplier';
+    error: Maybe<Scalars['String']['output']>;
+    supplier: Maybe<Supplier>;
+};
+
+export type UpdateSupplierInput = {
+    cuit: InputMaybe<Scalars['String']['input']>;
+    email: InputMaybe<Scalars['String']['input']>;
+    houseNumber: InputMaybe<Scalars['String']['input']>;
+    houseUnit: InputMaybe<Scalars['String']['input']>;
+    locality: InputMaybe<Scalars['ID']['input']>;
+    name: InputMaybe<Scalars['String']['input']>;
+    note: InputMaybe<Scalars['String']['input']>;
+    phoneCode: InputMaybe<Scalars['String']['input']>;
+    phoneNumber: InputMaybe<Scalars['String']['input']>;
+    streetName: InputMaybe<Scalars['String']['input']>;
+};
+
 export type User = {
     __typename?: 'User';
     admin: Maybe<Admin>;
+    contractsCreated: Array<Contract>;
     dateJoined: Scalars['DateTime']['output'];
     email: Scalars['String']['output'];
     employee: Maybe<Employee>;
     firstName: Scalars['String']['output'];
     id: Scalars['ID']['output'];
-    internalorderhistorymodelSet: Array<InternalOrderHistory>;
+    internalOrderHistories: Array<InternalOrderHistory>;
     /** Indica si el usuario debe ser tratado como activo. Desmarque esta opción en lugar de borrar la cuenta. */
     isActive: Scalars['Boolean']['output'];
     /** Designates whether the user can log into the admin site. */
@@ -1241,8 +1345,7 @@ export type User = {
     isSuperuser: Scalars['Boolean']['output'];
     lastLogin: Maybe<Scalars['DateTime']['output']>;
     lastName: Scalars['String']['output'];
-    rentalContractsCreated: Array<RentalContract>;
-    supplierorderhistorymodelSet: Array<SupplierOrderHistory>;
+    supplierOrderHistories: Array<SupplierOrderHistory>;
 };
 
 export type Verify = {
@@ -1294,6 +1397,7 @@ export type ClientsQuery = {
             houseUnit: string | null;
             houseNumber: string;
             dni: string;
+            note: string | null;
             locality: {
                 __typename?: 'Locality';
                 id: string;
@@ -1332,14 +1436,14 @@ export type ClientByIdQuery = {
     } | null;
 };
 
-export type RentalContractsByClientIdQueryVariables = Exact<{
+export type ContractsByClientIdQueryVariables = Exact<{
     id: Scalars['ID']['input'];
 }>;
 
-export type RentalContractsByClientIdQuery = {
+export type ContractsByClientIdQuery = {
     __typename?: 'Query';
-    rentalContractsByClientId: Array<{
-        __typename?: 'RentalContract';
+    contractsByClientId: Array<{
+        __typename?: 'Contract';
         id: string;
         createdOn: any;
         expirationDate: any | null;
@@ -1348,14 +1452,14 @@ export type RentalContractsByClientIdQuery = {
         houseNumber: string;
         streetName: string;
         houseUnit: string | null;
-        total: number;
-        currentHistory: {
-            __typename?: 'RentalContractHistory';
-            status: RentalContractStatusChoices;
+        total: any;
+        latestHistoryEntry: {
+            __typename?: 'ContractHistory';
+            status: ContractStatusChoices;
         } | null;
         locality: { __typename?: 'Locality'; name: string; state: StateChoices };
-        rentalContractItems: Array<{
-            __typename?: 'RentalContractItem';
+        contractItems: Array<{
+            __typename?: 'ContractItem';
             id: string;
             quantity: number;
             product: {
@@ -1368,19 +1472,19 @@ export type RentalContractsByClientIdQuery = {
     }>;
 };
 
-export type PurchasesByClientIdQueryVariables = Exact<{
+export type SalesByClientIdQueryVariables = Exact<{
     id: Scalars['ID']['input'];
 }>;
 
-export type PurchasesByClientIdQuery = {
+export type SalesByClientIdQuery = {
     __typename?: 'Query';
-    purchasesByClientId: Array<{
-        __typename?: 'Purchase';
+    salesByClientId: Array<{
+        __typename?: 'Sale';
         id: string;
         createdOn: any;
-        total: number;
-        purchaseItems: Array<{
-            __typename?: 'PurchaseItem';
+        total: any;
+        saleItems: Array<{
+            __typename?: 'SaleItem';
             id: string;
             quantity: number;
             product: {
@@ -1489,21 +1593,21 @@ export type ContractsQueryVariables = Exact<{
 
 export type ContractsQuery = {
     __typename?: 'Query';
-    rentalContracts: {
-        __typename?: 'PaginatedRentalContractQueryResult';
+    contracts: {
+        __typename?: 'PaginatedContractQueryResult';
         count: number;
         numPages: number;
         results: Array<{
-            __typename?: 'RentalContract';
+            __typename?: 'Contract';
             id: string;
             createdOn: any;
             contractStartDatetime: any;
             contractEndDatetime: any;
             client: { __typename?: 'Client'; firstName: string; lastName: string };
             office: { __typename?: 'Office'; name: string };
-            currentHistory: {
-                __typename?: 'RentalContractHistory';
-                status: RentalContractStatusChoices;
+            latestHistoryEntry: {
+                __typename?: 'ContractHistory';
+                status: ContractStatusChoices;
             } | null;
         }>;
     };
@@ -1516,14 +1620,14 @@ export type ContractByIdQueryVariables = Exact<{
 export type ContractByIdQuery = {
     __typename?: 'Query';
     contractById: {
-        __typename?: 'RentalContract';
+        __typename?: 'Contract';
         contractEndDatetime: any;
         contractStartDatetime: any;
         expirationDate: any | null;
         houseNumber: string;
         houseUnit: string | null;
         streetName: string;
-        total: number;
+        total: any;
         numberOfRentalDays: number;
         client: {
             __typename?: 'Client';
@@ -1543,9 +1647,9 @@ export type ContractByIdQuery = {
                 postalCode: string;
             };
         };
-        currentHistory: {
-            __typename?: 'RentalContractHistory';
-            status: RentalContractStatusChoices;
+        latestHistoryEntry: {
+            __typename?: 'ContractHistory';
+            status: ContractStatusChoices;
         } | null;
         office: {
             __typename?: 'Office';
@@ -1553,61 +1657,53 @@ export type ContractByIdQuery = {
             street: string;
             houseNumber: string;
         };
-        rentalContractItems: Array<{
-            __typename?: 'RentalContractItem';
+        contractItems: Array<{
+            __typename?: 'ContractItem';
             id: string;
-            servicePrice: number | null;
-            price: number;
+            productPrice: any;
             quantity: number;
-            subtotal: number;
-            discount: number;
-            total: number;
+            productSubtotal: any;
+            servicesSubtotal: number;
+            shippingSubtotal: number;
+            productDiscount: any;
+            servicesDiscount: any;
+            shippingDiscount: any;
+            total: any;
             product: {
                 __typename?: 'Product';
                 name: string;
                 sku: string | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
-            service: { __typename?: 'ProductService'; name: string } | null;
+            serviceItems: Array<{
+                __typename?: 'ContractItemService';
+                service: { __typename?: 'ProductService'; name: string; price: number };
+            }>;
         }>;
     } | null;
 };
 
-export type CreateRentalContractMutationVariables = Exact<{
-    data: CreateRentalContractInput;
+export type CreateContractMutationVariables = Exact<{
+    contractData: ContractInput;
+    itemsData: Array<ContractItemInput> | ContractItemInput;
 }>;
 
-export type CreateRentalContractMutation = {
+export type CreateContractMutation = {
     __typename?: 'Mutation';
-    createRentalContract: {
-        __typename?: 'CreateRentalContract';
+    createContract: {
+        __typename?: 'CreateContract';
+        contractId: string | null;
         error: string | null;
-        rentalContract: {
-            __typename?: 'RentalContract';
-            id: string;
-            createdOn: any;
-            contractStartDatetime: any;
-            contractEndDatetime: any;
-            client: { __typename?: 'Client'; firstName: string; lastName: string };
-            office: { __typename?: 'Office'; name: string };
-            currentHistory: {
-                __typename?: 'RentalContractHistory';
-                status: RentalContractStatusChoices;
-            } | null;
-        } | null;
     } | null;
 };
 
-export type DeleteRentalContractMutationVariables = Exact<{
+export type DeleteContractMutationVariables = Exact<{
     id: Scalars['ID']['input'];
 }>;
 
-export type DeleteRentalContractMutation = {
+export type DeleteContractMutation = {
     __typename?: 'Mutation';
-    deleteRentalContract: {
-        __typename?: 'DeleteRentalContract';
-        success: boolean;
-    } | null;
+    deleteContract: { __typename?: 'DeleteContract'; success: boolean } | null;
 };
 
 export type PayContractDepositMutationVariables = Exact<{
@@ -1619,12 +1715,12 @@ export type PayContractDepositMutation = {
     payContractDeposit: {
         __typename?: 'PayContractDeposit';
         error: string | null;
-        rentalContract: {
-            __typename?: 'RentalContract';
+        contract: {
+            __typename?: 'Contract';
             id: string;
-            currentHistory: {
-                __typename?: 'RentalContractHistory';
-                status: RentalContractStatusChoices;
+            latestHistoryEntry: {
+                __typename?: 'ContractHistory';
+                status: ContractStatusChoices;
             } | null;
         } | null;
     } | null;
@@ -1639,12 +1735,12 @@ export type PayTotalContractMutation = {
     payTotalContract: {
         __typename?: 'PayTotalContract';
         error: string | null;
-        rentalContract: {
-            __typename?: 'RentalContract';
+        contract: {
+            __typename?: 'Contract';
             id: string;
-            currentHistory: {
-                __typename?: 'RentalContractHistory';
-                status: RentalContractStatusChoices;
+            latestHistoryEntry: {
+                __typename?: 'ContractHistory';
+                status: ContractStatusChoices;
             } | null;
         } | null;
     } | null;
@@ -1659,12 +1755,12 @@ export type CancelContractMutation = {
     cancelContract: {
         __typename?: 'CancelContract';
         error: string | null;
-        rentalContract: {
-            __typename?: 'RentalContract';
+        contract: {
+            __typename?: 'Contract';
             id: string;
-            currentHistory: {
-                __typename?: 'RentalContractHistory';
-                status: RentalContractStatusChoices;
+            latestHistoryEntry: {
+                __typename?: 'ContractHistory';
+                status: ContractStatusChoices;
             } | null;
         } | null;
     } | null;
@@ -1678,12 +1774,9 @@ export type EmployeesCsvQueryVariables = Exact<{ [key: string]: never }>;
 
 export type EmployeesCsvQuery = { __typename?: 'Query'; employeesCsv: string };
 
-export type RentalContractsCsvQueryVariables = Exact<{ [key: string]: never }>;
+export type ContractsCsvQueryVariables = Exact<{ [key: string]: never }>;
 
-export type RentalContractsCsvQuery = {
-    __typename?: 'Query';
-    rentalContractsCsv: string;
-};
+export type ContractsCsvQuery = { __typename?: 'Query'; contractsCsv: string };
 
 export type ProductsCsvQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -1697,9 +1790,9 @@ export type OfficesCsvQueryVariables = Exact<{ [key: string]: never }>;
 
 export type OfficesCsvQuery = { __typename?: 'Query'; officesCsv: string };
 
-export type PurchasesCsvQueryVariables = Exact<{ [key: string]: never }>;
+export type SalesCsvQueryVariables = Exact<{ [key: string]: never }>;
 
-export type PurchasesCsvQuery = { __typename?: 'Query'; purchasesCsv: string };
+export type SalesCsvQuery = { __typename?: 'Query'; salesCsv: string };
 
 export type SuppliersCsvQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -1720,11 +1813,11 @@ export type DashboardQueryVariables = Exact<{ [key: string]: never }>;
 
 export type DashboardQuery = {
     __typename?: 'Query';
-    allPurchases: Array<{
-        __typename?: 'Purchase';
+    allSales: Array<{
+        __typename?: 'Sale';
         id: string;
         createdOn: any;
-        total: number;
+        total: any;
         client: { __typename?: 'Client'; firstName: string; lastName: string };
     }>;
     allClients: Array<{ __typename?: 'Client'; id: string }>;
@@ -1732,12 +1825,13 @@ export type DashboardQuery = {
         __typename?: 'Product';
         id: string;
         name: string;
-        purchaseItems: Array<{ __typename?: 'PurchaseItem'; quantity: number }>;
+        saleItems: Array<{ __typename?: 'SaleItem'; quantity: number }>;
     }>;
 };
 
 export type EmployeesQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
+    query: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type EmployeesQuery = {
@@ -1892,6 +1986,28 @@ export type AllLocalitiesQuery = {
     }>;
 };
 
+export type UpdateLocalityMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+    name: InputMaybe<Scalars['String']['input']>;
+    state: InputMaybe<StateChoices>;
+    postalCode: InputMaybe<Scalars['String']['input']>;
+}>;
+
+export type UpdateLocalityMutation = {
+    __typename?: 'Mutation';
+    updateLocality: {
+        __typename?: 'UpdateLocality';
+        error: string | null;
+        locality: {
+            __typename?: 'Locality';
+            id: string;
+            name: string;
+            state: StateChoices;
+            postalCode: string;
+        } | null;
+    } | null;
+};
+
 export type OfficesQueryVariables = Exact<{ [key: string]: never }>;
 
 export type OfficesQuery = {
@@ -1908,7 +2024,7 @@ export type OfficesQuery = {
             postalCode: string;
             name: string;
         };
-        stock: Array<{ __typename?: 'ProductStockInOffice'; stock: number }>;
+        stockItems: Array<{ __typename?: 'ProductStockInOffice'; quantity: number }>;
     }>;
 };
 
@@ -1926,9 +2042,9 @@ export type InternalOrdersQuery = {
             __typename?: 'InternalOrder';
             id: string;
             createdOn: any;
-            officeBranch: { __typename?: 'Office'; name: string };
-            officeDestination: { __typename?: 'Office'; name: string };
-            currentHistory: {
+            sourceOffice: { __typename?: 'Office'; name: string };
+            targetOffice: { __typename?: 'Office'; name: string };
+            latestHistoryEntry: {
                 __typename?: 'InternalOrderHistory';
                 status: InternalOrderHistoryStatusChoices;
             } | null;
@@ -1946,7 +2062,7 @@ export type InternalOrderByIdQuery = {
         __typename?: 'InternalOrder';
         id: string;
         createdOn: any;
-        officeBranch: {
+        sourceOffice: {
             __typename?: 'Office';
             id: string;
             houseNumber: string;
@@ -1954,7 +2070,7 @@ export type InternalOrderByIdQuery = {
             street: string;
             locality: { __typename?: 'Locality'; name: string; postalCode: string };
         };
-        officeDestination: {
+        targetOffice: {
             __typename?: 'Office';
             id: string;
             houseNumber: string;
@@ -1962,13 +2078,13 @@ export type InternalOrderByIdQuery = {
             street: string;
             locality: { __typename?: 'Locality'; name: string; postalCode: string };
         };
-        currentHistory: {
+        latestHistoryEntry: {
             __typename?: 'InternalOrderHistory';
             status: InternalOrderHistoryStatusChoices;
         } | null;
-        orders: Array<{
-            __typename?: 'InternalOrderProduct';
-            quantity: number;
+        orderItems: Array<{
+            __typename?: 'InternalOrderItem';
+            quantityOrdered: number;
             quantityReceived: number;
             product: {
                 __typename?: 'Product';
@@ -2021,10 +2137,10 @@ export type SupplierOrdersQuery = {
             id: string;
             createdOn: any;
             supplier: { __typename?: 'Supplier'; name: string };
-            officeDestination: { __typename?: 'Office'; name: string };
-            currentHistory: {
+            targetOffice: { __typename?: 'Office'; name: string };
+            latestHistoryEntry: {
                 __typename?: 'SupplierOrderHistory';
-                status: CoreSupplierOrderHistoryModelStatusChoices;
+                status: CoreSupplierOrderHistoryStatusChoices;
             } | null;
         }>;
     };
@@ -2055,7 +2171,7 @@ export type SupplierOrderByIdQuery = {
                 state: StateChoices;
             };
         };
-        officeDestination: {
+        targetOffice: {
             __typename?: 'Office';
             id: string;
             name: string;
@@ -2063,9 +2179,9 @@ export type SupplierOrderByIdQuery = {
             houseNumber: string;
             locality: { __typename?: 'Locality'; name: string };
         };
-        currentHistory: {
+        latestHistoryEntry: {
             __typename?: 'SupplierOrderHistory';
-            status: CoreSupplierOrderHistoryModelStatusChoices;
+            status: CoreSupplierOrderHistoryStatusChoices;
             user: {
                 __typename?: 'User';
                 firstName: string;
@@ -2073,10 +2189,10 @@ export type SupplierOrderByIdQuery = {
                 email: string;
             } | null;
         } | null;
-        orders: Array<{
+        orderItems: Array<{
             __typename?: 'SupplierOrderProduct';
             id: string;
-            quantity: number;
+            quantityOrdered: number;
             quantityReceived: number;
             product: {
                 __typename?: 'Product';
@@ -2099,15 +2215,15 @@ export type SupplierOrdersBySupplierIdQuery = {
         __typename?: 'OrderSupplier';
         id: string;
         createdOn: any;
-        officeDestination: {
+        targetOffice: {
             __typename?: 'Office';
             name: string;
             street: string;
             houseNumber: string;
         };
-        currentHistory: {
+        latestHistoryEntry: {
             __typename?: 'SupplierOrderHistory';
-            status: CoreSupplierOrderHistoryModelStatusChoices;
+            status: CoreSupplierOrderHistoryStatusChoices;
             createdOn: any;
             user: {
                 __typename?: 'User';
@@ -2116,10 +2232,10 @@ export type SupplierOrdersBySupplierIdQuery = {
                 lastName: string;
             } | null;
         } | null;
-        orders: Array<{
+        orderItems: Array<{
             __typename?: 'SupplierOrderProduct';
             id: string;
-            quantity: number;
+            quantityOrdered: number;
             quantityReceived: number;
             product: {
                 __typename?: 'Product';
@@ -2227,12 +2343,15 @@ export type ProductListItemFragment = {
     name: string;
     price: number | null;
     type: ProductTypeChoices;
+    sku: string | null;
     brand: { __typename?: 'Brand'; name: string } | null;
     services: Array<{
         __typename?: 'ProductService';
         id: string;
         name: string;
         price: number;
+        billingType: CoreProductServiceBillingTypeChoices;
+        billingPeriod: number | null;
     }>;
 };
 
@@ -2253,12 +2372,15 @@ export type ProductsQuery = {
             name: string;
             price: number | null;
             type: ProductTypeChoices;
+            sku: string | null;
             brand: { __typename?: 'Brand'; name: string } | null;
             services: Array<{
                 __typename?: 'ProductService';
                 id: string;
                 name: string;
                 price: number;
+                billingType: CoreProductServiceBillingTypeChoices;
+                billingPeriod: number | null;
             }>;
         }>;
     };
@@ -2277,21 +2399,36 @@ export type ProductByIdQuery = {
         description: string | null;
         type: ProductTypeChoices;
         price: number | null;
-        brand: { __typename?: 'Brand'; name: string } | null;
-        stock: Array<{
+        brand: { __typename?: 'Brand'; id: string; name: string } | null;
+        stockItems: Array<{
             __typename?: 'ProductStockInOffice';
-            stock: number;
+            quantity: number;
             office: {
                 __typename?: 'Office';
+                id: string;
+                name: string;
                 locality: { __typename?: 'Locality'; name: string };
             };
         }>;
-        services: Array<{ __typename?: 'ProductService'; name: string; price: number }>;
+        services: Array<{
+            __typename?: 'ProductService';
+            id: string;
+            name: string;
+            price: number;
+        }>;
+        suppliers: Array<{
+            __typename?: 'ProductSupplier';
+            price: number;
+            supplier: { __typename?: 'Supplier'; id: string; name: string };
+        }>;
     } | null;
 };
 
 export type CreateProductMutationVariables = Exact<{
-    productData: CreateProductInput;
+    productData: ProductDataInput;
+    stockItems: Array<ProductStockItemInput> | ProductStockItemInput;
+    suppliers: Array<ProductSupplierInput> | ProductSupplierInput;
+    services: Array<ProductServiceInput> | ProductServiceInput;
 }>;
 
 export type CreateProductMutation = {
@@ -2305,12 +2442,48 @@ export type CreateProductMutation = {
             name: string;
             price: number | null;
             type: ProductTypeChoices;
+            sku: string | null;
             brand: { __typename?: 'Brand'; name: string } | null;
             services: Array<{
                 __typename?: 'ProductService';
                 id: string;
                 name: string;
                 price: number;
+                billingType: CoreProductServiceBillingTypeChoices;
+                billingPeriod: number | null;
+            }>;
+        } | null;
+    } | null;
+};
+
+export type UpdateProductMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+    productData: ProductDataInput;
+    stockItems: Array<ProductStockItemInput> | ProductStockItemInput;
+    suppliers: Array<ProductSupplierInput> | ProductSupplierInput;
+    services: Array<ProductServiceInput> | ProductServiceInput;
+}>;
+
+export type UpdateProductMutation = {
+    __typename?: 'Mutation';
+    updateProduct: {
+        __typename?: 'UpdateProduct';
+        error: string | null;
+        product: {
+            __typename?: 'Product';
+            id: string;
+            name: string;
+            price: number | null;
+            type: ProductTypeChoices;
+            sku: string | null;
+            brand: { __typename?: 'Brand'; name: string } | null;
+            services: Array<{
+                __typename?: 'ProductService';
+                id: string;
+                name: string;
+                price: number;
+                billingType: CoreProductServiceBillingTypeChoices;
+                billingPeriod: number | null;
             }>;
         } | null;
     } | null;
@@ -2325,7 +2498,7 @@ export type ProductsStocksByOfficeIdQuery = {
     productsStocksByOfficeId: Array<{
         __typename?: 'ProductStockInOffice';
         id: string;
-        stock: number;
+        quantity: number;
         product: { __typename?: 'Product'; id: string; name: string };
     }>;
 };
@@ -2363,12 +2536,15 @@ export type AllProductsQuery = {
         name: string;
         price: number | null;
         type: ProductTypeChoices;
+        sku: string | null;
         brand: { __typename?: 'Brand'; name: string } | null;
         services: Array<{
             __typename?: 'ProductService';
             id: string;
             name: string;
             price: number;
+            billingType: CoreProductServiceBillingTypeChoices;
+            billingPeriod: number | null;
         }>;
     }>;
 };
@@ -2379,47 +2555,36 @@ export type ProductExistsQueryVariables = Exact<{
 
 export type ProductExistsQuery = { __typename?: 'Query'; productExists: boolean };
 
-export type ProductsStocksByOfficeInDateRangeQueryVariables = Exact<{
+export type ProductStocksInDateRangeQueryVariables = Exact<{
+    productId: Scalars['ID']['input'];
     startDate: Scalars['Date']['input'];
     endDate: Scalars['Date']['input'];
 }>;
 
-export type ProductsStocksByOfficeInDateRangeQuery = {
+export type ProductStocksInDateRangeQuery = {
     __typename?: 'Query';
-    productsStocksByOfficeInDateRange: Array<{
+    productStocksInDateRange: Array<{
         __typename?: 'ProductStocksInDateRange';
-        id: string;
-        name: string;
-        price: number;
-        services: Array<{
-            __typename?: 'ProductService';
-            id: string;
-            name: string;
-            price: number;
-        }>;
-        stocksByOffice: Array<{
-            __typename?: 'ProductsStocksInDateRangeStockByOffice';
-            stock: number;
-            office: { __typename?: 'Office'; id: string; name: string };
-        }>;
+        quantity: number;
+        office: { __typename?: 'Office'; id: string; name: string };
     }>;
 };
 
-export type PurchasesQueryVariables = Exact<{
+export type SalesQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
 }>;
 
-export type PurchasesQuery = {
+export type SalesQuery = {
     __typename?: 'Query';
-    purchases: {
-        __typename?: 'PaginatedPurchaseQueryResult';
+    sales: {
+        __typename?: 'PaginatedSaleQueryResult';
         count: number;
         numPages: number;
         results: Array<{
-            __typename?: 'Purchase';
+            __typename?: 'Sale';
             id: string;
             createdOn: any;
-            total: number;
+            total: any;
             client: {
                 __typename?: 'Client';
                 firstName: string;
@@ -2430,21 +2595,21 @@ export type PurchasesQuery = {
     };
 };
 
-export type PurchaseByIdQueryVariables = Exact<{
+export type SaleByIdQueryVariables = Exact<{
     id: Scalars['ID']['input'];
 }>;
 
-export type PurchaseByIdQuery = {
+export type SaleByIdQuery = {
     __typename?: 'Query';
-    purchaseById: {
-        __typename?: 'Purchase';
+    saleById: {
+        __typename?: 'Sale';
         id: string;
         createdOn: any;
-        total: number;
-        purchaseItems: Array<{
-            __typename?: 'PurchaseItem';
+        total: any;
+        saleItems: Array<{
+            __typename?: 'SaleItem';
             quantity: number;
-            total: number;
+            total: any;
             product: {
                 __typename?: 'Product';
                 name: string;
@@ -2463,20 +2628,20 @@ export type PurchaseByIdQuery = {
     } | null;
 };
 
-export type CreatePurchaseMutationVariables = Exact<{
-    purchaseData: CreatePurchaseInput;
+export type CreateSaleMutationVariables = Exact<{
+    saleData: CreateSaleInput;
 }>;
 
-export type CreatePurchaseMutation = {
+export type CreateSaleMutation = {
     __typename?: 'Mutation';
-    createPurchase: {
-        __typename?: 'CreatePurchase';
+    createSale: {
+        __typename?: 'CreateSale';
         error: string | null;
-        purchase: {
-            __typename?: 'Purchase';
+        sale: {
+            __typename?: 'Sale';
             id: string;
             createdOn: any;
-            total: number;
+            total: any;
             client: {
                 __typename?: 'Client';
                 firstName: string;
@@ -2487,21 +2652,21 @@ export type CreatePurchaseMutation = {
     } | null;
 };
 
-export type PurchaseListItemFragment = {
-    __typename?: 'Purchase';
+export type SaleListItemFragment = {
+    __typename?: 'Sale';
     id: string;
     createdOn: any;
-    total: number;
+    total: any;
     client: { __typename?: 'Client'; firstName: string; lastName: string; email: string };
 };
 
-export type DeletePurchaseMutationVariables = Exact<{
+export type DeleteSaleMutationVariables = Exact<{
     id: Scalars['ID']['input'];
 }>;
 
-export type DeletePurchaseMutation = {
+export type DeleteSaleMutation = {
     __typename?: 'Mutation';
-    deletePurchase: { __typename?: 'DeletePurchase'; success: boolean } | null;
+    deleteSale: { __typename?: 'DeleteSale'; success: boolean } | null;
 };
 
 export type AllSuppliersQueryVariables = Exact<{ [key: string]: never }>;
@@ -2513,6 +2678,7 @@ export type AllSuppliersQuery = {
 
 export type SuppliersQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
+    query: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type SuppliersQuery = {
@@ -2554,8 +2720,10 @@ export type SupplierByIdQuery = {
         houseNumber: string;
         houseUnit: string | null;
         streetName: string;
+        note: string | null;
         locality: {
             __typename?: 'Locality';
+            id: string;
             name: string;
             state: StateChoices;
             postalCode: string;
@@ -2570,6 +2738,20 @@ export type DeleteSupplierMutationVariables = Exact<{
 export type DeleteSupplierMutation = {
     __typename?: 'Mutation';
     deleteSupplier: { __typename?: 'DeleteSupplier'; success: boolean } | null;
+};
+
+export type UpdateSupplierMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+    input: UpdateSupplierInput;
+}>;
+
+export type UpdateSupplierMutation = {
+    __typename?: 'Mutation';
+    updateSupplier: {
+        __typename?: 'UpdateSupplier';
+        error: string | null;
+        supplier: { __typename?: 'Supplier'; id: string } | null;
+    } | null;
 };
 
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never }>;
@@ -2687,6 +2869,7 @@ export const ProductListItemFragmentDoc = {
                     { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'price' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
                     {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'brand' },
@@ -2706,6 +2889,14 @@ export const ProductListItemFragmentDoc = {
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'billingType' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'billingPeriod' },
+                                },
                             ],
                         },
                     },
@@ -2714,16 +2905,13 @@ export const ProductListItemFragmentDoc = {
         },
     ],
 } as unknown as DocumentNode<ProductListItemFragment, unknown>;
-export const PurchaseListItemFragmentDoc = {
+export const SaleListItemFragmentDoc = {
     kind: 'Document',
     definitions: [
         {
             kind: 'FragmentDefinition',
-            name: { kind: 'Name', value: 'PurchaseListItem' },
-            typeCondition: {
-                kind: 'NamedType',
-                name: { kind: 'Name', value: 'Purchase' },
-            },
+            name: { kind: 'Name', value: 'SaleListItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Sale' } },
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
@@ -2752,7 +2940,7 @@ export const PurchaseListItemFragmentDoc = {
             },
         },
     ],
-} as unknown as DocumentNode<PurchaseListItemFragment, unknown>;
+} as unknown as DocumentNode<SaleListItemFragment, unknown>;
 export const CurrentUserFragmentDoc = {
     kind: 'Document',
     definitions: [
@@ -3094,6 +3282,10 @@ export const ClientsDocument = {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'dni' },
                                             },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'note' },
+                                            },
                                         ],
                                     },
                                 },
@@ -3207,13 +3399,13 @@ export const ClientByIdDocument = {
         },
     ],
 } as unknown as DocumentNode<ClientByIdQuery, ClientByIdQueryVariables>;
-export const RentalContractsByClientIdDocument = {
+export const ContractsByClientIdDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'rentalContractsByClientId' },
+            name: { kind: 'Name', value: 'contractsByClientId' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -3229,7 +3421,7 @@ export const RentalContractsByClientIdDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'rentalContractsByClientId' },
+                        name: { kind: 'Name', value: 'contractsByClientId' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -3250,7 +3442,7 @@ export const RentalContractsByClientIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'currentHistory' },
+                                    name: { kind: 'Name', value: 'latestHistoryEntry' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -3307,7 +3499,7 @@ export const RentalContractsByClientIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'rentalContractItems' },
+                                    name: { kind: 'Name', value: 'contractItems' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -3372,17 +3564,14 @@ export const RentalContractsByClientIdDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<
-    RentalContractsByClientIdQuery,
-    RentalContractsByClientIdQueryVariables
->;
-export const PurchasesByClientIdDocument = {
+} as unknown as DocumentNode<ContractsByClientIdQuery, ContractsByClientIdQueryVariables>;
+export const SalesByClientIdDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'purchasesByClientId' },
+            name: { kind: 'Name', value: 'salesByClientId' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -3398,7 +3587,7 @@ export const PurchasesByClientIdDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'purchasesByClientId' },
+                        name: { kind: 'Name', value: 'salesByClientId' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -3420,7 +3609,7 @@ export const PurchasesByClientIdDocument = {
                                 { kind: 'Field', name: { kind: 'Name', value: 'total' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'purchaseItems' },
+                                    name: { kind: 'Name', value: 'saleItems' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -3484,7 +3673,7 @@ export const PurchasesByClientIdDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<PurchasesByClientIdQuery, PurchasesByClientIdQueryVariables>;
+} as unknown as DocumentNode<SalesByClientIdQuery, SalesByClientIdQueryVariables>;
 export const CreateClientDocument = {
     kind: 'Document',
     definitions: [
@@ -3942,7 +4131,7 @@ export const ContractsDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'rentalContracts' },
+                        name: { kind: 'Name', value: 'contracts' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -4035,7 +4224,7 @@ export const ContractsDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'currentHistory',
+                                                    value: 'latestHistoryEntry',
                                                 },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -4203,7 +4392,7 @@ export const ContractByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'currentHistory' },
+                                    name: { kind: 'Name', value: 'latestHistoryEntry' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -4261,24 +4450,13 @@ export const ContractByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'rentalContractItems' },
+                                    name: { kind: 'Name', value: 'contractItems' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'id' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'servicePrice',
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'price' },
                                             },
                                             {
                                                 kind: 'Field',
@@ -4324,7 +4502,17 @@ export const ContractByIdDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'service' },
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productPrice',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'serviceItems',
+                                                },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
@@ -4332,17 +4520,29 @@ export const ContractByIdDocument = {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'name',
+                                                                value: 'service',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'price',
+                                                                        },
+                                                                    },
+                                                                ],
                                                             },
                                                         },
                                                     ],
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'servicePrice',
                                                 },
                                             },
                                             {
@@ -4351,11 +4551,45 @@ export const ContractByIdDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'subtotal' },
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productSubtotal',
+                                                },
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'discount' },
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'servicesSubtotal',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'shippingSubtotal',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productDiscount',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'servicesDiscount',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'shippingDiscount',
+                                                },
                                             },
                                             {
                                                 kind: 'Field',
@@ -4372,22 +4606,45 @@ export const ContractByIdDocument = {
         },
     ],
 } as unknown as DocumentNode<ContractByIdQuery, ContractByIdQueryVariables>;
-export const CreateRentalContractDocument = {
+export const CreateContractDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'mutation',
-            name: { kind: 'Name', value: 'CreateRentalContract' },
+            name: { kind: 'Name', value: 'CreateContract' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'data' } },
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'contractData' },
+                    },
                     type: {
                         kind: 'NonNullType',
                         type: {
                             kind: 'NamedType',
-                            name: { kind: 'Name', value: 'CreateRentalContractInput' },
+                            name: { kind: 'Name', value: 'ContractInput' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'itemsData' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: { kind: 'Name', value: 'ContractItemInput' },
+                                },
+                            },
                         },
                     },
                 },
@@ -4397,14 +4654,22 @@ export const CreateRentalContractDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'createRentalContract' },
+                        name: { kind: 'Name', value: 'createContract' },
                         arguments: [
                             {
                                 kind: 'Argument',
-                                name: { kind: 'Name', value: 'data' },
+                                name: { kind: 'Name', value: 'contractData' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'data' },
+                                    name: { kind: 'Name', value: 'contractData' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'itemsData' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'itemsData' },
                                 },
                             },
                         ],
@@ -4413,95 +4678,7 @@ export const CreateRentalContractDocument = {
                             selections: [
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'rentalContract' },
-                                    selectionSet: {
-                                        kind: 'SelectionSet',
-                                        selections: [
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'id' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'client' },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'firstName',
-                                                            },
-                                                        },
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'lastName',
-                                                            },
-                                                        },
-                                                    ],
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'office' },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'name',
-                                                            },
-                                                        },
-                                                    ],
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'createdOn',
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'contractStartDatetime',
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'contractEndDatetime',
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'currentHistory',
-                                                },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'status',
-                                                            },
-                                                        },
-                                                    ],
-                                                },
-                                            },
-                                        ],
-                                    },
+                                    name: { kind: 'Name', value: 'contractId' },
                                 },
                                 { kind: 'Field', name: { kind: 'Name', value: 'error' } },
                             ],
@@ -4511,17 +4688,14 @@ export const CreateRentalContractDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<
-    CreateRentalContractMutation,
-    CreateRentalContractMutationVariables
->;
-export const DeleteRentalContractDocument = {
+} as unknown as DocumentNode<CreateContractMutation, CreateContractMutationVariables>;
+export const DeleteContractDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'mutation',
-            name: { kind: 'Name', value: 'deleteRentalContract' },
+            name: { kind: 'Name', value: 'deleteContract' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -4537,7 +4711,7 @@ export const DeleteRentalContractDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'deleteRentalContract' },
+                        name: { kind: 'Name', value: 'deleteContract' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -4562,10 +4736,7 @@ export const DeleteRentalContractDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<
-    DeleteRentalContractMutation,
-    DeleteRentalContractMutationVariables
->;
+} as unknown as DocumentNode<DeleteContractMutation, DeleteContractMutationVariables>;
 export const PayContractDepositDocument = {
     kind: 'Document',
     definitions: [
@@ -4604,7 +4775,7 @@ export const PayContractDepositDocument = {
                             selections: [
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'rentalContract' },
+                                    name: { kind: 'Name', value: 'contract' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -4616,7 +4787,7 @@ export const PayContractDepositDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'currentHistory',
+                                                    value: 'latestHistoryEntry',
                                                 },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -4684,7 +4855,7 @@ export const PayTotalContractDocument = {
                             selections: [
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'rentalContract' },
+                                    name: { kind: 'Name', value: 'contract' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -4696,7 +4867,7 @@ export const PayTotalContractDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'currentHistory',
+                                                    value: 'latestHistoryEntry',
                                                 },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -4761,7 +4932,7 @@ export const CancelContractDocument = {
                             selections: [
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'rentalContract' },
+                                    name: { kind: 'Name', value: 'contract' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -4773,7 +4944,7 @@ export const CancelContractDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'currentHistory',
+                                                    value: 'latestHistoryEntry',
                                                 },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -4832,25 +5003,22 @@ export const EmployeesCsvDocument = {
         },
     ],
 } as unknown as DocumentNode<EmployeesCsvQuery, EmployeesCsvQueryVariables>;
-export const RentalContractsCsvDocument = {
+export const ContractsCsvDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'rentalContractsCsv' },
+            name: { kind: 'Name', value: 'contractsCsv' },
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'rentalContractsCsv' },
-                    },
+                    { kind: 'Field', name: { kind: 'Name', value: 'contractsCsv' } },
                 ],
             },
         },
     ],
-} as unknown as DocumentNode<RentalContractsCsvQuery, RentalContractsCsvQueryVariables>;
+} as unknown as DocumentNode<ContractsCsvQuery, ContractsCsvQueryVariables>;
 export const ProductsCsvDocument = {
     kind: 'Document',
     definitions: [
@@ -4899,22 +5067,22 @@ export const OfficesCsvDocument = {
         },
     ],
 } as unknown as DocumentNode<OfficesCsvQuery, OfficesCsvQueryVariables>;
-export const PurchasesCsvDocument = {
+export const SalesCsvDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'purchasesCsv' },
+            name: { kind: 'Name', value: 'salesCsv' },
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
-                    { kind: 'Field', name: { kind: 'Name', value: 'purchasesCsv' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'salesCsv' } },
                 ],
             },
         },
     ],
-} as unknown as DocumentNode<PurchasesCsvQuery, PurchasesCsvQueryVariables>;
+} as unknown as DocumentNode<SalesCsvQuery, SalesCsvQueryVariables>;
 export const SuppliersCsvDocument = {
     kind: 'Document',
     definitions: [
@@ -4978,7 +5146,7 @@ export const DashboardDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'allPurchases' },
+                        name: { kind: 'Name', value: 'allSales' },
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
@@ -5031,7 +5199,7 @@ export const DashboardDocument = {
                                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'purchaseItems' },
+                                    name: { kind: 'Name', value: 'saleItems' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -5063,6 +5231,14 @@ export const EmployeesDocument = {
                     variable: { kind: 'Variable', name: { kind: 'Name', value: 'page' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'query' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -5077,6 +5253,14 @@ export const EmployeesDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'page' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'query' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'query' },
                                 },
                             },
                         ],
@@ -5752,6 +5936,127 @@ export const AllLocalitiesDocument = {
         },
     ],
 } as unknown as DocumentNode<AllLocalitiesQuery, AllLocalitiesQueryVariables>;
+export const UpdateLocalityDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'updateLocality' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'name' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'state' },
+                    },
+                    type: {
+                        kind: 'NamedType',
+                        name: { kind: 'Name', value: 'StateChoices' },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'postalCode' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updateLocality' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'name' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'name' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'state' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'state' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'postalCode' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'postalCode' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'locality' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'state' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'postalCode',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<UpdateLocalityMutation, UpdateLocalityMutationVariables>;
 export const OfficesDocument = {
     kind: 'Document',
     definitions: [
@@ -5804,13 +6109,13 @@ export const OfficesDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'stock' },
+                                    name: { kind: 'Name', value: 'stockItems' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'stock' },
+                                                name: { kind: 'Name', value: 'quantity' },
                                             },
                                         ],
                                     },
@@ -5875,7 +6180,7 @@ export const InternalOrdersDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'officeBranch',
+                                                    value: 'sourceOffice',
                                                 },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -5894,7 +6199,7 @@ export const InternalOrdersDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'officeDestination',
+                                                    value: 'targetOffice',
                                                 },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -5920,7 +6225,7 @@ export const InternalOrdersDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'currentHistory',
+                                                    value: 'latestHistoryEntry',
                                                 },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -5989,7 +6294,7 @@ export const InternalOrderByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'officeBranch' },
+                                    name: { kind: 'Name', value: 'sourceOffice' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -6040,7 +6345,7 @@ export const InternalOrderByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'officeDestination' },
+                                    name: { kind: 'Name', value: 'targetOffice' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -6091,7 +6396,7 @@ export const InternalOrderByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'currentHistory' },
+                                    name: { kind: 'Name', value: 'latestHistoryEntry' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -6104,13 +6409,16 @@ export const InternalOrderByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'orders' },
+                                    name: { kind: 'Name', value: 'orderItems' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'quantity' },
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'quantityOrdered',
+                                                },
                                             },
                                             {
                                                 kind: 'Field',
@@ -6368,7 +6676,7 @@ export const SupplierOrdersDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'officeDestination',
+                                                    value: 'targetOffice',
                                                 },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -6394,7 +6702,7 @@ export const SupplierOrdersDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'currentHistory',
+                                                    value: 'latestHistoryEntry',
                                                 },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
@@ -6538,7 +6846,7 @@ export const SupplierOrderByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'officeDestination' },
+                                    name: { kind: 'Name', value: 'targetOffice' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -6582,7 +6890,7 @@ export const SupplierOrderByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'currentHistory' },
+                                    name: { kind: 'Name', value: 'latestHistoryEntry' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -6625,7 +6933,7 @@ export const SupplierOrderByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'orders' },
+                                    name: { kind: 'Name', value: 'orderItems' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -6684,7 +6992,10 @@ export const SupplierOrderByIdDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'quantity' },
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'quantityOrdered',
+                                                },
                                             },
                                             {
                                                 kind: 'Field',
@@ -6747,7 +7058,7 @@ export const SupplierOrdersBySupplierIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'officeDestination' },
+                                    name: { kind: 'Name', value: 'targetOffice' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -6771,7 +7082,7 @@ export const SupplierOrdersBySupplierIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'currentHistory' },
+                                    name: { kind: 'Name', value: 'latestHistoryEntry' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -6821,7 +7132,7 @@ export const SupplierOrdersBySupplierIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'orders' },
+                                    name: { kind: 'Name', value: 'orderItems' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -6894,7 +7205,10 @@ export const SupplierOrdersBySupplierIdDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'quantity' },
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'quantityOrdered',
+                                                },
                                             },
                                             {
                                                 kind: 'Field',
@@ -7428,6 +7742,7 @@ export const ProductsDocument = {
                     { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'price' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
                     {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'brand' },
@@ -7447,6 +7762,14 @@ export const ProductsDocument = {
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'billingType' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'billingPeriod' },
+                                },
                             ],
                         },
                     },
@@ -7505,6 +7828,10 @@ export const ProductByIdDocument = {
                                         selections: [
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'name' },
                                             },
                                         ],
@@ -7514,7 +7841,7 @@ export const ProductByIdDocument = {
                                 { kind: 'Field', name: { kind: 'Name', value: 'price' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'stock' },
+                                    name: { kind: 'Name', value: 'stockItems' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -7524,6 +7851,20 @@ export const ProductByIdDocument = {
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
                                                         {
                                                             kind: 'Field',
                                                             name: {
@@ -7548,7 +7889,7 @@ export const ProductByIdDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'stock' },
+                                                name: { kind: 'Name', value: 'quantity' },
                                             },
                                         ],
                                     },
@@ -7561,7 +7902,47 @@ export const ProductByIdDocument = {
                                         selections: [
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'name' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'price' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'suppliers' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'supplier' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
                                             },
                                             {
                                                 kind: 'Field',
@@ -7596,7 +7977,70 @@ export const CreateProductDocument = {
                         kind: 'NonNullType',
                         type: {
                             kind: 'NamedType',
-                            name: { kind: 'Name', value: 'CreateProductInput' },
+                            name: { kind: 'Name', value: 'ProductDataInput' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'stockItems' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'ProductStockItemInput',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'suppliers' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: { kind: 'Name', value: 'ProductSupplierInput' },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'services' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: { kind: 'Name', value: 'ProductServiceInput' },
+                                },
+                            },
                         },
                     },
                 },
@@ -7614,6 +8058,30 @@ export const CreateProductDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'productData' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'stockItems' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'stockItems' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'suppliers' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'suppliers' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'services' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'services' },
                                 },
                             },
                         ],
@@ -7657,6 +8125,7 @@ export const CreateProductDocument = {
                     { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'price' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
                     {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'brand' },
@@ -7676,6 +8145,14 @@ export const CreateProductDocument = {
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'billingType' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'billingPeriod' },
+                                },
                             ],
                         },
                     },
@@ -7684,6 +8161,224 @@ export const CreateProductDocument = {
         },
     ],
 } as unknown as DocumentNode<CreateProductMutation, CreateProductMutationVariables>;
+export const UpdateProductDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'updateProduct' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'productData' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'ProductDataInput' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'stockItems' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'ProductStockItemInput',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'suppliers' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: { kind: 'Name', value: 'ProductSupplierInput' },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'services' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: { kind: 'Name', value: 'ProductServiceInput' },
+                                },
+                            },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updateProduct' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'productData' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'productData' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'stockItems' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'stockItems' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'suppliers' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'suppliers' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'services' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'services' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'product' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'FragmentSpread',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'ProductListItem',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            kind: 'FragmentDefinition',
+            name: { kind: 'Name', value: 'ProductListItem' },
+            typeCondition: {
+                kind: 'NamedType',
+                name: { kind: 'Name', value: 'Product' },
+            },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'brand' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                            ],
+                        },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'services' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'billingType' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'billingPeriod' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<UpdateProductMutation, UpdateProductMutationVariables>;
 export const ProductsStocksByOfficeIdDocument = {
     kind: 'Document',
     definitions: [
@@ -7741,7 +8436,10 @@ export const ProductsStocksByOfficeIdDocument = {
                                         ],
                                     },
                                 },
-                                { kind: 'Field', name: { kind: 'Name', value: 'stock' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'quantity' },
+                                },
                             ],
                         },
                     },
@@ -7894,6 +8592,7 @@ export const AllProductsDocument = {
                     { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'price' } },
                     { kind: 'Field', name: { kind: 'Name', value: 'type' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
                     {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'brand' },
@@ -7913,6 +8612,14 @@ export const AllProductsDocument = {
                                 { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                                 { kind: 'Field', name: { kind: 'Name', value: 'price' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'billingType' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'billingPeriod' },
+                                },
                             ],
                         },
                     },
@@ -7963,14 +8670,25 @@ export const ProductExistsDocument = {
         },
     ],
 } as unknown as DocumentNode<ProductExistsQuery, ProductExistsQueryVariables>;
-export const ProductsStocksByOfficeInDateRangeDocument = {
+export const ProductStocksInDateRangeDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'productsStocksByOfficeInDateRange' },
+            name: { kind: 'Name', value: 'productStocksInDateRange' },
             variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'productId' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
                 {
                     kind: 'VariableDefinition',
                     variable: {
@@ -8005,11 +8723,16 @@ export const ProductsStocksByOfficeInDateRangeDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: {
-                            kind: 'Name',
-                            value: 'productsStocksByOfficeInDateRange',
-                        },
+                        name: { kind: 'Name', value: 'productStocksInDateRange' },
                         arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'productId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'productId' },
+                                },
+                            },
                             {
                                 kind: 'Argument',
                                 name: { kind: 'Name', value: 'startDate' },
@@ -8030,12 +8753,9 @@ export const ProductsStocksByOfficeInDateRangeDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'services' },
+                                    name: { kind: 'Name', value: 'office' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -8047,48 +8767,12 @@ export const ProductsStocksByOfficeInDateRangeDocument = {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'name' },
                                             },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'price' },
-                                            },
                                         ],
                                     },
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'stocksByOffice' },
-                                    selectionSet: {
-                                        kind: 'SelectionSet',
-                                        selections: [
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'office' },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'id',
-                                                            },
-                                                        },
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'name',
-                                                            },
-                                                        },
-                                                    ],
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'stock' },
-                                            },
-                                        ],
-                                    },
+                                    name: { kind: 'Name', value: 'quantity' },
                                 },
                             ],
                         },
@@ -8098,16 +8782,16 @@ export const ProductsStocksByOfficeInDateRangeDocument = {
         },
     ],
 } as unknown as DocumentNode<
-    ProductsStocksByOfficeInDateRangeQuery,
-    ProductsStocksByOfficeInDateRangeQueryVariables
+    ProductStocksInDateRangeQuery,
+    ProductStocksInDateRangeQueryVariables
 >;
-export const PurchasesDocument = {
+export const SalesDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'purchases' },
+            name: { kind: 'Name', value: 'sales' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -8120,7 +8804,7 @@ export const PurchasesDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'purchases' },
+                        name: { kind: 'Name', value: 'sales' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -8149,7 +8833,7 @@ export const PurchasesDocument = {
                                                 kind: 'FragmentSpread',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'PurchaseListItem',
+                                                    value: 'SaleListItem',
                                                 },
                                             },
                                         ],
@@ -8163,11 +8847,8 @@ export const PurchasesDocument = {
         },
         {
             kind: 'FragmentDefinition',
-            name: { kind: 'Name', value: 'PurchaseListItem' },
-            typeCondition: {
-                kind: 'NamedType',
-                name: { kind: 'Name', value: 'Purchase' },
-            },
+            name: { kind: 'Name', value: 'SaleListItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Sale' } },
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
@@ -8196,14 +8877,14 @@ export const PurchasesDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<PurchasesQuery, PurchasesQueryVariables>;
-export const PurchaseByIdDocument = {
+} as unknown as DocumentNode<SalesQuery, SalesQueryVariables>;
+export const SaleByIdDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'purchaseById' },
+            name: { kind: 'Name', value: 'saleById' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -8219,7 +8900,7 @@ export const PurchaseByIdDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'purchaseById' },
+                        name: { kind: 'Name', value: 'saleById' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -8241,7 +8922,7 @@ export const PurchaseByIdDocument = {
                                 { kind: 'Field', name: { kind: 'Name', value: 'total' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'purchaseItems' },
+                                    name: { kind: 'Name', value: 'saleItems' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -8343,26 +9024,26 @@ export const PurchaseByIdDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<PurchaseByIdQuery, PurchaseByIdQueryVariables>;
-export const CreatePurchaseDocument = {
+} as unknown as DocumentNode<SaleByIdQuery, SaleByIdQueryVariables>;
+export const CreateSaleDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'mutation',
-            name: { kind: 'Name', value: 'createPurchase' },
+            name: { kind: 'Name', value: 'createSale' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
                     variable: {
                         kind: 'Variable',
-                        name: { kind: 'Name', value: 'purchaseData' },
+                        name: { kind: 'Name', value: 'saleData' },
                     },
                     type: {
                         kind: 'NonNullType',
                         type: {
                             kind: 'NamedType',
-                            name: { kind: 'Name', value: 'CreatePurchaseInput' },
+                            name: { kind: 'Name', value: 'CreateSaleInput' },
                         },
                     },
                 },
@@ -8372,14 +9053,14 @@ export const CreatePurchaseDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'createPurchase' },
+                        name: { kind: 'Name', value: 'createSale' },
                         arguments: [
                             {
                                 kind: 'Argument',
                                 name: { kind: 'Name', value: 'data' },
                                 value: {
                                     kind: 'Variable',
-                                    name: { kind: 'Name', value: 'purchaseData' },
+                                    name: { kind: 'Name', value: 'saleData' },
                                 },
                             },
                         ],
@@ -8388,7 +9069,7 @@ export const CreatePurchaseDocument = {
                             selections: [
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'purchase' },
+                                    name: { kind: 'Name', value: 'sale' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
@@ -8396,7 +9077,7 @@ export const CreatePurchaseDocument = {
                                                 kind: 'FragmentSpread',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'PurchaseListItem',
+                                                    value: 'SaleListItem',
                                                 },
                                             },
                                         ],
@@ -8411,11 +9092,8 @@ export const CreatePurchaseDocument = {
         },
         {
             kind: 'FragmentDefinition',
-            name: { kind: 'Name', value: 'PurchaseListItem' },
-            typeCondition: {
-                kind: 'NamedType',
-                name: { kind: 'Name', value: 'Purchase' },
-            },
+            name: { kind: 'Name', value: 'SaleListItem' },
+            typeCondition: { kind: 'NamedType', name: { kind: 'Name', value: 'Sale' } },
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
@@ -8444,14 +9122,14 @@ export const CreatePurchaseDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<CreatePurchaseMutation, CreatePurchaseMutationVariables>;
-export const DeletePurchaseDocument = {
+} as unknown as DocumentNode<CreateSaleMutation, CreateSaleMutationVariables>;
+export const DeleteSaleDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'mutation',
-            name: { kind: 'Name', value: 'deletePurchase' },
+            name: { kind: 'Name', value: 'deleteSale' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -8467,7 +9145,7 @@ export const DeletePurchaseDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'deletePurchase' },
+                        name: { kind: 'Name', value: 'deleteSale' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -8492,7 +9170,7 @@ export const DeletePurchaseDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<DeletePurchaseMutation, DeletePurchaseMutationVariables>;
+} as unknown as DocumentNode<DeleteSaleMutation, DeleteSaleMutationVariables>;
 export const AllSuppliersDocument = {
     kind: 'Document',
     definitions: [
@@ -8532,6 +9210,14 @@ export const SuppliersDocument = {
                     variable: { kind: 'Variable', name: { kind: 'Name', value: 'page' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'query' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -8546,6 +9232,14 @@ export const SuppliersDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'page' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'query' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'query' },
                                 },
                             },
                         ],
@@ -8712,6 +9406,10 @@ export const SupplierByIdDocument = {
                                         selections: [
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'name' },
                                             },
                                             {
@@ -8728,6 +9426,7 @@ export const SupplierByIdDocument = {
                                         ],
                                     },
                                 },
+                                { kind: 'Field', name: { kind: 'Name', value: 'note' } },
                             ],
                         },
                     },
@@ -8784,6 +9483,86 @@ export const DeleteSupplierDocument = {
         },
     ],
 } as unknown as DocumentNode<DeleteSupplierMutation, DeleteSupplierMutationVariables>;
+export const UpdateSupplierDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'updateSupplier' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'input' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'UpdateSupplierInput' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updateSupplier' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'input' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'input' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'supplier' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<UpdateSupplierMutation, UpdateSupplierMutationVariables>;
 export const CurrentUserDocument = {
     kind: 'Document',
     definitions: [

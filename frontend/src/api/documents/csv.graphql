@@ -6,8 +6,8 @@ query employeesCsv {
     employeesCsv
 }
 
-query rentalContractsCsv {
-    rentalContractsCsv
+query contractsCsv {
+    contractsCsv
 }
 
 query productsCsv {
@@ -22,8 +22,8 @@ query officesCsv {
     officesCsv
 }
 
-query purchasesCsv {
-    purchasesCsv
+query salesCsv {
+    salesCsv
 }
 
 query suppliersCsv {

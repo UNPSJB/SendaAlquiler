@@ -7,8 +7,8 @@ import { MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { PurchasesQuery } from '@/api/graphql';
-import { useDeletePurchase, useExportPurchasesCsv, usePurchases } from '@/api/hooks';
+import { SalesQuery } from '@/api/graphql';
+import { useDeleteSale, useExportSalesCsv, useSales } from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -37,28 +37,27 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { formatNumberAsPrice } from '@/lib/utils';
 
-type Purchase = PurchasesQuery['purchases']['results'][0];
+type Sale = SalesQuery['sales']['results'][0];
 
-const columnsHelper = createColumnHelper<Purchase>();
+const columnsHelper = createColumnHelper<Sale>();
 
-const columns: ColumnDef<Purchase, any>[] = [
+const columns: ColumnDef<Sale, any>[] = [
     columnsHelper.accessor('client.firstName', {
         id: 'client',
         header: 'Cliente',
         cell: (props) => {
-            const purchase = props.row.original;
+            const sale = props.row.original;
 
             return (
-                <Link href={`/ventas/${purchase.id}`}>
+                <Link href={`/ventas/${sale.id}`}>
                     <p className="text-violet-600">
-                        {purchase.client.firstName} {purchase.client.lastName}
+                        {sale.client.firstName} {sale.client.lastName}
                     </p>
 
                     <p>
-                        <span className="text-muted-foreground">
-                            {purchase.client.email}
-                        </span>
+                        <span className="text-muted-foreground">{sale.client.email}</span>
                     </p>
                 </Link>
             );
@@ -79,24 +78,24 @@ const columns: ColumnDef<Purchase, any>[] = [
         cell: (props) => {
             const total = props.getValue();
 
-            return `$${total}`;
+            return `$${formatNumberAsPrice(total)}`;
         },
     }),
     columnsHelper.display({
         id: 'actions',
         cell: (props) => {
-            const purchase = props.row.original;
+            const sale = props.row.original;
             return (
                 <div className="flex justify-end">
-                    <RowActions purchase={purchase} />
+                    <RowActions sale={sale} />
                 </div>
             );
         },
     }),
 ];
 
-const RowActions = ({ purchase }: { purchase: Purchase }) => {
-    const deleteMutation = useDeletePurchase({
+const RowActions = ({ sale }: { sale: Sale }) => {
+    const deleteMutation = useDeleteSale({
         onSuccess: () => {
             toast.success('Venta eliminada correctamente');
         },
@@ -137,12 +136,12 @@ const RowActions = ({ purchase }: { purchase: Purchase }) => {
                         ¿Estás seguro de que quieres eliminar la venta de &ldquo;
                         <strong>
                             <em>
-                                {purchase.client.firstName} {purchase.client.lastName}
+                                {sale.client.firstName} {sale.client.lastName}
                             </em>
                         </strong>
                         &rdquo; por un total de &ldquo;
                         <strong>
-                            <em>${purchase.total}</em>
+                            <em>${sale.total}</em>
                         </strong>
                         &rdquo;?
                     </DialogDescription>
@@ -155,7 +154,7 @@ const RowActions = ({ purchase }: { purchase: Purchase }) => {
 
                     <Button
                         onClick={() => {
-                            deleteMutation.mutate(purchase.id);
+                            deleteMutation.mutate(sale.id);
                         }}
                         variant="destructive"
                     >
@@ -168,9 +167,9 @@ const RowActions = ({ purchase }: { purchase: Purchase }) => {
 };
 
 const Page = () => {
-    const { setVariables, activePage, noPages, queryResult } = usePurchases();
+    const { setVariables, activePage, noPages, queryResult } = useSales();
 
-    const { exportCsv } = useExportPurchasesCsv();
+    const { exportCsv } = useExportSalesCsv();
 
     return (
         <DashboardLayout
@@ -198,7 +197,7 @@ const Page = () => {
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
-                    <div className="pr-container flex-1 py-5 pl-10">
+                    <div className="pr-container flex-1 py-5 pl-8">
                         <AdminDataTableLoading columns={columns} />
                     </div>
                 }
@@ -212,8 +211,8 @@ const Page = () => {
                     </div>
                 }
             >
-                {({ purchases: { results: purchases } }) => {
-                    if (purchases.length === 0) {
+                {({ sales: { results: sales } }) => {
+                    if (sales.length === 0) {
                         return (
                             <FetchStatusMessageWithButton
                                 message="Aún no hay ventas"
@@ -224,10 +223,10 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 py-5 pl-10">
+                        <div className="pr-container flex-1 pl-8">
                             <AdminDataTable
                                 columns={columns}
-                                data={purchases}
+                                data={sales}
                                 numberOfPages={noPages}
                                 currentPage={activePage}
                                 onPageChange={(page: number) => {

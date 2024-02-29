@@ -43,6 +43,11 @@ export const AdminDataTable = <TData, TValue>({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        defaultColumn: {
+            minSize: 0,
+            size: Number.MAX_SAFE_INTEGER,
+            maxSize: Number.MAX_SAFE_INTEGER,
+        },
     });
 
     const minPage = Math.max(1, currentPage - 1);
@@ -57,7 +62,16 @@ export const AdminDataTable = <TData, TValue>({
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
                                     return (
-                                        <TableHead key={header.id}>
+                                        <TableHead
+                                            style={{
+                                                width:
+                                                    header.getSize() ===
+                                                    Number.MAX_SAFE_INTEGER
+                                                        ? 'auto'
+                                                        : header.getSize(),
+                                            }}
+                                            key={header.id}
+                                        >
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -78,7 +92,16 @@ export const AdminDataTable = <TData, TValue>({
                                     data-state={row.getIsSelected() && 'selected'}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell
+                                            style={{
+                                                width:
+                                                    cell.column.getSize() ===
+                                                    Number.MAX_SAFE_INTEGER
+                                                        ? 'auto'
+                                                        : cell.column.getSize(),
+                                            }}
+                                            key={cell.id}
+                                        >
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext(),
@@ -99,22 +122,30 @@ export const AdminDataTable = <TData, TValue>({
                         )}
                     </TableBody>
 
-                    <TableFooter>
-                        {table.getFooterGroups().map((footerGroup) => (
-                            <TableRow key={footerGroup.id}>
-                                {footerGroup.headers.map((footer) => {
-                                    return (
-                                        <TableCell key={footer.id}>
-                                            {flexRender(
-                                                footer.column.columnDef.footer,
-                                                footer.getContext(),
-                                            )}
-                                        </TableCell>
-                                    );
-                                })}
-                            </TableRow>
-                        ))}
-                    </TableFooter>
+                    {table
+                        .getFooterGroups()
+                        .map((group) =>
+                            group.headers.map((header) => header.column.columnDef.footer),
+                        )
+                        .flat()
+                        .filter(Boolean).length > 0 && (
+                        <TableFooter>
+                            {table.getFooterGroups().map((footerGroup) => (
+                                <TableRow key={footerGroup.id}>
+                                    {footerGroup.headers.map((footer) => {
+                                        return (
+                                            <TableCell key={footer.id}>
+                                                {flexRender(
+                                                    footer.column.columnDef.footer,
+                                                    footer.getContext(),
+                                                )}
+                                            </TableCell>
+                                        );
+                                    })}
+                                </TableRow>
+                            ))}
+                        </TableFooter>
+                    )}
                 </Table>
             </div>
 

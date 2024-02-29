@@ -102,7 +102,7 @@ const Page = () => {
 
                     return (
                         <div className="flex flex-1 flex-col">
-                            <header className="border-b pl-10">
+                            <header className="border-b pl-8">
                                 <div className="mb-10 flex items-center">
                                     <Avatar>
                                         {getAvatarText(
@@ -130,8 +130,8 @@ const Page = () => {
                                 />
                             </header>
 
-                            <div className="flex-1 bg-gray-100 px-0">
-                                <section className="pl-10">
+                            <div className="flex-1 bg-gray-100">
+                                <section className="px-8">
                                     <Component contract={contract} />
                                 </section>
                             </div>

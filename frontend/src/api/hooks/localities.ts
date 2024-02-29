@@ -14,6 +14,9 @@ import {
     CreateLocalityDocument,
     CreateLocalityMutation,
     CreateLocalityMutationVariables,
+    UpdateLocalityDocument,
+    UpdateLocalityMutation,
+    UpdateLocalityMutationVariables,
     LocalitiesDocument,
     DeleteLocalityDocument,
     DeleteLocalityMutation,
@@ -52,7 +55,9 @@ export const useDeleteLocality = ({
         },
         {
             onSuccess: (data, variables, context) => {
+                client.removeQueries([queryDomains.localities]);
                 client.invalidateQueries([queryDomains.localities]);
+                client.refetchQueries([queryDomains.localities]);
 
                 if (onSuccess) {
                     onSuccess(data, variables, context);
@@ -81,6 +86,38 @@ export const useCreateLocality = ({
         {
             onSuccess: (data, variables, context) => {
                 const locality = data.createLocality?.locality;
+                if (locality) {
+                    client.invalidateQueries([queryDomains.localities]);
+                }
+
+                if (onSuccess) {
+                    onSuccess(data, variables, context);
+                }
+            },
+            ...options,
+        },
+    );
+};
+
+type UseUpdateLocalityOptions = UseMutationOptions<
+    UpdateLocalityMutation,
+    Error,
+    UpdateLocalityMutationVariables
+>;
+
+export const useUpdateLocality = ({
+    onSuccess,
+    ...options
+}: UseUpdateLocalityOptions = {}) => {
+    const client = useQueryClient();
+
+    return useMutation<UpdateLocalityMutation, Error, UpdateLocalityMutationVariables>(
+        (data) => {
+            return fetchClient(UpdateLocalityDocument, data);
+        },
+        {
+            onSuccess: (data, variables, context) => {
+                const locality = data.updateLocality?.locality;
                 if (locality) {
                     client.invalidateQueries([queryDomains.localities]);
                 }

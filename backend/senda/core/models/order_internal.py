@@ -1,96 +1,160 @@
-from typing import Any
+from typing import TypedDict, List, Optional
 
-from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.db import models, transaction
 
 from extensions.db.models import TimeStampedModel
-from senda.core.managers import InternalOrderManager
-from senda.core.models.offices import OfficeModel
-from senda.core.models.products import ProductModel
+from senda.core.models.offices import Office
+from senda.core.models.products import Product
+
+from django.core.exceptions import ValidationError
+from users.models import UserModel
+
+from datetime import datetime
 
 
-class InternalOrderModel(TimeStampedModel):
-    """
-    Represents an internal order within the Senda system. Inherits from TimeStampedModel for timestamps.
+class InternalOrderCreationError(Exception):
+    """Custom exception for internal order creation errors."""
 
-    Attributes:
-        history (models.QuerySet["InternalOrderHistoryModel"]): A queryset for accessing the order's history.
-        orders (models.QuerySet["InternalOrderProduct"]): A queryset for accessing the products associated with the order.
-        office_branch (models.ForeignKey): A foreign key to the OfficeModel, representing the branch office where the order originated.
-        office_destination (models.ForeignKey): A foreign key to the OfficeModel, representing the destination office for the order.
-        date_created (models.DateTimeField): The date and time when the order was created.
-        current_history (models.OneToOneField): A one-to-one relationship to the most current history item of the order.
-        objects (InternalOrderManager): Custom manager for additional functionalities.
 
-    Methods:
-        __str__: Returns the string representation of the order, which is its primary key.
-    """
+class InternalOrderDetailsDict(TypedDict):
+    source_office_id: int
+    target_office_id: int
+    contract_item_product_allocation_id: Optional[int]
+    note: Optional[str]
+    requested_for_date: datetime
+    approximate_delivery_date: Optional[datetime]
 
-    history: models.QuerySet["InternalOrderHistoryModel"]
-    orders: models.QuerySet["InternalOrderProductModel"]
 
-    office_branch = models.ForeignKey(
-        OfficeModel, on_delete=models.CASCADE, related_name="internal_orders_branch"
-    )
-    office_destination = models.ForeignKey(
-        OfficeModel,
+class InternalOrderItemDetailsDict(TypedDict):
+    product_id: int
+    quantity_ordered: int
+
+
+class InternalOrderManager(models.Manager["InternalOrder"]):
+    def _validate_office_and_product(self, source_office_id: int, product_id: int):
+        office = Office.objects.filter(id=source_office_id).first()
+        if not office:
+            raise ValidationError(
+                f"Source Office with ID {source_office_id} not found."
+            )
+
+        product = Product.objects.filter(id=product_id).first()
+        if not product:
+            raise ValidationError(f"Product with ID {product_id} not found.")
+
+        return office, product
+
+    def create_internal_order(
+        self,
+        order_data: InternalOrderDetailsDict,
+        items_data: List[InternalOrderItemDetailsDict],
+        responsible_user: Optional["UserModel"] = None,
+    ) -> "InternalOrder":
+        try:
+            with transaction.atomic():
+                internal_order = self.create(
+                    source_office_id=order_data.get("source_office_id"),
+                    target_office_id=order_data.get("target_office_id"),
+                    contract_item_product_allocation_id=order_data.get(
+                        "contract_item_product_allocation_id"
+                    ),
+                    requested_for_date=order_data.get("requested_for_date"),
+                    approximate_delivery_date=order_data.get(
+                        "approximate_delivery_date"
+                    ),
+                )
+
+                order_items = []
+
+                for item_data in items_data:
+                    _, product = self._validate_office_and_product(
+                        order_data.get("source_office_id"), item_data.get("product_id")
+                    )
+
+                    order_item = InternalOrderLineItem(
+                        internal_order=internal_order,
+                        product=product,
+                        quantity_ordered=item_data.get("quantity_ordered"),
+                    )
+                    order_items.append(order_item)
+
+                InternalOrderLineItem.objects.bulk_create(order_items)
+
+                internal_order.set_status(
+                    InternalOrderHistoryStatusChoices.PENDING,
+                    responsible_user,
+                    order_data.get("note"),
+                )
+
+                return internal_order
+        except ValidationError as e:
+            raise InternalOrderCreationError(f"Validation failed: {e}")
+        except Exception as e:
+            raise InternalOrderCreationError(f"Failed to create internal order: {e}")
+
+
+class InternalOrder(TimeStampedModel):
+    history_entries: models.QuerySet["InternalOrderHistory"]
+    order_items: models.QuerySet["InternalOrderLineItem"]
+
+    source_office = models.ForeignKey(
+        Office,
         on_delete=models.CASCADE,
-        related_name="internal_orders_destination",
+        related_name="outgoing_internal_orders",
     )
-
-    rental_contract_item_office_order = models.OneToOneField(
-        "RentalContractItemOfficeOrderModel",
+    target_office = models.ForeignKey(
+        Office,
         on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="internal_order",
+        related_name="incoming_internal_orders",
     )
 
-    current_history = models.OneToOneField(
-        "InternalOrderHistoryModel",
+    requested_for_date = models.DateField(blank=True, null=True)
+    approximate_delivery_date = models.DateField(blank=True, null=True)
+
+    latest_history_entry = models.OneToOneField(
+        "InternalOrderHistory",
         on_delete=models.SET_NULL,
         related_name="current_order",
         blank=True,
         null=True,
     )
 
-    objects: InternalOrderManager = InternalOrderManager()  # pyright: ignore
+    contract_item_product_allocation = models.OneToOneField(
+        "ContractItemProductAllocation",
+        related_name="internal_order",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+
+    objects: InternalOrderManager = InternalOrderManager()
 
     def __str__(self) -> str:
         return str(self.pk)
 
+    def set_status(self, status: str, responsible_user: UserModel, note: Optional[str]):
+        InternalOrderHistory.objects.create(
+            status=status,
+            internal_order=self,
+            responsible_user=responsible_user,
+            note=note,
+        )
 
-class InternalOrderProductModel(TimeStampedModel):
-    """
-    Represents a product within an internal order in the Senda system. Inherits from TimeStampedModel.
 
-    Attributes:
-        product (models.ForeignKey): A foreign key to ProductModel, representing the product in the order.
-        quantity (models.PositiveIntegerField): The quantity of the product ordered.
-        quantity_received (models.PositiveIntegerField): The quantity of the product that has been received.
-        internal_order (models.ForeignKey): A foreign key to InternalOrderModel, linking it to the internal order.
-
-    Meta:
-        Defines several constraints, including uniqueness of product per order and validation checks on quantities.
-
-    Methods:
-        __str__: Returns a string representation of the internal order product, showing product name and quantity.
-    """
-
+class InternalOrderLineItem(TimeStampedModel):
+    internal_order = models.ForeignKey(
+        InternalOrder, on_delete=models.CASCADE, related_name="order_items"
+    )
     product = models.ForeignKey(
-        ProductModel, on_delete=models.CASCADE, related_name="related_orders"
+        Product, on_delete=models.CASCADE, related_name="internal_orders"
     )
 
-    quantity = models.PositiveIntegerField(default=0)
+    quantity_ordered = models.PositiveIntegerField(default=0)
     quantity_received = models.PositiveIntegerField(default=0)
 
-    internal_order = models.ForeignKey(
-        InternalOrderModel, on_delete=models.CASCADE, related_name="orders"
-    )
+    objects = models.Manager()
 
     def __str__(self) -> str:
-        return f"{self.product.name} - {self.quantity}"
+        return f"{self.product.name} - Qty: {self.quantity_ordered}"
 
     class Meta(TimeStampedModel.Meta):
         constraints = [
@@ -99,92 +163,40 @@ class InternalOrderProductModel(TimeStampedModel):
                 name="internal_order_unique_product",
             ),
             models.CheckConstraint(
-                check=models.Q(quantity__gte=0),
-                name="internal_order_quantity_must_be_positive",
-            ),
-            models.CheckConstraint(
                 check=models.Q(quantity_received__gte=0),
                 name="internal_order_quantity_received_must_be_positive",
             ),
             models.CheckConstraint(
-                check=models.Q(quantity_received__lte=models.F("quantity")),
+                check=models.Q(quantity_received__lte=models.F("quantity_ordered")),
                 name="internal_order_quantity_received_must_be_lte_to_quantity",
             ),
         ]
 
 
 class InternalOrderHistoryStatusChoices(models.TextChoices):
-    """
-    Enum-like class representing status choices for internal order history. Inherits from models.TextChoices.
-
-    It provides a set of predefined status choices such as PENDING, IN_PROGRESS, COMPLETED, and CANCELED.
-    """
-
     PENDING = "PENDING", "Pendiente"
     IN_PROGRESS = "IN_PROGRESS", "En progreso"
     COMPLETED = "COMPLETED", "Completado"
     CANCELED = "CANCELED", "Cancelado"
 
 
-class InternalOrderHistoryModel(TimeStampedModel):
-    """
-    Represents the history of an internal order, tracking its status changes. Inherits from TimeStampedModel.
-
-    Attributes:
-        status (models.CharField): The current status of the order, using choices from InternalOrderHistoryStatusChoices.
-        internal_order (models.ForeignKey): A foreign key to InternalOrderModel, linking to the related order.
-        date (models.DateTimeField): The date and time of the status record.
-        user (models.ForeignKey): A foreign key to UserModel, representing the user associated with the status change.
-    """
-
+class InternalOrderHistory(TimeStampedModel):
     status = models.CharField(
         max_length=20, choices=InternalOrderHistoryStatusChoices.choices
     )
     internal_order = models.ForeignKey(
-        InternalOrderModel, on_delete=models.CASCADE, related_name="history"
+        InternalOrder, on_delete=models.CASCADE, related_name="history_entries"
     )
-    date = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(
-        "users.UserModel", on_delete=models.SET_NULL, null=True, blank=True
+    responsible_user = models.ForeignKey(
+        UserModel,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="internal_order_histories",
     )
+    note = models.TextField(blank=True, null=True)
+
+    objects = models.Manager()
 
     def __str__(self) -> str:
         return f"{self.internal_order} - {self.status}"
-
-
-@receiver(post_save, sender=InternalOrderHistoryModel)
-def update_current_history(
-    sender: InternalOrderHistoryModel,
-    instance: InternalOrderHistoryModel,
-    created: bool,
-    **kwargs: Any,
-) -> None:
-    """
-    Signal receiver that updates the current history of an InternalOrderModel when a new InternalOrderHistoryModel instance is created.
-
-    Parameters:
-        sender (InternalOrderHistoryModel): The model class sending the signal.
-        instance (InternalOrderHistoryModel): The instance of the model that was saved.
-        created (bool): A boolean flag indicating whether this instance is newly created.
-        kwargs (Any): Additional keyword arguments.
-    """
-    if created:
-        internal_order = instance.internal_order
-        internal_order.current_history = instance
-        internal_order.save()
-
-        if instance.status == InternalOrderHistoryStatusChoices.IN_PROGRESS:
-            from_office = internal_order.office_branch
-            for order in internal_order.orders.all():
-                order.product.stock.filter(office=from_office).update(
-                    stock=models.F("stock") - order.quantity
-                )
-        elif instance.status == InternalOrderHistoryStatusChoices.COMPLETED:
-            to_office = internal_order.office_destination
-            for order in internal_order.orders.all():
-                order.product.stock.filter(office=to_office).update(
-                    stock=models.F("stock") + order.quantity
-                )
-
-                order.quantity_received = order.quantity
-                order.save()

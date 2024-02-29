@@ -7,7 +7,7 @@ import { MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { ProductListItemFragment } from '@/api/graphql';
+import { ProductListItemFragment, ProductTypeChoices } from '@/api/graphql';
 import {
     useDeleteProduct,
     useExportProductsCsv,
@@ -25,6 +25,7 @@ import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -43,6 +44,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { formatNumberAsPrice } from '@/lib/utils';
 
 const columnsHelper = createColumnHelper<ProductListItemFragment>();
 
@@ -59,27 +61,46 @@ const columns: ColumnDef<ProductListItemFragment, any>[] = [
                 </Link>
             );
         },
+        size: 300,
+    }),
+    columnsHelper.accessor('sku', {
+        id: 'sku',
+        header: 'SKU',
+        cell: (props) => props.row.original.sku || '-',
+        size: 200,
     }),
     columnsHelper.accessor('brand', {
         id: 'brand',
         header: 'Marca',
         cell: (props) => props.row.original.brand?.name || '-',
+        size: 200,
     }),
     columnsHelper.accessor('type', {
         id: 'type',
         header: 'Tipo',
         cell: (props) => {
             const type = props.getValue();
-            return type;
+
+            if (type === ProductTypeChoices.Alquilable) {
+                return <Badge variant="outline">Alquilable</Badge>;
+            }
+
+            if (type === ProductTypeChoices.Comerciable) {
+                return <Badge variant="outline">Comerciable</Badge>;
+            }
+
+            return <Badge variant="outline">-</Badge>;
         },
+        size: 200,
     }),
     columnsHelper.accessor('price', {
         id: 'price',
         header: 'Precio',
         cell: (props) => {
             const price = props.getValue();
-            return `$ ${price}`;
+            return `$${formatNumberAsPrice(price)}`;
         },
+        size: 100,
     }),
     columnsHelper.display({
         id: 'actions',
@@ -90,6 +111,7 @@ const columns: ColumnDef<ProductListItemFragment, any>[] = [
                 </div>
             );
         },
+        size: 20,
     }),
 ];
 
@@ -201,7 +223,7 @@ const Page = () => {
                 </div>
             }
         >
-            <div className="pr-container mb-4 flex space-x-2 pl-10 pt-5">
+            <div className="pr-container mb-4 flex space-x-2 pl-8 pt-5">
                 <Input
                     placeholder="Buscar por nombre"
                     value={variables.query || ''}
@@ -215,7 +237,7 @@ const Page = () => {
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
-                    <div className="pr-container flex-1 pl-10">
+                    <div className="pr-container flex-1 pl-8">
                         <AdminDataTableLoading columns={columns} />
                     </div>
                 }
@@ -260,7 +282,7 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 pl-10">
+                        <div className="pr-container flex-1 pl-8">
                             <AdminDataTable
                                 columns={columns}
                                 data={edges}

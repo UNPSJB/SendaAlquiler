@@ -5,8 +5,8 @@ query allSuppliers {
     }
 }
 
-query suppliers($page: Int) {
-    suppliers(page: $page) {
+query suppliers($page: Int, $query: String) {
+    suppliers(page: $page, query: $query) {
         count
         numPages
         results {
@@ -38,15 +38,26 @@ query supplierById($id: ID!) {
         houseUnit
         streetName
         locality {
+            id
             name
             state
             postalCode
         }
+        note
     }
 }
 
 mutation deleteSupplier($id: ID!) {
     deleteSupplier(id: $id) {
         success
+    }
+}
+
+mutation updateSupplier($id: ID!, $input: UpdateSupplierInput!) {
+    updateSupplier(id: $id, input: $input) {
+        supplier {
+            id
+        }
+        error
     }
 }

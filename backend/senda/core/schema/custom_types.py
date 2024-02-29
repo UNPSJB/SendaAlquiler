@@ -1,33 +1,36 @@
 import graphene
 from graphene_django import DjangoObjectType
-from senda.core.models.clients import ClientModel
-from senda.core.models.employees import EmployeeModel, EmployeeOfficeModel
+from senda.core.models.clients import Client
+from senda.core.models.employees import EmployeeModel, EmployeeOffice
 from senda.core.models.localities import LocalityModel, StateChoices
-from senda.core.models.offices import OfficeModel
+from senda.core.models.offices import Office
 from senda.core.models.order_internal import (
-    InternalOrderHistoryModel,
-    InternalOrderProductModel,
+    InternalOrderHistory,
+    InternalOrderLineItem,
     InternalOrderHistoryStatusChoices,
-    InternalOrderModel,
+    InternalOrder,
 )
 from senda.core.models.order_supplier import (
-    SupplierOrderModel,
-    SupplierOrderHistoryModel,
-    SupplierOrderProductModel,
+    SupplierOrder,
+    SupplierOrderHistory,
+    SupplierOrderLineItem,
 )
 from senda.core.models.products import (
-    BrandModel,
-    ProductModel,
-    ProductServiceModel,
-    ProductStockInOfficeModel,
+    Brand,
+    Product,
+    ProductService,
+    StockItem,
     ProductTypeChoices,
+    ProductSupplier,
+    ProductServiceBillingTypeChoices,
 )
-from senda.core.models.purchases import PurchaseItemModel, PurchaseModel
-from senda.core.models.rental_contracts import (
-    RentalContractHistoryModel,
-    RentalContractItemModel,
-    RentalContractModel,
-    RentalContractStatusChoices,
+from senda.core.models.sale import SaleItemModel, Sale
+from senda.core.models.contract import (
+    ContractHistory,
+    ContractItem,
+    Contract,
+    ContractStatusChoices,
+    ContractItemService
 )
 from senda.core.models.suppliers import SupplierModel
 from senda.core.models.admin import AdminModel
@@ -39,7 +42,10 @@ InternalOrderHistoryStatusEnum = graphene.Enum.from_enum(
     InternalOrderHistoryStatusChoices
 )
 ProductTypeChoicesEnum = graphene.Enum.from_enum(ProductTypeChoices)
-RentalContractStatusChoicesEnum = graphene.Enum.from_enum(RentalContractStatusChoices)
+ContractStatusChoicesEnum = graphene.Enum.from_enum(ContractStatusChoices)
+ProductServiceBillingTypeChoicesEnum = graphene.Enum.from_enum(
+    ProductServiceBillingTypeChoices
+)
 
 
 class PaginatedQueryResult(graphene.ObjectType):
@@ -47,169 +53,202 @@ class PaginatedQueryResult(graphene.ObjectType):
     num_pages = graphene.NonNull(graphene.Int)
 
 
-class Brand(DjangoObjectType):
+class BrandType(DjangoObjectType):
     class Meta:
-        model = BrandModel
+        name = "Brand"
+        model = Brand
 
 
 class PaginatedBrandQueryResult(PaginatedQueryResult):
-    results = non_null_list_of(Brand)
+    results = non_null_list_of(BrandType)
 
 
-class Locality(DjangoObjectType):
+class LocalityType(DjangoObjectType):
     state = StateChoicesEnum(required=True)
 
     class Meta:
+        name = "Locality"
         model = LocalityModel
 
 
 class PaginatedLocalityQueryResult(PaginatedQueryResult):
-    results = non_null_list_of(Locality)
+    results = non_null_list_of(LocalityType)
 
 
-class Office(DjangoObjectType):
+class OfficeType(DjangoObjectType):
     class Meta:
-        model = OfficeModel
+        name = "Office"
+        model = Office
 
 
-class Product(DjangoObjectType):
+class ProductType(DjangoObjectType):
     type = ProductTypeChoicesEnum(required=True)
 
     class Meta:
-        model = ProductModel
+        name = "Product"
+        model = Product
 
 
 class PaginatedProductQueryResult(PaginatedQueryResult):
-    results = non_null_list_of(Product)
+    results = non_null_list_of(ProductType)
 
 
-class Employee(DjangoObjectType):
-    offices = non_null_list_of(Office)
+class EmployeeType(DjangoObjectType):
+    offices = non_null_list_of(OfficeType)
 
     def resolve_offices(parent: EmployeeModel, info):
-        return OfficeModel.objects.filter(employees__employee=parent)
+        return Office.objects.filter(employees__employee=parent)
 
     class Meta:
+        name = "Employee"
         model = EmployeeModel
 
 
 class PaginatedEmployeeQueryResult(PaginatedQueryResult):
-    results = non_null_list_of(Employee)
+    results = non_null_list_of(EmployeeType)
 
 
-class Client(DjangoObjectType):
+class ClientType(DjangoObjectType):
     class Meta:
-        model = ClientModel
+        name = "Client"
+        model = Client
 
 
 class PaginatedClientQueryResult(PaginatedQueryResult):
-    results = non_null_list_of(Client)
+    results = non_null_list_of(ClientType)
 
 
-class Supplier(DjangoObjectType):
+class SupplierType(DjangoObjectType):
     class Meta:
+        name = "Supplier"
         model = SupplierModel
 
 
 class PaginatedSupplierQueryResult(PaginatedQueryResult):
-    results = non_null_list_of(Supplier)
+    results = non_null_list_of(SupplierType)
 
 
-class OrderSupplier(DjangoObjectType):
+class OrderSupplierType(DjangoObjectType):
     class Meta:
-        model = SupplierOrderModel
+        name = "OrderSupplier"
+        model = SupplierOrder
 
 
 class PaginatedOrderSupplierQueryResult(PaginatedQueryResult):
-    results = non_null_list_of(OrderSupplier)
+    results = non_null_list_of(OrderSupplierType)
 
 
-class InternalOrder(DjangoObjectType):
+class InternalOrderType(DjangoObjectType):
     class Meta:
-        model = InternalOrderModel
+        name = "InternalOrder"
+        model = InternalOrder
 
 
 class PaginatedInternalOrderQueryResult(PaginatedQueryResult):
-    results = non_null_list_of(InternalOrder)
+    results = non_null_list_of(InternalOrderType)
 
 
-class InternalOrderProduct(DjangoObjectType):
+class InternalOrderItemType(DjangoObjectType):
     class Meta:
-        model = InternalOrderProductModel
+        name = "InternalOrderItem"
+        model = InternalOrderLineItem
 
 
-class InternalOrderHistory(DjangoObjectType):
+class InternalOrderHistoryType(DjangoObjectType):
     status = InternalOrderHistoryStatusEnum(required=True)
 
     class Meta:
-        model = InternalOrderHistoryModel
+        name = "InternalOrderHistory"
+        model = InternalOrderHistory
 
 
-class ProductStockInOffice(DjangoObjectType):
+class StockItemType(DjangoObjectType):
     class Meta:
-        model = ProductStockInOfficeModel
+        name = "ProductStockInOffice"
+        model = StockItem
 
 
-class Purchase(DjangoObjectType):
+class SaleType(DjangoObjectType):
     class Meta:
-        model = PurchaseModel
+        name = "Sale"
+        model = Sale
 
 
-class PaginatedPurchaseQueryResult(PaginatedQueryResult):
-    results = non_null_list_of(Purchase)
+class PaginatedSaleQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(SaleType)
 
 
-class PurchaseItem(DjangoObjectType):
+class SaleItemType(DjangoObjectType):
     class Meta:
-        model = PurchaseItemModel
+        name = "SaleItem"
+        model = SaleItemModel
 
 
-class RentalContract(DjangoObjectType):
+class ContractType(DjangoObjectType):
     class Meta:
-        model = RentalContractModel
+        name = "Contract"
+        model = Contract
 
 
-class PaginatedRentalContractQueryResult(PaginatedQueryResult):
-    results = non_null_list_of(RentalContract)
+class PaginatedContractQueryResult(PaginatedQueryResult):
+    results = non_null_list_of(ContractType)
 
 
-class RentalContractItem(DjangoObjectType):
+class ContractItemType(DjangoObjectType):
     class Meta:
-        model = RentalContractItemModel
+        name = "ContractItem"
+        model = ContractItem
 
 
-class RentalContractHistory(DjangoObjectType):
-    status = RentalContractStatusChoicesEnum(required=True)
+class ContractHistoryType(DjangoObjectType):
+    status = ContractStatusChoicesEnum(required=True)
 
     class Meta:
-        model = RentalContractHistoryModel
+        name = "ContractHistory"
+        model = ContractHistory
 
 
-class ProductService(DjangoObjectType):
+class ProductServiceType(DjangoObjectType):
     class Meta:
-        model = ProductServiceModel
+        name = "ProductService"
+        model = ProductService
 
 
-class SupplierOrderHistory(DjangoObjectType):
+class SupplierOrderHistoryType(DjangoObjectType):
     class Meta:
-        model = SupplierOrderHistoryModel
+        name = "SupplierOrderHistory"
+        model = SupplierOrderHistory
 
 
-class SupplierOrderProduct(DjangoObjectType):
+class SupplierOrderProductType(DjangoObjectType):
     class Meta:
-        model = SupplierOrderProductModel
+        name = "SupplierOrderProduct"
+        model = SupplierOrderLineItem
 
 
-class EmployeeOffice(DjangoObjectType):
+class EmployeeOfficeType(DjangoObjectType):
     class Meta:
-        model = EmployeeOfficeModel
+        name = "EmployeeOffice"
+        model = EmployeeOffice
 
 
-class Admin(DjangoObjectType):
-    offices = non_null_list_of(Office)
+class AdminType(DjangoObjectType):
+    offices = non_null_list_of(OfficeType)
 
     def resolve_offices(self, info):
-        return OfficeModel.objects.all()
+        return Office.objects.all()
 
     class Meta:
+        name = "Admin"
         model = AdminModel
+
+
+class ProductSupplierType(DjangoObjectType):
+    class Meta:
+        name = "ProductSupplier"
+        model = ProductSupplier
+
+class ContractItemServiceType(DjangoObjectType):
+    class Meta:
+        name = "ContractItemService"
+        model = ContractItemService

@@ -19,15 +19,11 @@ const SupplierOrderFormOfficeFields: React.FC = () => {
                 />
             </RHFFormField>
 
-            <RHFFormField
-                fieldID="officeDestination"
-                label="Sucursal de destino"
-                showRequired
-            >
+            <RHFFormField fieldID="targetOffice" label="Sucursal de destino" showRequired>
                 <RHFOfficesField
                     control={control}
                     placeholder="Selecciona una sucursal"
-                    name="officeDestination"
+                    name="targetOffice"
                     officeToExclude={undefined}
                 />
             </RHFFormField>

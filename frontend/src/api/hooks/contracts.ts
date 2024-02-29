@@ -13,21 +13,21 @@ import { fetchClient } from '../fetch-client';
 import {
     ContractByIdDocument,
     ContractsDocument,
-    CreateRentalContractDocument,
-    CreateRentalContractMutation,
-    CreateRentalContractMutationVariables,
-    DeleteRentalContractDocument,
-    DeleteRentalContractMutation,
+    CreateContractDocument,
+    CreateContractMutation,
+    CreateContractMutationVariables,
+    DeleteContractDocument,
+    DeleteContractMutation,
     PayContractDepositDocument,
     PayTotalContractDocument,
-    RentalContractsByClientIdDocument,
+    ContractsByClientIdDocument,
 } from '../graphql';
 
 export const useContracts = () => {
     return usePaginatedQuery(
         queryKeys.contractsPaginatedList,
         ContractsDocument,
-        'rentalContracts',
+        'contracts',
         {
             page: null,
         },
@@ -53,31 +53,27 @@ export const useContractById = (id: string | undefined) => {
     );
 };
 
-type UseCreateRentalContractOptions = UseMutationOptions<
-    CreateRentalContractMutation,
+type UseCreateContractOptions = UseMutationOptions<
+    CreateContractMutation,
     Error,
-    CreateRentalContractMutationVariables
+    CreateContractMutationVariables
 >;
 
-export const useCreateRentalContract = ({
+export const useCreateContract = ({
     onSuccess,
     ...options
-}: UseCreateRentalContractOptions = {}) => {
+}: UseCreateContractOptions = {}) => {
     const client = useQueryClient();
 
-    return useMutation<
-        CreateRentalContractMutation,
-        Error,
-        CreateRentalContractMutationVariables
-    >(
+    return useMutation<CreateContractMutation, Error, CreateContractMutationVariables>(
         (data) => {
-            return fetchClient(CreateRentalContractDocument, data);
+            return fetchClient(CreateContractDocument, data);
         },
         {
             onSuccess: (data, variables, context) => {
-                const rentalContract = data.createRentalContract?.rentalContract;
+                const contract = data.createContract?.contract;
 
-                if (rentalContract) {
+                if (contract) {
                     client.invalidateQueries(queryKeys.contractsPaginatedList());
                 }
 
@@ -90,15 +86,15 @@ export const useCreateRentalContract = ({
     );
 };
 
-export const useDeleteRentalContract = ({
+export const useDeleteContract = ({
     onSuccess,
     ...options
-}: UseMutationOptions<DeleteRentalContractMutation, Error, string> = {}) => {
+}: UseMutationOptions<DeleteContractMutation, Error, string> = {}) => {
     const client = useQueryClient();
 
-    return useMutation<DeleteRentalContractMutation, Error, string>(
+    return useMutation<DeleteContractMutation, Error, string>(
         (id: string) => {
-            return fetchClient(DeleteRentalContractDocument, {
+            return fetchClient(DeleteContractDocument, {
                 id,
             });
         },
@@ -131,11 +127,11 @@ export const usePayTotalContract = () => {
     });
 };
 
-export const useRentalContractsByClientId = (id: string | undefined) => {
+export const useContractsByClientId = (id: string | undefined) => {
     return useQuery(
         queryKeys.contractsListByClientId(id),
         () => {
-            return fetchClient(RentalContractsByClientIdDocument, {
+            return fetchClient(ContractsByClientIdDocument, {
                 id: id as string,
             });
         },
@@ -155,9 +151,9 @@ export const usePayContractDepositMutation = () => {
         },
         {
             onSuccess: (data) => {
-                const updatedId = data.payContractDeposit?.rentalContract?.id;
+                const updatedId = data.payContractDeposit?.contract?.id;
                 const updatedHistory =
-                    data.payContractDeposit?.rentalContract?.currentHistory;
+                    data.payContractDeposit?.contract?.latestHistoryEntry;
 
                 if (!updatedId || !updatedHistory) {
                     return;
@@ -180,9 +176,9 @@ export const usePayTotalContractMutation = () => {
         },
         {
             onSuccess: (data) => {
-                const updatedId = data.payTotalContract?.rentalContract?.id;
+                const updatedId = data.payTotalContract?.contract?.id;
                 const updatedHistory =
-                    data.payTotalContract?.rentalContract?.currentHistory;
+                    data.payTotalContract?.contract?.latestHistoryEntry;
 
                 if (!updatedId || !updatedHistory) {
                     return;

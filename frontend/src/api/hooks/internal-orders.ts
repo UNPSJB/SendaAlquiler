@@ -130,8 +130,8 @@ const updateInternalOrderStatus = (
                 ...prev,
                 internalOrderById: {
                     ...prevOrder,
-                    currentHistory: {
-                        ...prevOrder.currentHistory,
+                    latestHistoryEntry: {
+                        ...prevOrder.latestHistoryEntry,
                         status,
                     },
                 },
