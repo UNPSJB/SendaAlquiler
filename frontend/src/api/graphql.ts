@@ -2063,8 +2063,8 @@ export type InternalOrdersQuery = {
             __typename?: 'InternalOrder';
             id: string;
             createdOn: any;
-            sourceOffice: { __typename?: 'Office'; name: string };
-            targetOffice: { __typename?: 'Office'; name: string };
+            sourceOffice: { __typename?: 'Office'; id: string; name: string };
+            targetOffice: { __typename?: 'Office'; id: string; name: string };
             latestHistoryEntry: {
                 __typename?: 'InternalOrderHistory';
                 status: InternalOrderHistoryStatusChoices;
@@ -6247,6 +6247,13 @@ export const InternalOrdersDocument = {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
                                                                 value: 'name',
                                                             },
                                                         },
@@ -6262,6 +6269,13 @@ export const InternalOrdersDocument = {
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
                                                         {
                                                             kind: 'Field',
                                                             name: {

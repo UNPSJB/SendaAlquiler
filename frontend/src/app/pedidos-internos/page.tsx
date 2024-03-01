@@ -41,6 +41,9 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+import { useOfficeContext } from '../OfficeProvider';
 
 type InternalOrder = InternalOrdersQuery['internalOrders']['results'][0];
 
@@ -198,11 +201,17 @@ const Status = ({ status }: { status: InternalOrderHistoryStatusChoices }) => {
     );
 };
 
+enum TabValue {
+    OUTGOING = 'outgoing',
+    INCOMING = 'incoming',
+}
+
 const Page = () => {
     const { setVariables, activePage, noPages, queryResult } =
         usePaginatedInternalOrders();
 
     const { exportCsv } = useExportInternalOrdersCsv();
+    const officeContext = useOfficeContext();
 
     return (
         <DashboardLayout
@@ -256,16 +265,52 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 pl-8">
-                            <AdminDataTable
-                                columns={columns}
-                                currentPage={activePage}
-                                data={internalOrders}
-                                numberOfPages={noPages}
-                                onPageChange={(page: number) => {
-                                    setVariables('page', page);
-                                }}
-                            />
+                        <div className="pr-container flex-1 pl-8 pt-8">
+                            <Tabs defaultValue={TabValue.INCOMING}>
+                                <TabsList>
+                                    <TabsTrigger value={TabValue.INCOMING}>
+                                        Entrantes
+                                    </TabsTrigger>
+
+                                    <TabsTrigger value={TabValue.OUTGOING}>
+                                        Salientes
+                                    </TabsTrigger>
+                                </TabsList>
+
+                                <TabsContent value={TabValue.INCOMING}>
+                                    <AdminDataTable
+                                        columns={columns}
+                                        currentPage={activePage}
+                                        data={internalOrders.filter((order) => {
+                                            return (
+                                                order.targetOffice.id ===
+                                                officeContext.office?.id
+                                            );
+                                        })}
+                                        numberOfPages={noPages}
+                                        onPageChange={(page: number) => {
+                                            setVariables('page', page);
+                                        }}
+                                    />
+                                </TabsContent>
+
+                                <TabsContent value={TabValue.OUTGOING}>
+                                    <AdminDataTable
+                                        columns={columns}
+                                        currentPage={activePage}
+                                        data={internalOrders.filter((order) => {
+                                            return (
+                                                order.sourceOffice.id ===
+                                                officeContext.office?.id
+                                            );
+                                        })}
+                                        numberOfPages={noPages}
+                                        onPageChange={(page: number) => {
+                                            setVariables('page', page);
+                                        }}
+                                    />
+                                </TabsContent>
+                            </Tabs>
                         </div>
                     );
                 }}

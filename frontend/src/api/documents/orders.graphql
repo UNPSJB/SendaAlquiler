@@ -5,9 +5,11 @@ query internalOrders($page: Int) {
         results {
             id
             sourceOffice {
+                id
                 name
             }
             targetOffice {
+                id
                 name
             }
             createdOn

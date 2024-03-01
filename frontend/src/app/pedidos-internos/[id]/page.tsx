@@ -160,32 +160,7 @@ const Page = () => {
 
                     return (
                         <div className="flex flex-1 flex-col">
-                            <header className="border-b pl-8">
-                                <div className="mb-10 flex items-center">
-                                    <Avatar>
-                                        {getAvatarText(internalOrder.sourceOffice.name)}
-                                    </Avatar>
-                                    <div className="pl-6">
-                                        <h1 className="my-2 mt-10 text-xl font-bold">
-                                            {internalOrder.sourceOffice.name}
-                                        </h1>
-                                        <p>
-                                            {internalOrder.sourceOffice.street}{' '}
-                                            {internalOrder.sourceOffice.houseNumber}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <Tabs
-                                    tabs={tabs.map((tab) => {
-                                        return {
-                                            ...tab,
-                                            isActive: tab.key === activeTab,
-                                            onClick: setActiveTab,
-                                        };
-                                    })}
-                                />
-                            </header>
+                            <header className="border-b pl-8"></header>
 
                             <div className="flex-1 bg-gray-100">
                                 <section className="px-8">
