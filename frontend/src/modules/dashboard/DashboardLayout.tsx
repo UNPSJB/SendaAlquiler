@@ -45,9 +45,13 @@ export type DashboardIconProps = {
 };
 
 type NavLink = {
-    href: string;
+    href: string | null;
     label?: string;
     Icon: LucideIcon;
+    innerLinks?: {
+        href: string;
+        label: string;
+    }[];
     userCanAccess?: (user: CurrentUser) => boolean;
 };
 
@@ -69,14 +73,29 @@ const MAIN_LINKS: NavLink[] = [
         label: 'Pedidos a proveedores',
         Icon: ClipboardListIcon,
     },
-    { href: '/pedidos-internos', label: 'Pedidos internos', Icon: ClipboardPenLineIcon },
+    {
+        href: null,
+        label: 'Pedidos internos',
+        Icon: ClipboardPenLineIcon,
+        innerLinks: [
+            {
+                href: '/pedidos-internos/entrantes',
+                label: 'Entrantes',
+            },
+            {
+                href: '/pedidos-internos/salientes',
+                label: 'Salientes',
+            },
+        ],
+    },
     { href: '/contratos', label: 'Contratos', Icon: FileTextIcon },
 ];
 
 type NavigationLinkProps = PropsWithChildren<{
-    href: string;
+    href: string | null;
     Icon: NavLink['Icon'];
     label?: string;
+    innerLinks?: NavLink['innerLinks'];
 }>;
 
 /**
@@ -91,11 +110,71 @@ const NavigationLink: React.FC<NavigationLinkProps> = ({
     href,
     Icon,
     label,
+    innerLinks,
 }) => {
     const currentPath = usePathname();
     const currenLinkIsActive =
-        href === '/' ? currentPath === href : currentPath.startsWith(href);
+        href && (href === '/' ? currentPath === href : currentPath.startsWith(href));
     const variant = currenLinkIsActive ? 'default' : 'ghost';
+
+    if (href === null) {
+        return (
+            <div className="space-y-1">
+                <span
+                    className={cn(
+                        buttonVariants({
+                            variant: variant,
+                            size: 'sm',
+                        }),
+                        'pointer-events-none flex justify-start',
+                    )}
+                >
+                    <Icon className="mr-2 h-4 w-4" />
+                    {children}
+                    {label && (
+                        <span
+                            className={cn(
+                                'ml-auto',
+                                variant === 'default' &&
+                                    'text-background dark:text-white',
+                            )}
+                        >
+                            {label}
+                        </span>
+                    )}
+                </span>
+
+                <div className="flex flex-col space-y-2 pl-6">
+                    {innerLinks?.map((link) => {
+                        const currenLinkIsActive =
+                            link.href === '/'
+                                ? currentPath === link.href
+                                : currentPath.startsWith(link.href);
+
+                        const variant = currenLinkIsActive ? 'default' : 'ghost';
+
+                        return (
+                            <Link
+                                key={link.href}
+                                href={link.href}
+                                className={cn(
+                                    buttonVariants({
+                                        variant: variant,
+                                        size: 'sm',
+                                    }),
+                                    variant === 'default' &&
+                                        'dark:bg-muted dark:text-white dark:hover:bg-muted dark:hover:text-white',
+                                    'justify-start',
+                                )}
+                            >
+                                {link.label}
+                            </Link>
+                        );
+                    })}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <Link
@@ -159,6 +238,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
                                 href={link.href}
                                 Icon={link.Icon}
                                 label={undefined}
+                                innerLinks={link.innerLinks}
                             >
                                 {link.label}
                             </NavigationLink>
