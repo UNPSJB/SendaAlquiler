@@ -24,7 +24,7 @@ from senda.core.models.products import (
     ProductSupplierDataDict,
     ProductServiceDataDict,
     ProductServiceBillingTypeChoices,
-    ProductService
+    ProductService,
 )
 from senda.core.models.order_internal import (
     InternalOrder,
@@ -47,6 +47,7 @@ from senda.core.models.contract import (
 from django.db import models, transaction
 from senda.core.models.localities import LocalityModel, StateChoices
 
+from django.utils import timezone
 from datetime import datetime, timedelta
 
 # Initialize Faker
@@ -433,7 +434,10 @@ def create_supplier_orders():
 
 def create_sales():
     for i in range(random.randint(50, 80)):
-        sale_date = fake.date_time_this_year()
+        naive_contract_start_datetime = fake.date_time_between(
+            start_date="-1y", end_date="now", tzinfo=None
+        )
+        sale_date = timezone.make_aware(naive_contract_start_datetime)
         client = Client.objects.order_by("?").first()
         office = Office.objects.order_by("?").first()
 
@@ -474,7 +478,10 @@ def create_sales():
             if no_added_products >= 5:
                 break
 
-        Sale.objects.create_sale(client.pk, office.pk, sale_item_dicts)
+        sale = Sale.objects.create_sale(client.pk, office.pk, sale_item_dicts)
+        sale.created_on = sale_date
+        sale.modified_on = sale_date
+        sale.save()
 
 
 def create_contracts():
@@ -484,10 +491,12 @@ def create_contracts():
         office = Office.objects.order_by("?").first()
 
         # random start between now and a year ago
-        contract_start = fake.date_time_between(
+        naive_contract_start_datetime = fake.date_time_between(
             start_date="-1y", end_date="now", tzinfo=None
         )
+        contract_start = timezone.make_aware(naive_contract_start_datetime)
         contract_end = contract_start + timedelta(days=random.randint(1, 30))
+        expiration_date = contract_end + timedelta(days=random.randint(1, 30))
 
         contract_data = ContractDetailsDict(
             client_id=client.pk,
@@ -498,7 +507,7 @@ def create_contracts():
             house_number=client.house_number,
             street_name=client.street_name,
             house_unit=client.house_unit,
-            expiration_date=contract_end + timedelta(days=random.randint(1, 30)),
+            expiration_date=expiration_date
         )
 
         contract_item_dicts = [
@@ -517,7 +526,10 @@ def create_contracts():
                     ContractItemServiceDetailsDict(
                         service_discount=random.randint(0, 1000),
                         service_id=service.pk,
-                    ) for service in ProductService.objects.order_by("?")[0 : random.randint(0, 2)]
+                    )
+                    for service in ProductService.objects.order_by("?")[
+                        0 : random.randint(0, 2)
+                    ]
                 ],
             )
             for product in Product.objects.order_by("?").filter(
@@ -525,11 +537,15 @@ def create_contracts():
             )[0 : random.randint(1, 5)]
         ]
 
-        Contract.objects.create_contract(
+        contract = Contract.objects.create_contract(
             contract_data,
             contract_item_dicts,
             created_by_user_id=created_by_employee.user.pk,
         )
+
+        contract.created_on = contract_start
+        contract.modified_on = contract_start
+        contract.save()
 
 
 def get_full_name():
