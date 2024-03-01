@@ -25,6 +25,7 @@ import DashboardLayout, {
 import { getMonthNameFromDayjs } from '@/modules/dayjs/utils';
 
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
+import { formatNumberAsPrice } from '@/lib/utils';
 
 ChartJS.register(
     CategoryScale,
@@ -106,12 +107,9 @@ const Home = () => {
                             (a, b) => new Date(a).getTime() - new Date(b).getTime(),
                         );
 
-                        const salesTotals = allSales
-                            .reduce((acc, sale) => {
-                                return acc + sale.total;
-                            }, 0)
-                            .toString()
-                            .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                        const salesTotals = allSales.reduce((acc, sale) => {
+                            return acc + sale.total;
+                        }, 0);
 
                         return (
                             <>
@@ -150,7 +148,7 @@ const Home = () => {
                                                 Total generado
                                             </p>
                                             <p className="mb-8 text-2xl font-bold">
-                                                ${salesTotals} ARS
+                                                ${formatNumberAsPrice(salesTotals)} ARS
                                             </p>
 
                                             <Line
@@ -162,16 +160,34 @@ const Home = () => {
                                                             label: 'Ventas',
                                                             data: salesMonths.map(
                                                                 (date) => {
-                                                                    return salesByMonth[
-                                                                        date
-                                                                    ].reduce(
-                                                                        (acc, sale) => {
-                                                                            return (
-                                                                                acc +
-                                                                                sale.total
-                                                                            );
-                                                                        },
-                                                                        0,
+                                                                    // parseFloat transforms the string into a number
+                                                                    // ex of input: "1,000.37" -> 1000.37
+
+                                                                    return parseFloat(
+                                                                        formatNumberAsPrice(
+                                                                            salesByMonth[
+                                                                                date
+                                                                            ].reduce(
+                                                                                (
+                                                                                    acc,
+                                                                                    sale,
+                                                                                ) => {
+                                                                                    return (
+                                                                                        acc +
+                                                                                        sale.total
+                                                                                    );
+                                                                                },
+                                                                                0,
+                                                                            ),
+                                                                        )
+                                                                            .replaceAll(
+                                                                                '.',
+                                                                                '',
+                                                                            )
+                                                                            .replaceAll(
+                                                                                ',',
+                                                                                '.',
+                                                                            ),
                                                                     );
                                                                 },
                                                             ),
