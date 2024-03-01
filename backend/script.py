@@ -378,7 +378,9 @@ def create_alquilable_products():
 def create_internal_orders():
     for i in range(random.randint(50, 80)):
         source_office = Office.objects.order_by("?").first()
-        target_office = Office.objects.order_by("?").first()
+        target_office = (
+            Office.objects.order_by("?").exclude(pk=source_office.pk).first()
+        )
 
         requested_for_date = fake.date_time_this_year()
         approximate_delivery_date = requested_for_date + timedelta(
@@ -507,7 +509,7 @@ def create_contracts():
             house_number=client.house_number,
             street_name=client.street_name,
             house_unit=client.house_unit,
-            expiration_date=expiration_date
+            expiration_date=expiration_date,
         )
 
         contract_item_dicts = [
@@ -593,10 +595,12 @@ def run_fixtures():
         create_admins()
         create_employees()
         create_clients()
-        create_suppliers()
+
         create_brands()
-        create_comerciable_products()
+        create_suppliers()
         create_alquilable_products()
+        create_comerciable_products()
+
         create_internal_orders()
         create_supplier_orders()
 
