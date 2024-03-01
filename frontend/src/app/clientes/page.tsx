@@ -216,7 +216,7 @@ const Page = () => {
                             }}
                             variant={ButtonVariant.GRAY}
                         >
-                            Exportar
+                            Exportar a CSV
                         </DeprecatedButton>
                         <DeprecatedButton href="/clientes/add">
                             + Añadir cliente
