@@ -124,7 +124,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
 
     return (
         <div className="min-h-screen lg:flex">
-            <aside className="lg:pl-container pointer-events-none fixed inset-x-0 flex h-screen flex-col overflow-y-scroll text-white lg:static lg:w-1/5 lg:bg-black lg:pr-6">
+            <aside className="lg:pl-container pointer-events-none fixed inset-x-0 flex h-screen flex-col overflow-y-scroll text-white lg:static lg:w-[300px] lg:bg-black lg:pr-6">
                 <header className="container pointer-events-auto flex items-center justify-between bg-black pt-6 lg:static lg:mx-0 lg:max-w-full lg:px-0">
                     <span className="block font-headings text-xl font-black tracking-widest">
                         SENDA
