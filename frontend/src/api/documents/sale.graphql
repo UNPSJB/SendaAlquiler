@@ -23,6 +23,8 @@ query saleById($id: ID!) {
             }
             quantity
             total
+            subtotal
+            discount
         }
         client {
             firstName

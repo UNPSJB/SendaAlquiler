@@ -2,6 +2,14 @@
 
 import { useParams } from 'next/navigation';
 
+import {
+    ColumnDef,
+    createColumnHelper,
+    flexRender,
+    getCoreRowModel,
+    useReactTable,
+} from '@tanstack/react-table';
+
 import { SaleByIdQuery } from '@/api/graphql';
 import { useSaleById } from '@/api/hooks';
 
@@ -16,6 +24,16 @@ import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableFooter,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import { formatNumberAsPrice } from '@/lib/utils';
 
 const getAvatarText = (firstName: string, lastName: string) => {
     return (firstName[0] + lastName[0]).toUpperCase();
@@ -33,6 +51,176 @@ const getDasboardTitle = (sale: SaleByIdQuery['saleById'] | undefined) => {
             <span className="font-headings text-sm">
                 {sale.client.firstName} {sale.client.lastName} / #{sale.id}
             </span>
+        </div>
+    );
+};
+
+type SaleItemDetail = NonNullable<SaleByIdQuery['saleById']>['saleItems'][0];
+
+const columnsHelper = createColumnHelper<SaleItemDetail>();
+
+const columns: ColumnDef<SaleItemDetail, any>[] = [
+    columnsHelper.accessor('product.name', {
+        id: 'product',
+        header: 'Producto',
+        cell: (props) => {
+            return props.getValue();
+        },
+    }),
+    columnsHelper.accessor('product.brand.name', {
+        id: 'brand',
+        header: 'Marca',
+        cell: (props) => {
+            return props.getValue();
+        },
+    }),
+    columnsHelper.accessor('product.price', {
+        id: 'price',
+        header: 'Precio',
+        cell: (props) => {
+            return `$${formatNumberAsPrice(props.getValue() || 0)}`;
+        },
+    }),
+    columnsHelper.accessor('quantity', {
+        id: 'quantity',
+        header: 'Cantidad',
+        cell: (props) => {
+            return props.getValue();
+        },
+    }),
+    columnsHelper.accessor('subtotal', {
+        id: 'subtotal',
+        header: 'Subtotal',
+        cell: (props) => {
+            return `$${formatNumberAsPrice(props.getValue() || 0)}`;
+        },
+    }),
+    columnsHelper.accessor('discount', {
+        id: 'discount',
+        header: 'Descuento',
+        cell: (props) => {
+            return `$${formatNumberAsPrice(props.getValue() || 0)}`;
+        },
+    }),
+
+    columnsHelper.accessor('total', {
+        id: 'total',
+        header: 'Total',
+        cell: (props) => {
+            return `$${formatNumberAsPrice(props.getValue() || 0)}`;
+        },
+        footer: (props) => {
+            const total = props.table
+                .getFilteredRowModel()
+                .rows.reduce((acc, row) => acc + row.original.total, 0);
+
+            return `$${formatNumberAsPrice(total)}`;
+        },
+    }),
+];
+
+type MyTableProps = {
+    data: SaleItemDetail[];
+};
+
+const MyTable = ({ data }: MyTableProps) => {
+    const table = useReactTable({
+        data,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        defaultColumn: {
+            minSize: 0,
+            size: Number.MAX_SAFE_INTEGER,
+            maxSize: Number.MAX_SAFE_INTEGER,
+        },
+    });
+
+    return (
+        <div className="rounded-md border bg-white">
+            <Table>
+                <TableHeader>
+                    {table.getHeaderGroups().map((headerGroup) => (
+                        <TableRow key={headerGroup.id}>
+                            {headerGroup.headers.map((header) => {
+                                return (
+                                    <TableHead
+                                        style={{
+                                            width:
+                                                header.getSize() ===
+                                                Number.MAX_SAFE_INTEGER
+                                                    ? 'auto'
+                                                    : header.getSize(),
+                                        }}
+                                        key={header.id}
+                                    >
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                  header.column.columnDef.header,
+                                                  header.getContext(),
+                                              )}
+                                    </TableHead>
+                                );
+                            })}
+                        </TableRow>
+                    ))}
+                </TableHeader>
+
+                <TableBody>
+                    {table.getRowModel().rows?.length ? (
+                        table.getRowModel().rows.map((row) => (
+                            <TableRow
+                                key={row.id}
+                                data-state={row.getIsSelected() && 'selected'}
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <TableCell
+                                        style={{
+                                            width:
+                                                cell.column.getSize() ===
+                                                Number.MAX_SAFE_INTEGER
+                                                    ? 'auto'
+                                                    : cell.column.getSize(),
+                                        }}
+                                        key={cell.id}
+                                    >
+                                        {flexRender(
+                                            cell.column.columnDef.cell,
+                                            cell.getContext(),
+                                        )}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                            <TableCell
+                                colSpan={columns.length}
+                                className="h-24 text-center"
+                            >
+                                No se encontraron resultados.
+                            </TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
+
+                <TableFooter>
+                    {table.getFooterGroups().map((footerGroup) => (
+                        <TableRow key={footerGroup.id}>
+                            {footerGroup.headers.map((footer) => {
+                                return (
+                                    <TableCell key={footer.id}>
+                                        {flexRender(
+                                            footer.column.columnDef.footer,
+                                            footer.getContext(),
+                                        )}
+                                    </TableCell>
+                                );
+                            })}
+                        </TableRow>
+                    ))}
+                </TableFooter>
+            </Table>
         </div>
     );
 };
@@ -76,68 +264,39 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="flex  flex-1 flex-col">
-                            <header className="border-b pl-8">
-                                <div className="mb-10 flex items-center">
-                                    <Avatar>
-                                        {getAvatarText(
-                                            sale.client.firstName,
-                                            sale.client.lastName,
-                                        )}
-                                    </Avatar>
-                                    <div className="pl-6">
-                                        <h1 className="my-2 mt-10 text-xl font-bold">
-                                            {sale.client.firstName} {sale.client.lastName}
-                                        </h1>
-                                        <p>
-                                            {sale.client.email} | {sale.client.phoneCode}
-                                            {sale.client.phoneNumber}
-                                        </p>
-                                    </div>
+                        <div className="flex flex-1 flex-col">
+                            <header className="flex items-center space-x-6 border-b p-8">
+                                <Avatar>
+                                    {getAvatarText(
+                                        sale.client.firstName,
+                                        sale.client.lastName,
+                                    )}
+                                </Avatar>
+
+                                <div>
+                                    <h1 className="text-xl font-bold">
+                                        {sale.client.firstName} {sale.client.lastName}
+                                    </h1>
+
+                                    <p>
+                                        {sale.client.email} | {sale.client.phoneCode}
+                                        {sale.client.phoneNumber}
+                                    </p>
                                 </div>
                             </header>
 
-                            <div className="flex-1 bg-gray-100">
-                                <section className="mt-8 items-center pl-8">
-                                    <div className="mb-4 flex">
-                                        <div className="pl-4">
-                                            <h1 className="text-xl font-bold">
-                                                Venta #{sale.id}
-                                            </h1>
-                                            <p className=" text-base">
-                                                {formatDateTime(sale.createdOn)}
-                                            </p>
-                                        </div>
-                                    </div>
+                            <div className="flex-1 bg-gray-100 py-8">
+                                <section className="items-center space-y-4 px-8">
                                     <div>
-                                        {sale.saleItems.map((item, index) => (
-                                            <div
-                                                key={index}
-                                                className="mb-2 mr-8 rounded-md border bg-white"
-                                            >
-                                                <div className="flex justify-between border-b px-4 pb-2 pt-4">
-                                                    <h2 className="text-muted-foreground">
-                                                        {item.product.name}{' '}
-                                                        {item.product.brand?.name}
-                                                    </h2>
-                                                    <p className=" text-muted-foreground">
-                                                        {item.quantity} u. x $
-                                                        {item.product.price}
-                                                    </p>
-                                                </div>
-                                                <div className="flex justify-between px-4 py-2">
-                                                    <p className="font-bold">Subtotal </p>
-                                                    <p className="font-bold">
-                                                        $ {item.total}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))}
+                                        <h1 className="text-xl font-bold">
+                                            Venta #{sale.id}
+                                        </h1>
+                                        <p className=" text-base">
+                                            {formatDateTime(sale.createdOn)}
+                                        </p>
                                     </div>
-                                    <div className="mr-8 mt-8 flex justify-between border-t pr-2 pt-2">
-                                        <p className="ml-4 text-lg font-bold">Total</p>
-                                        <b className="text-xl">${sale.total}</b>
-                                    </div>
+
+                                    <MyTable data={sale.saleItems} />
                                 </section>
                             </div>
                         </div>
