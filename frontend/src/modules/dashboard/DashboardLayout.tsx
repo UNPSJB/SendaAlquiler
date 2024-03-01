@@ -103,7 +103,7 @@ const NavigationLink: React.FC<NavigationLinkProps> = ({ children, href, Icon })
 };
 
 export const DashboardLayoutBigTitle: React.FC<PropsWithChildren> = ({ children }) => {
-    return <h1 className="text-3xl font-bold">{children}</h1>;
+    return <h1 className="text-2xl font-bold">{children}</h1>;
 };
 
 type DashboardLayoutProps = PropsWithChildren<{
@@ -207,9 +207,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
                 </nav>
             </aside>
 
-            <main className="flex flex-col pt-20 lg:h-screen lg:w-4/5 lg:pt-0">
+            <main className="flex flex-1 flex-col pt-20 lg:h-screen lg:pt-0">
                 {header && (
-                    <header className="lg:pr-container flex h-[5.625rem] items-center border-b border-black py-5 lg:px-8">
+                    <header className="lg:pr-container flex h-[75px] items-center border-b border-gray-300 py-4 lg:px-8">
                         <div className="container w-full lg:mx-0 lg:max-w-full lg:px-0">
                             {header}
                         </div>
