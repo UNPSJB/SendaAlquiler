@@ -141,6 +141,7 @@ class ContractManager(models.Manager["Contract"]):
         start_date: datetime,
         end_date: datetime,
     ) -> ContractItemTotalDetailsDict:
+        contract_duration_in_calendar_days = (end_date - start_date).days
 
         quantity = 0
         shipping_subtotal = 0
@@ -149,7 +150,7 @@ class ContractManager(models.Manager["Contract"]):
             quantity += allocation.get("quantity")
             shipping_subtotal += allocation.get("shipping_cost") or 0
             shipping_discount += allocation.get("shipping_discount") or 0
-        product_subtotal = product_price * quantity
+        product_subtotal = product_price * quantity * contract_duration_in_calendar_days
 
         services_subtotal = 0
         services_discount = 0

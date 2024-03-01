@@ -1,3 +1,4 @@
+import { differenceInCalendarDays } from 'date-fns';
 import { Trash } from 'lucide-react';
 import { UseFieldArrayReturn, useFieldArray, useFormContext } from 'react-hook-form';
 
@@ -46,6 +47,10 @@ export const ContractFormEditorOrderItem = ({
 
     const startDatetime = formMethods.watch('startDatetime');
     const endDatetime = formMethods.watch('endDatetime');
+    let contractDurationInDays = 0;
+    if (startDatetime && endDatetime) {
+        contractDurationInDays = differenceInCalendarDays(endDatetime, startDatetime);
+    }
 
     const watchedField = formMethods.watch(`orders.${orderIndex}`);
     const product = watchedField.product;
@@ -82,7 +87,8 @@ export const ContractFormEditorOrderItem = ({
 
     let productSubtotal = 0;
     if (product && requestedQuantity) {
-        productSubtotal = (product.data.price || 0) * requestedQuantity;
+        productSubtotal =
+            (product.data.price || 0) * requestedQuantity * contractDurationInDays;
     }
 
     return (
@@ -103,7 +109,7 @@ export const ContractFormEditorOrderItem = ({
             <div className="grid grid-cols-2">
                 <div className="space-y-8 pr-4">
                     <div className="space-y-4">
-                        <h2 className="text-xl font-bold">Selecciona un producto</h2>
+                        <h2 className="font-medium">Selecciona un producto</h2>
 
                         <div className="grid grid-cols-3 gap-4">
                             <FormField
@@ -181,7 +187,7 @@ export const ContractFormEditorOrderItem = ({
                     </div>
 
                     <div className="space-y-4">
-                        <h2 className="text-xl font-bold">
+                        <h2 className="font-medium">
                             ¿Desde qué sucursales se alquilará este producto?
                         </h2>
 
@@ -224,9 +230,7 @@ export const ContractFormEditorOrderItem = ({
                 </div>
 
                 <div className="space-y-4 border-l border-gray-200 pl-4">
-                    <h2 className="text-xl font-bold">
-                        Precio y descuentos del producto
-                    </h2>
+                    <h2 className="font-medium">Precio y descuentos del producto</h2>
 
                     <div className="space-y-2">
                         <Label>Subtotal</Label>

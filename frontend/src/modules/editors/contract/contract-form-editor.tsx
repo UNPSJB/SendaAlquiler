@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+import { differenceInCalendarDays } from 'date-fns';
 import { useEffect } from 'react';
 import { SubmitErrorHandler, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -122,6 +123,15 @@ export const ContractFormEditor: React.FC<CreateContractFormProps> = ({ cancelHr
     const { mutate, isLoading: isMutating } = useCreateContract();
 
     const orders = watch('orders');
+
+    const startDatetime = formMethods.watch('startDatetime');
+    const endDatetime = formMethods.watch('endDatetime');
+
+    let contractDurationInDays = 0;
+    if (startDatetime && endDatetime) {
+        contractDurationInDays = differenceInCalendarDays(endDatetime, startDatetime);
+    }
+
     const subtotal = (orders || []).reduce((acc, order) => {
         const product = order.product?.data;
         const quantity =
@@ -131,7 +141,7 @@ export const ContractFormEditor: React.FC<CreateContractFormProps> = ({ cancelHr
             ) || 0;
 
         const productPrice = product?.price || 0;
-        const productSubtotal = productPrice * quantity;
+        const productSubtotal = productPrice * quantity * contractDurationInDays;
 
         return (
             acc +
