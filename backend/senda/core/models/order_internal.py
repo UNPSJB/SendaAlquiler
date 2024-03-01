@@ -132,12 +132,14 @@ class InternalOrder(TimeStampedModel):
         return str(self.pk)
 
     def set_status(self, status: str, responsible_user: UserModel, note: Optional[str]):
-        InternalOrderHistory.objects.create(
+        history = InternalOrderHistory.objects.create(
             status=status,
             internal_order=self,
             responsible_user=responsible_user,
             note=note,
         )
+        self.latest_history_entry = history
+        self.save()
 
 
 class InternalOrderLineItem(TimeStampedModel):

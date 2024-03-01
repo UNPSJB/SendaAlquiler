@@ -85,7 +85,9 @@ class SupplierOrderManager(models.Manager["SupplierOrder"]):
                         )
                     )
 
-                    total_item = item_data["quantity_ordered"] * product_supplier_relation.price
+                    total_item = (
+                        item_data["quantity_ordered"] * product_supplier_relation.price
+                    )
 
                     order_item = SupplierOrderLineItem(
                         supplier_order=supplier_order,
@@ -148,14 +150,12 @@ class SupplierOrder(TimeStampedModel):
         self.total = self.order_items.aggregate(models.Sum("total"))["total__sum"]
         self.save()
 
-    def set_status(
-        self,
-        status: str,
-        user: Optional["UserModel"] = None,
-    ):
-        SupplierOrderHistory.objects.create(
+    def set_status(self, status: str, user: Optional["UserModel"] = None):
+        history = SupplierOrderHistory.objects.create(
             user=user, supplier_order=self, status=status
         )
+        self.latest_history_entry = history
+        self.save()
 
 
 class SupplierOrderLineItem(TimeStampedModel):
