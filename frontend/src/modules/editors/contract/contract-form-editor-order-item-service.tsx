@@ -177,21 +177,22 @@ export const ContractFormEditorOrderItemService = ({
                         }
                     />
 
-                    {billingType !== CoreProductServiceBillingTypeChoices.OneTime && (
-                        <>
-                            {startDatetime && endDatetime ? (
-                                <p className="text-sm text-muted-foreground">
-                                    El subtotal se calcula en base a las fechas de inicio
-                                    y fin
-                                </p>
-                            ) : (
-                                <p className="text-sm text-muted-foreground">
-                                    Selecciona fechas de inicio y fin para calcular el
-                                    subtotal
-                                </p>
-                            )}
-                        </>
-                    )}
+                    {billingType &&
+                        billingType !== CoreProductServiceBillingTypeChoices.OneTime && (
+                            <>
+                                {startDatetime && endDatetime ? (
+                                    <p className="text-sm text-muted-foreground">
+                                        El subtotal se calcula en base a las fechas de
+                                        inicio y fin
+                                    </p>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                        Selecciona fechas de inicio y fin para calcular el
+                                        subtotal
+                                    </p>
+                                )}
+                            </>
+                        )}
                 </div>
 
                 <FormField
