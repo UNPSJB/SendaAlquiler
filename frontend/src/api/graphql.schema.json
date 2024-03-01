@@ -708,9 +708,13 @@
                         "description": null,
                         "args": [],
                         "type": {
-                            "kind": "SCALAR",
-                            "name": "DateTime",
-                            "ofType": null
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "DateTime",
+                                "ofType": null
+                            }
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -1056,6 +1060,22 @@
                     },
                     {
                         "name": "contractStart",
+                        "description": null,
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "DateTime",
+                                "ofType": null
+                            }
+                        },
+                        "defaultValue": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "expirationDate",
                         "description": null,
                         "type": {
                             "kind": "NON_NULL",
@@ -1558,6 +1578,34 @@
                 "description": null,
                 "fields": [
                     {
+                        "name": "billingPeriod",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Int",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "billingType",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "ENUM",
+                                "name": "CoreContractItemServiceBillingTypeChoices",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "createdOn",
                         "description": null,
                         "args": [],
@@ -1805,6 +1853,41 @@
                     {
                         "name": "VENCIDO",
                         "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "possibleTypes": null
+            },
+            {
+                "kind": "ENUM",
+                "name": "CoreContractItemServiceBillingTypeChoices",
+                "description": "An enumeration.",
+                "fields": null,
+                "inputFields": null,
+                "interfaces": null,
+                "enumValues": [
+                    {
+                        "name": "CUSTOM",
+                        "description": "CUSTOM",
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "MONTHLY",
+                        "description": "MONTHLY",
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "ONE_TIME",
+                        "description": "ONE_TIME",
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "WEEKLY",
+                        "description": "WEEKLY",
                         "isDeprecated": false,
                         "deprecationReason": null
                     }
@@ -3690,13 +3773,9 @@
                         "description": null,
                         "args": [],
                         "type": {
-                            "kind": "NON_NULL",
-                            "name": null,
-                            "ofType": {
-                                "kind": "SCALAR",
-                                "name": "Date",
-                                "ofType": null
-                            }
+                            "kind": "SCALAR",
+                            "name": "Date",
+                            "ofType": null
                         },
                         "isDeprecated": false,
                         "deprecationReason": null

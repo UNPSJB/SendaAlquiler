@@ -31,6 +31,7 @@ class ContractDetailsDict(TypedDict):
     house_number: str
     street_name: str
     house_unit: str
+    expiration_date: datetime
 
 
 class ContractItemProductAllocationDetailsDict(TypedDict):
@@ -211,6 +212,7 @@ class ContractManager(models.Manager["Contract"]):
                     house_unit=contract_data.get("house_unit"),
                     number_of_rental_days=number_of_rental_days,
                     created_by_id=created_by_user_id,
+                    expiration_date=contract_data.get("expiration_date"),
                 )
 
                 for item_data in items_data:
@@ -252,6 +254,8 @@ class ContractManager(models.Manager["Contract"]):
                             discount=service_dict.get("service_discount") or 0,
                             subtotal=service_totals.get("service_subtotal"),
                             total=service_totals.get("total"),
+                            billing_type=service_instance.billing_type,
+                            billing_period=service_instance.billing_period,
                         )
 
                 contract.update_totals()
@@ -289,7 +293,7 @@ class Contract(TimeStampedModel):
         related_name="contracts_created",
     )
 
-    expiration_date = models.DateTimeField(blank=True, null=True)
+    expiration_date = models.DateTimeField()
 
     contract_start_datetime = models.DateTimeField()
     contract_end_datetime = models.DateTimeField()
@@ -448,6 +452,12 @@ class ContractItemService(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="contract_items",
     )
+
+    billing_type = models.CharField(
+        max_length=50,
+        choices=ProductServiceBillingTypeChoices.choices,
+    )
+    billing_period = models.PositiveIntegerField(blank=True, null=True)
 
     price = models.PositiveBigIntegerField(default=0)
 

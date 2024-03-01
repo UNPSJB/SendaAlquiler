@@ -100,6 +100,7 @@ export type ContractFormEditorValues = {
         | undefined;
     startDatetime: Date | null | undefined;
     endDatetime: Date | null | undefined;
+    expirationDatetime: Date | null | undefined;
     streetName: string | null;
     houseUnit: string | null;
     houseNumber: string | null;
@@ -226,6 +227,7 @@ export const ContractFormEditor: React.FC<CreateContractFormProps> = ({ cancelHr
                     clientId: client,
                     contractStart: data.startDatetime,
                     contractEnd: data.endDatetime,
+                    expirationDate: data.expirationDatetime,
                     houseNumber: data.houseNumber,
                     houseUnit: data.houseUnit,
                     localityId: data.locality.value,

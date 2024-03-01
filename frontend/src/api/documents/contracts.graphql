@@ -70,8 +70,13 @@ query contractById($id: ID!) {
             serviceItems {
                 service {
                     name
-                    price
                 }
+                price
+                discount
+                subtotal
+                total
+                billingType
+                billingPeriod
             }
 
             quantity

@@ -97,7 +97,7 @@ export type Contract = {
     createdBy: User;
     createdOn: Scalars['DateTime']['output'];
     discountAmount: Scalars['BigInt']['output'];
-    expirationDate: Maybe<Scalars['DateTime']['output']>;
+    expirationDate: Scalars['DateTime']['output'];
     history: Array<ContractHistory>;
     /** Número de la calle donde vive el cliente */
     houseNumber: Scalars['String']['output'];
@@ -129,6 +129,7 @@ export type ContractInput = {
     clientId: Scalars['ID']['input'];
     contractEnd: Scalars['DateTime']['input'];
     contractStart: Scalars['DateTime']['input'];
+    expirationDate: Scalars['DateTime']['input'];
     houseNumber: Scalars['String']['input'];
     houseUnit: InputMaybe<Scalars['String']['input']>;
     localityId: Scalars['ID']['input'];
@@ -171,6 +172,8 @@ export type ContractItemProductAllocationInput = {
 
 export type ContractItemService = {
     __typename?: 'ContractItemService';
+    billingPeriod: Maybe<Scalars['Int']['output']>;
+    billingType: CoreContractItemServiceBillingTypeChoices;
     createdOn: Scalars['DateTime']['output'];
     discount: Scalars['BigInt']['output'];
     id: Scalars['ID']['output'];
@@ -198,6 +201,18 @@ export enum ContractStatusChoices {
     Pagado = 'PAGADO',
     Presupuestado = 'PRESUPUESTADO',
     Vencido = 'VENCIDO',
+}
+
+/** An enumeration. */
+export enum CoreContractItemServiceBillingTypeChoices {
+    /** CUSTOM */
+    Custom = 'CUSTOM',
+    /** MONTHLY */
+    Monthly = 'MONTHLY',
+    /** ONE_TIME */
+    OneTime = 'ONE_TIME',
+    /** WEEKLY */
+    Weekly = 'WEEKLY',
 }
 
 /** An enumeration. */
@@ -441,7 +456,7 @@ export type InternalOrder = {
     latestHistoryEntry: Maybe<InternalOrderHistory>;
     modifiedOn: Scalars['DateTime']['output'];
     orderItems: Array<InternalOrderItem>;
-    requestedForDate: Scalars['Date']['output'];
+    requestedForDate: Maybe<Scalars['Date']['output']>;
     sourceOffice: Office;
     targetOffice: Office;
 };
@@ -1446,7 +1461,7 @@ export type ContractsByClientIdQuery = {
         __typename?: 'Contract';
         id: string;
         createdOn: any;
-        expirationDate: any | null;
+        expirationDate: any;
         contractStartDatetime: any;
         contractEndDatetime: any;
         houseNumber: string;
@@ -1623,7 +1638,7 @@ export type ContractByIdQuery = {
         __typename?: 'Contract';
         contractEndDatetime: any;
         contractStartDatetime: any;
-        expirationDate: any | null;
+        expirationDate: any;
         houseNumber: string;
         houseUnit: string | null;
         streetName: string;
@@ -1677,7 +1692,13 @@ export type ContractByIdQuery = {
             };
             serviceItems: Array<{
                 __typename?: 'ContractItemService';
-                service: { __typename?: 'ProductService'; name: string; price: number };
+                price: any;
+                discount: any;
+                subtotal: any;
+                total: any;
+                billingType: CoreContractItemServiceBillingTypeChoices;
+                billingPeriod: number | null;
+                service: { __typename?: 'ProductService'; name: string };
             }>;
         }>;
     } | null;
@@ -2610,6 +2631,8 @@ export type SaleByIdQuery = {
             __typename?: 'SaleItem';
             quantity: number;
             total: any;
+            subtotal: any;
+            discount: any;
             product: {
                 __typename?: 'Product';
                 name: string;
@@ -4532,14 +4555,49 @@ export const ContractByIdDocument = {
                                                                             value: 'name',
                                                                         },
                                                                     },
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'price',
-                                                                        },
-                                                                    },
                                                                 ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'price',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'discount',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'subtotal',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'total',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'billingType',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'billingPeriod',
                                                             },
                                                         },
                                                     ],
@@ -8975,6 +9033,14 @@ export const SaleByIdDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'total' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'subtotal' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'discount' },
                                             },
                                         ],
                                     },

@@ -24,6 +24,7 @@ from senda.core.models.products import (
     ProductSupplierDataDict,
     ProductServiceDataDict,
     ProductServiceBillingTypeChoices,
+    ProductService
 )
 from senda.core.models.order_internal import (
     InternalOrder,
@@ -41,6 +42,7 @@ from senda.core.models.contract import (
     ContractDetailsDict,
     ContractItemDetailsDict,
     ContractItemProductAllocationDetailsDict,
+    ContractItemServiceDetailsDict,
 )
 from django.db import models, transaction
 from senda.core.models.localities import LocalityModel, StateChoices
@@ -421,9 +423,9 @@ def create_supplier_orders():
                 product_id=product_supplier_relation.product.pk,
                 quantity_ordered=random.randint(1, 100),
             )
-            for product_supplier_relation in ProductSupplier.objects.filter(supplier=supplier).order_by(
-                "?"
-            )[0 : random.randint(1, 5)]
+            for product_supplier_relation in ProductSupplier.objects.filter(
+                supplier=supplier
+            ).order_by("?")[0 : random.randint(1, 5)]
         ]
 
         SupplierOrder.objects.create_supplier_order(order_data, items_data)
@@ -481,7 +483,10 @@ def create_contracts():
         client = Client.objects.order_by("?").first()
         office = Office.objects.order_by("?").first()
 
-        contract_start = fake.date_time_this_year()
+        # random start between now and a year ago
+        contract_start = fake.date_time_between(
+            start_date="-1y", end_date="now", tzinfo=None
+        )
         contract_end = contract_start + timedelta(days=random.randint(1, 30))
 
         contract_data = ContractDetailsDict(
@@ -493,6 +498,7 @@ def create_contracts():
             house_number=client.house_number,
             street_name=client.street_name,
             house_unit=client.house_unit,
+            expiration_date=contract_end + timedelta(days=random.randint(1, 30)),
         )
 
         contract_item_dicts = [
@@ -507,7 +513,12 @@ def create_contracts():
                         shipping_discount=random.randint(0, 100),
                     )
                 ],
-                services=[],
+                services=[
+                    ContractItemServiceDetailsDict(
+                        service_discount=random.randint(0, 1000),
+                        service_id=service.pk,
+                    ) for service in ProductService.objects.order_by("?")[0 : random.randint(0, 2)]
+                ],
             )
             for product in Product.objects.order_by("?").filter(
                 type=ProductTypeChoices.ALQUILABLE

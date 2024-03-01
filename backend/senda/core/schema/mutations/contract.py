@@ -57,6 +57,7 @@ class ContractInput(graphene.InputObjectType):
     house_number = graphene.String(required=True)
     street_name = graphene.String(required=True)
     house_unit = graphene.String(required=False)
+    expiration_date = graphene.DateTime(required=True)
 
 
 class CreateContract(graphene.Mutation):
@@ -124,6 +125,7 @@ class CreateContract(graphene.Mutation):
                     house_number=contract_data.house_number,
                     street_name=contract_data.street_name,
                     house_unit=contract_data.house_unit,
+                    expiration_date=contract_data.expiration_date,
                 ),
                 items_data=items_data_dicts,
             )

@@ -10,6 +10,7 @@ import { DateTimePicker } from '@/components/date-time-picker/date-time-picker';
 import { Button } from '@/components/ui/button';
 import {
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -24,6 +25,7 @@ export const ContractFormEditorDetails = () => {
 
     const watchedClient = formMethods.watch('client')?.data;
     const watchedStartDatetime = formMethods.watch('startDatetime');
+    const watchedEndDatetime = formMethods.watch('endDatetime');
 
     return (
         <section className="flex border-t border-gray-200 py-8">
@@ -53,7 +55,7 @@ export const ContractFormEditorDetails = () => {
                 <FormField
                     name="locality"
                     control={formMethods.control}
-                    rules={{ required: 'La localidad es requerida' }}
+                    rules={{ required: 'Este campo es requerido' }}
                     render={({ field }) => (
                         <FormItem className="flex flex-col space-y-2">
                             <FormLabel required>Localidad</FormLabel>
@@ -84,7 +86,7 @@ export const ContractFormEditorDetails = () => {
                 <FormField
                     name="streetName"
                     control={formMethods.control}
-                    rules={{ required: 'La calle es requerida' }}
+                    rules={{ required: 'Este campo es requerido' }}
                     render={({ field }) => (
                         <FormItem className="flex flex-col space-y-2">
                             <FormLabel required>Calle</FormLabel>
@@ -101,7 +103,7 @@ export const ContractFormEditorDetails = () => {
                 <FormField
                     name="houseNumber"
                     control={formMethods.control}
-                    rules={{ required: 'El número es requerido' }}
+                    rules={{ required: 'Este campo es requerido' }}
                     render={({ field }) => (
                         <FormItem className="flex flex-col space-y-2">
                             <FormLabel required>Número</FormLabel>
@@ -150,7 +152,7 @@ export const ContractFormEditorDetails = () => {
                 <div className="grid grid-cols-2 gap-4">
                     <FormField
                         name="startDatetime"
-                        rules={{ required: 'El cliente es requerido' }}
+                        rules={{ required: 'Este campo es requerido' }}
                         control={formMethods.control}
                         render={({ field }) => (
                             <FormItem className="flex flex-col space-y-2">
@@ -171,7 +173,7 @@ export const ContractFormEditorDetails = () => {
 
                     <FormField
                         name="endDatetime"
-                        rules={{ required: 'El cliente es requerido' }}
+                        rules={{ required: 'Este campo es requerido' }}
                         control={formMethods.control}
                         render={({ field }) => (
                             <FormItem className="flex flex-col space-y-2">
@@ -179,7 +181,25 @@ export const ContractFormEditorDetails = () => {
 
                                 <FormControl>
                                     <DateTimePicker
-                                        onChange={field.onChange}
+                                        onChange={(val) => {
+                                            field.onChange(val);
+
+                                            const expirationDatetime =
+                                                formMethods.getValues(
+                                                    'expirationDatetime',
+                                                );
+
+                                            if (
+                                                val &&
+                                                (!expirationDatetime ||
+                                                    val > expirationDatetime)
+                                            ) {
+                                                formMethods.setValue(
+                                                    'expirationDatetime',
+                                                    dayjs(val).add(7, 'day').toDate(),
+                                                );
+                                            }
+                                        }}
                                         value={field.value || null}
                                         fromDate={
                                             watchedStartDatetime
@@ -190,6 +210,38 @@ export const ContractFormEditorDetails = () => {
                                         }
                                     />
                                 </FormControl>
+
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        name="expirationDatetime"
+                        rules={{ required: 'Este campo es requerido' }}
+                        control={formMethods.control}
+                        render={({ field }) => (
+                            <FormItem className="col-span-2 flex flex-col space-y-2">
+                                <FormLabel required>Fecha de vencimiento</FormLabel>
+
+                                <FormControl>
+                                    <DateTimePicker
+                                        onChange={field.onChange}
+                                        value={field.value || null}
+                                        fromDate={
+                                            watchedEndDatetime
+                                                ? dayjs(watchedEndDatetime)
+                                                      .add(7, 'day')
+                                                      .toDate()
+                                                : dayjs().add(7, 'day').toDate()
+                                        }
+                                    />
+                                </FormControl>
+
+                                <FormDescription>
+                                    Fecha máxima para la aceptación del contrato. Por
+                                    defecto, 7 días después de la fecha de fin.
+                                </FormDescription>
 
                                 <FormMessage />
                             </FormItem>
