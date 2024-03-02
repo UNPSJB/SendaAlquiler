@@ -326,75 +326,90 @@ const Page = () => {
                             <header className="border-b pl-8"></header>
 
                             <div className="flex-1 bg-muted">
-                                <section className="pr-container grid gap-4 pl-8 pt-8">
-                                    <div className="space-y-4 bg-white p-4">
-                                        <div className="flex justify-between">
-                                            <div>
-                                                <h2 className="text-lg font-bold">
-                                                    Pedido #{internalOrder.id}
-                                                </h2>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Creado el{' '}
-                                                    {format(
-                                                        new Date(internalOrder.createdOn),
-                                                        'dd/MM/yyyy',
+                                <section className="pr-container grid grid-cols-12 gap-4 pl-8 pt-8">
+                                    <div className="col-span-8">
+                                        <div className="space-y-4 bg-white p-4">
+                                            <div className="flex justify-between">
+                                                <div>
+                                                    <h2 className="text-lg font-bold">
+                                                        Pedido #{internalOrder.id}
+                                                    </h2>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Creado el{' '}
+                                                        {format(
+                                                            new Date(
+                                                                internalOrder.createdOn,
+                                                            ),
+                                                            'dd/MM/yyyy',
+                                                        )}
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    {internalOrder.latestHistoryEntry
+                                                        ?.status ===
+                                                        InternalOrderHistoryStatusChoices.Canceled && (
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="flex space-x-2"
+                                                        >
+                                                            <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                                                            <span>Cancelado</span>
+                                                        </Badge>
                                                     )}
-                                                </p>
+
+                                                    {internalOrder.latestHistoryEntry
+                                                        ?.status ===
+                                                        InternalOrderHistoryStatusChoices.Completed && (
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="flex space-x-2"
+                                                        >
+                                                            <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-green-500"></span>
+                                                            <span>Completado</span>
+                                                        </Badge>
+                                                    )}
+
+                                                    {internalOrder.latestHistoryEntry
+                                                        ?.status ===
+                                                        InternalOrderHistoryStatusChoices.InProgress && (
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="flex space-x-2"
+                                                        >
+                                                            <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-yellow-500"></span>
+                                                            <span>En progreso</span>
+                                                        </Badge>
+                                                    )}
+
+                                                    {internalOrder.latestHistoryEntry
+                                                        ?.status ===
+                                                        InternalOrderHistoryStatusChoices.Pending && (
+                                                        <Badge
+                                                            variant="outline"
+                                                            className="flex space-x-2"
+                                                        >
+                                                            <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-blue-500"></span>
+                                                            <span>Pendiente</span>
+                                                        </Badge>
+                                                    )}
+                                                </div>
                                             </div>
 
-                                            <div>
-                                                {internalOrder.latestHistoryEntry
-                                                    ?.status ===
-                                                    InternalOrderHistoryStatusChoices.Canceled && (
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="flex space-x-2"
-                                                    >
-                                                        <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-red-500"></span>
-                                                        <span>Cancelado</span>
-                                                    </Badge>
-                                                )}
+                                            <div className="space-y-2">
+                                                <h3 className="text-sm text-muted-foreground">
+                                                    Productos
+                                                </h3>
 
-                                                {internalOrder.latestHistoryEntry
-                                                    ?.status ===
-                                                    InternalOrderHistoryStatusChoices.Completed && (
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="flex space-x-2"
-                                                    >
-                                                        <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-green-500"></span>
-                                                        <span>Completado</span>
-                                                    </Badge>
-                                                )}
-
-                                                {internalOrder.latestHistoryEntry
-                                                    ?.status ===
-                                                    InternalOrderHistoryStatusChoices.InProgress && (
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="flex space-x-2"
-                                                    >
-                                                        <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-yellow-500"></span>
-                                                        <span>En progreso</span>
-                                                    </Badge>
-                                                )}
-
-                                                {internalOrder.latestHistoryEntry
-                                                    ?.status ===
-                                                    InternalOrderHistoryStatusChoices.Pending && (
-                                                    <Badge
-                                                        variant="outline"
-                                                        className="flex space-x-2"
-                                                    >
-                                                        <span className="mr-1 inline-block h-2.5 w-2.5 rounded-full bg-blue-500"></span>
-                                                        <span>Pendiente</span>
-                                                    </Badge>
-                                                )}
+                                                <BaseTable
+                                                    columns={productColumns}
+                                                    data={internalOrder.orderItems}
+                                                />
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-3 gap-4">
+                                    <div className="col-span-4 grid grid-cols-1 gap-4">
                                         <div className="space-y-4 bg-white p-4">
                                             <h3 className="text-sm text-muted-foreground">
                                                 Origen y destino
@@ -569,17 +584,6 @@ const Page = () => {
                                                 ]}
                                             />
                                         </div>
-                                    </div>
-
-                                    <div className="space-y-4 bg-white p-4">
-                                        <h3 className="text-sm text-muted-foreground">
-                                            Productos
-                                        </h3>
-
-                                        <BaseTable
-                                            columns={productColumns}
-                                            data={internalOrder.orderItems}
-                                        />
                                     </div>
                                 </section>
                             </div>
