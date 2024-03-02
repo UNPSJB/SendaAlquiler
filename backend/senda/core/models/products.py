@@ -211,6 +211,31 @@ class Product(TimeStampedModel):
             or 0
         )
 
+    def decrease_stock_in_office(self, office_id: int, quantity: int) -> None:
+        stock_item = self.stock_items.filter(office_id=office_id).first()
+
+        if not stock_item:
+            stock_item = StockItem.objects.create(
+                product=self, office_id=office_id, quantity=0
+            )
+
+        if stock_item.quantity < quantity:
+            raise ValueError("Not enough stock in office.")
+
+        stock_item.quantity -= quantity
+        stock_item.save()
+
+    def increase_stock_in_office(self, office_id: int, quantity: int) -> None:
+        stock_item = self.stock_items.filter(office_id=office_id).first()
+
+        if not stock_item:
+            stock_item = StockItem.objects.create(
+                product=self, office_id=office_id, quantity=0
+            )
+
+        stock_item.quantity += quantity
+        stock_item.save()
+
     def get_stock_for_office(self, office_id: int) -> Optional[int]:
         stock_item = self.stock_items.filter(office_id=office_id).first()
 

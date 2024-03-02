@@ -26,10 +26,7 @@ query internalOrderById($id: ID!) {
         id
         createdOn
         historyEntries {
-            id
-            createdOn
-            status
-            note
+            ...InternalOrderHistoryEntryItem
         }
         sourceOffice {
             id
@@ -55,16 +52,7 @@ query internalOrderById($id: ID!) {
             status
         }
         orderItems {
-            id
-            quantityOrdered
-            quantityReceived
-            product {
-                brand {
-                    name
-                }
-                name
-                type
-            }
+            ...InternalOrderListItem
         }
     }
 }
@@ -228,18 +216,22 @@ mutation deleteInternalOrder($id: ID!) {
     }
 }
 
-mutation InProgressInternalOrder($id: ID!, $note: String) {
-    inProgressInternalOrder(id: $id, note: $note) {
+mutation InProgressInternalOrder(
+    $id: ID!
+    $note: String
+    $items: [InProgressInternalOrderItemInput!]!
+) {
+    inProgressInternalOrder(id: $id, note: $note, items: $items) {
         internalOrder {
             id
             latestHistoryEntry {
                 status
             }
             historyEntries {
-                id
-                createdOn
-                status
-                note
+                ...InternalOrderHistoryEntryItem
+            }
+            orderItems {
+                ...InternalOrderListItem
             }
         }
         error
@@ -258,25 +250,10 @@ mutation receiveInternalOrder(
                 status
             }
             historyEntries {
-                id
-                createdOn
-                status
-                note
+                ...InternalOrderHistoryEntryItem
             }
             orderItems {
-                id
-                product {
-                    id
-                    name
-                    brand {
-                        name
-                    }
-                    name
-                    price
-                    type
-                }
-                quantityOrdered
-                quantityReceived
+                ...InternalOrderListItem
             }
         }
         error
@@ -291,10 +268,7 @@ mutation cancelInternalOrder($id: ID!, $note: String) {
                 status
             }
             historyEntries {
-                id
-                createdOn
-                status
-                note
+                ...InternalOrderHistoryEntryItem
             }
         }
         error
@@ -310,4 +284,39 @@ mutation receiveOrderSupplier($orderSupplierId: ID!) {
 
 query numberOfPendingOutgoingInternalOrders {
     numberOfPendingOutgoingInternalOrders
+}
+
+fragment InternalOrderListItem on InternalOrderItem {
+    id
+    product {
+        id
+        name
+        brand {
+            name
+        }
+        name
+        price
+        type
+    }
+    quantityOrdered
+    quantityReceived
+    quantitySent
+
+    sourceOfficeQuantityBeforeSend
+    sourceOfficeQuantityAfterSend
+
+    targetOfficeQuantityBeforeReceive
+    targetOfficeQuantityAfterReceive
+}
+
+fragment InternalOrderHistoryEntryItem on InternalOrderHistory {
+    id
+    createdOn
+    status
+    note
+    responsibleUser {
+        firstName
+        lastName
+        email
+    }
 }

@@ -98,6 +98,11 @@ class CompletedOrderItemDetailsDict(TypedDict):
     quantity_received: int
 
 
+class InProgressOrderItemDetailsDict(TypedDict):
+    item_id: int
+    quantity_sent: int
+
+
 class InternalOrder(TimeStampedModel):
     history_entries: models.QuerySet["InternalOrderHistory"]
     order_items: models.QuerySet["InternalOrderLineItem"]
@@ -142,6 +147,7 @@ class InternalOrder(TimeStampedModel):
         responsible_user: UserModel,
         note: Optional[str],
         completed_order_items: Optional[List[CompletedOrderItemDetailsDict]] = None,
+        in_progress_order_items: Optional[List[InProgressOrderItemDetailsDict]] = None,
     ) -> "InternalOrderHistory":
         if self.latest_history_entry:
             if (
@@ -161,28 +167,99 @@ class InternalOrder(TimeStampedModel):
                 raise ValidationError("Completed orders must have completed items.")
 
             for item in self.order_items.all():
-                order_item_details_dict: Optional[CompletedOrderItemDetailsDict] = None
-                for item_dict in completed_order_items:
-                    if item_dict["item_id"] == item.pk:
-                        order_item_details_dict = item_dict
+                completed_order_item_details_dict: Optional[
+                    CompletedOrderItemDetailsDict
+                ] = None
+                for completed_item_dict in completed_order_items:
+                    if completed_item_dict["item_id"] == item.pk:
+                        completed_order_item_details_dict = completed_item_dict
                         break
 
-                if not order_item_details_dict:
+                if not completed_order_item_details_dict:
                     raise ValidationError(
                         f"Item {item.pk} not found in completed_order_items."
                     )
 
-                if order_item_details_dict["quantity_received"] < 0:
-                    raise ValidationError(
-                        f"Quantity received for item {item.pk} must be positive."
-                    )
-
-                if order_item_details_dict["quantity_received"] > item.quantity_ordered:
+                if (
+                    completed_order_item_details_dict["quantity_received"]
+                    > item.quantity_ordered
+                ):
                     raise ValidationError(
                         f"Quantity received for item {item.pk} must be less than or equal to quantity ordered."
                     )
 
-                item.quantity_received = order_item_details_dict["quantity_received"]
+                if completed_order_item_details_dict["quantity_received"] < 0:
+                    raise ValidationError(
+                        f"Quantity received for item {item.pk} must be positive."
+                    )
+
+                if (
+                    completed_order_item_details_dict["quantity_received"]
+                    > item.quantity_sent
+                ):
+                    raise ValidationError(
+                        f"Quantity received for item {item.pk} must be less than or equal to quantity sent."
+                    )
+
+                item.target_office_quantity_before_receive = (
+                    item.product.get_stock_for_office(office_id=self.target_office.pk) or 0
+                )
+                item.product.increase_stock_in_office(
+                    office_id=self.target_office.pk,
+                    quantity=completed_order_item_details_dict["quantity_received"],
+                )
+                item.target_office_quantity_after_receive = (
+                    item.product.get_stock_for_office(office_id=self.target_office.pk)
+                )
+
+                item.quantity_received = completed_order_item_details_dict[
+                    "quantity_received"
+                ]
+                item.save()
+
+        if status == InternalOrderHistoryStatusChoices.IN_PROGRESS:
+            if not in_progress_order_items:
+                raise ValidationError("In progress orders must have in progress items.")
+
+            for item in self.order_items.all():
+                internal_order_item_details_dict: Optional[
+                    InProgressOrderItemDetailsDict
+                ] = None
+                for in_progress_item_dict in in_progress_order_items:
+                    if in_progress_item_dict["item_id"] == item.pk:
+                        internal_order_item_details_dict = in_progress_item_dict
+                        break
+
+                if not internal_order_item_details_dict:
+                    raise ValidationError(
+                        f"Item {item.pk} not found in in_progress_order_items."
+                    )
+
+                if internal_order_item_details_dict["quantity_sent"] < 0:
+                    raise ValidationError(
+                        f"Quantity sent for item {item.pk} must be positive."
+                    )
+
+                if (
+                    internal_order_item_details_dict["quantity_sent"]
+                    > item.quantity_ordered
+                ):
+                    raise ValidationError(
+                        f"Quantity sent for item {item.pk} must be less than or equal to quantity ordered."
+                    )
+
+                item.source_office_quantity_before_send = (
+                    item.product.get_stock_for_office(office_id=self.source_office.pk) or 0
+                )
+                item.product.decrease_stock_in_office(
+                    office_id=self.source_office.pk,
+                    quantity=internal_order_item_details_dict["quantity_sent"],
+                )
+                item.source_office_quantity_after_send = (
+                    item.product.get_stock_for_office(office_id=self.source_office.pk)
+                )
+
+                item.quantity_sent = internal_order_item_details_dict["quantity_sent"]
                 item.save()
 
         history = InternalOrderHistory.objects.create(
@@ -207,6 +284,13 @@ class InternalOrderLineItem(TimeStampedModel):
 
     quantity_ordered = models.PositiveIntegerField(default=0)
     quantity_received = models.PositiveIntegerField(default=0)
+    quantity_sent = models.PositiveIntegerField(default=0)
+
+    source_office_quantity_before_send = models.PositiveIntegerField(default=0)
+    source_office_quantity_after_send = models.PositiveIntegerField(default=0)
+
+    target_office_quantity_before_receive = models.PositiveIntegerField(default=0)
+    target_office_quantity_after_receive = models.PositiveIntegerField(default=0)
 
     objects = models.Manager()
 

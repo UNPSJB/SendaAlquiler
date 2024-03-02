@@ -150,3 +150,9 @@ query productStocksInDateRange($productId: ID!, $startDate: Date!, $endDate: Dat
         quantity
     }
 }
+
+query productStockInOffice($productId: ID!, $officeId: ID!) {
+    productStockInOffice(productId: $productId, officeId: $officeId) {
+        quantity
+    }
+}

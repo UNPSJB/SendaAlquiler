@@ -28,6 +28,7 @@ import {
     ReceiveInternalOrderMutation,
     CancelInternalOrderDocument,
     CancelInternalOrderMutationVariables,
+    CancelInternalOrderMutation,
 } from '../graphql';
 
 export const useInternalOrderById = (id: string | undefined) => {
@@ -128,6 +129,11 @@ const updateInternalOrderStatus = (
         | NonNullable<
               NonNullable<
                   ReceiveInternalOrderMutation['receiveInternalOrder']
+              >['internalOrder']
+          >
+        | NonNullable<
+              NonNullable<
+                  CancelInternalOrderMutation['cancelInternalOrder']
               >['internalOrder']
           >,
 ) => {

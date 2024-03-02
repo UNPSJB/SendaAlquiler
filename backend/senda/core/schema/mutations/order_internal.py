@@ -11,6 +11,7 @@ from senda.core.models.order_internal import (
     InternalOrderDetailsDict,
     InternalOrderItemDetailsDict,
     CompletedOrderItemDetailsDict,
+    InProgressOrderItemDetailsDict
 )
 from senda.core.schema.custom_types import InternalOrderType
 from utils.graphene import non_null_list_of
@@ -115,13 +116,33 @@ class BaseChangeOrderInternalStatus(graphene.Mutation):
         raise NotImplementedError()
 
 
-class InProgressInternalOrder(BaseChangeOrderInternalStatus):
+class InProgressInternalOrderItemInput(graphene.InputObjectType):
+    id = graphene.ID(required=True)
+    quantity_sent = graphene.Int(required=True, min_value=0)
+
+
+class InProgressInternalOrder(graphene.Mutation):
+    internal_order = graphene.Field(InternalOrderType)
+    error = graphene.String()
+
+    class Arguments(BaseChangeOrderInternalStatus.Arguments):
+        items = non_null_list_of(InProgressInternalOrderItemInput)
+
+    @classmethod
+    def get_internal_order(cls, id: str):
+        internal_order = InternalOrder.objects.filter(id=id).first()
+        if internal_order is None:
+            raise Exception("No existe un pedido con ese ID")
+
+        return internal_order
+
     @classmethod
     def mutate(
         cls,
         self: "InProgressInternalOrder",
         info: CustomInfo,
         id: str,
+        items: List[InProgressInternalOrderItemInput],
         note: str = None,
     ):
         try:
@@ -130,7 +151,14 @@ class InProgressInternalOrder(BaseChangeOrderInternalStatus):
                 status=InternalOrderHistoryStatusChoices.IN_PROGRESS,
                 responsible_user=info.context.user,
                 note=note,
+                in_progress_order_items=[
+                    InProgressOrderItemDetailsDict(
+                        item_id=int(item.id), quantity_sent=item.quantity_sent
+                    )
+                    for item in items
+                ],
             )
+
             return BaseChangeOrderInternalStatus(internal_order=order)
         except Exception as e:
             return BaseChangeOrderInternalStatus(error=str(e))

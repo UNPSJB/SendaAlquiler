@@ -25,12 +25,15 @@ from senda.core.models.products import (
     ProductServiceDataDict,
     ProductServiceBillingTypeChoices,
     ProductService,
+    StockItem,
 )
 from senda.core.models.order_internal import (
     InternalOrder,
     InternalOrderDetailsDict,
     InternalOrderItemDetailsDict,
     InternalOrderHistoryStatusChoices,
+    InProgressOrderItemDetailsDict,
+    CompletedOrderItemDetailsDict,
 )
 from senda.core.models.order_supplier import (
     SupplierOrder,
@@ -405,9 +408,11 @@ def create_internal_orders():
 
         items_data = [
             InternalOrderItemDetailsDict(
-                product_id=product.pk, quantity_ordered=random.randint(1, 100)
+                product_id=stock_item.product.pk, quantity_ordered=random.randint(1, stock_item.quantity)
             )
-            for product in Product.objects.order_by("?")[0 : random.randint(1, 5)]
+            for stock_item in StockItem.objects.filter(
+                office=source_office, quantity__gt=0
+            ).order_by("?")[0 : random.randint(1, 5)]
         ]
 
         internal_order = InternalOrder.objects.create_internal_order(
@@ -420,6 +425,13 @@ def create_internal_orders():
                 InternalOrderHistoryStatusChoices.IN_PROGRESS,
                 responsible_user=EmployeeModel.objects.order_by("?").first().user,
                 note=fake.sentence(),
+                in_progress_order_items=[
+                    InProgressOrderItemDetailsDict(
+                        item_id=order_item.pk,
+                        quantity_sent=random.randint(0, order_item.quantity_ordered),
+                    )
+                    for order_item in internal_order.order_items.all()
+                ],
             )
             history.created_on = requested_for_date + timedelta(
                 days=random.randint(1, 30)
@@ -433,6 +445,15 @@ def create_internal_orders():
                     InternalOrderHistoryStatusChoices.COMPLETED,
                     responsible_user=EmployeeModel.objects.order_by("?").first().user,
                     note=fake.sentence(),
+                    completed_order_items=[
+                        CompletedOrderItemDetailsDict(
+                            item_id=order_item.pk,
+                            quantity_received=random.randint(
+                                0, order_item.quantity_sent
+                            ),
+                        )
+                        for order_item in internal_order.order_items.all()
+                    ],
                 )
                 completed_history.created_on = requested_for_date + timedelta(
                     days=random.randint(1, 30)

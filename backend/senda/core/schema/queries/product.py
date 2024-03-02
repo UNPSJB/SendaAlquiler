@@ -95,6 +95,14 @@ class Query(graphene.ObjectType):
         products = Product.objects.filter(id__in=result)
         return products
 
+    product_stock_in_office = graphene.Field(
+        StockItemType, product_id=graphene.ID(required=True), office_id=graphene.ID(required=True)
+    )
+
+    @employee_or_admin_required
+    def resolve_product_stock_in_office(self, info: CustomInfo, product_id: int, office_id: int):
+        return StockItem.objects.filter(product=product_id, office=office_id).first()
+
     product_exists = graphene.Field(
         graphene.NonNull(graphene.Boolean), sku=graphene.String(required=True)
     )
