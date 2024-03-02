@@ -93,6 +93,11 @@ class InternalOrderManager(models.Manager["InternalOrder"]):
             raise InternalOrderCreationError(f"Failed to create internal order: {e}")
 
 
+class CompletedOrderItemDetailsDict(TypedDict):
+    item_id: int
+    quantity_received: int
+
+
 class InternalOrder(TimeStampedModel):
     history_entries: models.QuerySet["InternalOrderHistory"]
     order_items: models.QuerySet["InternalOrderLineItem"]
@@ -132,7 +137,11 @@ class InternalOrder(TimeStampedModel):
         return str(self.pk)
 
     def set_status(
-        self, status: str, responsible_user: UserModel, note: Optional[str]
+        self,
+        status: str,
+        responsible_user: UserModel,
+        note: Optional[str],
+        completed_order_items: Optional[List[CompletedOrderItemDetailsDict]] = None,
     ) -> "InternalOrderHistory":
         if self.latest_history_entry:
             if (
@@ -146,6 +155,35 @@ class InternalOrder(TimeStampedModel):
 
             if status == InternalOrderHistoryStatusChoices.PENDING:
                 raise ValidationError("Cannot set status to PENDING.")
+
+        if status == InternalOrderHistoryStatusChoices.COMPLETED:
+            if not completed_order_items:
+                raise ValidationError("Completed orders must have completed items.")
+
+            for item in self.order_items.all():
+                order_item_details_dict: Optional[CompletedOrderItemDetailsDict] = None
+                for item_dict in completed_order_items:
+                    if item_dict["item_id"] == item.pk:
+                        order_item_details_dict = item_dict
+                        break
+
+                if not order_item_details_dict:
+                    raise ValidationError(
+                        f"Item {item.pk} not found in completed_order_items."
+                    )
+
+                if order_item_details_dict["quantity_received"] < 0:
+                    raise ValidationError(
+                        f"Quantity received for item {item.pk} must be positive."
+                    )
+
+                if order_item_details_dict["quantity_received"] > item.quantity_ordered:
+                    raise ValidationError(
+                        f"Quantity received for item {item.pk} must be less than or equal to quantity ordered."
+                    )
+
+                item.quantity_received = order_item_details_dict["quantity_received"]
+                item.save()
 
         history = InternalOrderHistory.objects.create(
             status=status,

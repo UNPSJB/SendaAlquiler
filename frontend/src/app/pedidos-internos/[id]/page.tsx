@@ -2,13 +2,16 @@
 
 import { useParams } from 'next/navigation';
 
-import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
+import { CellContext, ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { format } from 'date-fns';
+import { useEffect } from 'react';
+import { useForm, useFormContext } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
 import { InternalOrderByIdQuery, InternalOrderHistoryStatusChoices } from '@/api/graphql';
 import {
     useInternalOrderById,
+    useSetInternalOrderAsCanceled,
     useSetInternalOrderAsCompleted,
     useSetInternalOrderAsInProgress,
 } from '@/api/hooks';
@@ -18,26 +21,29 @@ import DashboardLayout, {
 } from '@/modules/dashboard/DashboardLayout';
 import ChevronRight from '@/modules/icons/ChevronRight';
 
-import { useOfficeContext } from '@/app/OfficeProvider';
-
 import { BaseTable } from '@/components/base-table';
 import ButtonWithSpinner from '@/components/ButtonWithSpinner';
+import { ComboboxSimple } from '@/components/combobox';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import Spinner from '@/components/Spinner/Spinner';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { cn, inputToNumber } from '@/lib/utils';
 
 const useHeader = (
     internalOrder: InternalOrderByIdQuery['internalOrderById'] | undefined,
 ) => {
-    const { office } = useOfficeContext();
-    const { mutate: markAsInProgress, isLoading: isMarkAsInProgressLoading } =
-        useSetInternalOrderAsInProgress();
-    const { mutate: markAsCompleted, isLoading: isMarkAsCompletedLoading } =
-        useSetInternalOrderAsCompleted();
-
     if (!internalOrder) {
         return <DashboardLayoutBigTitle>Pedidos Internos</DashboardLayoutBigTitle>;
     }
@@ -49,46 +55,6 @@ const useHeader = (
                 <ChevronRight />
                 <span className="font-headings text-sm">Pedido #{internalOrder.id}</span>
             </div>
-
-            {internalOrder.latestHistoryEntry?.status ===
-                InternalOrderHistoryStatusChoices.Pending &&
-                internalOrder.sourceOffice.id === office?.id && (
-                    <ButtonWithSpinner
-                        showSpinner={isMarkAsInProgressLoading}
-                        onClick={() => {
-                            markAsInProgress(internalOrder.id, {
-                                onSuccess: () => {
-                                    toast.success('Pedido en progreso');
-                                },
-                                onError: () => {
-                                    toast.error('Ha ocurrido un error');
-                                },
-                            });
-                        }}
-                    >
-                        Pasar pedido a en progreso
-                    </ButtonWithSpinner>
-                )}
-
-            {internalOrder.latestHistoryEntry?.status ===
-                InternalOrderHistoryStatusChoices.InProgress &&
-                internalOrder.targetOffice.id === office?.id && (
-                    <ButtonWithSpinner
-                        showSpinner={isMarkAsCompletedLoading}
-                        onClick={() => {
-                            markAsCompleted(internalOrder.id, {
-                                onSuccess: () => {
-                                    toast.success('Pedido completado');
-                                },
-                                onError: () => {
-                                    toast.error('Ha ocurrido un error');
-                                },
-                            });
-                        }}
-                    >
-                        Pasar pedido a completado
-                    </ButtonWithSpinner>
-                )}
         </div>
     );
 };
@@ -206,6 +172,70 @@ const VerticalProgressTracker = ({
     );
 };
 
+type QuantityReceivedColumnProps = {
+    cell: CellContext<Item, any>;
+};
+
+const QuantityReceivedColumn = ({ cell }: QuantityReceivedColumnProps) => {
+    const value = cell.getValue();
+    const formMethods = useFormContext<FormValues>();
+    const watchedStatus = formMethods.watch('status');
+    const max = cell.row.original.quantityOrdered;
+
+    return (
+        <div>
+            {watchedStatus?.value === InternalOrderHistoryStatusChoices.Completed ? (
+                <FormField
+                    name={`ordersById.${cell.row.original.id}.quantityReceived`}
+                    control={formMethods.control}
+                    rules={{
+                        required: 'Este campo es requerido',
+                        min: {
+                            value: 0,
+                            message: 'La cantidad recibida no puede ser menor a 0',
+                        },
+                        max: {
+                            value: max,
+                            message: `La cantidad recibida no puede ser mayor a ${max}`,
+                        },
+                    }}
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormControl>
+                                <Input
+                                    {...field}
+                                    onChange={(e) => {
+                                        field.onChange(
+                                            inputToNumber(e.target.value, {
+                                                min: 0,
+                                                max,
+                                            }),
+                                        );
+                                    }}
+                                    value={field.value ?? ''}
+                                />
+                            </FormControl>
+
+                            <div className="flex space-x-4">
+                                <FormMessage className="flex-1" />
+
+                                <button
+                                    className="ml-auto rounded-md border border-primary px-3 py-1.5 text-sm text-primary"
+                                    onClick={() => field.onChange(max)}
+                                >
+                                    Llenar
+                                </button>
+                            </div>
+                        </FormItem>
+                    )}
+                />
+            ) : (
+                value ?? '-'
+            )}
+        </div>
+    );
+};
+
 type Item = NonNullable<InternalOrderByIdQuery['internalOrderById']>['orderItems'][0];
 
 const columnHelper = createColumnHelper<Item>();
@@ -224,12 +254,18 @@ const productColumns: ColumnDef<Item, any>[] = [
                 </div>
             );
         },
+        size: 300,
     }),
     columnHelper.accessor('quantityOrdered', {
         header: 'Cantidad solicitada',
+        size: 300,
     }),
     columnHelper.accessor('quantityReceived', {
         header: 'Cantidad recibida',
+        cell: (cell) => {
+            return <QuantityReceivedColumn cell={cell} />;
+        },
+        size: 300,
     }),
 ];
 
@@ -281,13 +317,138 @@ const getTargetOfficeStateStatus = (
     return StageStatus.Upcoming;
 };
 
+type FormValues = Partial<{
+    status: {
+        value: InternalOrderHistoryStatusChoices;
+        label: string;
+    };
+    note: string;
+    ordersById: Record<string, { quantityReceived: number | null }>;
+    ordersIds: string[];
+}>;
+
 const Page = () => {
     const { id } = useParams();
     const useInternalOrderByIdResult = useInternalOrderById(id as string);
 
     const internalOrder = useInternalOrderByIdResult.data?.internalOrderById;
+    const statusToInProgressMutation = useSetInternalOrderAsInProgress();
+    const statusToCompletedMutation = useSetInternalOrderAsCompleted();
+    const statusToCanceledMutation = useSetInternalOrderAsCanceled();
 
     const header = useHeader(internalOrder);
+
+    const formMethods = useForm<FormValues>();
+    const { reset: formReset } = formMethods;
+
+    useEffect(() => {
+        if (!internalOrder) return;
+        const ordersIds = internalOrder.orderItems.map((orderItem) => orderItem.id);
+        const ordersById = internalOrder.orderItems.reduce(
+            (acc, orderItem) => ({
+                ...acc,
+                [orderItem.id]: {
+                    quantityReceived: null,
+                },
+            }),
+            {},
+        );
+
+        formReset({
+            ordersIds,
+            ordersById,
+        });
+    }, [internalOrder, formReset]);
+
+    const onSubmit = (data: FormValues) => {
+        if (!internalOrder) return;
+
+        if (data.status?.value === InternalOrderHistoryStatusChoices.InProgress) {
+            statusToInProgressMutation.mutate(
+                {
+                    id: internalOrder.id,
+                    note: data.note || null,
+                },
+                {
+                    onSuccess: (data) => {
+                        if (
+                            !data.inProgressInternalOrder ||
+                            data.inProgressInternalOrder?.error
+                        ) {
+                            toast.error(
+                                'Hubo un error al actualizar el estado del pedido',
+                            );
+                            return;
+                        }
+
+                        formReset();
+                    },
+                    onError: () => {
+                        toast.error('Hubo un error al actualizar el estado del pedido');
+                    },
+                },
+            );
+        }
+
+        if (data.status?.value === InternalOrderHistoryStatusChoices.Completed) {
+            statusToCompletedMutation.mutate(
+                {
+                    id: internalOrder.id,
+                    note: data.note || null,
+                    items: internalOrder.orderItems.map((orderItem) => ({
+                        id: orderItem.id,
+                        quantityReceived:
+                            data.ordersById![orderItem.id]!.quantityReceived!,
+                    })),
+                },
+                {
+                    onSuccess: (data) => {
+                        if (
+                            !data.receiveInternalOrder ||
+                            data.receiveInternalOrder?.error
+                        ) {
+                            toast.error(
+                                'Hubo un error al actualizar el estado del pedido',
+                            );
+                            return;
+                        }
+
+                        formReset();
+                    },
+                    onError: () => {
+                        toast.error('Hubo un error al actualizar el estado del pedido');
+                    },
+                },
+            );
+        }
+
+        if (data.status?.value === InternalOrderHistoryStatusChoices.Canceled) {
+            statusToCanceledMutation.mutate(
+                {
+                    id: internalOrder.id,
+                    note: data.note || null,
+                },
+                {
+                    onSuccess: (data) => {
+                        if (
+                            !data.cancelInternalOrder ||
+                            data.cancelInternalOrder?.error
+                        ) {
+                            toast.error(
+                                'Hubo un error al actualizar el estado del pedido',
+                            );
+                            return;
+                        }
+
+                        formReset();
+                    },
+                    onError: () => {
+                        toast.error('Hubo un error al actualizar el estado del pedido');
+                    },
+                },
+            );
+        }
+    };
 
     return (
         <DashboardLayout header={header}>
@@ -322,12 +483,10 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="flex flex-1 flex-col">
-                            <header className="border-b pl-8"></header>
-
-                            <div className="flex-1 bg-muted">
+                        <Form {...formMethods}>
+                            <div className="flex-1 bg-muted pb-8">
                                 <section className="pr-container grid grid-cols-12 gap-4 pl-8 pt-8">
-                                    <div className="col-span-8">
+                                    <div className="col-span-9">
                                         <div className="space-y-4 bg-white p-4">
                                             <div className="flex justify-between">
                                                 <div>
@@ -409,7 +568,121 @@ const Page = () => {
                                         </div>
                                     </div>
 
-                                    <div className="col-span-4 grid grid-cols-1 gap-4">
+                                    <div className="col-span-3 grid grid-cols-1 gap-4">
+                                        {internalOrder.latestHistoryEntry?.status !==
+                                            InternalOrderHistoryStatusChoices.Completed &&
+                                            internalOrder.latestHistoryEntry?.status !==
+                                                InternalOrderHistoryStatusChoices.Canceled && (
+                                                <div className="space-y-4 bg-white p-4">
+                                                    <h3 className="text-sm text-muted-foreground">
+                                                        Asignación de estado
+                                                    </h3>
+
+                                                    <FormField
+                                                        name="status"
+                                                        rules={{
+                                                            required:
+                                                                'Este campo es requerido',
+                                                        }}
+                                                        control={formMethods.control}
+                                                        render={({ field }) => (
+                                                            <FormItem className="flex flex-col space-y-2">
+                                                                <FormLabel required>
+                                                                    Nuevo estado
+                                                                </FormLabel>
+
+                                                                <ComboboxSimple
+                                                                    placeholder="Selecciona un estado"
+                                                                    options={
+                                                                        internalOrder
+                                                                            .latestHistoryEntry
+                                                                            ?.status ===
+                                                                        InternalOrderHistoryStatusChoices.Pending
+                                                                            ? [
+                                                                                  {
+                                                                                      value: InternalOrderHistoryStatusChoices.InProgress,
+                                                                                      label: 'En progreso',
+                                                                                  },
+                                                                                  {
+                                                                                      value: InternalOrderHistoryStatusChoices.Canceled,
+                                                                                      label: 'Cancelar',
+                                                                                  },
+                                                                                  {
+                                                                                      value: InternalOrderHistoryStatusChoices.Completed,
+                                                                                      label: 'Completar',
+                                                                                  },
+                                                                              ]
+                                                                            : internalOrder
+                                                                                    .latestHistoryEntry
+                                                                                    ?.status ===
+                                                                                InternalOrderHistoryStatusChoices.InProgress
+                                                                              ? [
+                                                                                    {
+                                                                                        value: InternalOrderHistoryStatusChoices.Completed,
+                                                                                        label: 'Completar',
+                                                                                    },
+                                                                                    {
+                                                                                        value: InternalOrderHistoryStatusChoices.Canceled,
+                                                                                        label: 'Cancelar',
+                                                                                    },
+                                                                                ]
+                                                                              : []
+                                                                    }
+                                                                    onChange={
+                                                                        field.onChange
+                                                                    }
+                                                                    value={
+                                                                        field.value ||
+                                                                        null
+                                                                    }
+                                                                />
+
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+
+                                                    <FormField
+                                                        name="note"
+                                                        control={formMethods.control}
+                                                        render={({ field }) => (
+                                                            <FormItem className="flex flex-col space-y-2">
+                                                                <FormLabel>
+                                                                    Nota
+                                                                </FormLabel>
+
+                                                                <FormControl>
+                                                                    <Textarea
+                                                                        {...field}
+                                                                        value={
+                                                                            field.value ||
+                                                                            ''
+                                                                        }
+                                                                    />
+                                                                </FormControl>
+
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+
+                                                    <ButtonWithSpinner
+                                                        className="w-full"
+                                                        showSpinner={
+                                                            statusToInProgressMutation.isLoading ||
+                                                            statusToCompletedMutation.isLoading ||
+                                                            statusToCanceledMutation.isLoading
+                                                        }
+                                                        type="submit"
+                                                        onClick={formMethods.handleSubmit(
+                                                            onSubmit,
+                                                        )}
+                                                    >
+                                                        Guardar
+                                                    </ButtonWithSpinner>
+                                                </div>
+                                            )}
+
                                         <div className="space-y-4 bg-white p-4">
                                             <h3 className="text-sm text-muted-foreground">
                                                 Origen y destino
@@ -512,7 +785,15 @@ const Page = () => {
                                                                 status: status,
                                                                 children: (
                                                                     <div>
-                                                                        <h3 className="text-sm text-muted-foreground">
+                                                                        <h3 className="mb-1 text-sm text-muted-foreground">
+                                                                            {format(
+                                                                                new Date(
+                                                                                    historyEntry.createdOn,
+                                                                                ),
+                                                                                'dd/MM/yyyy',
+                                                                            )}
+                                                                        </h3>
+                                                                        <p>
                                                                             {historyEntry.status ===
                                                                             InternalOrderHistoryStatusChoices.Completed
                                                                                 ? 'Completado'
@@ -523,15 +804,14 @@ const Page = () => {
                                                                                       InternalOrderHistoryStatusChoices.Canceled
                                                                                     ? 'Cancelado'
                                                                                     : 'Pendiente'}
-                                                                        </h3>
-                                                                        <p>
-                                                                            {format(
-                                                                                new Date(
-                                                                                    historyEntry.createdOn,
-                                                                                ),
-                                                                                'dd/MM/yyyy',
-                                                                            )}
                                                                         </p>
+                                                                        {historyEntry.note && (
+                                                                            <p className="text-sm text-muted-foreground">
+                                                                                {
+                                                                                    historyEntry.note
+                                                                                }
+                                                                            </p>
+                                                                        )}
                                                                     </div>
                                                                 ),
                                                             };
@@ -547,12 +827,12 @@ const Page = () => {
                                                                   children: (
                                                                       <div>
                                                                           <h3 className="text-sm text-muted-foreground">
-                                                                              Esperando
-                                                                              aprobación
-                                                                          </h3>
-                                                                          <p>
                                                                               Fecha por
                                                                               definir
+                                                                          </h3>
+                                                                          <p>
+                                                                              Esperando
+                                                                              aprobación
                                                                           </p>
                                                                       </div>
                                                                   ),
@@ -569,12 +849,12 @@ const Page = () => {
                                                                   children: (
                                                                       <div>
                                                                           <h3 className="text-sm text-muted-foreground">
-                                                                              Esperando
-                                                                              completar
-                                                                          </h3>
-                                                                          <p>
                                                                               Fecha por
                                                                               definir
+                                                                          </h3>
+                                                                          <p>
+                                                                              Esperando
+                                                                              completar
                                                                           </p>
                                                                       </div>
                                                                   ),
@@ -587,7 +867,7 @@ const Page = () => {
                                     </div>
                                 </section>
                             </div>
-                        </div>
+                        </Form>
                     );
                 }}
             </FetchedDataRenderer>

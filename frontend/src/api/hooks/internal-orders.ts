@@ -23,6 +23,11 @@ import {
     InternalOrderByIdQuery,
     ReceiveInternalOrderDocument,
     InProgressInternalOrderMutation,
+    ReceiveInternalOrderMutationVariables,
+    InProgressInternalOrderMutationVariables,
+    ReceiveInternalOrderMutation,
+    CancelInternalOrderDocument,
+    CancelInternalOrderMutationVariables,
 } from '../graphql';
 
 export const useInternalOrderById = (id: string | undefined) => {
@@ -114,11 +119,17 @@ export const useDeleteInternalOrder = ({
 const updateInternalOrderStatus = (
     client: ReturnType<typeof useQueryClient>,
     id: string,
-    responseOrder: NonNullable<
-        NonNullable<
-            InProgressInternalOrderMutation['inProgressInternalOrder']
-        >['internalOrder']
-    >,
+    responseOrder:
+        | NonNullable<
+              NonNullable<
+                  InProgressInternalOrderMutation['inProgressInternalOrder']
+              >['internalOrder']
+          >
+        | NonNullable<
+              NonNullable<
+                  ReceiveInternalOrderMutation['receiveInternalOrder']
+              >['internalOrder']
+          >,
 ) => {
     client.invalidateQueries(queryKeys.internalOrdersPaginatedList());
     client.setQueryData<InternalOrderByIdQuery>(
@@ -138,6 +149,12 @@ const updateInternalOrderStatus = (
                         status: responseOrder.latestHistoryEntry!.status,
                     },
                     historyEntries: responseOrder.historyEntries,
+                    orderItems:
+                        'orderItems' in responseOrder
+                            ? responseOrder.orderItems
+                            : 'orderItems' in prevOrder
+                              ? prevOrder.orderItems
+                              : [],
                 },
             };
 
@@ -150,10 +167,8 @@ export const useSetInternalOrderAsInProgress = () => {
     const client = useQueryClient();
 
     return useMutation({
-        mutationFn: (id: string) => {
-            return fetchClient(InProgressInternalOrderDocument, {
-                id,
-            });
+        mutationFn: (data: InProgressInternalOrderMutationVariables) => {
+            return fetchClient(InProgressInternalOrderDocument, data);
         },
         onSuccess: (data) => {
             if (data.inProgressInternalOrder?.internalOrder) {
@@ -174,10 +189,8 @@ export const useSetInternalOrderAsCompleted = () => {
     const client = useQueryClient();
 
     return useMutation({
-        mutationFn: (id: string) => {
-            return fetchClient(ReceiveInternalOrderDocument, {
-                id,
-            });
+        mutationFn: (data: ReceiveInternalOrderMutationVariables) => {
+            return fetchClient(ReceiveInternalOrderDocument, data);
         },
         onSuccess: (data) => {
             if (data.receiveInternalOrder?.internalOrder) {
@@ -185,6 +198,28 @@ export const useSetInternalOrderAsCompleted = () => {
                     client,
                     data.receiveInternalOrder.internalOrder.id,
                     data.receiveInternalOrder.internalOrder,
+                );
+            }
+        },
+        onError: () => {
+            toast.error('Hubo un error al actualizar el estado del pedido');
+        },
+    });
+};
+
+export const useSetInternalOrderAsCanceled = () => {
+    const client = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: CancelInternalOrderMutationVariables) => {
+            return fetchClient(CancelInternalOrderDocument, data);
+        },
+        onSuccess: (data) => {
+            if (data.cancelInternalOrder?.internalOrder) {
+                updateInternalOrderStatus(
+                    client,
+                    data.cancelInternalOrder.internalOrder.id,
+                    data.cancelInternalOrder.internalOrder,
                 );
             }
         },

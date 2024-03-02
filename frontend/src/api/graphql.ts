@@ -565,6 +565,7 @@ export type MutationCancelContractArgs = {
 
 export type MutationCancelInternalOrderArgs = {
     id: Scalars['ID']['input'];
+    note: InputMaybe<Scalars['String']['input']>;
 };
 
 export type MutationCancelOrderSupplierArgs = {
@@ -667,6 +668,7 @@ export type MutationFinishContractArgs = {
 
 export type MutationInProgressInternalOrderArgs = {
     id: Scalars['ID']['input'];
+    note: InputMaybe<Scalars['String']['input']>;
 };
 
 export type MutationLoginArgs = {
@@ -684,6 +686,8 @@ export type MutationPayTotalContractArgs = {
 
 export type MutationReceiveInternalOrderArgs = {
     id: Scalars['ID']['input'];
+    items: Array<ReceiveInternalOrderItemInput>;
+    note: InputMaybe<Scalars['String']['input']>;
 };
 
 export type MutationReceiveOrderSupplierArgs = {
@@ -1134,6 +1138,11 @@ export type ReceiveInternalOrder = {
     __typename?: 'ReceiveInternalOrder';
     error: Maybe<Scalars['String']['output']>;
     internalOrder: Maybe<InternalOrder>;
+};
+
+export type ReceiveInternalOrderItemInput = {
+    id: Scalars['ID']['input'];
+    quantityReceived: Scalars['Int']['input'];
 };
 
 export type ReceiveOrderSupplier = {
@@ -2089,6 +2098,7 @@ export type InternalOrderByIdQuery = {
             id: string;
             createdOn: any;
             status: InternalOrderHistoryStatusChoices;
+            note: string | null;
         }>;
         sourceOffice: {
             __typename?: 'Office';
@@ -2112,6 +2122,7 @@ export type InternalOrderByIdQuery = {
         } | null;
         orderItems: Array<{
             __typename?: 'InternalOrderItem';
+            id: string;
             quantityOrdered: number;
             quantityReceived: number;
             product: {
@@ -2328,6 +2339,7 @@ export type DeleteInternalOrderMutation = {
 
 export type InProgressInternalOrderMutationVariables = Exact<{
     id: Scalars['ID']['input'];
+    note: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type InProgressInternalOrderMutation = {
@@ -2347,6 +2359,7 @@ export type InProgressInternalOrderMutation = {
                 id: string;
                 createdOn: any;
                 status: InternalOrderHistoryStatusChoices;
+                note: string | null;
             }>;
         } | null;
     } | null;
@@ -2354,6 +2367,8 @@ export type InProgressInternalOrderMutation = {
 
 export type ReceiveInternalOrderMutationVariables = Exact<{
     id: Scalars['ID']['input'];
+    note: InputMaybe<Scalars['String']['input']>;
+    items: Array<ReceiveInternalOrderItemInput> | ReceiveInternalOrderItemInput;
 }>;
 
 export type ReceiveInternalOrderMutation = {
@@ -2373,6 +2388,49 @@ export type ReceiveInternalOrderMutation = {
                 id: string;
                 createdOn: any;
                 status: InternalOrderHistoryStatusChoices;
+                note: string | null;
+            }>;
+            orderItems: Array<{
+                __typename?: 'InternalOrderItem';
+                id: string;
+                quantityOrdered: number;
+                quantityReceived: number;
+                product: {
+                    __typename?: 'Product';
+                    id: string;
+                    name: string;
+                    price: number | null;
+                    type: ProductTypeChoices;
+                    brand: { __typename?: 'Brand'; name: string } | null;
+                };
+            }>;
+        } | null;
+    } | null;
+};
+
+export type CancelInternalOrderMutationVariables = Exact<{
+    id: Scalars['ID']['input'];
+    note: InputMaybe<Scalars['String']['input']>;
+}>;
+
+export type CancelInternalOrderMutation = {
+    __typename?: 'Mutation';
+    cancelInternalOrder: {
+        __typename?: 'CancelInternalOrder';
+        error: string | null;
+        internalOrder: {
+            __typename?: 'InternalOrder';
+            id: string;
+            latestHistoryEntry: {
+                __typename?: 'InternalOrderHistory';
+                status: InternalOrderHistoryStatusChoices;
+            } | null;
+            historyEntries: Array<{
+                __typename?: 'InternalOrderHistory';
+                id: string;
+                createdOn: any;
+                status: InternalOrderHistoryStatusChoices;
+                note: string | null;
             }>;
         } | null;
     } | null;
@@ -6427,6 +6485,10 @@ export const InternalOrderByIdDocument = {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'status' },
                                             },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'note' },
+                                            },
                                         ],
                                     },
                                 },
@@ -6551,6 +6613,10 @@ export const InternalOrderByIdDocument = {
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
                                             {
                                                 kind: 'Field',
                                                 name: {
@@ -7629,6 +7695,11 @@ export const InProgressInternalOrderDocument = {
                         type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
                     },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'note' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -7643,6 +7714,14 @@ export const InProgressInternalOrderDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'note' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'note' },
                                 },
                             },
                         ],
@@ -7706,6 +7785,13 @@ export const InProgressInternalOrderDocument = {
                                                             name: {
                                                                 kind: 'Name',
                                                                 value: 'status',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'note',
                                                             },
                                                         },
                                                     ],
@@ -7742,6 +7828,34 @@ export const ReceiveInternalOrderDocument = {
                         type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
                     },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'note' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'items' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'ReceiveInternalOrderItemInput',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -7756,6 +7870,22 @@ export const ReceiveInternalOrderDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'note' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'note' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'items' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'items' },
                                 },
                             },
                         ],
@@ -7821,6 +7951,112 @@ export const ReceiveInternalOrderDocument = {
                                                                 value: 'status',
                                                             },
                                                         },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'note',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'orderItems',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'product',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'brand',
+                                                                        },
+                                                                        selectionSet: {
+                                                                            kind: 'SelectionSet',
+                                                                            selections: [
+                                                                                {
+                                                                                    kind: 'Field',
+                                                                                    name: {
+                                                                                        kind: 'Name',
+                                                                                        value: 'name',
+                                                                                    },
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'price',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'type',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'quantityOrdered',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'quantityReceived',
+                                                            },
+                                                        },
                                                     ],
                                                 },
                                             },
@@ -7838,6 +8074,139 @@ export const ReceiveInternalOrderDocument = {
 } as unknown as DocumentNode<
     ReceiveInternalOrderMutation,
     ReceiveInternalOrderMutationVariables
+>;
+export const CancelInternalOrderDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'cancelInternalOrder' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'note' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'cancelInternalOrder' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'note' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'note' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'internalOrder' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'latestHistoryEntry',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'historyEntries',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'createdOn',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'note',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    CancelInternalOrderMutation,
+    CancelInternalOrderMutationVariables
 >;
 export const ReceiveOrderSupplierDocument = {
     kind: 'Document',

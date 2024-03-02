@@ -29,6 +29,7 @@ query internalOrderById($id: ID!) {
             id
             createdOn
             status
+            note
         }
         sourceOffice {
             id
@@ -54,6 +55,7 @@ query internalOrderById($id: ID!) {
             status
         }
         orderItems {
+            id
             quantityOrdered
             quantityReceived
             product {
@@ -226,8 +228,8 @@ mutation deleteInternalOrder($id: ID!) {
     }
 }
 
-mutation InProgressInternalOrder($id: ID!) {
-    inProgressInternalOrder(id: $id) {
+mutation InProgressInternalOrder($id: ID!, $note: String) {
+    inProgressInternalOrder(id: $id, note: $note) {
         internalOrder {
             id
             latestHistoryEntry {
@@ -237,14 +239,19 @@ mutation InProgressInternalOrder($id: ID!) {
                 id
                 createdOn
                 status
+                note
             }
         }
         error
     }
 }
 
-mutation receiveInternalOrder($id: ID!) {
-    receiveInternalOrder(id: $id) {
+mutation receiveInternalOrder(
+    $id: ID!
+    $note: String
+    $items: [ReceiveInternalOrderItemInput!]!
+) {
+    receiveInternalOrder(id: $id, note: $note, items: $items) {
         internalOrder {
             id
             latestHistoryEntry {
@@ -254,6 +261,40 @@ mutation receiveInternalOrder($id: ID!) {
                 id
                 createdOn
                 status
+                note
+            }
+            orderItems {
+                id
+                product {
+                    id
+                    name
+                    brand {
+                        name
+                    }
+                    name
+                    price
+                    type
+                }
+                quantityOrdered
+                quantityReceived
+            }
+        }
+        error
+    }
+}
+
+mutation cancelInternalOrder($id: ID!, $note: String) {
+    cancelInternalOrder(id: $id, note: $note) {
+        internalOrder {
+            id
+            latestHistoryEntry {
+                status
+            }
+            historyEntries {
+                id
+                createdOn
+                status
+                note
             }
         }
         error

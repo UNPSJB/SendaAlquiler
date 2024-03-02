@@ -7,10 +7,10 @@ from typing import Optional
 from senda.core.models.offices import Office
 from senda.core.models.order_internal import (
     InternalOrder,
-    InternalOrderHistory,
     InternalOrderHistoryStatusChoices,
     InternalOrderDetailsDict,
     InternalOrderItemDetailsDict,
+    CompletedOrderItemDetailsDict,
 )
 from senda.core.schema.custom_types import InternalOrderType
 from utils.graphene import non_null_list_of
@@ -94,6 +94,7 @@ class BaseChangeOrderInternalStatus(graphene.Mutation):
 
     class Arguments:
         id = graphene.ID(required=True)
+        note = graphene.String()
 
     @classmethod
     def get_internal_order(cls, id: str):
@@ -104,34 +105,78 @@ class BaseChangeOrderInternalStatus(graphene.Mutation):
         return internal_order
 
     @classmethod
-    def mutate(cls, self: "BaseChangeOrderInternalStatus", info: CustomInfo, id: str):
+    def mutate(
+        cls,
+        self: "BaseChangeOrderInternalStatus",
+        info: CustomInfo,
+        id: str,
+        note: str = None,
+    ):
         raise NotImplementedError()
 
 
 class InProgressInternalOrder(BaseChangeOrderInternalStatus):
     @classmethod
-    def mutate(cls, self: "InProgressInternalOrder", info: CustomInfo, id: str):
+    def mutate(
+        cls,
+        self: "InProgressInternalOrder",
+        info: CustomInfo,
+        id: str,
+        note: str = None,
+    ):
         try:
             order = cls.get_internal_order(id)
             order.set_status(
                 status=InternalOrderHistoryStatusChoices.IN_PROGRESS,
                 responsible_user=info.context.user,
-                note=None,
+                note=note,
             )
             return BaseChangeOrderInternalStatus(internal_order=order)
         except Exception as e:
             return BaseChangeOrderInternalStatus(error=str(e))
 
 
-class ReceiveInternalOrder(BaseChangeOrderInternalStatus):
+class ReceiveInternalOrderItemInput(graphene.InputObjectType):
+    id = graphene.ID(required=True)
+    quantity_received = graphene.Int(required=True, min_value=0)
+
+
+class ReceiveInternalOrder(graphene.Mutation):
+    internal_order = graphene.Field(InternalOrderType)
+    error = graphene.String()
+
+    class Arguments(BaseChangeOrderInternalStatus.Arguments):
+        items = non_null_list_of(ReceiveInternalOrderItemInput)
+
     @classmethod
-    def mutate(cls, self: "ReceiveInternalOrder", info: CustomInfo, id: str):
+    def get_internal_order(cls, id: str):
+        internal_order = InternalOrder.objects.filter(id=id).first()
+        if internal_order is None:
+            raise Exception("No existe un pedido con ese ID")
+
+        return internal_order
+
+    @classmethod
+    def mutate(
+        cls,
+        self: "ReceiveInternalOrder",
+        info: CustomInfo,
+        id: str,
+        items: List[ReceiveInternalOrderItemInput],
+        note: str = None,
+    ):
         try:
             order = cls.get_internal_order(id)
             order.set_status(
                 status=InternalOrderHistoryStatusChoices.COMPLETED,
                 responsible_user=info.context.user,
-                note=None,
+                note=note,
+                completed_order_items=[
+                    CompletedOrderItemDetailsDict(
+                        item_id=int(item.id), quantity_received=item.quantity_received
+                    )
+                    for item in items
+                ],
             )
 
             return BaseChangeOrderInternalStatus(internal_order=order)
@@ -141,13 +186,15 @@ class ReceiveInternalOrder(BaseChangeOrderInternalStatus):
 
 class CancelInternalOrder(BaseChangeOrderInternalStatus):
     @classmethod
-    def mutate(cls, self: "CancelInternalOrder", info: CustomInfo, id: str):
+    def mutate(
+        cls, self: "CancelInternalOrder", info: CustomInfo, id: str, note: str = None
+    ):
         try:
             order = cls.get_internal_order(id)
             order.set_status(
                 status=InternalOrderHistoryStatusChoices.CANCELED,
                 responsible_user=info.context.user,
-                note=None,
+                note=note,
             )
 
             return BaseChangeOrderInternalStatus(internal_order=order)
@@ -162,7 +209,7 @@ class DeleteInternalOrder(graphene.Mutation):
         id = graphene.ID(required=True)
 
     @employee_or_admin_required
-    def mutate(self, info: CustomInfo, id: str):
+    def mutate(self, info: CustomInfo, id: str, note: str = None):
         try:
             order = InternalOrder.objects.get(id=id)
             order.delete()
