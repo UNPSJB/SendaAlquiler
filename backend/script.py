@@ -30,6 +30,7 @@ from senda.core.models.order_internal import (
     InternalOrder,
     InternalOrderDetailsDict,
     InternalOrderItemDetailsDict,
+    InternalOrderHistoryStatusChoices,
 )
 from senda.core.models.order_supplier import (
     SupplierOrder,
@@ -375,6 +376,14 @@ def create_alquilable_products():
         create_product_with_details(name, ProductTypeChoices.ALQUILABLE, services)
 
 
+""" class InternalOrderHistoryStatusChoices(models.TextChoices):
+    PENDING = "PENDING", "Pendiente"
+    IN_PROGRESS = "IN_PROGRESS", "En progreso"
+    COMPLETED = "COMPLETED", "Completado"
+    CANCELED = "CANCELED", "Cancelado"
+ """
+
+
 def create_internal_orders():
     for i in range(random.randint(50, 80)):
         source_office = Office.objects.order_by("?").first()
@@ -401,7 +410,45 @@ def create_internal_orders():
             for product in Product.objects.order_by("?")[0 : random.randint(1, 5)]
         ]
 
-        InternalOrder.objects.create_internal_order(order_data, items_data)
+        internal_order = InternalOrder.objects.create_internal_order(
+            order_data, items_data
+        )
+
+        is_accepted = random.choice([True, False, None])
+        if is_accepted:
+            history = internal_order.set_status(
+                InternalOrderHistoryStatusChoices.IN_PROGRESS,
+                responsible_user=EmployeeModel.objects.order_by("?").first().user,
+                note=fake.sentence(),
+            )
+            history.created_on = requested_for_date + timedelta(
+                days=random.randint(1, 30)
+            )
+            history.save()
+
+            is_completed = random.choice([True, False])
+
+            if is_completed:
+                completed_history = internal_order.set_status(
+                    InternalOrderHistoryStatusChoices.COMPLETED,
+                    responsible_user=EmployeeModel.objects.order_by("?").first().user,
+                    note=fake.sentence(),
+                )
+                completed_history.created_on = requested_for_date + timedelta(
+                    days=random.randint(1, 30)
+                )
+                completed_history.save()
+        elif is_accepted is False:
+            history = internal_order.set_status(
+                InternalOrderHistoryStatusChoices.CANCELED,
+                responsible_user=EmployeeModel.objects.order_by("?").first().user,
+                note=fake.sentence(),
+            )
+
+            history.created_on = requested_for_date + timedelta(
+                days=random.randint(1, 30)
+            )
+            history.save()
 
 
 def create_supplier_orders():

@@ -2083,6 +2083,12 @@ export type InternalOrderByIdQuery = {
         __typename?: 'InternalOrder';
         id: string;
         createdOn: any;
+        historyEntries: Array<{
+            __typename?: 'InternalOrderHistory';
+            id: string;
+            createdOn: any;
+            status: InternalOrderHistoryStatusChoices;
+        }>;
         sourceOffice: {
             __typename?: 'Office';
             id: string;
@@ -2328,7 +2334,20 @@ export type InProgressInternalOrderMutation = {
     inProgressInternalOrder: {
         __typename?: 'InProgressInternalOrder';
         error: string | null;
-        internalOrder: { __typename?: 'InternalOrder'; id: string } | null;
+        internalOrder: {
+            __typename?: 'InternalOrder';
+            id: string;
+            latestHistoryEntry: {
+                __typename?: 'InternalOrderHistory';
+                status: InternalOrderHistoryStatusChoices;
+            } | null;
+            historyEntries: Array<{
+                __typename?: 'InternalOrderHistory';
+                id: string;
+                createdOn: any;
+                status: InternalOrderHistoryStatusChoices;
+            }>;
+        } | null;
     } | null;
 };
 
@@ -2341,7 +2360,20 @@ export type ReceiveInternalOrderMutation = {
     receiveInternalOrder: {
         __typename?: 'ReceiveInternalOrder';
         error: string | null;
-        internalOrder: { __typename?: 'InternalOrder'; id: string } | null;
+        internalOrder: {
+            __typename?: 'InternalOrder';
+            id: string;
+            latestHistoryEntry: {
+                __typename?: 'InternalOrderHistory';
+                status: InternalOrderHistoryStatusChoices;
+            } | null;
+            historyEntries: Array<{
+                __typename?: 'InternalOrderHistory';
+                id: string;
+                createdOn: any;
+                status: InternalOrderHistoryStatusChoices;
+            }>;
+        } | null;
     } | null;
 };
 
@@ -6366,6 +6398,30 @@ export const InternalOrderByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
+                                    name: { kind: 'Name', value: 'historyEntries' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'createdOn',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
                                     name: { kind: 'Name', value: 'sourceOffice' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
@@ -7593,6 +7649,58 @@ export const InProgressInternalOrderDocument = {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'id' },
                                             },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'latestHistoryEntry',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'historyEntries',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'createdOn',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
                                         ],
                                     },
                                 },
@@ -7653,6 +7761,58 @@ export const ReceiveInternalOrderDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'latestHistoryEntry',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'historyEntries',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'createdOn',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
                                             },
                                         ],
                                     },

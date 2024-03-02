@@ -303,7 +303,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
 
             <main className="flex flex-1 flex-col pt-20 lg:h-screen lg:pt-0">
                 {header && (
-                    <header className="lg:pr-container flex h-[75px] items-center border-b border-gray-300 py-4 lg:px-8">
+                    <header className="lg:pr-container flex h-[75px] items-center border-b border-border py-4 lg:px-8">
                         <div className="container w-full lg:mx-0 lg:max-w-full lg:px-0">
                             {header}
                         </div>

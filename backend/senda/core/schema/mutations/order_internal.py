@@ -104,36 +104,20 @@ class BaseChangeOrderInternalStatus(graphene.Mutation):
         return internal_order
 
     @classmethod
-    def check_internal_order_status_is_one_of_and_update_status(
-        cls,
-        order: InternalOrder,
-        status: List[InternalOrderHistoryStatusChoices],
-        new_status: InternalOrderHistoryStatusChoices,
-    ):
-        if (
-            not order.latest_history_entry
-            or order.latest_history_entry.status not in status
-        ):
-            raise Exception("La orden no esta en un estado valido")
-
-        InternalOrderHistory.objects.create(internal_order=order, status=new_status)
-
-    @classmethod
-    def mutate(cls, self: "BaseChangeOrderInternalStatus", info: Any, id: str):
+    def mutate(cls, self: "BaseChangeOrderInternalStatus", info: CustomInfo, id: str):
         raise NotImplementedError()
 
 
 class InProgressInternalOrder(BaseChangeOrderInternalStatus):
     @classmethod
-    def mutate(cls, self: "InProgressInternalOrder", info: Any, id: str):
+    def mutate(cls, self: "InProgressInternalOrder", info: CustomInfo, id: str):
         try:
             order = cls.get_internal_order(id)
-            cls.check_internal_order_status_is_one_of_and_update_status(
-                order,
-                [InternalOrderHistoryStatusChoices.PENDING],
-                InternalOrderHistoryStatusChoices.IN_PROGRESS,
+            order.set_status(
+                status=InternalOrderHistoryStatusChoices.IN_PROGRESS,
+                responsible_user=info.context.user,
+                note=None,
             )
-
             return BaseChangeOrderInternalStatus(internal_order=order)
         except Exception as e:
             return BaseChangeOrderInternalStatus(error=str(e))
@@ -141,13 +125,13 @@ class InProgressInternalOrder(BaseChangeOrderInternalStatus):
 
 class ReceiveInternalOrder(BaseChangeOrderInternalStatus):
     @classmethod
-    def mutate(cls, self: "ReceiveInternalOrder", info: Any, id: str):
+    def mutate(cls, self: "ReceiveInternalOrder", info: CustomInfo, id: str):
         try:
             order = cls.get_internal_order(id)
-            cls.check_internal_order_status_is_one_of_and_update_status(
-                order,
-                [InternalOrderHistoryStatusChoices.IN_PROGRESS],
-                InternalOrderHistoryStatusChoices.COMPLETED,
+            order.set_status(
+                status=InternalOrderHistoryStatusChoices.COMPLETED,
+                responsible_user=info.context.user,
+                note=None,
             )
 
             return BaseChangeOrderInternalStatus(internal_order=order)
@@ -157,13 +141,13 @@ class ReceiveInternalOrder(BaseChangeOrderInternalStatus):
 
 class CancelInternalOrder(BaseChangeOrderInternalStatus):
     @classmethod
-    def mutate(cls, self: "CancelInternalOrder", info: Any, id: str):
+    def mutate(cls, self: "CancelInternalOrder", info: CustomInfo, id: str):
         try:
             order = cls.get_internal_order(id)
-            cls.check_internal_order_status_is_one_of_and_update_status(
-                order,
-                [InternalOrderHistoryStatusChoices.PENDING],
-                InternalOrderHistoryStatusChoices.CANCELED,
+            order.set_status(
+                status=InternalOrderHistoryStatusChoices.CANCELED,
+                responsible_user=info.context.user,
+                note=None,
             )
 
             return BaseChangeOrderInternalStatus(internal_order=order)

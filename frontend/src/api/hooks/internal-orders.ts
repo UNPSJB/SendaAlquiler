@@ -21,8 +21,8 @@ import {
     InternalOrderByIdDocument,
     InProgressInternalOrderDocument,
     InternalOrderByIdQuery,
-    InternalOrderHistoryStatusChoices,
     ReceiveInternalOrderDocument,
+    InProgressInternalOrderMutation,
 } from '../graphql';
 
 export const useInternalOrderById = (id: string | undefined) => {
@@ -114,7 +114,11 @@ export const useDeleteInternalOrder = ({
 const updateInternalOrderStatus = (
     client: ReturnType<typeof useQueryClient>,
     id: string,
-    status: InternalOrderHistoryStatusChoices,
+    responseOrder: NonNullable<
+        NonNullable<
+            InProgressInternalOrderMutation['inProgressInternalOrder']
+        >['internalOrder']
+    >,
 ) => {
     client.invalidateQueries(queryKeys.internalOrdersPaginatedList());
     client.setQueryData<InternalOrderByIdQuery>(
@@ -131,9 +135,9 @@ const updateInternalOrderStatus = (
                 internalOrderById: {
                     ...prevOrder,
                     latestHistoryEntry: {
-                        ...prevOrder.latestHistoryEntry,
-                        status,
+                        status: responseOrder.latestHistoryEntry!.status,
                     },
+                    historyEntries: responseOrder.historyEntries,
                 },
             };
 
@@ -152,13 +156,11 @@ export const useSetInternalOrderAsInProgress = () => {
             });
         },
         onSuccess: (data) => {
-            const id = data.inProgressInternalOrder?.internalOrder?.id;
-
-            if (id) {
+            if (data.inProgressInternalOrder?.internalOrder) {
                 updateInternalOrderStatus(
                     client,
-                    id,
-                    InternalOrderHistoryStatusChoices.InProgress,
+                    data.inProgressInternalOrder.internalOrder.id,
+                    data.inProgressInternalOrder.internalOrder,
                 );
             }
         },
@@ -178,13 +180,11 @@ export const useSetInternalOrderAsCompleted = () => {
             });
         },
         onSuccess: (data) => {
-            const id = data.receiveInternalOrder?.internalOrder?.id;
-
-            if (id) {
+            if (data.receiveInternalOrder?.internalOrder) {
                 updateInternalOrderStatus(
                     client,
-                    id,
-                    InternalOrderHistoryStatusChoices.Completed,
+                    data.receiveInternalOrder.internalOrder.id,
+                    data.receiveInternalOrder.internalOrder,
                 );
             }
         },

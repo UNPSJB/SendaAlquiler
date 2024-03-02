@@ -13,6 +13,7 @@ query internalOrders($page: Int) {
                 name
             }
             createdOn
+
             latestHistoryEntry {
                 status
             }
@@ -24,6 +25,11 @@ query internalOrderById($id: ID!) {
     internalOrderById(id: $id) {
         id
         createdOn
+        historyEntries {
+            id
+            createdOn
+            status
+        }
         sourceOffice {
             id
             houseNumber
@@ -224,6 +230,14 @@ mutation InProgressInternalOrder($id: ID!) {
     inProgressInternalOrder(id: $id) {
         internalOrder {
             id
+            latestHistoryEntry {
+                status
+            }
+            historyEntries {
+                id
+                createdOn
+                status
+            }
         }
         error
     }
@@ -233,6 +247,14 @@ mutation receiveInternalOrder($id: ID!) {
     receiveInternalOrder(id: $id) {
         internalOrder {
             id
+            latestHistoryEntry {
+                status
+            }
+            historyEntries {
+                id
+                createdOn
+                status
+            }
         }
         error
     }
