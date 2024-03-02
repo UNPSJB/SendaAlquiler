@@ -233,6 +233,54 @@ const productColumns: ColumnDef<Item, any>[] = [
     }),
 ];
 
+const getSourceOfficeStateStatus = (
+    latestHistoryEntry: NonNullable<
+        InternalOrderByIdQuery['internalOrderById']
+    >['latestHistoryEntry'],
+) => {
+    if (latestHistoryEntry?.status === InternalOrderHistoryStatusChoices.Canceled) {
+        return StageStatus.Upcoming;
+    }
+
+    if (latestHistoryEntry?.status === InternalOrderHistoryStatusChoices.Pending) {
+        return StageStatus.Upcoming;
+    }
+
+    if (latestHistoryEntry?.status === InternalOrderHistoryStatusChoices.InProgress) {
+        return StageStatus.InProgress;
+    }
+
+    if (latestHistoryEntry?.status === InternalOrderHistoryStatusChoices.Completed) {
+        return StageStatus.Completed;
+    }
+
+    return StageStatus.Upcoming;
+};
+
+const getTargetOfficeStateStatus = (
+    latestHistoryEntry: NonNullable<
+        InternalOrderByIdQuery['internalOrderById']
+    >['latestHistoryEntry'],
+) => {
+    if (latestHistoryEntry?.status === InternalOrderHistoryStatusChoices.Pending) {
+        return StageStatus.Upcoming;
+    }
+
+    if (latestHistoryEntry?.status === InternalOrderHistoryStatusChoices.InProgress) {
+        return StageStatus.Upcoming;
+    }
+
+    if (latestHistoryEntry?.status === InternalOrderHistoryStatusChoices.Completed) {
+        return StageStatus.Completed;
+    }
+
+    if (latestHistoryEntry?.status === InternalOrderHistoryStatusChoices.Canceled) {
+        return StageStatus.Upcoming;
+    }
+
+    return StageStatus.Upcoming;
+};
+
 const Page = () => {
     const { id } = useParams();
     const useInternalOrderByIdResult = useInternalOrderById(id as string);
@@ -356,7 +404,9 @@ const Page = () => {
                                                 stages={[
                                                     {
                                                         id: 'source',
-                                                        status: StageStatus.Completed,
+                                                        status: getSourceOfficeStateStatus(
+                                                            internalOrder.latestHistoryEntry,
+                                                        ),
                                                         children: (
                                                             <div>
                                                                 <h3 className="text-sm text-muted-foreground">
@@ -374,23 +424,9 @@ const Page = () => {
                                                     },
                                                     {
                                                         id: 'target',
-                                                        status:
-                                                            internalOrder
-                                                                .latestHistoryEntry
-                                                                ?.status ===
-                                                            InternalOrderHistoryStatusChoices.Pending
-                                                                ? StageStatus.Upcoming
-                                                                : internalOrder
-                                                                        .latestHistoryEntry
-                                                                        ?.status ===
-                                                                    InternalOrderHistoryStatusChoices.InProgress
-                                                                  ? StageStatus.InProgress
-                                                                  : internalOrder
-                                                                          .latestHistoryEntry
-                                                                          ?.status ===
-                                                                      InternalOrderHistoryStatusChoices.Completed
-                                                                    ? StageStatus.Completed
-                                                                    : StageStatus.Upcoming,
+                                                        status: getTargetOfficeStateStatus(
+                                                            internalOrder.latestHistoryEntry,
+                                                        ),
                                                         children: (
                                                             <div>
                                                                 <h3 className="text-sm text-muted-foreground">
