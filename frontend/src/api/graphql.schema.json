@@ -8775,6 +8775,18 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "numberOfPendingOutgoingInternalOrders",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Int",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "officeById",
                         "description": null,
                         "args": [

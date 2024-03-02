@@ -987,6 +987,7 @@ export type Query = {
     internalOrdersCsv: Scalars['String']['output'];
     localities: PaginatedLocalityQueryResult;
     localitiesCsv: Scalars['String']['output'];
+    numberOfPendingOutgoingInternalOrders: Maybe<Scalars['Int']['output']>;
     officeById: Maybe<Office>;
     offices: Array<Office>;
     officesCsv: Scalars['String']['output'];
@@ -2388,6 +2389,15 @@ export type ReceiveOrderSupplierMutation = {
         orderSupplier: string;
         error: string | null;
     } | null;
+};
+
+export type NumberOfPendingOutgoingInternalOrdersQueryVariables = Exact<{
+    [key: string]: never;
+}>;
+
+export type NumberOfPendingOutgoingInternalOrdersQuery = {
+    __typename?: 'Query';
+    numberOfPendingOutgoingInternalOrders: number | null;
 };
 
 export type ProductListItemFragment = {
@@ -7883,6 +7893,31 @@ export const ReceiveOrderSupplierDocument = {
 } as unknown as DocumentNode<
     ReceiveOrderSupplierMutation,
     ReceiveOrderSupplierMutationVariables
+>;
+export const NumberOfPendingOutgoingInternalOrdersDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'numberOfPendingOutgoingInternalOrders' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: {
+                            kind: 'Name',
+                            value: 'numberOfPendingOutgoingInternalOrders',
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    NumberOfPendingOutgoingInternalOrdersQuery,
+    NumberOfPendingOutgoingInternalOrdersQueryVariables
 >;
 export const ProductsDocument = {
     kind: 'Document',

@@ -2,7 +2,10 @@ from typing import Any
 
 import graphene
 
-from senda.core.models.order_internal import InternalOrder
+from senda.core.models.order_internal import (
+    InternalOrder,
+    InternalOrderHistoryStatusChoices,
+)
 from senda.core.schema.custom_types import (
     PaginatedInternalOrderQueryResult,
     InternalOrderType,
@@ -38,6 +41,15 @@ class Query(graphene.ObjectType):
             results=selected_page.object_list,
             num_pages=paginator.num_pages,
         )
+
+    number_of_pending_outgoing_internal_orders = graphene.Int()
+
+    @employee_or_admin_required
+    def resolve_number_of_pending_outgoing_internal_orders(self, info: CustomInfo):
+        return InternalOrder.objects.filter(
+            source_office=info.context.office_id,
+            latest_history_entry__status=InternalOrderHistoryStatusChoices.PENDING,
+        ).count()
 
     internal_order_by_id = graphene.Field(
         InternalOrderType, id=graphene.ID(required=True)

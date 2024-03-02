@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { DropdownMenuGroup } from '@radix-ui/react-dropdown-menu';
+import { useQuery } from '@tanstack/react-query';
 import {
     ChevronsUpDownIcon,
     ClipboardListIcon,
@@ -22,6 +23,9 @@ import {
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { PropsWithChildren } from 'react';
+
+import fetchClient from '@/api/fetch-client';
+import { NumberOfPendingOutgoingInternalOrdersDocument } from '@/api/graphql';
 
 import { useOfficeContext } from '@/app/OfficeProvider';
 import { useUserContext } from '@/app/UserProvider';
@@ -50,7 +54,8 @@ type NavLink = {
     Icon: LucideIcon;
     innerLinks?: {
         href: string;
-        label: string;
+        title: string;
+        label?: string;
     }[];
     userCanAccess?: (user: CurrentUser) => boolean;
 };
@@ -80,11 +85,11 @@ const MAIN_LINKS: NavLink[] = [
         innerLinks: [
             {
                 href: '/pedidos-internos/entrantes',
-                label: 'Entrantes',
+                title: 'Entrantes',
             },
             {
                 href: '/pedidos-internos/salientes',
-                label: 'Salientes',
+                title: 'Salientes',
             },
         ],
     },
@@ -145,18 +150,18 @@ const NavigationLink: React.FC<NavigationLinkProps> = ({
                 </span>
 
                 <div className="flex flex-col space-y-2 pl-6">
-                    {innerLinks?.map((link) => {
+                    {innerLinks?.map((innerLinkItem) => {
                         const currenLinkIsActive =
-                            link.href === '/'
-                                ? currentPath === link.href
-                                : currentPath.startsWith(link.href);
+                            innerLinkItem.href === '/'
+                                ? currentPath === innerLinkItem.href
+                                : currentPath.startsWith(innerLinkItem.href);
 
                         const variant = currenLinkIsActive ? 'default' : 'ghost';
 
                         return (
                             <Link
-                                key={link.href}
-                                href={link.href}
+                                key={innerLinkItem.href}
+                                href={innerLinkItem.href}
                                 className={cn(
                                     buttonVariants({
                                         variant: variant,
@@ -167,7 +172,19 @@ const NavigationLink: React.FC<NavigationLinkProps> = ({
                                     'justify-start',
                                 )}
                             >
-                                {link.label}
+                                {innerLinkItem.title}
+
+                                {innerLinkItem.label && (
+                                    <span
+                                        className={cn(
+                                            'ml-auto',
+                                            variant === 'default' &&
+                                                'text-background dark:text-white',
+                                        )}
+                                    >
+                                        {innerLinkItem.label}
+                                    </span>
+                                )}
                             </Link>
                         );
                     })}
@@ -220,6 +237,12 @@ type DashboardLayoutProps = PropsWithChildren<{
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) => {
     const { user } = useUserContext<EmployeeUser>();
     const { office, resetOffice } = useOfficeContext();
+    const internalOrdersQuery = useQuery({
+        queryKey: ['NumberOfPendingOutgoingInternalOrdersDocument'],
+        queryFn: () => {
+            return fetchClient(NumberOfPendingOutgoingInternalOrdersDocument, {});
+        },
+    });
 
     return (
         <div className="min-h-screen lg:flex">
@@ -238,7 +261,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
                                 href={link.href}
                                 Icon={link.Icon}
                                 label={undefined}
-                                innerLinks={link.innerLinks}
+                                innerLinks={link.innerLinks?.map((innerLink) => ({
+                                    href: innerLink.href,
+                                    title: innerLink.title,
+                                    label:
+                                        innerLink.href === '/pedidos-internos/salientes'
+                                            ? (internalOrdersQuery.data
+                                                  ?.numberOfPendingOutgoingInternalOrders
+                                                  ? `(${internalOrdersQuery.data.numberOfPendingOutgoingInternalOrders} nuevos)`
+                                                  : '') || undefined
+                                            : undefined,
+                                }))}
                             >
                                 {link.label}
                             </NavigationLink>
