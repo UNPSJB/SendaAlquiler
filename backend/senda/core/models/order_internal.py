@@ -134,18 +134,18 @@ class InternalOrder(TimeStampedModel):
     def set_status(
         self, status: str, responsible_user: UserModel, note: Optional[str]
     ) -> "InternalOrderHistory":
-        if status == self.latest_history_entry.status:
-            raise ValidationError(f"Order is already in {status} status.")
+        if self.latest_history_entry:
+            if (
+                self.latest_history_entry.status
+                == InternalOrderHistoryStatusChoices.COMPLETED
+            ):
+                raise ValidationError("Cannot change status of a completed order.")
 
-        if status == InternalOrderHistoryStatusChoices.PENDING:
-            raise ValidationError("Cannot set status to PENDING.")
+            if status == self.latest_history_entry.status:
+                raise ValidationError(f"Order is already in {status} status.")
 
-        if (
-            self.latest_history_entry
-            and self.latest_history_entry.status
-            == InternalOrderHistoryStatusChoices.COMPLETED
-        ):
-            raise ValidationError("Cannot change status of a completed order.")
+            if status == InternalOrderHistoryStatusChoices.PENDING:
+                raise ValidationError("Cannot set status to PENDING.")
 
         history = InternalOrderHistory.objects.create(
             status=status,
