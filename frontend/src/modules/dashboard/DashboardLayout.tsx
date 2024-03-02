@@ -268,7 +268,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, header }) =
                                         innerLink.href === '/pedidos-internos/salientes'
                                             ? (internalOrdersQuery.data
                                                   ?.numberOfPendingOutgoingInternalOrders
-                                                  ? `(${internalOrdersQuery.data.numberOfPendingOutgoingInternalOrders} nuevos)`
+                                                  ? `(${internalOrdersQuery.data.numberOfPendingOutgoingInternalOrders} pendientes)`
                                                   : '') || undefined
                                             : undefined,
                                 }))}
