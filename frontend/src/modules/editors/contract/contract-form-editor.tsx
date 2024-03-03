@@ -121,7 +121,7 @@ export const ContractFormEditor: React.FC<CreateContractFormProps> = ({ cancelHr
     const searchParams = useSearchParams();
     const clientId = searchParams.get('client');
 
-    const { mutate, isLoading: isMutating } = useCreateContract();
+    const { mutate, isPending: isMutating } = useCreateContract();
 
     const orders = watch('orders');
 

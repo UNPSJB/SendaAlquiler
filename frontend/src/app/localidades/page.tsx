@@ -83,7 +83,7 @@ const RowActions = ({ locality }: { locality: Locality }) => {
     return (
         <Dialog
             onOpenChange={(next) => {
-                if (deleteMutation.isLoading) {
+                if (deleteMutation.isPending) {
                     return;
                 }
 
@@ -121,7 +121,7 @@ const RowActions = ({ locality }: { locality: Locality }) => {
                     </DialogClose>
 
                     <ButtonWithSpinner
-                        showSpinner={deleteMutation.isLoading}
+                        showSpinner={deleteMutation.isPending}
                         onClick={() => {
                             deleteMutation.mutate(locality.id, {
                                 onSuccess: () => {

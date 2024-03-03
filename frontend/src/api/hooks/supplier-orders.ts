@@ -7,7 +7,7 @@ import {
 
 import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
-import { queryKeys } from './constants';
+import { queryDomains, queryKeys } from './constants';
 
 import { fetchClient } from '../fetch-client';
 import {
@@ -41,31 +41,27 @@ export const useSupplierOrders = () => {
 };
 
 export const useSupplierOrderById = (id: string | undefined) => {
-    return useQuery(
-        queryKeys.supplierOrderDetailsById(id),
-        () => {
+    return useQuery({
+        queryKey: queryKeys.supplierOrderDetailsById(id),
+        queryFn: () => {
             return fetchClient(SupplierOrderByIdDocument, {
                 id: id as string,
             });
         },
-        {
-            enabled: typeof id === 'string',
-        },
-    );
+        enabled: typeof id === 'string',
+    });
 };
 
 export const useSupplierOrdersBySupplierId = (id: string | undefined) => {
-    return useQuery(
-        queryKeys.supplierOrderDetailsBySupplierId(id),
-        () => {
+    return useQuery({
+        queryKey: queryKeys.supplierOrderDetailsBySupplierId(id),
+        queryFn: () => {
             return fetchClient(SupplierOrdersBySupplierIdDocument, {
                 id: id as string,
             });
         },
-        {
-            enabled: typeof id === 'string',
-        },
-    );
+        enabled: typeof id === 'string',
+    });
 };
 
 type UseCreateSupplierOrderOptions = UseMutationOptions<
@@ -84,23 +80,25 @@ export const useCreateSupplierOrder = ({
         CreateSupplierOrderMutation,
         Error,
         CreateSupplierOrderMutationVariables
-    >(
-        (data) => {
+    >({
+        mutationFn: (data) => {
             return fetchClient(CreateSupplierOrderDocument, data);
         },
-        {
-            onSuccess: (data, variables, context) => {
-                if (data.createSupplierOrder?.supplierOrder) {
-                    client.invalidateQueries(queryKeys.supplierOrdersPaginatedList());
-                }
+        onSuccess: (data, variables, context) => {
+            if (data.createSupplierOrder?.supplierOrder) {
+                client.invalidateQueries({
+                    queryKey: [queryDomains.supplierOrders],
+                    type: 'all',
+                    refetchType: 'all',
+                });
+            }
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 export const useDeleteSupplierOrder = ({
@@ -109,23 +107,25 @@ export const useDeleteSupplierOrder = ({
 }: UseMutationOptions<DeleteSupplierOrderMutation, Error, string> = {}) => {
     const client = useQueryClient();
 
-    return useMutation<DeleteSupplierOrderMutation, Error, string>(
-        (id: string) => {
+    return useMutation<DeleteSupplierOrderMutation, Error, string>({
+        mutationFn: (id: string) => {
             return fetchClient(DeleteSupplierOrderDocument, {
                 id,
             });
         },
-        {
-            onSuccess: (data, variables, context) => {
-                client.invalidateQueries(queryKeys.supplierOrdersPaginatedList());
+        onSuccess: (data, variables, context) => {
+            client.invalidateQueries({
+                queryKey: [queryDomains.supplierOrders],
+                type: 'all',
+                refetchType: 'all',
+            });
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 const updateSupplierOrderStatus = (
@@ -143,7 +143,12 @@ const updateSupplierOrderStatus = (
               >['supplierOrder']
           >,
 ) => {
-    client.invalidateQueries(queryKeys.supplierOrdersPaginatedList());
+    client.invalidateQueries({
+        queryKey: [queryDomains.supplierOrders],
+        type: 'all',
+        refetchType: 'all',
+    });
+
     client.setQueryData<SupplierOrderByIdQuery>(
         queryKeys.supplierOrderDetailsById(id),
         (prev) => {

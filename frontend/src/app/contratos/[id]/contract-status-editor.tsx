@@ -167,8 +167,8 @@ export const ContractStatusEditor = ({ contract }: Props) => {
             <ButtonWithSpinner
                 className="w-full"
                 showSpinner={
-                    statusToCompletedMutation.isLoading ||
-                    statusToCanceledMutation.isLoading
+                    statusToCompletedMutation.isPending ||
+                    statusToCanceledMutation.isPending
                 }
                 type="submit"
                 onClick={formMethods.handleSubmit(onSubmit)}

@@ -205,7 +205,7 @@ export const ProductFormEditor = ({ cancelHref, defaultValues, idToUpdate }: Pro
     };
 
     const isCreatingOrUpdating =
-        createProductMutation.isLoading || updateProductMutation.isLoading;
+        createProductMutation.isPending || updateProductMutation.isPending;
 
     return (
         <main className="px-8 pb-12">

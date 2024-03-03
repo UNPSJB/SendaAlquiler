@@ -15,7 +15,8 @@ type UseLoginOptions = UseMutationOptions<LoginMutation, Error, LoginMutationVar
  * @returns The result object from the useMutation hook.
  */
 export const useLogin = (options: UseLoginOptions = {}) => {
-    return useMutation<LoginMutation, Error, LoginMutationVariables>((data) => {
-        return fetchClient(LoginDocument, data);
-    }, options);
+    return useMutation<LoginMutation, Error, LoginMutationVariables>({
+        mutationFn: (variables) => fetchClient(LoginDocument, variables),
+        ...options,
+    });
 };

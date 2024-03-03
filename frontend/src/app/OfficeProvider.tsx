@@ -35,7 +35,8 @@ const OfficeContext = createContext<OfficeProviderData>({
 });
 
 const useOfficeCookie = () => {
-    return useQuery(OFFICE_COOKIE_QUERY_KEY, {
+    return useQuery({
+        queryKey: OFFICE_COOKIE_QUERY_KEY,
         queryFn: async () => {
             const res = await gettOfficeCookieAction();
             return res;
@@ -44,16 +45,20 @@ const useOfficeCookie = () => {
 };
 
 const useSetOfficeCookie = () => {
-    return useMutation(async (id: string) => {
-        await setOfficeCookieAction(id);
-        return true;
+    return useMutation({
+        mutationFn: async (id: string) => {
+            await setOfficeCookieAction(id);
+            return true;
+        },
     });
 };
 
 const useClearOfficeCookie = () => {
-    return useMutation(async (_p: null): Promise<boolean> => {
-        await clearOfficeCookieAction();
-        return true;
+    return useMutation({
+        mutationFn: async (_p: null): Promise<boolean> => {
+            await clearOfficeCookieAction();
+            return true;
+        },
     });
 };
 

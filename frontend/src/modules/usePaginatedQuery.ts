@@ -42,12 +42,12 @@ const usePaginatedQuery = <
         page: activePage,
     } as unknown as V;
 
-    const queryResult = useQuery<unknown, Error, T>(
-        [typeof key === 'function' ? key(variables) : key, variables],
-        () => {
+    const queryResult = useQuery<unknown, Error, T>({
+        queryKey: [typeof key === 'function' ? key(variables) : key, variables],
+        queryFn: () => {
             return fetchClient<T, V>(document, variables);
         },
-    );
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const count = queryResult.data ? (queryResult.data[dataKey] as any)['count'] : null;

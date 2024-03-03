@@ -1,9 +1,10 @@
 import { differenceInCalendarDays } from 'date-fns';
 import { Trash } from 'lucide-react';
+import { useState } from 'react';
 import { UseFieldArrayReturn, useFieldArray, useFormContext } from 'react-hook-form';
 
 import { ProductTypeChoices } from '@/api/graphql';
-import { useAllProducts, useProductStocksInDateRange } from '@/api/hooks';
+import { useInfiniteProducts, useProductStocksInDateRange } from '@/api/hooks';
 
 import {
     ContractFormEditorDiscountType,
@@ -12,7 +13,7 @@ import {
 import { ContractFormEditorOrderItemAllocation } from './contract-form-editor-order-item-allocation';
 import { ContractFormEditorOrderItemService } from './contract-form-editor-order-item-service';
 
-import { ComboboxSimple } from '@/components/combobox';
+import { ComboboxInfinite, ComboboxSimple } from '@/components/combobox';
 import { Button } from '@/components/ui/button';
 import {
     FormControl,
@@ -43,7 +44,13 @@ export const ContractFormEditorOrderItem = ({
     const formMethods = useFormContext<ContractFormEditorValues>();
     const { setValue } = formMethods;
 
-    const productsQuery = useAllProducts();
+    const [query, setQuery] = useState<string>('');
+    const productsQuery = useInfiniteProducts({
+        officeId: null,
+        page: 1,
+        query: query,
+        type: ProductTypeChoices.Alquilable,
+    });
 
     const startDatetime = formMethods.watch('startDatetime');
     const endDatetime = formMethods.watch('endDatetime');
@@ -120,20 +127,23 @@ export const ContractFormEditorOrderItem = ({
                                     <FormItem className="flex flex-col space-y-2">
                                         <FormLabel>Producto</FormLabel>
 
-                                        <ComboboxSimple
-                                            options={
-                                                productsQuery.data?.allProducts
-                                                    .filter(
-                                                        (product) =>
-                                                            product.type ===
-                                                            ProductTypeChoices.Alquilable,
-                                                    )
-                                                    .map((product) => ({
-                                                        value: product.id,
-                                                        label: product.name,
-                                                        data: product,
-                                                    })) ?? []
-                                            }
+                                        <ComboboxInfinite
+                                            placeholder="Selecciona un producto"
+                                            isLoading={productsQuery.isPending}
+                                            options={(productsQuery.data
+                                                ? productsQuery.data.pages
+                                                      .map(
+                                                          (page) => page.products.results,
+                                                      )
+                                                      .flat()
+                                                : []
+                                            ).map((product) => ({
+                                                value: product.id,
+                                                label: product.name,
+                                                data: product,
+                                            }))}
+                                            queryValue={query}
+                                            setQueryValue={setQuery}
                                             onChange={(next) => {
                                                 if (next?.value !== field.value?.value) {
                                                     setValue(
@@ -157,7 +167,11 @@ export const ContractFormEditorOrderItem = ({
                                                 field.onChange(next);
                                             }}
                                             value={field.value || null}
-                                            placeholder="Selecciona un producto"
+                                            fetchNextPage={productsQuery.fetchNextPage}
+                                            hasNextPage={productsQuery.hasNextPage}
+                                            isFetchingNextPage={
+                                                productsQuery.isFetchingNextPage
+                                            }
                                         />
 
                                         <FormMessage />

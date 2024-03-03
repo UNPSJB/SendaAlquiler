@@ -60,7 +60,7 @@ export const SaleFormEditor: React.FC<CreateSaleFormProps> = ({ cancelHref }) =>
     const searchParams = useSearchParams();
     const clientId = searchParams.get('client');
 
-    const { mutate, isLoading: isMutating } = useCreateSale();
+    const { mutate, isPending: isMutating } = useCreateSale();
 
     const orders = watch('orders');
     const subtotal = (orders || []).reduce((acc, order) => {

@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 
-import { useAllClients } from '@/api/hooks';
+import { useInfiniteClients } from '@/api/hooks';
 
 import { ContractFormEditorValues } from './contract-form-editor';
 
-import { ComboboxSimple } from '@/components/combobox';
+import { ComboboxInfinite } from '@/components/combobox';
 import {
     FormControl,
     FormField,
@@ -18,7 +19,13 @@ import { Textarea } from '@/components/ui/textarea';
 
 export const ContractFormEditorBilling = () => {
     const formMethods = useFormContext<ContractFormEditorValues>();
-    const clientsQuery = useAllClients();
+
+    const [query, setQuery] = useState<string>('');
+    const clientsQuery = useInfiniteClients({
+        page: 1,
+        localities: null,
+        query: query,
+    });
 
     const client = formMethods.watch('client');
 
@@ -36,19 +43,26 @@ export const ContractFormEditorBilling = () => {
                             <FormLabel required>Cliente</FormLabel>
 
                             <FormControl>
-                                <ComboboxSimple
+                                <ComboboxInfinite
                                     placeholder="Selecciona un cliente"
-                                    options={
-                                        clientsQuery.data?.allClients.map((client) => ({
-                                            value: client.id,
-                                            label: `${client.firstName} ${client.lastName}`,
-                                            data: client,
-                                        })) || []
-                                    }
-                                    onChange={(option) => {
-                                        field.onChange(option);
-                                    }}
+                                    isLoading={clientsQuery.isPending}
+                                    options={(clientsQuery.data
+                                        ? clientsQuery.data.pages
+                                              .map((page) => page.clients.results)
+                                              .flat()
+                                        : []
+                                    ).map((client) => ({
+                                        value: client.id,
+                                        label: `${client.firstName} ${client.lastName}`,
+                                        data: client,
+                                    }))}
+                                    queryValue={query}
+                                    setQueryValue={setQuery}
+                                    onChange={field.onChange}
                                     value={field.value || null}
+                                    fetchNextPage={clientsQuery.fetchNextPage}
+                                    hasNextPage={clientsQuery.hasNextPage}
+                                    isFetchingNextPage={clientsQuery.isFetchingNextPage}
                                 />
                             </FormControl>
 

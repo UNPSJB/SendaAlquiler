@@ -36,6 +36,7 @@ from senda.core.models.contract import (
 from senda.core.models.suppliers import SupplierModel
 from senda.core.models.admin import AdminModel
 
+from senda.core.decorators import CustomInfo
 from utils.graphene import non_null_list_of
 
 StateChoicesEnum = graphene.Enum.from_enum(StateChoices)
@@ -55,6 +56,7 @@ ProductServiceBillingTypeChoicesEnum = graphene.Enum.from_enum(
 class PaginatedQueryResult(graphene.ObjectType):
     count = graphene.NonNull(graphene.Int)
     num_pages = graphene.NonNull(graphene.Int)
+    current_page = graphene.NonNull(graphene.Int)
 
 
 class BrandType(DjangoObjectType):
@@ -87,6 +89,10 @@ class OfficeType(DjangoObjectType):
 
 class ProductType(DjangoObjectType):
     type = ProductTypeChoicesEnum(required=True)
+    current_office_quantity = graphene.Int(default_value=0, required=True)
+
+    def resolve_current_office_quantity(parent: Product, info: CustomInfo):
+        return parent.get_stock_for_office(int(info.context.office_id)) or 0
 
     class Meta:
         name = "Product"

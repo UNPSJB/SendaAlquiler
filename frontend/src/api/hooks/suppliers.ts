@@ -7,7 +7,7 @@ import {
 
 import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
-import { queryKeys } from './constants';
+import { queryDomains, queryKeys } from './constants';
 
 import { fetchClient } from '../fetch-client';
 import {
@@ -30,28 +30,33 @@ export const useDeleteSupplier = ({
 }: UseMutationOptions<DeleteSupplierMutation, Error, string> = {}) => {
     const client = useQueryClient();
 
-    return useMutation<DeleteSupplierMutation, Error, string>(
-        (id: string) => {
+    return useMutation<DeleteSupplierMutation, Error, string>({
+        mutationFn: (id: string) => {
             return fetchClient(DeleteSupplierDocument, {
                 id,
             });
         },
-        {
-            onSuccess: (data, variables, context) => {
-                client.invalidateQueries(queryKeys.suppliersPaginatedList());
+        onSuccess: (data, variables, context) => {
+            client.invalidateQueries({
+                queryKey: [queryDomains.suppliers],
+                type: 'all',
+                refetchType: 'all',
+            });
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 export const useAllSuppliers = () => {
-    return useQuery(['all-suppliers'], () => {
-        return fetchClient(AllSuppliersDocument, {});
+    return useQuery({
+        queryKey: ['all-suppliers'],
+        queryFn: () => {
+            return fetchClient(AllSuppliersDocument, {});
+        },
     });
 };
 
@@ -75,17 +80,15 @@ export const usePaginatedSuppliers = () => {
 };
 
 export const useSupplierById = (id: string | undefined) => {
-    return useQuery(
-        queryKeys.supplierDetailsById(id),
-        () => {
+    return useQuery({
+        queryKey: queryKeys.supplierDetailsById(id),
+        queryFn: () => {
             return fetchClient(SupplierByIdDocument, {
                 id: id as string,
             });
         },
-        {
-            enabled: typeof id === 'string',
-        },
-    );
+        enabled: typeof id === 'string',
+    });
 };
 
 type UseCreateSupplierOptions = UseMutationOptions<
@@ -100,23 +103,25 @@ export const useCreateSupplier = ({
 }: UseCreateSupplierOptions = {}) => {
     const client = useQueryClient();
 
-    return useMutation<CreateSupplierMutation, Error, CreateSupplierMutationVariables>(
-        (data) => {
+    return useMutation<CreateSupplierMutation, Error, CreateSupplierMutationVariables>({
+        mutationFn: (data) => {
             return fetchClient(CreateSupplierDocument, data);
         },
-        {
-            onSuccess: (data, context, variables) => {
-                if (data.createSupplier?.supplier) {
-                    client.invalidateQueries(queryKeys.suppliersPaginatedList());
-                }
+        onSuccess: (data, context, variables) => {
+            if (data.createSupplier?.supplier) {
+                client.invalidateQueries({
+                    queryKey: [queryDomains.suppliers],
+                    type: 'all',
+                    refetchType: 'all',
+                });
+            }
 
-                if (onSuccess) {
-                    onSuccess(data, context, variables);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, context, variables);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 type UseUpdateSupplierOptions = UseMutationOptions<
@@ -131,21 +136,23 @@ export const useUpdateSupplier = ({
 }: UseUpdateSupplierOptions = {}) => {
     const client = useQueryClient();
 
-    return useMutation<UpdateSupplierMutation, Error, UpdateSupplierMutationVariables>(
-        (data) => {
+    return useMutation<UpdateSupplierMutation, Error, UpdateSupplierMutationVariables>({
+        mutationFn: (data) => {
             return fetchClient(UpdateSupplierDocument, data);
         },
-        {
-            onSuccess: (data, context, variables) => {
-                if (data.updateSupplier?.supplier) {
-                    client.invalidateQueries(queryKeys.suppliersPaginatedList());
-                }
+        onSuccess: (data, context, variables) => {
+            if (data.updateSupplier?.supplier) {
+                client.invalidateQueries({
+                    queryKey: [queryDomains.suppliers],
+                    type: 'all',
+                    refetchType: 'all',
+                });
+            }
 
-                if (onSuccess) {
-                    onSuccess(data, context, variables);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, context, variables);
+            }
         },
-    );
+        ...options,
+    });
 };

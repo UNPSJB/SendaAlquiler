@@ -103,7 +103,7 @@ const RowActions = ({ contract }: { contract: Contract }) => {
     return (
         <Dialog
             onOpenChange={(next) => {
-                if (deleteMutation.isLoading) {
+                if (deleteMutation.isPending) {
                     return;
                 }
 

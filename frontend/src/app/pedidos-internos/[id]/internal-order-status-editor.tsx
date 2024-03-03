@@ -202,9 +202,9 @@ export const InternalOrderStatusEditor = ({ internalOrder }: Props) => {
             <ButtonWithSpinner
                 className="w-full"
                 showSpinner={
-                    statusToInProgressMutation.isLoading ||
-                    statusToCompletedMutation.isLoading ||
-                    statusToCanceledMutation.isLoading
+                    statusToInProgressMutation.isPending ||
+                    statusToCompletedMutation.isPending ||
+                    statusToCanceledMutation.isPending
                 }
                 type="submit"
                 onClick={formMethods.handleSubmit(onSubmit)}

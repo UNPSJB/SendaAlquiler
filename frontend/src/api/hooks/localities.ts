@@ -36,8 +36,11 @@ export const useLocalities = () => {
 };
 
 export const useAllLocalities = () => {
-    return useQuery(queryKeys.localitiesNonPaginated, () => {
-        return fetchClient(AllLocalitiesDocument, {});
+    return useQuery({
+        queryKey: queryKeys.localitiesNonPaginated,
+        queryFn: () => {
+            return fetchClient(AllLocalitiesDocument, {});
+        },
     });
 };
 
@@ -47,25 +50,25 @@ export const useDeleteLocality = ({
 }: UseMutationOptions<DeleteLocalityMutation, Error, string> = {}) => {
     const client = useQueryClient();
 
-    return useMutation<DeleteLocalityMutation, Error, string>(
-        (id: string) => {
+    return useMutation<DeleteLocalityMutation, Error, string>({
+        mutationFn: (id: string) => {
             return fetchClient(DeleteLocalityDocument, {
                 id,
             });
         },
-        {
-            onSuccess: (data, variables, context) => {
-                client.removeQueries([queryDomains.localities]);
-                client.invalidateQueries([queryDomains.localities]);
-                client.refetchQueries([queryDomains.localities]);
+        onSuccess: (data, variables, context) => {
+            client.invalidateQueries({
+                queryKey: [queryDomains.localities],
+                type: 'all',
+                refetchType: 'all',
+            });
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };
 type UseCreateLocalityOptions = UseMutationOptions<
     CreateLocalityMutation,
@@ -79,24 +82,26 @@ export const useCreateLocality = ({
 }: UseCreateLocalityOptions = {}) => {
     const client = useQueryClient();
 
-    return useMutation<CreateLocalityMutation, Error, CreateLocalityMutationVariables>(
-        (data) => {
+    return useMutation<CreateLocalityMutation, Error, CreateLocalityMutationVariables>({
+        mutationFn: (data) => {
             return fetchClient(CreateLocalityDocument, data);
         },
-        {
-            onSuccess: (data, variables, context) => {
-                const locality = data.createLocality?.locality;
-                if (locality) {
-                    client.invalidateQueries([queryDomains.localities]);
-                }
+        onSuccess: (data, variables, context) => {
+            const locality = data.createLocality?.locality;
+            if (locality) {
+                client.invalidateQueries({
+                    queryKey: [queryDomains.localities],
+                    type: 'all',
+                    refetchType: 'all',
+                });
+            }
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 type UseUpdateLocalityOptions = UseMutationOptions<
@@ -111,22 +116,24 @@ export const useUpdateLocality = ({
 }: UseUpdateLocalityOptions = {}) => {
     const client = useQueryClient();
 
-    return useMutation<UpdateLocalityMutation, Error, UpdateLocalityMutationVariables>(
-        (data) => {
+    return useMutation<UpdateLocalityMutation, Error, UpdateLocalityMutationVariables>({
+        mutationFn: (data) => {
             return fetchClient(UpdateLocalityDocument, data);
         },
-        {
-            onSuccess: (data, variables, context) => {
-                const locality = data.updateLocality?.locality;
-                if (locality) {
-                    client.invalidateQueries([queryDomains.localities]);
-                }
+        onSuccess: (data, variables, context) => {
+            const locality = data.updateLocality?.locality;
+            if (locality) {
+                client.invalidateQueries({
+                    queryKey: [queryDomains.localities],
+                    type: 'all',
+                    refetchType: 'all',
+                });
+            }
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };

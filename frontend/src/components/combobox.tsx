@@ -1,6 +1,10 @@
 import { Command as CommandPrimitive } from 'cmdk';
+import throttle from 'lodash.throttle';
 import { Check, ChevronsUpDown } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useInView } from 'react-intersection-observer';
+
+import Spinner from './Spinner/Spinner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -321,6 +325,146 @@ export const ComboboxSimple = <TData extends ComboboxOption>({
                                         </span>
                                     </CommandItem>
                                 ))}
+
+                                <CommandEmpty>No se encontraron resultados.</CommandEmpty>
+                            </>
+                        )}
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    );
+};
+
+interface ComboboxInfiniteProps<TData extends ComboboxOption> {
+    isDisabled?: boolean;
+    isLoading?: boolean;
+    onChange: (option: TData | null) => void;
+    options: TData[];
+    value: TData | null;
+    placeholder?: string;
+    queryValue: string;
+    setQueryValue: (query: string) => void;
+    hasNextPage: boolean;
+    fetchNextPage: () => void;
+    isFetchingNextPage: boolean;
+}
+
+export const ComboboxInfinite = <TData extends ComboboxOption>({
+    isDisabled = false,
+    isLoading = false,
+    onChange,
+    options,
+    value,
+    queryValue,
+    setQueryValue,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+    placeholder = 'Selecciona una opción',
+}: ComboboxInfiniteProps<TData>) => {
+    const [open, setOpen] = useState(false);
+    const [ref, inView] = useInView();
+
+    const handleInputChange = (newValue: string) => {
+        throttle(setQueryValue, 100)(newValue);
+    };
+
+    useEffect(() => {
+        if (inView && hasNextPage) {
+            fetchNextPage();
+        }
+    }, [inView, hasNextPage, fetchNextPage]);
+
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={open}
+                    className="min-w-[200px] justify-between text-left"
+                    disabled={isDisabled}
+                >
+                    <span className="inline-block w-[90%] overflow-hidden text-ellipsis text-left">
+                        {value?.label || placeholder}
+                    </span>
+
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+            </PopoverTrigger>
+
+            <PopoverContent align="start" className="p-0">
+                <Command value={value?.value || ''} shouldFilter={false}>
+                    <CommandInput
+                        value={queryValue}
+                        onValueChange={handleInputChange}
+                        disabled={isDisabled}
+                    />
+
+                    <CommandList>
+                        {isLoading && !isFetchingNextPage ? (
+                            <CommandPrimitive.Loading>
+                                <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+                                    Cargando...
+                                </div>
+                            </CommandPrimitive.Loading>
+                        ) : (
+                            <>
+                                {options.map((item) => (
+                                    <CommandItem
+                                        key={item.label}
+                                        onSelect={() => {
+                                            onChange(item);
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        <Check
+                                            className={cn(
+                                                'mr-2 h-4 w-4',
+                                                value?.value === item.value
+                                                    ? 'opacity-100'
+                                                    : 'opacity-0',
+                                            )}
+                                        />
+
+                                        <span className="min-w-0 flex-1">
+                                            {item.label}
+                                        </span>
+                                    </CommandItem>
+                                ))}
+
+                                {options.length > 0 && (
+                                    <CommandPrimitive.Item>
+                                        <div>
+                                            <button
+                                                tabIndex={-1}
+                                                className="pointer-events-none block w-full"
+                                                ref={ref}
+                                                disabled={
+                                                    !hasNextPage || isFetchingNextPage
+                                                }
+                                                onClick={() => fetchNextPage()}
+                                            />
+
+                                            {isFetchingNextPage && (
+                                                <div
+                                                    className={cn(
+                                                        'relative h-14',
+                                                        isFetchingNextPage
+                                                            ? 'opacity-100'
+                                                            : 'opacity-0',
+                                                    )}
+                                                >
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <Spinner />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </CommandPrimitive.Item>
+                                )}
 
                                 <CommandEmpty>No se encontraron resultados.</CommandEmpty>
                             </>

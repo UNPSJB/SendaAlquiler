@@ -1,11 +1,15 @@
 import { Trash } from 'lucide-react';
+import { useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
-import { useAllProducts } from '@/api/hooks';
+import { ProductTypeChoices } from '@/api/graphql';
+import { useInfiniteProducts } from '@/api/hooks';
+
+import { useOfficeContext } from '@/app/OfficeProvider';
 
 import { SaleFormEditorDiscountType, SaleFormEditorValues } from './sale-form-editor';
 
-import { ComboboxSimple } from '@/components/combobox';
+import { ComboboxInfinite } from '@/components/combobox';
 import { Button } from '@/components/ui/button';
 import {
     FormControl,
@@ -48,7 +52,16 @@ const calculateDiscountPercentageFromAmount = ({
 export const SaleFormEditorOrders = () => {
     const formMethods = useFormContext<SaleFormEditorValues>();
     const { setValue } = formMethods;
-    const productsQuery = useAllProducts();
+
+    const officeContext = useOfficeContext();
+
+    const [query, setQuery] = useState<string>('');
+    const productsQuery = useInfiniteProducts({
+        page: 1,
+        query: query,
+        officeId: officeContext.office!.id!,
+        type: ProductTypeChoices.Comerciable,
+    });
 
     const ordersFieldArray = useFieldArray({
         control: formMethods.control,
@@ -99,16 +112,24 @@ export const SaleFormEditorOrders = () => {
                                         <FormItem className="flex w-6/12 flex-col">
                                             <FormLabel>Producto</FormLabel>
 
-                                            <ComboboxSimple
-                                                options={
-                                                    productsQuery.data?.allProducts.map(
-                                                        (product) => ({
-                                                            value: product.id,
-                                                            label: product.name,
-                                                            data: product,
-                                                        }),
-                                                    ) ?? []
-                                                }
+                                            <ComboboxInfinite
+                                                placeholder="Selecciona un producto"
+                                                isLoading={productsQuery.isPending}
+                                                options={(productsQuery.data
+                                                    ? productsQuery.data.pages
+                                                          .map(
+                                                              (page) =>
+                                                                  page.products.results,
+                                                          )
+                                                          .flat()
+                                                    : []
+                                                ).map((product) => ({
+                                                    value: product.id,
+                                                    label: `${product.name} (${product.currentOfficeQuantity})`,
+                                                    data: product,
+                                                }))}
+                                                queryValue={query}
+                                                setQueryValue={setQuery}
                                                 onChange={(next) => {
                                                     if (
                                                         next?.value !== field.value?.value
@@ -129,8 +150,14 @@ export const SaleFormEditorOrders = () => {
 
                                                     field.onChange(next);
                                                 }}
-                                                value={field.value}
-                                                placeholder="Selecciona un producto"
+                                                value={field.value || null}
+                                                fetchNextPage={
+                                                    productsQuery.fetchNextPage
+                                                }
+                                                hasNextPage={productsQuery.hasNextPage}
+                                                isFetchingNextPage={
+                                                    productsQuery.isFetchingNextPage
+                                                }
                                             />
 
                                             <FormMessage />
@@ -157,7 +184,26 @@ export const SaleFormEditorOrders = () => {
                                 <FormField
                                     name={`orders.${index}.quantity`}
                                     control={formMethods.control}
-                                    rules={{ required: 'Este campo es requerido' }}
+                                    rules={{
+                                        validate: (value) => {
+                                            if (!value) {
+                                                return 'Este campo es requerido';
+                                            }
+
+                                            if (value < 1) {
+                                                return 'La cantidad debe ser mayor a 0';
+                                            }
+
+                                            if (
+                                                product?.data.currentOfficeQuantity &&
+                                                value > product.data.currentOfficeQuantity
+                                            ) {
+                                                return `La cantidad no puede ser mayor a ${product.data.currentOfficeQuantity}`;
+                                            }
+
+                                            return true;
+                                        },
+                                    }}
                                     render={({ field }) => (
                                         <FormItem className="flex w-6/12 flex-col">
                                             <FormLabel>Cantidad</FormLabel>
@@ -171,8 +217,10 @@ export const SaleFormEditorOrders = () => {
                                                             e.target.value,
                                                             {
                                                                 min: product ? 1 : 0,
-                                                                // TODO: Get max from product stock
-                                                                max: product ? 1000 : 0,
+                                                                max: product
+                                                                    ? product.data
+                                                                          .currentOfficeQuantity
+                                                                    : 0,
                                                             },
                                                         );
 
@@ -181,12 +229,9 @@ export const SaleFormEditorOrders = () => {
                                                 />
                                             </FormControl>
 
-                                            {/* 
-                                            TODO: Get max from product stock
-                                             */}
                                             <FormDescription>
                                                 {product
-                                                    ? `Stock disponible: ${product ? 1000 : 0}`
+                                                    ? `Stock disponible: ${product.data.currentOfficeQuantity}`
                                                     : ''}
                                             </FormDescription>
 

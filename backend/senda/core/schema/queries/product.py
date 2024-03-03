@@ -15,8 +15,8 @@ from senda.core.schema.custom_types import (
     BrandType,
     PaginatedProductQueryResult,
     OfficeType,
-    ProductServiceType,
     ProductType,
+    ProductTypeChoicesEnum,
 )
 from utils.graphene import non_null_list_of, get_paginated_model
 
@@ -35,14 +35,34 @@ class ProductStocksInDateRange(ObjectType):
 
 class Query(graphene.ObjectType):
     products = graphene.NonNull(
-        PaginatedProductQueryResult, page=graphene.Int(), query=graphene.String()
+        PaginatedProductQueryResult,
+        page=graphene.Int(),
+        query=graphene.String(),
+        type=ProductTypeChoicesEnum(),
+        office_id=graphene.ID(),
     )
 
     @employee_or_admin_required
-    def resolve_products(self, info: CustomInfo, page: int, query: str = None):
+    def resolve_products(
+        self,
+        info: CustomInfo,
+        page: int,
+        query: str = None,
+        type: ProductTypeChoices = None,
+        office_id: str = None,
+    ):
         products = Product.objects.all()
         if query:
             products = products.filter(name__icontains=query)
+
+        if type:
+            products = products.filter(type=type)
+
+        if office_id:
+            product_ids_in_office = StockItem.objects.filter(
+                office_id=int(office_id), product__in=products, quantity__gt=0
+            ).values_list("product", flat=True)
+            products = products.filter(id__in=product_ids_in_office)
 
         paginator, selected_page = get_paginated_model(
             products.order_by("-created_on"),
@@ -53,6 +73,7 @@ class Query(graphene.ObjectType):
             count=paginator.count,
             results=selected_page.object_list,
             num_pages=paginator.num_pages,
+            current_page=selected_page.number,
         )
 
     all_products = non_null_list_of(ProductType)
@@ -96,11 +117,15 @@ class Query(graphene.ObjectType):
         return products
 
     product_stock_in_office = graphene.Field(
-        StockItemType, product_id=graphene.ID(required=True), office_id=graphene.ID(required=True)
+        StockItemType,
+        product_id=graphene.ID(required=True),
+        office_id=graphene.ID(required=True),
     )
 
     @employee_or_admin_required
-    def resolve_product_stock_in_office(self, info: CustomInfo, product_id: int, office_id: int):
+    def resolve_product_stock_in_office(
+        self, info: CustomInfo, product_id: int, office_id: int
+    ):
         return StockItem.objects.filter(product=product_id, office=office_id).first()
 
     product_exists = graphene.Field(

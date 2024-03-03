@@ -7,7 +7,7 @@ import {
 
 import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
-import { queryKeys } from './constants';
+import { queryDomains, queryKeys } from './constants';
 
 import { fetchClient } from '../fetch-client';
 import {
@@ -31,17 +31,15 @@ import {
 } from '../graphql';
 
 export const useInternalOrderById = (id: string | undefined) => {
-    return useQuery(
-        queryKeys.internalOrdersDetailsById(id),
-        () => {
+    return useQuery({
+        queryKey: queryKeys.internalOrdersDetailsById(id),
+        queryFn: () => {
             return fetchClient(InternalOrderByIdDocument, {
                 id: id as string,
             });
         },
-        {
-            enabled: typeof id === 'string',
-        },
-    );
+        enabled: typeof id === 'string',
+    });
 };
 
 export const usePaginatedInternalOrders = () => {
@@ -72,23 +70,25 @@ export const useCreateInternalOrder = ({
         CreateInternalOrderMutation,
         Error,
         CreateInternalOrderMutationVariables
-    >(
-        (data) => {
+    >({
+        mutationFn: (data) => {
             return fetchClient(CreateInternalOrderDocument, data);
         },
-        {
-            onSuccess: (data, variables, context) => {
-                if (data.createInternalOrder?.internalOrder) {
-                    client.invalidateQueries(queryKeys.internalOrdersPaginatedList());
-                }
+        onSuccess: (data, variables, context) => {
+            if (data.createInternalOrder?.internalOrder) {
+                client.invalidateQueries({
+                    queryKey: [queryDomains.internalOrders],
+                    type: 'all',
+                    refetchType: 'all',
+                });
+            }
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 export const useDeleteInternalOrder = ({
@@ -97,23 +97,25 @@ export const useDeleteInternalOrder = ({
 }: UseMutationOptions<DeleteInternalOrderMutation, Error, string> = {}) => {
     const client = useQueryClient();
 
-    return useMutation<DeleteInternalOrderMutation, Error, string>(
-        (id: string) => {
+    return useMutation<DeleteInternalOrderMutation, Error, string>({
+        mutationFn: (id: string) => {
             return fetchClient(DeleteInternalOrderDocument, {
                 id,
             });
         },
-        {
-            onSuccess: (data, variables, context) => {
-                client.invalidateQueries(queryKeys.internalOrdersPaginatedList());
+        onSuccess: (data, variables, context) => {
+            client.invalidateQueries({
+                queryKey: [queryDomains.internalOrders],
+                type: 'all',
+                refetchType: 'all',
+            });
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 const updateInternalOrderStatus = (
@@ -136,7 +138,12 @@ const updateInternalOrderStatus = (
               >['internalOrder']
           >,
 ) => {
-    client.invalidateQueries(queryKeys.internalOrdersPaginatedList());
+    client.invalidateQueries({
+        queryKey: [queryDomains.internalOrders],
+        type: 'all',
+        refetchType: 'all',
+    });
+
     client.setQueryData<InternalOrderByIdQuery>(
         queryKeys.internalOrdersDetailsById(id),
         (prev) => {

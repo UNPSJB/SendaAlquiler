@@ -2,6 +2,7 @@ query clients($page: Int, $localities: [ID!], $query: String) {
     clients(page: $page, localities: $localities, query: $query) {
         count
         numPages
+        currentPage
         results {
             id
             email
@@ -131,27 +132,6 @@ mutation updateClient($id: ID!, $clientData: UpdateClientInput!) {
 mutation deleteClient($id: ID!) {
     deleteClient(id: $id) {
         success
-    }
-}
-
-query allClients($query: String) {
-    allClients(query: $query) {
-        id
-        firstName
-        lastName
-        email
-        dni
-        phoneCode
-        phoneNumber
-        houseNumber
-        houseUnit
-        streetName
-        locality {
-            id
-            name
-            state
-            postalCode
-        }
     }
 }
 

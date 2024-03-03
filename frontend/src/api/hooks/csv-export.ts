@@ -27,7 +27,7 @@ const useCsvExporter = <TData extends Record<string, string>, TVariables>(
     options: UseCsvExporterOptions<TData, TVariables>,
 ) => {
     const { query, csvKey, variables, filename } = options;
-    const { mutate, isLoading } = useMutation<TData, Error, TVariables>({
+    const { mutate, isPending } = useMutation<TData, Error, TVariables>({
         mutationFn: () => {
             return fetchClient(query, variables);
         },
@@ -52,7 +52,7 @@ const useCsvExporter = <TData extends Record<string, string>, TVariables>(
 
     return {
         exportCsv: mutate,
-        isExporting: isLoading,
+        isExporting: isPending,
     };
 };
 

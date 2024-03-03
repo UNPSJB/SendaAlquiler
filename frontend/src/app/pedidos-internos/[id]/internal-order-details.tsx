@@ -148,7 +148,7 @@ const QuantitySentColumn = ({ cell }: QuantityReceivedColumnProps) => {
                             </FormControl>
 
                             <FormDescription>
-                                Stock disponible: {stockQuery.isLoading && <Skeleton />}
+                                Stock disponible: {stockQuery.isPending && <Skeleton />}
                                 {stockQuery.data?.productStockInOffice?.quantity ?? 0}
                             </FormDescription>
 

@@ -30,7 +30,6 @@ class Query(graphene.ObjectType):
         localities=graphene.List(graphene.NonNull(graphene.ID)),
         query=graphene.String(),
     )
-
     @employee_or_admin_required
     def resolve_clients(
         self,
@@ -43,7 +42,6 @@ class Query(graphene.ObjectType):
 
         if localities is not None and len(localities) > 0:
             results = results.filter(locality__in=localities)
-
         if query is not None:
             results = results.annotate(
                 full_name=Concat("first_name", Value(" "), "last_name")
@@ -61,27 +59,10 @@ class Query(graphene.ObjectType):
             count=paginator.count,
             results=selected_page.object_list,
             num_pages=paginator.num_pages,
+            current_page=selected_page.number,
         )
 
-    all_clients = non_null_list_of(ClientType, query=graphene.String(default_value=None))
-
-    @employee_or_admin_required
-    def resolve_all_clients(self, info: CustomInfo, query: str = None):
-        if query is not None:
-            return Client.objects.annotate(
-                full_name=Concat("first_name", Value(" "), "last_name")
-            ).filter(
-                models.Q(first_name__icontains=query)
-                | models.Q(last_name__icontains=query)
-                | models.Q(email__icontains=query)
-                | models.Q(dni__icontains=query)
-                | models.Q(full_name__icontains=query)
-            )
-
-        return Client.objects.all()
-
     client_by_id = graphene.Field(ClientType, id=graphene.ID(required=True))
-
     @employee_or_admin_required
     def resolve_client_by_id(self, info: CustomInfo, id: str):
         return Client.objects.filter(id=id).first()
@@ -91,7 +72,6 @@ class Query(graphene.ObjectType):
         email=graphene.String(),
         dni=graphene.String(),
     )
-
     @employee_or_admin_required
     def resolve_client_exists(
         self, info: CustomInfo, email: str = None, dni: str = None
@@ -106,7 +86,6 @@ class Query(graphene.ObjectType):
             return Client.objects.filter(dni=dni).exists()
 
     clients_csv = graphene.NonNull(graphene.String)
-
     @employee_or_admin_required
     def resolve_clients_csv(self, info: CustomInfo):
         clients = Client.objects.all().prefetch_related("locality")

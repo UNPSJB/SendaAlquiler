@@ -84,8 +84,8 @@ export const ProductFormEditorSuppliers = () => {
                                                     field.onChange(option);
                                                 }}
                                                 value={field.value || null}
-                                                isDisabled={suppliersQuery.isLoading}
-                                                isLoading={suppliersQuery.isLoading}
+                                                isDisabled={suppliersQuery.isPending}
+                                                isLoading={suppliersQuery.isPending}
                                             />
                                         </FormControl>
 

@@ -136,7 +136,7 @@ export const SupplierFormEditor = ({ cancelHref, defaultValues, idToUpdate }: Pr
     };
 
     const isCreatingOrUpdating =
-        createSupplierMutation.isLoading || updateSupplierMutation.isLoading;
+        createSupplierMutation.isPending || updateSupplierMutation.isPending;
 
     return (
         <main className="px-8 pb-12" onSubmit={formMethods.handleSubmit(onSubmit)}>

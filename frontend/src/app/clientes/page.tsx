@@ -130,7 +130,7 @@ const RowActions = ({ client }: { client: Client }) => {
     return (
         <Dialog
             onOpenChange={(next) => {
-                if (deleteMutation.isLoading) {
+                if (deleteMutation.isPending) {
                     return;
                 }
 
@@ -184,7 +184,7 @@ const RowActions = ({ client }: { client: Client }) => {
                             });
                         }}
                         variant="destructive"
-                        showSpinner={deleteMutation.isLoading}
+                        showSpinner={deleteMutation.isPending}
                     >
                         Eliminar
                     </ButtonWithSpinner>

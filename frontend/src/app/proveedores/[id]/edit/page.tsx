@@ -11,7 +11,7 @@ const Page = () => {
     const { id } = useParams();
     const supplierByIdQuery = useSupplierById(id as string);
 
-    if (supplierByIdQuery.isLoading) {
+    if (supplierByIdQuery.isPending) {
         return (
             <DashboardLayout>
                 <div className="flex h-64 items-center justify-center">

@@ -7,7 +7,7 @@ import {
 
 import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
-import { queryKeys } from './constants';
+import { queryDomains, queryKeys } from './constants';
 
 import fetchClient from '../fetch-client';
 import {
@@ -34,17 +34,15 @@ export const useSales = () => {
 };
 
 export const useSaleById = (id: string | undefined) => {
-    return useQuery(
-        queryKeys.saleDetailsById(id),
-        () => {
+    return useQuery({
+        queryKey: queryKeys.saleDetailsById(id),
+        queryFn: () => {
             return fetchClient(SaleByIdDocument, {
                 id: id as string,
             });
         },
-        {
-            enabled: typeof id === 'string',
-        },
-    );
+        enabled: typeof id === 'string',
+    });
 };
 
 type UseCreateSaleOptions = UseMutationOptions<
@@ -56,25 +54,27 @@ type UseCreateSaleOptions = UseMutationOptions<
 export const useCreateSale = ({ onSuccess, ...options }: UseCreateSaleOptions = {}) => {
     const client = useQueryClient();
 
-    return useMutation<CreateSaleMutation, Error, CreateSaleMutationVariables>(
-        (data) => {
+    return useMutation<CreateSaleMutation, Error, CreateSaleMutationVariables>({
+        mutationFn: (data) => {
             return fetchClient(CreateSaleDocument, data);
         },
-        {
-            onSuccess: (data, variables, context) => {
-                const sale = data.createSale?.sale;
+        onSuccess: (data, variables, context) => {
+            const sale = data.createSale?.sale;
 
-                if (sale) {
-                    client.invalidateQueries(queryKeys.salesPaginatedList());
-                }
+            if (sale) {
+                client.invalidateQueries({
+                    queryKey: [queryDomains.sales],
+                    type: 'all',
+                    refetchType: 'all',
+                });
+            }
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 export const useDeleteSale = ({
@@ -83,35 +83,35 @@ export const useDeleteSale = ({
 }: UseMutationOptions<DeleteSaleMutation, Error, string> = {}) => {
     const client = useQueryClient();
 
-    return useMutation<DeleteSaleMutation, Error, string>(
-        (id: string) => {
+    return useMutation<DeleteSaleMutation, Error, string>({
+        mutationFn: (id: string) => {
             return fetchClient(DeleteSaleDocument, {
                 id,
             });
         },
-        {
-            onSuccess: (data, variables, context) => {
-                client.invalidateQueries(queryKeys.salesPaginatedList());
+        onSuccess: (data, variables, context) => {
+            client.invalidateQueries({
+                queryKey: [queryDomains.sales],
+                type: 'all',
+                refetchType: 'all',
+            });
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 export const useSalesByClientId = (id: string | undefined) => {
-    return useQuery(
-        queryKeys.salesListByClientId(id),
-        () => {
+    return useQuery({
+        queryKey: queryKeys.salesListByClientId(id),
+        queryFn: () => {
             return fetchClient(SalesByClientIdDocument, {
                 id: id as string,
             });
         },
-        {
-            enabled: typeof id === 'string',
-        },
-    );
+        enabled: typeof id === 'string',
+    });
 };

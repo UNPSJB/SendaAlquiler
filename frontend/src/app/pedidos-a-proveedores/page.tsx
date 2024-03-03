@@ -114,7 +114,7 @@ const RowActions = ({ supplierOrder }: { supplierOrder: OrderSupplier }) => {
     return (
         <Dialog
             onOpenChange={(next) => {
-                if (deleteMutation.isLoading) {
+                if (deleteMutation.isPending) {
                     return;
                 }
 

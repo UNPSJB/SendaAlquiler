@@ -14,11 +14,13 @@ fragment ProductListItem on Product {
         billingType
         billingPeriod
     }
+    currentOfficeQuantity
 }
 
-query products($page: Int, $query: String) {
-    products(page: $page, query: $query) {
+query products($page: Int, $query: String, $type: ProductTypeChoices, $officeId: ID) {
+    products(page: $page, query: $query, type: $type, officeId: $officeId) {
         count
+        currentPage
         numPages
         results {
             ...ProductListItem
@@ -124,12 +126,6 @@ query productsSuppliedBySupplierId($supplierId: ID!) {
 mutation deleteProduct($id: ID!) {
     deleteProduct(id: $id) {
         success
-    }
-}
-
-query allProducts {
-    allProducts {
-        ...ProductListItem
     }
 }
 

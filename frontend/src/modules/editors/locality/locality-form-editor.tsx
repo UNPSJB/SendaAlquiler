@@ -102,7 +102,7 @@ export const LocalityFormEditor = ({ defaultValues, cancelHref, idToUpdate }: Pr
     };
 
     const isCreatingOrUpdating =
-        createLocalityMutation.isLoading || updateLocalityMutation.isLoading;
+        createLocalityMutation.isPending || updateLocalityMutation.isPending;
 
     return (
         <main className="px-8 pb-12">

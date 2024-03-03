@@ -798,6 +798,7 @@ export type OrderSupplier = {
 export type PaginatedClientQueryResult = {
     __typename?: 'PaginatedClientQueryResult';
     count: Scalars['Int']['output'];
+    currentPage: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<Client>;
 };
@@ -805,6 +806,7 @@ export type PaginatedClientQueryResult = {
 export type PaginatedContractQueryResult = {
     __typename?: 'PaginatedContractQueryResult';
     count: Scalars['Int']['output'];
+    currentPage: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<Contract>;
 };
@@ -812,6 +814,7 @@ export type PaginatedContractQueryResult = {
 export type PaginatedEmployeeQueryResult = {
     __typename?: 'PaginatedEmployeeQueryResult';
     count: Scalars['Int']['output'];
+    currentPage: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<Employee>;
 };
@@ -819,6 +822,7 @@ export type PaginatedEmployeeQueryResult = {
 export type PaginatedInternalOrderQueryResult = {
     __typename?: 'PaginatedInternalOrderQueryResult';
     count: Scalars['Int']['output'];
+    currentPage: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<InternalOrder>;
 };
@@ -826,6 +830,7 @@ export type PaginatedInternalOrderQueryResult = {
 export type PaginatedLocalityQueryResult = {
     __typename?: 'PaginatedLocalityQueryResult';
     count: Scalars['Int']['output'];
+    currentPage: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<Locality>;
 };
@@ -833,6 +838,7 @@ export type PaginatedLocalityQueryResult = {
 export type PaginatedOrderSupplierQueryResult = {
     __typename?: 'PaginatedOrderSupplierQueryResult';
     count: Scalars['Int']['output'];
+    currentPage: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<OrderSupplier>;
 };
@@ -840,6 +846,7 @@ export type PaginatedOrderSupplierQueryResult = {
 export type PaginatedProductQueryResult = {
     __typename?: 'PaginatedProductQueryResult';
     count: Scalars['Int']['output'];
+    currentPage: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<Product>;
 };
@@ -847,6 +854,7 @@ export type PaginatedProductQueryResult = {
 export type PaginatedSaleQueryResult = {
     __typename?: 'PaginatedSaleQueryResult';
     count: Scalars['Int']['output'];
+    currentPage: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<Sale>;
 };
@@ -854,6 +862,7 @@ export type PaginatedSaleQueryResult = {
 export type PaginatedSupplierQueryResult = {
     __typename?: 'PaginatedSupplierQueryResult';
     count: Scalars['Int']['output'];
+    currentPage: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<Supplier>;
 };
@@ -875,12 +884,13 @@ export type Product = {
     brand: Maybe<Brand>;
     contractItems: Array<ContractItem>;
     createdOn: Scalars['DateTime']['output'];
+    currentOfficeQuantity: Scalars['Int']['output'];
     description: Maybe<Scalars['String']['output']>;
     id: Scalars['ID']['output'];
     internalOrders: Array<InternalOrderItem>;
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
-    price: Maybe<Scalars['Int']['output']>;
+    price: Maybe<Scalars['BigInt']['output']>;
     relatedSupplierOrders: Array<SupplierOrderItem>;
     saleItems: Array<SaleItem>;
     services: Array<ProductService>;
@@ -909,7 +919,7 @@ export type ProductService = {
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
-    price: Scalars['Int']['output'];
+    price: Scalars['BigInt']['output'];
     product: Product;
 };
 
@@ -955,7 +965,7 @@ export type ProductSupplier = {
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
-    price: Scalars['Int']['output'];
+    price: Scalars['BigInt']['output'];
     product: Product;
     supplier: Supplier;
 };
@@ -973,7 +983,6 @@ export enum ProductTypeChoices {
 
 export type Query = {
     __typename?: 'Query';
-    allClients: Array<Client>;
     allLocalities: Array<Locality>;
     allProducts: Array<Product>;
     allSales: Array<Sale>;
@@ -1021,10 +1030,6 @@ export type Query = {
     suppliersOrdersCsv: Scalars['String']['output'];
     user: Maybe<User>;
     users: Array<User>;
-};
-
-export type QueryAllClientsArgs = {
-    query?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type QueryClientByIdArgs = {
@@ -1099,8 +1104,10 @@ export type QueryProductStocksInDateRangeArgs = {
 };
 
 export type QueryProductsArgs = {
+    officeId: InputMaybe<Scalars['ID']['input']>;
     page: InputMaybe<Scalars['Int']['input']>;
     query: InputMaybe<Scalars['String']['input']>;
+    type: InputMaybe<ProductTypeChoices>;
 };
 
 export type QueryProductsStocksByOfficeIdArgs = {
@@ -1437,6 +1444,7 @@ export type ClientsQuery = {
         __typename?: 'PaginatedClientQueryResult';
         count: number;
         numPages: number;
+        currentPage: number;
         results: Array<{
             __typename?: 'Client';
             id: string;
@@ -1517,7 +1525,7 @@ export type ContractsByClientIdQuery = {
             product: {
                 __typename?: 'Product';
                 name: string;
-                price: number | null;
+                price: any | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
         }>;
@@ -1542,7 +1550,7 @@ export type SalesByClientIdQuery = {
             product: {
                 __typename?: 'Product';
                 name: string;
-                price: number | null;
+                price: any | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
         }>;
@@ -1602,34 +1610,6 @@ export type DeleteClientMutationVariables = Exact<{
 export type DeleteClientMutation = {
     __typename?: 'Mutation';
     deleteClient: { __typename?: 'DeleteClient'; success: boolean } | null;
-};
-
-export type AllClientsQueryVariables = Exact<{
-    query: InputMaybe<Scalars['String']['input']>;
-}>;
-
-export type AllClientsQuery = {
-    __typename?: 'Query';
-    allClients: Array<{
-        __typename?: 'Client';
-        id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        dni: string;
-        phoneCode: string;
-        phoneNumber: string;
-        houseNumber: string;
-        houseUnit: string | null;
-        streetName: string;
-        locality: {
-            __typename?: 'Locality';
-            id: string;
-            name: string;
-            state: StateChoices;
-            postalCode: string;
-        };
-    }>;
 };
 
 export type ClientExistsQueryVariables = Exact<{
@@ -1893,7 +1873,6 @@ export type DashboardQuery = {
         total: any;
         client: { __typename?: 'Client'; firstName: string; lastName: string };
     }>;
-    allClients: Array<{ __typename?: 'Client'; id: string }>;
     allProducts: Array<{
         __typename?: 'Product';
         id: string;
@@ -2050,7 +2029,7 @@ export type InProgressInternalOrderMutation = {
                     __typename?: 'Product';
                     id: string;
                     name: string;
-                    price: number | null;
+                    price: any | null;
                     type: ProductTypeChoices;
                     brand: { __typename?: 'Brand'; name: string } | null;
                 };
@@ -2104,7 +2083,7 @@ export type ReceiveInternalOrderMutation = {
                     __typename?: 'Product';
                     id: string;
                     name: string;
-                    price: number | null;
+                    price: any | null;
                     type: ProductTypeChoices;
                     brand: { __typename?: 'Brand'; name: string } | null;
                 };
@@ -2170,7 +2149,7 @@ export type InternalOrderListItemFragment = {
         __typename?: 'Product';
         id: string;
         name: string;
-        price: number | null;
+        price: any | null;
         type: ProductTypeChoices;
         brand: { __typename?: 'Brand'; name: string } | null;
     };
@@ -2271,7 +2250,7 @@ export type InternalOrderByIdQuery = {
                 __typename?: 'Product';
                 id: string;
                 name: string;
-                price: number | null;
+                price: any | null;
                 type: ProductTypeChoices;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
@@ -2401,15 +2380,16 @@ export type ProductListItemFragment = {
     __typename?: 'Product';
     id: string;
     name: string;
-    price: number | null;
+    price: any | null;
     type: ProductTypeChoices;
     sku: string | null;
+    currentOfficeQuantity: number;
     brand: { __typename?: 'Brand'; name: string } | null;
     services: Array<{
         __typename?: 'ProductService';
         id: string;
         name: string;
-        price: number;
+        price: any;
         billingType: CoreProductServiceBillingTypeChoices;
         billingPeriod: number | null;
     }>;
@@ -2418,6 +2398,8 @@ export type ProductListItemFragment = {
 export type ProductsQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
     query: InputMaybe<Scalars['String']['input']>;
+    type: InputMaybe<ProductTypeChoices>;
+    officeId: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 export type ProductsQuery = {
@@ -2425,20 +2407,22 @@ export type ProductsQuery = {
     products: {
         __typename?: 'PaginatedProductQueryResult';
         count: number;
+        currentPage: number;
         numPages: number;
         results: Array<{
             __typename?: 'Product';
             id: string;
             name: string;
-            price: number | null;
+            price: any | null;
             type: ProductTypeChoices;
             sku: string | null;
+            currentOfficeQuantity: number;
             brand: { __typename?: 'Brand'; name: string } | null;
             services: Array<{
                 __typename?: 'ProductService';
                 id: string;
                 name: string;
-                price: number;
+                price: any;
                 billingType: CoreProductServiceBillingTypeChoices;
                 billingPeriod: number | null;
             }>;
@@ -2458,7 +2442,7 @@ export type ProductByIdQuery = {
         name: string;
         description: string | null;
         type: ProductTypeChoices;
-        price: number | null;
+        price: any | null;
         brand: { __typename?: 'Brand'; id: string; name: string } | null;
         stockItems: Array<{
             __typename?: 'ProductStockInOffice';
@@ -2474,11 +2458,11 @@ export type ProductByIdQuery = {
             __typename?: 'ProductService';
             id: string;
             name: string;
-            price: number;
+            price: any;
         }>;
         suppliers: Array<{
             __typename?: 'ProductSupplier';
-            price: number;
+            price: any;
             supplier: { __typename?: 'Supplier'; id: string; name: string };
         }>;
     } | null;
@@ -2500,15 +2484,16 @@ export type CreateProductMutation = {
             __typename?: 'Product';
             id: string;
             name: string;
-            price: number | null;
+            price: any | null;
             type: ProductTypeChoices;
             sku: string | null;
+            currentOfficeQuantity: number;
             brand: { __typename?: 'Brand'; name: string } | null;
             services: Array<{
                 __typename?: 'ProductService';
                 id: string;
                 name: string;
-                price: number;
+                price: any;
                 billingType: CoreProductServiceBillingTypeChoices;
                 billingPeriod: number | null;
             }>;
@@ -2533,15 +2518,16 @@ export type UpdateProductMutation = {
             __typename?: 'Product';
             id: string;
             name: string;
-            price: number | null;
+            price: any | null;
             type: ProductTypeChoices;
             sku: string | null;
+            currentOfficeQuantity: number;
             brand: { __typename?: 'Brand'; name: string } | null;
             services: Array<{
                 __typename?: 'ProductService';
                 id: string;
                 name: string;
-                price: number;
+                price: any;
                 billingType: CoreProductServiceBillingTypeChoices;
                 billingPeriod: number | null;
             }>;
@@ -2573,7 +2559,7 @@ export type ProductsSuppliedBySupplierIdQuery = {
         __typename?: 'Product';
         id: string;
         name: string;
-        price: number | null;
+        price: any | null;
     }>;
 };
 
@@ -2584,29 +2570,6 @@ export type DeleteProductMutationVariables = Exact<{
 export type DeleteProductMutation = {
     __typename?: 'Mutation';
     deleteProduct: { __typename?: 'DeleteProduct'; success: boolean } | null;
-};
-
-export type AllProductsQueryVariables = Exact<{ [key: string]: never }>;
-
-export type AllProductsQuery = {
-    __typename?: 'Query';
-    allProducts: Array<{
-        __typename?: 'Product';
-        id: string;
-        name: string;
-        price: number | null;
-        type: ProductTypeChoices;
-        sku: string | null;
-        brand: { __typename?: 'Brand'; name: string } | null;
-        services: Array<{
-            __typename?: 'ProductService';
-            id: string;
-            name: string;
-            price: number;
-            billingType: CoreProductServiceBillingTypeChoices;
-            billingPeriod: number | null;
-        }>;
-    }>;
 };
 
 export type ProductExistsQueryVariables = Exact<{
@@ -2688,7 +2651,7 @@ export type SaleByIdQuery = {
             product: {
                 __typename?: 'Product';
                 name: string;
-                price: number | null;
+                price: any | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
         }>;
@@ -2786,7 +2749,7 @@ export type ReceiveSupplierOrderMutation = {
                     __typename?: 'Product';
                     id: string;
                     name: string;
-                    price: number | null;
+                    price: any | null;
                     type: ProductTypeChoices;
                     brand: { __typename?: 'Brand'; name: string } | null;
                 };
@@ -2915,7 +2878,7 @@ export type SupplierOrderByIdQuery = {
                 __typename?: 'Product';
                 id: string;
                 name: string;
-                price: number | null;
+                price: any | null;
                 type: ProductTypeChoices;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
@@ -2968,7 +2931,7 @@ export type SupplierOrdersBySupplierIdQuery = {
                 __typename?: 'Product';
                 id: string;
                 name: string;
-                price: number | null;
+                price: any | null;
                 type: ProductTypeChoices;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
@@ -3009,7 +2972,7 @@ export type SupplierOrderListItemFragment = {
         __typename?: 'Product';
         id: string;
         name: string;
-        price: number | null;
+        price: any | null;
         type: ProductTypeChoices;
         brand: { __typename?: 'Brand'; name: string } | null;
     };
@@ -3399,6 +3362,10 @@ export const ProductListItemFragmentDoc = {
                             ],
                         },
                     },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'currentOfficeQuantity' },
+                    },
                 ],
             },
         },
@@ -3778,6 +3745,10 @@ export const ClientsDocument = {
                                 {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'numPages' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'currentPage' },
                                 },
                                 {
                                     kind: 'Field',
@@ -4555,109 +4526,6 @@ export const DeleteClientDocument = {
         },
     ],
 } as unknown as DocumentNode<DeleteClientMutation, DeleteClientMutationVariables>;
-export const AllClientsDocument = {
-    kind: 'Document',
-    definitions: [
-        {
-            kind: 'OperationDefinition',
-            operation: 'query',
-            name: { kind: 'Name', value: 'allClients' },
-            variableDefinitions: [
-                {
-                    kind: 'VariableDefinition',
-                    variable: {
-                        kind: 'Variable',
-                        name: { kind: 'Name', value: 'query' },
-                    },
-                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
-                },
-            ],
-            selectionSet: {
-                kind: 'SelectionSet',
-                selections: [
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'allClients' },
-                        arguments: [
-                            {
-                                kind: 'Argument',
-                                name: { kind: 'Name', value: 'query' },
-                                value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'query' },
-                                },
-                            },
-                        ],
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'firstName' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'lastName' },
-                                },
-                                { kind: 'Field', name: { kind: 'Name', value: 'email' } },
-                                { kind: 'Field', name: { kind: 'Name', value: 'dni' } },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'phoneCode' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'phoneNumber' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'houseNumber' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'houseUnit' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'streetName' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'locality' },
-                                    selectionSet: {
-                                        kind: 'SelectionSet',
-                                        selections: [
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'id' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'name' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'state' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'postalCode',
-                                                },
-                                            },
-                                        ],
-                                    },
-                                },
-                            ],
-                        },
-                    },
-                ],
-            },
-        },
-    ],
-} as unknown as DocumentNode<AllClientsQuery, AllClientsQueryVariables>;
 export const ClientExistsDocument = {
     kind: 'Document',
     definitions: [
@@ -5875,16 +5743,6 @@ export const DashboardDocument = {
                                         ],
                                     },
                                 },
-                            ],
-                        },
-                    },
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'allClients' },
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                             ],
                         },
                     },
@@ -8086,6 +7944,22 @@ export const ProductsDocument = {
                     },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'type' } },
+                    type: {
+                        kind: 'NamedType',
+                        name: { kind: 'Name', value: 'ProductTypeChoices' },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'officeId' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -8110,11 +7984,31 @@ export const ProductsDocument = {
                                     name: { kind: 'Name', value: 'query' },
                                 },
                             },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'type' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'type' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'officeId' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'officeId' },
+                                },
+                            },
                         ],
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
                                 { kind: 'Field', name: { kind: 'Name', value: 'count' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'currentPage' },
+                                },
                                 {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'numPages' },
@@ -8185,6 +8079,10 @@ export const ProductsDocument = {
                                 },
                             ],
                         },
+                    },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'currentOfficeQuantity' },
                     },
                 ],
             },
@@ -8569,6 +8467,10 @@ export const CreateProductDocument = {
                             ],
                         },
                     },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'currentOfficeQuantity' },
+                    },
                 ],
             },
         },
@@ -8787,6 +8689,10 @@ export const UpdateProductDocument = {
                             ],
                         },
                     },
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'currentOfficeQuantity' },
+                    },
                 ],
             },
         },
@@ -8965,82 +8871,6 @@ export const DeleteProductDocument = {
         },
     ],
 } as unknown as DocumentNode<DeleteProductMutation, DeleteProductMutationVariables>;
-export const AllProductsDocument = {
-    kind: 'Document',
-    definitions: [
-        {
-            kind: 'OperationDefinition',
-            operation: 'query',
-            name: { kind: 'Name', value: 'allProducts' },
-            selectionSet: {
-                kind: 'SelectionSet',
-                selections: [
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'allProducts' },
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                {
-                                    kind: 'FragmentSpread',
-                                    name: { kind: 'Name', value: 'ProductListItem' },
-                                },
-                            ],
-                        },
-                    },
-                ],
-            },
-        },
-        {
-            kind: 'FragmentDefinition',
-            name: { kind: 'Name', value: 'ProductListItem' },
-            typeCondition: {
-                kind: 'NamedType',
-                name: { kind: 'Name', value: 'Product' },
-            },
-            selectionSet: {
-                kind: 'SelectionSet',
-                selections: [
-                    { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'price' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'type' } },
-                    { kind: 'Field', name: { kind: 'Name', value: 'sku' } },
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'brand' },
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                            ],
-                        },
-                    },
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'services' },
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
-                                { kind: 'Field', name: { kind: 'Name', value: 'price' } },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'billingType' },
-                                },
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'billingPeriod' },
-                                },
-                            ],
-                        },
-                    },
-                ],
-            },
-        },
-    ],
-} as unknown as DocumentNode<AllProductsQuery, AllProductsQueryVariables>;
 export const ProductExistsDocument = {
     kind: 'Document',
     definitions: [

@@ -6,7 +6,10 @@ import { fetchClient } from '../fetch-client';
 import { OfficesDocument } from '../graphql';
 
 export const useOffices = () => {
-    return useQuery(queryKeys.officesNonPaginated, () => {
-        return fetchClient(OfficesDocument, {});
+    return useQuery({
+        queryKey: queryKeys.officesNonPaginated,
+        queryFn: () => {
+            return fetchClient(OfficesDocument, {});
+        },
     });
 };

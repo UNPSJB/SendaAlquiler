@@ -1,5 +1,7 @@
 import {
+    InfiniteData,
     UseMutationOptions,
+    useInfiniteQuery,
     useMutation,
     useQuery,
     useQueryClient,
@@ -18,11 +20,11 @@ import {
     CreateClientMutationVariables,
     DeleteClientDocument,
     DeleteClientMutation,
-    AllClientsDocument,
     UpdateClientMutation,
     UpdateClientMutationVariables,
     UpdateClientDocument,
-    AllClientsQueryVariables,
+    ClientsQueryVariables,
+    ClientsQuery,
 } from '../graphql';
 
 export const useDeleteClient = ({
@@ -31,23 +33,25 @@ export const useDeleteClient = ({
 }: UseMutationOptions<DeleteClientMutation, Error, string> = {}) => {
     const client = useQueryClient();
 
-    return useMutation<DeleteClientMutation, Error, string>(
-        (id: string) => {
+    return useMutation<DeleteClientMutation, Error, string>({
+        mutationFn: (id: string) => {
             return fetchClient(DeleteClientDocument, {
                 id,
             });
         },
-        {
-            onSuccess: (data, variables, context) => {
-                client.invalidateQueries([queryDomains.clients]);
+        onSuccess: (data, variables, context) => {
+            client.invalidateQueries({
+                queryKey: [queryDomains.clients],
+                type: 'all',
+                refetchType: 'all',
+            });
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 type UseUpdateClientOptions = UseMutationOptions<
@@ -62,23 +66,25 @@ export const useUpdateClient = ({
 }: UseUpdateClientOptions = {}) => {
     const client = useQueryClient();
 
-    return useMutation<UpdateClientMutation, Error, UpdateClientMutationVariables>(
-        (data) => {
+    return useMutation<UpdateClientMutation, Error, UpdateClientMutationVariables>({
+        mutationFn: (data) => {
             return fetchClient(UpdateClientDocument, data);
         },
-        {
-            onSuccess: (data, context, variables) => {
-                if (data.updateClient?.client) {
-                    client.invalidateQueries([queryDomains.clients]);
-                }
+        onSuccess: (data, context, variables) => {
+            if (data.updateClient?.client) {
+                client.invalidateQueries({
+                    queryKey: [queryDomains.clients],
+                    type: 'all',
+                    refetchType: 'all',
+                });
+            }
 
-                if (onSuccess) {
-                    onSuccess(data, context, variables);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, context, variables);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 type UseCreateClientOptions = UseMutationOptions<
@@ -93,40 +99,25 @@ export const useCreateClient = ({
 }: UseCreateClientOptions = {}) => {
     const client = useQueryClient();
 
-    return useMutation<CreateClientMutation, Error, CreateClientMutationVariables>(
-        (data) => {
+    return useMutation<CreateClientMutation, Error, CreateClientMutationVariables>({
+        mutationFn: (data) => {
             return fetchClient(CreateClientDocument, data);
         },
-        {
-            onSuccess: (data, context, variables) => {
-                if (data.createClient?.client) {
-                    client.invalidateQueries([queryDomains.clients]);
-                }
+        onSuccess: (data, context, variables) => {
+            if (data.createClient?.client) {
+                client.invalidateQueries({
+                    queryKey: [queryDomains.clients],
+                    type: 'all',
+                    refetchType: 'all',
+                });
+            }
 
-                if (onSuccess) {
-                    onSuccess(data, context, variables);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, context, variables);
+            }
         },
-    );
-};
-
-export const useAllClients = (props?: AllClientsQueryVariables) => {
-    const query = typeof props?.query === 'string' ? props.query : null;
-    const variables = props || {
-        query,
-    };
-
-    return useQuery(
-        queryKeys.clientsNonPaginated(variables),
-        () => {
-            return fetchClient(AllClientsDocument, variables);
-        },
-        {
-            enabled: query === null ? true : query.length >= 3,
-        },
-    );
+        ...options,
+    });
 };
 
 export const useClients = () => {
@@ -152,16 +143,48 @@ export const useClients = () => {
     );
 };
 
+export const useInfiniteClients = (filters: ClientsQueryVariables) => {
+    return useInfiniteQuery<
+        ClientsQuery,
+        Error,
+        InfiniteData<ClientsQuery>,
+        unknown[],
+        number | null
+    >({
+        queryKey: queryKeys.clientsInfiniteList(filters),
+        queryFn: (props) => {
+            return fetchClient(ClientsDocument, {
+                localities: filters.localities,
+                query: filters.query && filters.query.length >= 3 ? filters.query : null,
+                page: props.pageParam,
+            });
+        },
+        getPreviousPageParam: (firstPage) => {
+            if (firstPage.clients.currentPage <= 1) {
+                return null;
+            }
+
+            return firstPage.clients.currentPage - 1;
+        },
+        getNextPageParam: (lastPage) => {
+            if (lastPage.clients.currentPage >= lastPage.clients.numPages) {
+                return null;
+            }
+
+            return lastPage.clients.currentPage + 1;
+        },
+        initialPageParam: 1,
+    });
+};
+
 export const useClientById = (id: string | undefined) => {
-    return useQuery(
-        queryKeys.clientDetailsById(id),
-        () => {
+    return useQuery({
+        queryKey: queryKeys.clientDetailsById(id),
+        queryFn: () => {
             return fetchClient(ClientByIdDocument, {
                 id: id as string,
             });
         },
-        {
-            enabled: typeof id === 'string',
-        },
-    );
+        enabled: typeof id === 'string',
+    });
 };

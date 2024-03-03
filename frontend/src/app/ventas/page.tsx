@@ -109,7 +109,7 @@ const RowActions = ({ sale }: { sale: Sale }) => {
     return (
         <Dialog
             onOpenChange={(next) => {
-                if (deleteMutation.isLoading) {
+                if (deleteMutation.isPending) {
                     return;
                 }
 

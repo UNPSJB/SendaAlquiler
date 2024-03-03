@@ -141,7 +141,7 @@ export const CustomerFormEditor = ({ cancelHref, defaultValues, idToUpdate }: Pr
     };
 
     const isCreatingOrUpdating =
-        createCustomerMutation.isLoading || updateCustomerMutation.isLoading;
+        createCustomerMutation.isPending || updateCustomerMutation.isPending;
 
     return (
         <main className="px-8 pb-12">

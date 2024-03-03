@@ -128,7 +128,7 @@ export const ProductFormEditorDetails = ({ originalSku }: Props) => {
                         <FormControl>
                             <ComboboxCreatable
                                 placeholder={
-                                    brandMutation.isLoading || brandsQuery.isLoading
+                                    brandMutation.isPending || brandsQuery.isPending
                                         ? 'Cargando marcas...'
                                         : 'Selecciona una marca'
                                 }
@@ -149,10 +149,10 @@ export const ProductFormEditorDetails = ({ originalSku }: Props) => {
                                 })}
                                 value={field.value || null}
                                 isDisabled={
-                                    brandsQuery.isLoading || brandMutation.isLoading
+                                    brandsQuery.isPending || brandMutation.isPending
                                 }
                                 isLoading={
-                                    brandsQuery.isLoading || brandMutation.isLoading
+                                    brandsQuery.isPending || brandMutation.isPending
                                 }
                             />
                         </FormControl>

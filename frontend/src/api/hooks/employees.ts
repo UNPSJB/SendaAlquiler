@@ -7,7 +7,7 @@ import {
 
 import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
-import { queryKeys } from './constants';
+import { queryDomains, queryKeys } from './constants';
 
 import { fetchClient } from '../fetch-client';
 import {
@@ -54,37 +54,37 @@ export const useCreateEmployee = ({
 }: UseCreateEmployeeOptions = {}) => {
     const client = useQueryClient();
 
-    return useMutation<CreateEmployeeMutation, Error, CreateEmployeeMutationVariables>(
-        (data) => {
+    return useMutation<CreateEmployeeMutation, Error, CreateEmployeeMutationVariables>({
+        mutationFn: (data) => {
             return fetchClient(CreateEmployeeDocument, data);
         },
-        {
-            onSuccess: (data, context, variables) => {
-                if (data.createEmployee?.employee) {
-                    client.invalidateQueries(queryKeys.employeesPaginatedList());
-                }
+        onSuccess: (data, context, variables) => {
+            if (data.createEmployee?.employee) {
+                client.invalidateQueries({
+                    queryKey: [queryDomains.employees],
+                    type: 'all',
+                    refetchType: 'all',
+                });
+            }
 
-                if (onSuccess) {
-                    onSuccess(data, context, variables);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, context, variables);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 export const useEmployeeById = (id: string | undefined) => {
-    return useQuery(
-        queryKeys.employeeDetailsById(id),
-        () => {
+    return useQuery({
+        queryKey: queryKeys.employeeDetailsById(id),
+        queryFn: () => {
             return fetchClient(EmployeeByIdDocument, {
                 id: id as string,
             });
         },
-        {
-            enabled: typeof id === 'string',
-        },
-    );
+        enabled: typeof id === 'string',
+    });
 };
 
 export const useDeleteEmployee = ({
@@ -93,23 +93,25 @@ export const useDeleteEmployee = ({
 }: UseMutationOptions<DeleteEmployeeMutation, Error, string> = {}) => {
     const client = useQueryClient();
 
-    return useMutation<DeleteEmployeeMutation, Error, string>(
-        (id: string) => {
+    return useMutation<DeleteEmployeeMutation, Error, string>({
+        mutationFn: (id: string) => {
             return fetchClient(DeleteEmployeeDocument, {
                 id,
             });
         },
-        {
-            onSuccess: (data, variables, context) => {
-                client.invalidateQueries(queryKeys.employeesPaginatedList());
+        onSuccess: (data, variables, context) => {
+            client.invalidateQueries({
+                queryKey: [queryDomains.employees],
+                type: 'all',
+                refetchType: 'all',
+            });
 
-                if (onSuccess) {
-                    onSuccess(data, variables, context);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, variables, context);
+            }
         },
-    );
+        ...options,
+    });
 };
 
 type UseUpdateEmployeeOptions = UseMutationOptions<
@@ -124,21 +126,21 @@ export const useUpdateEmployee = ({
 }: UseUpdateEmployeeOptions = {}) => {
     const client = useQueryClient();
 
-    return useMutation<UpdateEmployeeMutation, Error, UpdateEmployeeMutationVariables>(
-        (data) => {
+    return useMutation<UpdateEmployeeMutation, Error, UpdateEmployeeMutationVariables>({
+        mutationFn: (data) => {
             return fetchClient(UpdateEmployeeDocument, data);
         },
-        {
-            onSuccess: (data, context, variables) => {
-                if (data.updateEmployee?.employee) {
-                    client.invalidateQueries(queryKeys.employeesPaginatedList());
-                }
+        onSuccess: (data, context, variables) => {
+            if (data.updateEmployee?.employee) {
+                client.invalidateQueries({
+                    queryKey: queryKeys.employeesPaginatedList(),
+                });
+            }
 
-                if (onSuccess) {
-                    onSuccess(data, context, variables);
-                }
-            },
-            ...options,
+            if (onSuccess) {
+                onSuccess(data, context, variables);
+            }
         },
-    );
+        ...options,
+    });
 };

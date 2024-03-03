@@ -120,7 +120,7 @@ export const EmployeeFormEditor = ({ cancelHref, defaultValues, idToUpdate }: Pr
     };
 
     const isCreatingOrUpdating =
-        createEmployeeMutation.isLoading || updateEmployeeMutation.isLoading;
+        createEmployeeMutation.isPending || updateEmployeeMutation.isPending;
 
     return (
         <main className="px-8 pb-12">

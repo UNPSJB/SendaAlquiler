@@ -8,9 +8,9 @@ query dashboard {
             lastName
         }
     }
-    allClients {
-        id
-    }
+    # allClients {
+    #     id
+    # }
     allProducts {
         id
         name

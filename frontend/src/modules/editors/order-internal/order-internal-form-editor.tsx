@@ -133,7 +133,7 @@ export const OrderInternalFormEditor = ({
         );
     };
 
-    const isCreatingOrUpdating = createOrderMutation.isLoading;
+    const isCreatingOrUpdating = createOrderMutation.isPending;
     return (
         <main className="px-8 pb-12">
             <div className="flex items-center justify-between py-6">
