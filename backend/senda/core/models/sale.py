@@ -73,17 +73,19 @@ class SaleManager(models.Manager["Sale"]):
                     self.validate_product(product, item, office_id)
 
                     item_totals = self.calculate_item_totals(item, product.price)
+                    item_model = SaleItemModel(
+                        sale=sale,
+                        product=product,
+                        product_price=product.price,
+                        quantity=item.get("quantity"),
+                        subtotal=item_totals.get("subtotal", 0),
+                        discount=item_totals.get("discount", 0),
+                        total=item_totals.get("total", 0),
+                    )
 
-                    sale_items.append(
-                        SaleItemModel(
-                            sale=sale,
-                            product=product,
-                            product_price=product.price,
-                            quantity=item.get("quantity"),
-                            subtotal=item_totals.get("subtotal", 0),
-                            discount=item_totals.get("discount", 0),
-                            total=item_totals.get("total", 0),
-                        )
+                    sale_items.append(item_model)
+                    product.decrease_stock_in_office(
+                        office_id=office_id, quantity=item_model.quantity
                     )
 
                 SaleItemModel.objects.bulk_create(sale_items)
@@ -127,7 +129,9 @@ class Sale(TimeStampedModel):
 class SaleItemModel(TimeStampedModel):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE, related_name="sale_items")
 
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="sale_items")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="sale_items"
+    )
     product_price = models.PositiveBigIntegerField()
 
     quantity = models.IntegerField(default=0)
