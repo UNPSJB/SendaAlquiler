@@ -61,6 +61,7 @@ export const useDeleteLocality = ({
                 queryKey: [queryDomains.localities],
                 type: 'all',
                 refetchType: 'all',
+                stale: true,
             });
 
             if (onSuccess) {

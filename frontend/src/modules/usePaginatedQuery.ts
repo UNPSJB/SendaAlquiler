@@ -43,7 +43,7 @@ const usePaginatedQuery = <
     } as unknown as V;
 
     const queryResult = useQuery<unknown, Error, T>({
-        queryKey: [typeof key === 'function' ? key(variables) : key, variables],
+        queryKey: typeof key === 'function' ? key(variables) : [key, variables],
         queryFn: () => {
             return fetchClient<T, V>(document, variables);
         },
