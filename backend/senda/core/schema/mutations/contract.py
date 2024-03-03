@@ -1,20 +1,22 @@
-from typing import Any, List
+from typing import  List
 
 import graphene
 from django.core.exceptions import ObjectDoesNotExist
 
 from senda.core.models.contract import (
-    ContractHistory,
     Contract,
-    ContractHistoryStatusChoices,
     ContractDetailsDict,
     ContractItemDetailsDict,
     ContractItemProductAllocationDetailsDict,
     ContractItemServiceDetailsDict,
     ContractCreationError,
+    ContractItemDevolutionDetailsDict,
 )
 from senda.core.decorators import employee_or_admin_required, CustomInfo
-from senda.core.schema.custom_types import ContractType
+from senda.core.schema.custom_types import (
+    ContractType,
+    ContractHistoryStatusChoicesEnum,
+)
 
 from senda.core.decorators import CustomInfo
 from utils.graphene import non_null_list_of
@@ -134,192 +136,6 @@ class CreateContract(graphene.Mutation):
             return CreateContract(ok=False, error=str(e))
 
 
-class BaseChangeContractStatus(graphene.Mutation):
-    contract = graphene.Field(ContractType)
-    error = graphene.String()
-
-    class Arguments:
-        id = graphene.ID(required=True)
-
-    @classmethod
-    def get_contract(cls, id: str) -> Contract:
-        contract = Contract.objects.filter(id=id).first()
-
-        if contract is None:
-            raise Exception("No existe contrato con ese ID")
-
-        return contract
-
-    @classmethod
-    def check_contract_status_is_one_of_and_update_status(
-        cls,
-        contract: Contract,
-        status: List[ContractHistoryStatusChoices],
-        new_status: ContractHistoryStatusChoices,
-    ) -> None:
-        if (
-            not contract.latest_history_entry
-            or contract.latest_history_entry.status not in status
-        ):
-            raise Exception("El contrato no esta en un estado valido")
-
-        ContractHistory.objects.create(contract=contract, status=new_status)
-
-    @classmethod
-    def mutate(cls, self: "BaseChangeContractStatus", info: Any, id: str):
-        raise NotImplementedError()
-
-
-class PayContractDeposit(BaseChangeContractStatus):
-    @classmethod
-    def mutate(
-        cls, self: "PayContractDeposit", info: Any, id: str
-    ) -> BaseChangeContractStatus:
-        try:
-            contract = cls.get_contract(id)
-            cls.check_contract_status_is_one_of_and_update_status(
-                contract,
-                [ContractHistoryStatusChoices.PRESUPUESTADO],
-                ContractHistoryStatusChoices.CON_DEPOSITO,
-            )
-
-            return BaseChangeContractStatus(contract=contract)
-        except Exception as e:
-            return BaseChangeContractStatus(error=str(e))
-
-
-class PayTotalContract(BaseChangeContractStatus):
-    @classmethod
-    def mutate(
-        cls, self: "PayTotalContract", info: Any, id: str
-    ) -> BaseChangeContractStatus:
-        try:
-            contract = cls.get_contract(id)
-            cls.check_contract_status_is_one_of_and_update_status(
-                contract,
-                [ContractHistoryStatusChoices.CON_DEPOSITO],
-                ContractHistoryStatusChoices.PAGADO,
-            )
-
-            return BaseChangeContractStatus(contract=contract)
-        except Exception as e:
-            return BaseChangeContractStatus(error=str(e))
-
-
-class CancelContract(BaseChangeContractStatus):
-    @classmethod
-    def mutate(
-        cls, self: "CancelContract", info: Any, id: str
-    ) -> BaseChangeContractStatus:
-        try:
-            contract = cls.get_contract(id)
-            cls.check_contract_status_is_one_of_and_update_status(
-                contract,
-                [
-                    ContractHistoryStatusChoices.CON_DEPOSITO,
-                    ContractHistoryStatusChoices.PAGADO,
-                ],
-                ContractHistoryStatusChoices.CANCELADO,
-            )
-
-            return BaseChangeContractStatus(contract=contract)
-        except Exception as e:
-            return BaseChangeContractStatus(error=str(e))
-
-
-class StartContract(BaseChangeContractStatus):
-    @classmethod
-    def mutate(
-        cls, self: "StartContract", info: Any, id: str
-    ) -> BaseChangeContractStatus:
-        try:
-            contract = cls.get_contract(id)
-            cls.check_contract_status_is_one_of_and_update_status(
-                contract,
-                [ContractHistoryStatusChoices.PAGADO],
-                ContractHistoryStatusChoices.ACTIVO,
-            )
-
-            return BaseChangeContractStatus(contract=contract)
-        except Exception as e:
-            return BaseChangeContractStatus(error=str(e))
-
-
-class ExpiredContract(BaseChangeContractStatus):
-    @classmethod
-    def mutate(
-        cls, self: "ExpiredContract", info: Any, id: str
-    ) -> BaseChangeContractStatus:
-        try:
-            contract = cls.get_contract(id)
-            cls.check_contract_status_is_one_of_and_update_status(
-                contract,
-                [
-                    ContractHistoryStatusChoices.CON_DEPOSITO,
-                    ContractHistoryStatusChoices.PRESUPUESTADO,
-                ],
-                ContractHistoryStatusChoices.VENCIDO,
-            )
-
-            return BaseChangeContractStatus(contract=contract)
-        except Exception as e:
-            return BaseChangeContractStatus(error=str(e))
-
-
-class FinishContract(BaseChangeContractStatus):
-    @classmethod
-    def mutate(
-        cls, self: "FinishContract", info: Any, id: str
-    ) -> BaseChangeContractStatus:
-        try:
-            contract = cls.get_contract(id)
-            cls.check_contract_status_is_one_of_and_update_status(
-                contract,
-                [ContractHistoryStatusChoices.ACTIVO],
-                ContractHistoryStatusChoices.FINALIZADO,
-            )
-
-            return BaseChangeContractStatus(contract=contract)
-        except Exception as e:
-            return BaseChangeContractStatus(error=str(e))
-
-
-class FailedReturnContract(BaseChangeContractStatus):
-    @classmethod
-    def mutate(
-        cls, self: "FailedReturnContract", info: Any, id: str
-    ) -> BaseChangeContractStatus:
-        try:
-            contract = cls.get_contract(id)
-            cls.check_contract_status_is_one_of_and_update_status(
-                contract,
-                [ContractHistoryStatusChoices.FINALIZADO],
-                ContractHistoryStatusChoices.DEVOLUCION_FALLIDA,
-            )
-
-            return BaseChangeContractStatus(contract=contract)
-        except Exception as e:
-            return BaseChangeContractStatus(error=str(e))
-
-
-class SuccessfulReturnContract(BaseChangeContractStatus):
-    @classmethod
-    def mutate(
-        cls, self: "SuccessfulReturnContract", info: Any, id: str
-    ) -> BaseChangeContractStatus:
-        try:
-            contract = cls.get_contract(id)
-            cls.check_contract_status_is_one_of_and_update_status(
-                contract,
-                [ContractHistoryStatusChoices.FINALIZADO],
-                ContractHistoryStatusChoices.DEVOLUCION_EXITOSA,
-            )
-
-            return BaseChangeContractStatus(contract=contract)
-        except Exception as e:
-            return BaseChangeContractStatus(error=str(e))
-
-
 class DeleteContract(graphene.Mutation):
     success = graphene.Boolean(required=True)
 
@@ -336,15 +152,64 @@ class DeleteContract(graphene.Mutation):
         return DeleteContract(success=True)
 
 
+class ContractItemDevolutionInput(graphene.InputObjectType):
+    item_id = graphene.ID(required=True)
+    quantity = graphene.Int(required=True)
+
+
+class ChangeContractStatus(graphene.Mutation):
+    contract = graphene.Field(ContractType)
+    error = graphene.String()
+
+    class Arguments:
+        id = graphene.ID(required=True)
+        cash_payment = graphene.Int()
+        devolutions = graphene.List(graphene.NonNull(ContractItemDevolutionInput))
+        status = graphene.String(required=True)
+        note = graphene.String()
+
+    @classmethod
+    def get_contract(cls, id: str) -> Contract:
+        contract = Contract.objects.filter(id=id).first()
+
+        if contract is None:
+            raise Exception("No existe contrato con ese ID")
+
+        return contract
+
+    @classmethod
+    def mutate(
+        cls,
+        self: "ChangeContractStatus",
+        info: CustomInfo,
+        id: str,
+        status: str,
+        cash_payment: int = None,
+        devolutions: List[ContractItemDevolutionInput] = None,
+        note: str = None,
+    ):
+        contract = cls.get_contract(id)
+        contract.set_status(
+            cash_payment=cash_payment,
+            devolutions=(
+                [
+                    ContractItemDevolutionDetailsDict(
+                        item_id=int(devolution.item_id), quantity=devolution.quantity
+                    )
+                    for devolution in devolutions
+                ]
+                if devolutions
+                else []
+            ),
+            note=note,
+            responsible_user=info.context.user,
+            status=status,
+        )
+
+        return ChangeContractStatus(contract=contract, error=None)
+
+
 class Mutation(graphene.ObjectType):
     create_contract = CreateContract.Field()
-    pay_contract_deposit = PayContractDeposit.Field()
-    pay_total_contract = PayTotalContract.Field()
-    cancel_contract = CancelContract.Field()
-    start_contract = StartContract.Field()
-    expired_contract = ExpiredContract.Field()
-    finish_contract = FinishContract.Field()
-    failed_return_contract = FailedReturnContract.Field()
-    successful_return_contract = SuccessfulReturnContract.Field()
-
+    change_contract_status = ChangeContractStatus.Field()
     delete_contract = DeleteContract.Field()

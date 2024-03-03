@@ -18,9 +18,9 @@ import {
     CreateContractMutationVariables,
     DeleteContractDocument,
     DeleteContractMutation,
-    PayContractDepositDocument,
-    PayTotalContractDocument,
     ContractsByClientIdDocument,
+    ChangeContractStatusDocument,
+    ChangeContractStatusMutationVariables,
 } from '../graphql';
 
 export const useContracts = () => {
@@ -41,7 +41,7 @@ export const useContracts = () => {
 
 export const useContractById = (id: string | undefined) => {
     return useQuery({
-        queryKey: ['contract', id],
+        queryKey: queryKeys.contractDetailsById(id),
         queryFn: () => {
             return fetchClient(ContractByIdDocument, {
                 id: id as string,
@@ -113,21 +113,23 @@ export const useDeleteContract = ({
     });
 };
 
-export const usePayContractDeposit = () => {
-    return useMutation({
-        mutationFn: (id: string) => {
-            return fetchClient(PayContractDepositDocument, {
-                id,
-            });
-        },
-    });
-};
+export const useChangeContractStatus = () => {
+    const client = useQueryClient();
 
-export const usePayTotalContract = () => {
     return useMutation({
-        mutationFn: (id: string) => {
-            return fetchClient(PayTotalContractDocument, {
-                id,
+        mutationFn: (data: ChangeContractStatusMutationVariables) => {
+            return fetchClient(ChangeContractStatusDocument, data);
+        },
+        onSuccess: (data) => {
+            const updatedId = data.changeContractStatus?.contract?.id;
+            if (!updatedId) {
+                return;
+            }
+
+            client.invalidateQueries({
+                queryKey: [queryDomains.contracts],
+                refetchType: 'all',
+                type: 'all',
             });
         },
     });
@@ -142,56 +144,5 @@ export const useContractsByClientId = (id: string | undefined) => {
             });
         },
         enabled: typeof id === 'string',
-    });
-};
-
-export const usePayContractDepositMutation = () => {
-    const client = useQueryClient();
-    return useMutation({
-        mutationFn: (id: string) => {
-            return fetchClient(PayContractDepositDocument, {
-                id,
-            });
-        },
-        onSuccess: (data) => {
-            const updatedId = data.payContractDeposit?.contract?.id;
-            const updatedHistory = data.payContractDeposit?.contract?.latestHistoryEntry;
-
-            if (!updatedId || !updatedHistory) {
-                return;
-            }
-
-            client.invalidateQueries({
-                queryKey: [queryDomains.contracts],
-                refetchType: 'all',
-                type: 'all',
-            });
-        },
-    });
-};
-
-export const usePayTotalContractMutation = () => {
-    const client = useQueryClient();
-
-    return useMutation({
-        mutationFn: (id: string) => {
-            return fetchClient(PayTotalContractDocument, {
-                id,
-            });
-        },
-        onSuccess: (data) => {
-            const updatedId = data.payTotalContract?.contract?.id;
-            const updatedHistory = data.payTotalContract?.contract?.latestHistoryEntry;
-
-            if (!updatedId || !updatedHistory) {
-                return;
-            }
-
-            client.invalidateQueries({
-                queryKey: [queryDomains.contracts],
-                refetchType: 'all',
-                type: 'all',
-            });
-        },
     });
 };

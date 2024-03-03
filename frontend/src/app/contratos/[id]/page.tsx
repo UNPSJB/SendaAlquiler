@@ -44,13 +44,13 @@ export type ContractByIdTabComponentProps = {
 
 export type ContractStatusEditorFormValues = Partial<{
     status: {
-        value: ContractHistoryStatusChoices;
+        value: ContractHistoryStatusChoices | 'DEVOLUCION';
         label: string;
     };
     note: string;
-    ordersById: Partial<
-        Record<string, { quantityReceived: number | null; quantitySent: number | null }>
-    >;
+    ordersById: Partial<Record<string, { quantityReceived: number | null }>>;
+    cashPayment: number | null;
+    cashPaymentIsCorrect: boolean;
 }>;
 
 const Page = () => {
@@ -108,9 +108,10 @@ const Page = () => {
                                     </div>
 
                                     <div className="col-span-3 flex flex-col space-y-4">
-                                        {[
-                                            ContractHistoryStatusChoices.Presupuestado,
-                                            ContractHistoryStatusChoices.Finalizado,
+                                        {![
+                                            ContractHistoryStatusChoices.DevolucionExitosa,
+                                            ContractHistoryStatusChoices.DevolucionFallida,
+                                            ContractHistoryStatusChoices.Cancelado,
                                         ].includes(
                                             contract.latestHistoryEntry!.status!,
                                         ) && <ContractStatusEditor contract={contract} />}

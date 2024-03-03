@@ -43,12 +43,6 @@ export type Brand = {
     products: Array<Product>;
 };
 
-export type CancelContract = {
-    __typename?: 'CancelContract';
-    contract: Maybe<Contract>;
-    error: Maybe<Scalars['String']['output']>;
-};
-
 export type CancelInternalOrder = {
     __typename?: 'CancelInternalOrder';
     error: Maybe<Scalars['String']['output']>;
@@ -59,6 +53,12 @@ export type CancelSupplierOrder = {
     __typename?: 'CancelSupplierOrder';
     error: Maybe<Scalars['String']['output']>;
     supplierOrder: Maybe<OrderSupplier>;
+};
+
+export type ChangeContractStatus = {
+    __typename?: 'ChangeContractStatus';
+    contract: Maybe<Contract>;
+    error: Maybe<Scalars['String']['output']>;
 };
 
 export type Client = {
@@ -98,6 +98,8 @@ export type Contract = {
     createdOn: Scalars['DateTime']['output'];
     discountAmount: Scalars['BigInt']['output'];
     expirationDate: Scalars['DateTime']['output'];
+    finalDepositAmount: Scalars['BigInt']['output'];
+    firstDepositAmount: Scalars['BigInt']['output'];
     historyEntries: Array<ContractHistory>;
     /** Número de la calle donde vive el cliente */
     houseNumber: Scalars['String']['output'];
@@ -169,6 +171,11 @@ export type ContractItem = {
     shippingDiscount: Scalars['BigInt']['output'];
     shippingSubtotal: Scalars['Int']['output'];
     total: Scalars['BigInt']['output'];
+};
+
+export type ContractItemDevolutionInput = {
+    itemId: Scalars['ID']['input'];
+    quantity: Scalars['Int']['input'];
 };
 
 export type ContractItemInput = {
@@ -413,24 +420,6 @@ export type EmployeeOffice = {
     office: Office;
 };
 
-export type ExpiredContract = {
-    __typename?: 'ExpiredContract';
-    contract: Maybe<Contract>;
-    error: Maybe<Scalars['String']['output']>;
-};
-
-export type FailedReturnContract = {
-    __typename?: 'FailedReturnContract';
-    contract: Maybe<Contract>;
-    error: Maybe<Scalars['String']['output']>;
-};
-
-export type FinishContract = {
-    __typename?: 'FinishContract';
-    contract: Maybe<Contract>;
-    error: Maybe<Scalars['String']['output']>;
-};
-
 export type InProgressInternalOrder = {
     __typename?: 'InProgressInternalOrder';
     error: Maybe<Scalars['String']['output']>;
@@ -514,9 +503,9 @@ export type Login = {
 
 export type Mutation = {
     __typename?: 'Mutation';
-    cancelContract: Maybe<CancelContract>;
     cancelInternalOrder: Maybe<CancelInternalOrder>;
     cancelSupplierOrder: Maybe<CancelSupplierOrder>;
+    changeContractStatus: Maybe<ChangeContractStatus>;
     createBrand: Maybe<CreateBrand>;
     createClient: Maybe<CreateClient>;
     createContract: Maybe<CreateContract>;
@@ -536,19 +525,12 @@ export type Mutation = {
     deleteSale: Maybe<DeleteSale>;
     deleteSupplier: Maybe<DeleteSupplier>;
     deleteSupplierOrder: Maybe<DeleteSupplierOrder>;
-    expiredContract: Maybe<ExpiredContract>;
-    failedReturnContract: Maybe<FailedReturnContract>;
-    finishContract: Maybe<FinishContract>;
     inProgressInternalOrder: Maybe<InProgressInternalOrder>;
     login: Maybe<Login>;
-    payContractDeposit: Maybe<PayContractDeposit>;
-    payTotalContract: Maybe<PayTotalContract>;
     receiveInternalOrder: Maybe<ReceiveInternalOrder>;
     receiveSupplierOrder: Maybe<ReceiveSupplierOrder>;
     refreshToken: Maybe<Refresh>;
     resetEmployeePassword: Maybe<ResetEmployeePassword>;
-    startContract: Maybe<StartContract>;
-    successfulReturnContract: Maybe<SuccessfulReturnContract>;
     /** Obtain JSON Web Token mutation */
     tokenAuth: Maybe<ObtainJsonWebToken>;
     updateClient: Maybe<UpdateClient>;
@@ -559,10 +541,6 @@ export type Mutation = {
     verifyToken: Maybe<Verify>;
 };
 
-export type MutationCancelContractArgs = {
-    id: Scalars['ID']['input'];
-};
-
 export type MutationCancelInternalOrderArgs = {
     id: Scalars['ID']['input'];
     note: InputMaybe<Scalars['String']['input']>;
@@ -571,6 +549,14 @@ export type MutationCancelInternalOrderArgs = {
 export type MutationCancelSupplierOrderArgs = {
     id: Scalars['ID']['input'];
     note: InputMaybe<Scalars['String']['input']>;
+};
+
+export type MutationChangeContractStatusArgs = {
+    cashPayment: InputMaybe<Scalars['Int']['input']>;
+    devolutions: InputMaybe<Array<ContractItemDevolutionInput>>;
+    id: Scalars['ID']['input'];
+    note: InputMaybe<Scalars['String']['input']>;
+    status: Scalars['String']['input'];
 };
 
 export type MutationCreateBrandArgs = {
@@ -655,18 +641,6 @@ export type MutationDeleteSupplierOrderArgs = {
     id: Scalars['ID']['input'];
 };
 
-export type MutationExpiredContractArgs = {
-    id: Scalars['ID']['input'];
-};
-
-export type MutationFailedReturnContractArgs = {
-    id: Scalars['ID']['input'];
-};
-
-export type MutationFinishContractArgs = {
-    id: Scalars['ID']['input'];
-};
-
 export type MutationInProgressInternalOrderArgs = {
     id: Scalars['ID']['input'];
     items: Array<InProgressInternalOrderItemInput>;
@@ -676,14 +650,6 @@ export type MutationInProgressInternalOrderArgs = {
 export type MutationLoginArgs = {
     email: Scalars['String']['input'];
     password: Scalars['String']['input'];
-};
-
-export type MutationPayContractDepositArgs = {
-    id: Scalars['ID']['input'];
-};
-
-export type MutationPayTotalContractArgs = {
-    id: Scalars['ID']['input'];
 };
 
 export type MutationReceiveInternalOrderArgs = {
@@ -703,14 +669,6 @@ export type MutationRefreshTokenArgs = {
 };
 
 export type MutationResetEmployeePasswordArgs = {
-    id: Scalars['ID']['input'];
-};
-
-export type MutationStartContractArgs = {
-    id: Scalars['ID']['input'];
-};
-
-export type MutationSuccessfulReturnContractArgs = {
     id: Scalars['ID']['input'];
 };
 
@@ -865,18 +823,6 @@ export type PaginatedSupplierQueryResult = {
     currentPage: Scalars['Int']['output'];
     numPages: Scalars['Int']['output'];
     results: Array<Supplier>;
-};
-
-export type PayContractDeposit = {
-    __typename?: 'PayContractDeposit';
-    contract: Maybe<Contract>;
-    error: Maybe<Scalars['String']['output']>;
-};
-
-export type PayTotalContract = {
-    __typename?: 'PayTotalContract';
-    contract: Maybe<Contract>;
-    error: Maybe<Scalars['String']['output']>;
 };
 
 export type Product = {
@@ -1218,12 +1164,6 @@ export type SaleOrderItemInput = {
     quantity: Scalars['Int']['input'];
 };
 
-export type StartContract = {
-    __typename?: 'StartContract';
-    contract: Maybe<Contract>;
-    error: Maybe<Scalars['String']['output']>;
-};
-
 /**
  *
  *     Enum-like class representing choices for states. Inherits from models.TextChoices.
@@ -1256,12 +1196,6 @@ export enum StateChoices {
     TierraDelFuego = 'TIERRA_DEL_FUEGO',
     Tucuman = 'TUCUMAN',
 }
-
-export type SuccessfulReturnContract = {
-    __typename?: 'SuccessfulReturnContract';
-    contract: Maybe<Contract>;
-    error: Maybe<Scalars['String']['output']>;
-};
 
 export type Supplier = {
     __typename?: 'Supplier';
@@ -1655,6 +1589,8 @@ export type ContractByIdQuery = {
         __typename?: 'Contract';
         id: string;
         createdOn: any;
+        firstDepositAmount: any;
+        finalDepositAmount: any;
         contractEndDatetime: any;
         contractStartDatetime: any;
         expirationDate: any;
@@ -1759,58 +1695,37 @@ export type DeleteContractMutation = {
     deleteContract: { __typename?: 'DeleteContract'; success: boolean } | null;
 };
 
-export type PayContractDepositMutationVariables = Exact<{
+export type ChangeContractStatusMutationVariables = Exact<{
     id: Scalars['ID']['input'];
+    cashPayment: InputMaybe<Scalars['Int']['input']>;
+    status: Scalars['String']['input'];
+    devolutions: InputMaybe<
+        Array<ContractItemDevolutionInput> | ContractItemDevolutionInput
+    >;
+    note: InputMaybe<Scalars['String']['input']>;
 }>;
 
-export type PayContractDepositMutation = {
+export type ChangeContractStatusMutation = {
     __typename?: 'Mutation';
-    payContractDeposit: {
-        __typename?: 'PayContractDeposit';
+    changeContractStatus: {
+        __typename?: 'ChangeContractStatus';
         error: string | null;
         contract: {
             __typename?: 'Contract';
             id: string;
-            latestHistoryEntry: {
+            historyEntries: Array<{
                 __typename?: 'ContractHistory';
+                id: string;
+                createdOn: any;
                 status: ContractHistoryStatusChoices;
-            } | null;
-        } | null;
-    } | null;
-};
-
-export type PayTotalContractMutationVariables = Exact<{
-    id: Scalars['ID']['input'];
-}>;
-
-export type PayTotalContractMutation = {
-    __typename?: 'Mutation';
-    payTotalContract: {
-        __typename?: 'PayTotalContract';
-        error: string | null;
-        contract: {
-            __typename?: 'Contract';
-            id: string;
-            latestHistoryEntry: {
-                __typename?: 'ContractHistory';
-                status: ContractHistoryStatusChoices;
-            } | null;
-        } | null;
-    } | null;
-};
-
-export type CancelContractMutationVariables = Exact<{
-    id: Scalars['ID']['input'];
-}>;
-
-export type CancelContractMutation = {
-    __typename?: 'Mutation';
-    cancelContract: {
-        __typename?: 'CancelContract';
-        error: string | null;
-        contract: {
-            __typename?: 'Contract';
-            id: string;
+                note: string | null;
+                responsibleUser: {
+                    __typename?: 'User';
+                    firstName: string;
+                    lastName: string;
+                    email: string;
+                } | null;
+            }>;
             latestHistoryEntry: {
                 __typename?: 'ContractHistory';
                 status: ContractHistoryStatusChoices;
@@ -4759,6 +4674,14 @@ export const ContractByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
+                                    name: { kind: 'Name', value: 'firstDepositAmount' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'finalDepositAmount' },
+                                },
+                                {
+                                    kind: 'Field',
                                     name: { kind: 'Name', value: 'client' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
@@ -5179,7 +5102,7 @@ export const CreateContractDocument = {
         {
             kind: 'OperationDefinition',
             operation: 'mutation',
-            name: { kind: 'Name', value: 'CreateContract' },
+            name: { kind: 'Name', value: 'createContract' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -5304,13 +5227,13 @@ export const DeleteContractDocument = {
         },
     ],
 } as unknown as DocumentNode<DeleteContractMutation, DeleteContractMutationVariables>;
-export const PayContractDepositDocument = {
+export const ChangeContractStatusDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'mutation',
-            name: { kind: 'Name', value: 'payContractDeposit' },
+            name: { kind: 'Name', value: 'changeContractStatus' },
             variableDefinitions: [
                 {
                     kind: 'VariableDefinition',
@@ -5320,13 +5243,60 @@ export const PayContractDepositDocument = {
                         type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
                     },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'cashPayment' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'status' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'devolutions' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: {
+                                    kind: 'Name',
+                                    value: 'ContractItemDevolutionInput',
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'note' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'payContractDeposit' },
+                        name: { kind: 'Name', value: 'changeContractStatus' },
                         arguments: [
                             {
                                 kind: 'Argument',
@@ -5334,6 +5304,38 @@ export const PayContractDepositDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'status' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'status' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'cashPayment' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'cashPayment' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'devolutions' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'devolutions' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'note' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'note' },
                                 },
                             },
                         ],
@@ -5349,6 +5351,79 @@ export const PayContractDepositDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'historyEntries',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'createdOn',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'note',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'responsibleUser',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'firstName',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'lastName',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'email',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
                                             },
                                             {
                                                 kind: 'Field',
@@ -5381,163 +5456,9 @@ export const PayContractDepositDocument = {
         },
     ],
 } as unknown as DocumentNode<
-    PayContractDepositMutation,
-    PayContractDepositMutationVariables
+    ChangeContractStatusMutation,
+    ChangeContractStatusMutationVariables
 >;
-export const PayTotalContractDocument = {
-    kind: 'Document',
-    definitions: [
-        {
-            kind: 'OperationDefinition',
-            operation: 'mutation',
-            name: { kind: 'Name', value: 'payTotalContract' },
-            variableDefinitions: [
-                {
-                    kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
-                    type: {
-                        kind: 'NonNullType',
-                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
-                    },
-                },
-            ],
-            selectionSet: {
-                kind: 'SelectionSet',
-                selections: [
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'payTotalContract' },
-                        arguments: [
-                            {
-                                kind: 'Argument',
-                                name: { kind: 'Name', value: 'id' },
-                                value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'id' },
-                                },
-                            },
-                        ],
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'contract' },
-                                    selectionSet: {
-                                        kind: 'SelectionSet',
-                                        selections: [
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'id' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'latestHistoryEntry',
-                                                },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'status',
-                                                            },
-                                                        },
-                                                    ],
-                                                },
-                                            },
-                                        ],
-                                    },
-                                },
-                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
-                            ],
-                        },
-                    },
-                ],
-            },
-        },
-    ],
-} as unknown as DocumentNode<PayTotalContractMutation, PayTotalContractMutationVariables>;
-export const CancelContractDocument = {
-    kind: 'Document',
-    definitions: [
-        {
-            kind: 'OperationDefinition',
-            operation: 'mutation',
-            name: { kind: 'Name', value: 'cancelContract' },
-            variableDefinitions: [
-                {
-                    kind: 'VariableDefinition',
-                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
-                    type: {
-                        kind: 'NonNullType',
-                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
-                    },
-                },
-            ],
-            selectionSet: {
-                kind: 'SelectionSet',
-                selections: [
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'cancelContract' },
-                        arguments: [
-                            {
-                                kind: 'Argument',
-                                name: { kind: 'Name', value: 'id' },
-                                value: {
-                                    kind: 'Variable',
-                                    name: { kind: 'Name', value: 'id' },
-                                },
-                            },
-                        ],
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                {
-                                    kind: 'Field',
-                                    name: { kind: 'Name', value: 'contract' },
-                                    selectionSet: {
-                                        kind: 'SelectionSet',
-                                        selections: [
-                                            {
-                                                kind: 'Field',
-                                                name: { kind: 'Name', value: 'id' },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'latestHistoryEntry',
-                                                },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'status',
-                                                            },
-                                                        },
-                                                    ],
-                                                },
-                                            },
-                                        ],
-                                    },
-                                },
-                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
-                            ],
-                        },
-                    },
-                ],
-            },
-        },
-    ],
-} as unknown as DocumentNode<CancelContractMutation, CancelContractMutationVariables>;
 export const ClientsCsvDocument = {
     kind: 'Document',
     definitions: [

@@ -269,6 +269,11 @@ class ContractManager(models.Manager["Contract"]):
             raise ContractCreationError(f"Failed to create sale: {e}")
 
 
+class ContractItemDevolutionDetailsDict(TypedDict):
+    item_id: int
+    quantity: int
+
+
 class Contract(TimeStampedModel):
     contract_items: models.QuerySet["ContractItem"]
     contract_history: models.QuerySet["ContractHistory"]
@@ -320,6 +325,9 @@ class Contract(TimeStampedModel):
     discount_amount = models.PositiveBigIntegerField(default=0)
     total = models.PositiveBigIntegerField(default=0)
 
+    first_deposit_amount = models.PositiveBigIntegerField(default=0)
+    final_deposit_amount = models.PositiveBigIntegerField(default=0)
+
     objects: ContractManager = ContractManager()
 
     def __str__(self) -> str:
@@ -336,10 +344,80 @@ class Contract(TimeStampedModel):
 
         self.save()
 
-    def set_status(self, status: str):
-        self.latest_history_entry = ContractHistory.objects.create(
-            contract=self, status=status
+    def set_status(
+        self,
+        status: str,
+        responsible_user: UserModel = None,
+        note: str = "",
+        cash_payment: int = None,
+        devolutions: List[ContractItemDevolutionDetailsDict] = None,
+    ):
+        if self.latest_history_entry:
+            if self.latest_history_entry.status == status:
+                raise ValidationError(f"Contract is already in status {status}.")
+
+        if status == ContractHistoryStatusChoices.CON_DEPOSITO:
+            if cash_payment is None:
+                raise ValidationError("Cash payment amount is required.")
+
+            if self.total < cash_payment:
+                raise ValidationError("Cash payment amount is greater than total.")
+
+            self.first_deposit_amount = cash_payment
+            self.save()
+
+        if status == ContractHistoryStatusChoices.PAGADO:
+            if cash_payment is None:
+                raise ValidationError("Cash payment amount is required.")
+
+            total_new_deposited = self.first_deposit_amount + cash_payment
+            if self.total < total_new_deposited:
+                raise ValidationError("Cash payment amount is greater than total.")
+
+            if self.total > total_new_deposited:
+                raise ValidationError("Cash payment amount is less than total.")
+
+            self.final_deposit_amount = cash_payment
+            self.save()
+
+        if status == "DEVOLUCION":
+            if not devolutions:
+                raise ValidationError("Devolution details are required.")
+
+            is_successful_devolution = True
+            for item in self.contract_items.all():
+                item_dict_details: ContractItemDevolutionDetailsDict = None
+                for devolution in devolutions:
+                    if item.id == devolution.get("item_id"):
+                        item_dict_details = devolution
+                        break
+
+                if not item_dict_details:
+                    raise ValidationError(
+                        f"Devolution details for item {item.id} are required."
+                    )
+
+                if item_dict_details.get("quantity") > item.quantity:
+                    raise ValidationError(
+                        f"Devolution quantity for item {item.id} is greater than quantity."
+                    )
+
+                if item_dict_details.get("quantity") < item.quantity:
+                    is_successful_devolution = False
+
+                item.quantity_returned = item_dict_details.get("quantity")
+                item.save()
+
+            if is_successful_devolution:
+                status = ContractHistoryStatusChoices.DEVOLUCION_EXITOSA
+            else:
+                status = ContractHistoryStatusChoices.DEVOLUCION_FALLIDA
+
+        latest_history_entry = ContractHistory.objects.create(
+            contract=self, status=status, responsible_user=responsible_user, note=note
         )
+
+        self.latest_history_entry = latest_history_entry
         self.save()
 
 
@@ -361,7 +439,9 @@ class ContractHistory(TimeStampedModel):
         on_delete=models.CASCADE,
         related_name="history_entries",
     )
-    status = models.CharField(max_length=50, choices=ContractHistoryStatusChoices.choices)
+    status = models.CharField(
+        max_length=50, choices=ContractHistoryStatusChoices.choices
+    )
     responsible_user = models.ForeignKey(
         UserModel,
         on_delete=models.SET_NULL,

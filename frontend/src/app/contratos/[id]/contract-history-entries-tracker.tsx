@@ -39,19 +39,19 @@ const getNextStage = (
     latestHistoryEntry: Props['contract']['latestHistoryEntry'],
 ): VerticalProgressTrackerStage | null => {
     if (latestHistoryEntry?.status === ContractHistoryStatusChoices.Presupuestado) {
-        return createNextStage('Esperando depósito');
+        return createNextStage('Esperando depósito o pago completo');
     }
 
     if (latestHistoryEntry?.status === ContractHistoryStatusChoices.ConDeposito) {
-        return createNextStage('Esperando día de entrega');
+        return createNextStage('Esperando pago completo');
     }
 
     if (latestHistoryEntry?.status === ContractHistoryStatusChoices.Pagado) {
-        return createNextStage('Esperando completar');
+        return createNextStage('Esperando día de entrega');
     }
 
     if (latestHistoryEntry?.status === ContractHistoryStatusChoices.Activo) {
-        return createNextStage('Esperando completar');
+        return createNextStage('Esperando finalización del contrato');
     }
 
     return null;

@@ -25,6 +25,8 @@ query contractById($id: ID!) {
     contractById(id: $id) {
         id
         createdOn
+        firstDepositAmount
+        finalDepositAmount
         client {
             firstName
             dni
@@ -107,7 +109,7 @@ query contractById($id: ID!) {
     }
 }
 
-mutation CreateContract(
+mutation createContract(
     $contractData: ContractInput!
     $itemsData: [ContractItemInput!]!
 ) {
@@ -123,38 +125,38 @@ mutation deleteContract($id: ID!) {
     }
 }
 
-mutation payContractDeposit($id: ID!) {
-    payContractDeposit(id: $id) {
+mutation changeContractStatus(
+    $id: ID!
+    $cashPayment: Int
+    $status: String!
+    $devolutions: [ContractItemDevolutionInput!]
+    $note: String
+) {
+    changeContractStatus(
+        id: $id
+        status: $status
+        cashPayment: $cashPayment
+        devolutions: $devolutions
+        note: $note
+    ) {
         contract {
             id
+            historyEntries {
+                id
+                createdOn
+                status
+                note
+                responsibleUser {
+                    firstName
+                    lastName
+                    email
+                }
+            }
             latestHistoryEntry {
                 status
             }
         }
-        error
-    }
-}
 
-mutation payTotalContract($id: ID!) {
-    payTotalContract(id: $id) {
-        contract {
-            id
-            latestHistoryEntry {
-                status
-            }
-        }
-        error
-    }
-}
-
-mutation cancelContract($id: ID!) {
-    cancelContract(id: $id) {
-        contract {
-            id
-            latestHistoryEntry {
-                status
-            }
-        }
         error
     }
 }
