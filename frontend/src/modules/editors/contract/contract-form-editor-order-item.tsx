@@ -6,10 +6,9 @@ import { UseFieldArrayReturn, useFieldArray, useFormContext } from 'react-hook-f
 import { ProductTypeChoices } from '@/api/graphql';
 import { useInfiniteProducts, useProductStocksInDateRange } from '@/api/hooks';
 
-import {
-    ContractFormEditorDiscountType,
-    ContractFormEditorValues,
-} from './contract-form-editor';
+import { ContractFormEditorDiscountType } from '@/app/contratos/add/page';
+
+import { ContractFormEditorValues } from './contract-form-editor';
 import { ContractFormEditorOrderItemAllocation } from './contract-form-editor-order-item-allocation';
 import { ContractFormEditorOrderItemService } from './contract-form-editor-order-item-service';
 
@@ -109,7 +108,7 @@ export const ContractFormEditorOrderItem = ({
                         ordersFieldArray.remove(orderIndex);
                     }}
                 >
-                    <Trash className="h-4 w-4" />
+                    <Trash className="size-4" />
                 </Button>
             </div>
 

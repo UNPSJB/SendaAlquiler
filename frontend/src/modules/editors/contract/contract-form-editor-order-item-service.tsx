@@ -4,8 +4,9 @@ import { useFormContext } from 'react-hook-form';
 
 import { CoreProductServiceBillingTypeChoices } from '@/api/graphql';
 
+import { ContractFormEditorDiscountType } from '@/app/contratos/add/page';
+
 import { ContractFormEditorValues } from './contract-form-editor';
-import { ContractFormEditorDiscountType } from './contract-form-editor';
 
 import { ComboboxSimple } from '@/components/combobox';
 import { Button } from '@/components/ui/button';
@@ -114,7 +115,7 @@ export const ContractFormEditorOrderItemService = ({
                 <h3 className="font-bold">Servicio #{index + 1}</h3>
 
                 <Button variant="outline" onClick={onDelete}>
-                    <Trash className="h-4 w-4" />
+                    <Trash className="size-4" />
                 </Button>
             </div>
 

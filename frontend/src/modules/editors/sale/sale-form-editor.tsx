@@ -7,8 +7,10 @@ import { useEffect } from 'react';
 import { SubmitErrorHandler, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { ClientsQuery, ProductsQuery, SaleOrderItemInput } from '@/api/graphql';
+import { SaleOrderItemInput, StateChoices } from '@/api/graphql';
 import { useCreateSale, useClients } from '@/api/hooks';
+
+import { SaleFormEditorDiscountType } from '@/app/ventas/add/page';
 
 import { SaleFormEditorBilling } from './sale-form-editor-billing';
 import { SaleFormEditorOrders } from './sale-form-editor-orders';
@@ -20,28 +22,42 @@ import { formatNumberAsPrice } from '@/lib/utils';
 
 type CreateSaleFormProps = {
     cancelHref: string;
+    defaultValues?: SaleFormEditorValues;
 };
-
-type ProductDetails = ProductsQuery['products']['results'][0];
-
-export enum SaleFormEditorDiscountType {
-    PERCENTAGE = 'percentage',
-    AMOUNT = 'amount',
-    NONE = 'none',
-}
 
 export type SaleFormEditorValues = {
     client?: {
         label: string;
         value: string;
-        data: ClientsQuery['clients']['results'][0];
+        data: {
+            firstName: string;
+            lastName: string;
+            email: string;
+            phoneCode: string;
+            phoneNumber: string;
+            dni: string;
+            streetName: string;
+            houseNumber: string;
+            houseUnit: string | null;
+            note: string | null;
+            locality: {
+                id: string;
+                name: string;
+                state: StateChoices;
+                postalCode: string;
+            };
+        };
     };
     orders:
         | {
               product: {
                   value: string;
                   label: string;
-                  data: ProductDetails;
+                  data: {
+                      id: string;
+                      price: any;
+                      currentOfficeQuantity: number;
+                  };
               } | null;
               quantity: number | null;
               discountPercentage: number | null;
@@ -51,9 +67,12 @@ export type SaleFormEditorValues = {
         | undefined;
 };
 
-export const SaleFormEditor: React.FC<CreateSaleFormProps> = ({ cancelHref }) => {
+export const SaleFormEditor: React.FC<CreateSaleFormProps> = ({
+    cancelHref,
+    defaultValues,
+}) => {
     const clientsResult = useClients();
-    const formMethods = useForm<SaleFormEditorValues>();
+    const formMethods = useForm<SaleFormEditorValues>({ defaultValues });
     const { watch, setValue } = formMethods;
     const router = useRouter();
 
@@ -79,7 +98,7 @@ export const SaleFormEditor: React.FC<CreateSaleFormProps> = ({ cancelHref }) =>
     const total = subtotal - discount;
 
     const onSubmit: SubmitHandler<SaleFormEditorValues> = (data) => {
-        const client = data.client?.data.id;
+        const client = data.client?.value;
         const orders = data.orders
             ? data.orders.map((order) => {
                   const next: SaleOrderItemInput = {

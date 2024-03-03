@@ -64,14 +64,39 @@ query contractsByClientId($id: ID!) {
         houseUnit
         contractItems {
             id
+
             product {
-                name
                 brand {
                     name
                 }
-                price
+                name
+                sku
             }
+            productPrice
+
+            serviceItems {
+                service {
+                    name
+                }
+                price
+                discount
+                subtotal
+                total
+                billingType
+                billingPeriod
+            }
+
             quantity
+
+            productSubtotal
+            servicesSubtotal
+            shippingSubtotal
+
+            productDiscount
+            servicesDiscount
+            shippingDiscount
+
+            total
         }
         total
     }
@@ -89,9 +114,12 @@ query salesByClientId($id: ID!) {
                 brand {
                     name
                 }
-                price
             }
+            productPrice
             quantity
+            subtotal
+            discount
+            total
         }
     }
 }

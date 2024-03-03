@@ -28,10 +28,10 @@ import { formatNumberAsPrice } from '@/lib/utils';
 
 type Item = NonNullable<ContractByIdQuery['contractById']>['contractItems'][0];
 
-const columnHelper = createColumnHelper<Item>();
+const productColumnsHelper = createColumnHelper<Item>();
 
 const productColumns: ColumnDef<Item, any>[] = [
-    columnHelper.accessor('product.name', {
+    productColumnsHelper.accessor('product.name', {
         header: 'Descripción',
         cell: (cell) => {
             const value = cell.getValue();
@@ -46,17 +46,17 @@ const productColumns: ColumnDef<Item, any>[] = [
         },
         size: 225,
     }),
-    columnHelper.accessor('quantity', {
+    productColumnsHelper.accessor('quantity', {
         header: 'Cantidad',
     }),
-    columnHelper.accessor('productPrice', {
+    productColumnsHelper.accessor('productPrice', {
         header: 'Precio u. x día',
         cell: (cell) => {
             const value = cell.getValue();
             return `$${formatNumberAsPrice(value)}`;
         },
     }),
-    columnHelper.accessor('productSubtotal', {
+    productColumnsHelper.accessor('productSubtotal', {
         header: 'Subtotal',
         cell: (cell) => {
             const value = cell.getValue();
@@ -69,7 +69,7 @@ const productColumns: ColumnDef<Item, any>[] = [
             return `$${formatNumberAsPrice(value)}`;
         },
     }),
-    columnHelper.accessor('productDiscount', {
+    productColumnsHelper.accessor('productDiscount', {
         header: 'Descuento',
         cell: (cell) => {
             const value = cell.getValue();
@@ -82,7 +82,7 @@ const productColumns: ColumnDef<Item, any>[] = [
             return `$${formatNumberAsPrice(value)}`;
         },
     }),
-    columnHelper.accessor('total', {
+    productColumnsHelper.accessor('total', {
         header: 'Total',
         cell: (cell) => {
             const value = cell.row.original;

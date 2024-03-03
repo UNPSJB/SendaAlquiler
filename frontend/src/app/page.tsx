@@ -63,8 +63,11 @@ const options: ChartOptions<'line'> = {
 };
 
 const Home = () => {
-    const result = useQuery([], () => {
-        return fetchClient(DashboardDocument, {});
+    const result = useQuery({
+        queryKey: ['dashboard'],
+        queryFn: () => {
+            return fetchClient(DashboardDocument, {});
+        },
     });
 
     return (
@@ -76,7 +79,7 @@ const Home = () => {
                     {...result}
                     Loading={
                         <div className="relative pb-[50%]">
-                            <div className="absolute inset-0 h-full w-full">
+                            <div className="absolute inset-0 size-full">
                                 <Skeleton
                                     height="100%"
                                     className="absolute inset-0 h-full"
@@ -86,7 +89,7 @@ const Home = () => {
                     }
                     Error={<div>Error</div>}
                 >
-                    {({ allSales, allClients, allProducts }) => {
+                    {({ allSales, allProducts }) => {
                         const salesByMonth = allSales.reduce(
                             (acc, sale) => {
                                 const dateDayjs = dayjs(sale.createdOn);
@@ -119,9 +122,7 @@ const Home = () => {
                                             <p className="mb-2 text-sm text-muted-foreground">
                                                 Clientes
                                             </p>
-                                            <p className="text-4xl font-bold">
-                                                {allClients.length}
-                                            </p>
+                                            <p className="text-4xl font-bold">-</p>
                                         </div>
                                     </div>
 

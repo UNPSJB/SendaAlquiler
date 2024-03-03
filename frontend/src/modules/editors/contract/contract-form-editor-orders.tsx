@@ -1,9 +1,8 @@
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
-import {
-    ContractFormEditorDiscountType,
-    ContractFormEditorValues,
-} from './contract-form-editor';
+import { ContractFormEditorDiscountType } from '@/app/contratos/add/page';
+
+import { ContractFormEditorValues } from './contract-form-editor';
 import { ContractFormEditorOrderItem } from './contract-form-editor-order-item';
 
 import { Button } from '@/components/ui/button';

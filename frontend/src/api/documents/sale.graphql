@@ -15,23 +15,37 @@ query saleById($id: ID!) {
         total
         saleItems {
             product {
+                id
                 name
                 brand {
                     name
                 }
                 price
             }
+            productPrice
             quantity
             total
             subtotal
             discount
         }
         client {
+            id
             firstName
             lastName
             email
             phoneCode
             phoneNumber
+            dni
+            streetName
+            houseNumber
+            houseUnit
+            note
+            locality {
+                id
+                name
+                state
+                postalCode
+            }
         }
     }
 }

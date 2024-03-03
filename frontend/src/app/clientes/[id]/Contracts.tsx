@@ -1,25 +1,23 @@
 import Link from 'next/link';
 
-import clsx from 'clsx';
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { PropsWithChildren } from 'react';
 
-import { ContractHistoryStatusChoices } from '@/api/graphql';
-import {
-    usePayContractDepositMutation,
-    usePayTotalContractMutation,
-    useContractsByClientId,
-} from '@/api/hooks';
+import { ContractsByClientIdQuery } from '@/api/graphql';
+import { useContractsByClientId } from '@/api/hooks';
 
 import { formatDateTimeHr } from '@/modules/dayjs/utils';
 import { formatDateTime } from '@/modules/dayjs/utils';
 
 import { ContractsByClientIdTabComponentProps } from './page';
 
+import { ContractStatusBadge } from '@/components/badges';
+import { BaseTable } from '@/components/base-table';
 import DeprecatedButton from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import { DashboardLayoutContentLoading } from '@/components/page-loading';
-import Spinner from '@/components/Spinner/Spinner';
+import { formatNumberAsPrice } from '@/lib/utils';
 
 const LI: React.FC<PropsWithChildren> = ({ children }) => {
     return <li className="my-2">{children}</li>;
@@ -29,98 +27,155 @@ const SN: React.FC<PropsWithChildren> = ({ children }) => {
     return <span className="font-medium text-black">{children}</span>;
 };
 
-const dataByStatus: Record<
-    ContractHistoryStatusChoices,
-    {
-        bg: string;
-        text: string;
-    }
-> = {
-    [ContractHistoryStatusChoices.Presupuestado]: {
-        bg: 'bg-orange-500',
-        text: 'Presupuestado',
-    },
-    [ContractHistoryStatusChoices.ConDeposito]: {
-        bg: 'bg-yellow-500',
-        text: 'Señado',
-    },
-    [ContractHistoryStatusChoices.Activo]: {
-        bg: 'bg-blue-500',
-        text: 'Enviado',
-    },
-    [ContractHistoryStatusChoices.Pagado]: {
-        bg: 'bg-green-500',
-        text: 'Aceptado',
-    },
-    [ContractHistoryStatusChoices.Cancelado]: {
-        bg: 'bg-red-500',
-        text: 'Rechazado',
-    },
-    [ContractHistoryStatusChoices.DevolucionExitosa]: {
-        bg: '',
-        text: '',
-    },
-    [ContractHistoryStatusChoices.DevolucionFallida]: {
-        bg: '',
-        text: '',
-    },
-    [ContractHistoryStatusChoices.Finalizado]: {
-        bg: '',
-        text: '',
-    },
-    [ContractHistoryStatusChoices.Vencido]: {
-        bg: '',
-        text: '',
-    },
+type Item = NonNullable<
+    ContractsByClientIdQuery['contractsByClientId']
+>[0]['contractItems'][0];
+
+const productColumnsHelper = createColumnHelper<Item>();
+
+const productColumns: ColumnDef<Item, any>[] = [
+    productColumnsHelper.accessor('product.name', {
+        header: 'Descripción',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return (
+                <div>
+                    <p className="font-bold">{value}</p>
+                    <p className="text-xs text-muted-foreground">
+                        {cell.row.original.product.brand?.name || 'Sin marca'}
+                    </p>
+                </div>
+            );
+        },
+        size: 225,
+    }),
+    productColumnsHelper.accessor('quantity', {
+        header: 'Cantidad',
+    }),
+    productColumnsHelper.accessor('productPrice', {
+        header: 'Precio u. x día',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return `$${formatNumberAsPrice(value)}`;
+        },
+    }),
+    productColumnsHelper.accessor('productSubtotal', {
+        header: 'Subtotal',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return `$${formatNumberAsPrice(value)}`;
+        },
+        footer: (props) => {
+            const value = props.table
+                .getFilteredRowModel()
+                .rows.reduce((acc, row) => acc + row.original.productSubtotal, 0);
+            return `$${formatNumberAsPrice(value)}`;
+        },
+    }),
+    productColumnsHelper.accessor('productDiscount', {
+        header: 'Descuento',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return `$${formatNumberAsPrice(value)}`;
+        },
+        footer: (props) => {
+            const value = props.table
+                .getFilteredRowModel()
+                .rows.reduce((acc, row) => acc + row.original.productDiscount, 0);
+            return `$${formatNumberAsPrice(value)}`;
+        },
+    }),
+    productColumnsHelper.accessor('total', {
+        header: 'Total',
+        cell: (cell) => {
+            const value = cell.row.original;
+            return `$${formatNumberAsPrice(value.productSubtotal - value.productDiscount)}`;
+        },
+        footer: (props) => {
+            const value = props.table
+                .getFilteredRowModel()
+                .rows.reduce((acc, row) => acc + row.original.total, 0);
+            return `$${formatNumberAsPrice(value)}`;
+        },
+    }),
+];
+
+type ServiceRowType = Item['serviceItems'][0] & {
+    product: Item['product'];
 };
+const serviceColumnsHelper = createColumnHelper<ServiceRowType>();
 
-type StatusIndicatorProps = { status: ContractHistoryStatusChoices };
-
-const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status }) => {
-    return (
-        <>
-            <div
-                className={clsx('mr-2 mt-1 size-4 rounded-full', dataByStatus[status].bg)}
-            ></div>
-            <b>{dataByStatus[status].text}</b>
-        </>
-    );
-};
-
-type StatusButtonProps = { status: ContractHistoryStatusChoices; id: string };
-
-const StatusButton: React.FC<StatusButtonProps> = ({ status, id }) => {
-    const { mutate: payContractDeposit } = usePayContractDepositMutation();
-    const { mutate: payContractTotal } = usePayTotalContractMutation();
-
-    if (status === ContractHistoryStatusChoices.Presupuestado) {
-        return (
-            <button
-                onClick={() => {
-                    payContractDeposit(id);
-                }}
-                className=" px-8 py-4  font-bold text-muted-foreground duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
-            >
-                Señar contrato
-            </button>
-        );
-    }
-
-    if (status === ContractHistoryStatusChoices.ConDeposito) {
-        return (
-            <button
-                onClick={() => {
-                    payContractTotal(id);
-                }}
-                className=" px-8 py-4  font-bold text-muted-foreground duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
-            >
-                Pagar totalidad del contrato
-            </button>
-        );
-    }
-
-    return null;
-};
+const serviceColumns: ColumnDef<ServiceRowType, any>[] = [
+    serviceColumnsHelper.accessor('service.name', {
+        header: 'Descripción',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return (
+                <div>
+                    <p className="font-bold">{value}</p>
+                    <p className="text-xs text-muted-foreground">
+                        {cell.row.original.product.name} -{' '}
+                        {cell.row.original.product.brand?.name || 'Sin marca'}
+                    </p>
+                </div>
+            );
+        },
+    }),
+    serviceColumnsHelper.accessor('price', {
+        header: 'Precio',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return value ? `$${formatNumberAsPrice(value)}` : '-';
+        },
+    }),
+    serviceColumnsHelper.accessor('billingType', {
+        header: 'Tipo de facturación',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return value;
+        },
+    }),
+    serviceColumnsHelper.accessor('billingPeriod', {
+        header: 'Periodo de facturación',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return value ? `${value} días` : '-';
+        },
+    }),
+    serviceColumnsHelper.accessor('subtotal', {
+        header: 'Subtotal',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return value ? `$${formatNumberAsPrice(value)}` : '-';
+        },
+    }),
+    serviceColumnsHelper.accessor('discount', {
+        header: 'Descuento',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return value ? `$${formatNumberAsPrice(value)}` : '-';
+        },
+        footer: (props) => {
+            const value = props.table
+                .getFilteredRowModel()
+                .rows.reduce((acc, row) => acc + row.original.discount, 0);
+            return value ? `$${formatNumberAsPrice(value)}` : '-';
+        },
+    }),
+    serviceColumnsHelper.accessor('total', {
+        header: 'Total',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return value ? `$${formatNumberAsPrice(value)}` : '-';
+        },
+        footer: (props) => {
+            const value = props.table
+                .getFilteredRowModel()
+                .rows.reduce((acc, row) => acc + row.original.total, 0);
+            return value ? `$${formatNumberAsPrice(value)}` : '-';
+        },
+    }),
+];
 
 const ClientByIdContractsTab: React.FC<ContractsByClientIdTabComponentProps> = ({
     id,
@@ -161,18 +216,17 @@ const ClientByIdContractsTab: React.FC<ContractsByClientIdTabComponentProps> = (
                                 className="mb-4 mr-4 mt-8 rounded-md border bg-white "
                                 key={contract.id}
                             >
-                                <div className="flex justify-between border-b px-4 pt-3">
+                                <div className="flex justify-between border-b px-4 py-3">
                                     <h2 className="mt-2">
                                         {formatDateTimeHr(contract.contractStartDatetime)}{' '}
                                         - {formatDateTimeHr(contract.contractEndDatetime)}
                                     </h2>
 
-                                    <div className="mb-3 flex rounded-full border border-black px-4 py-1 ">
-                                        <StatusIndicator
-                                            status={contract.latestHistoryEntry!.status}
-                                        />
-                                    </div>
+                                    <ContractStatusBadge
+                                        status={contract.latestHistoryEntry!.status}
+                                    />
                                 </div>
+
                                 <div className="h-full border-b px-4 py-2 text-gray-400">
                                     <LI>
                                         <SN>Contrato creado el:</SN>{' '}
@@ -188,45 +242,55 @@ const ClientByIdContractsTab: React.FC<ContractsByClientIdTabComponentProps> = (
                                         {contract.locality.state}
                                     </LI>
                                 </div>
-                                <div>
-                                    <div className="mt-2 px-4">
-                                        {contract.contractItems.map((item) => {
-                                            return (
-                                                <li
-                                                    key={item.id}
-                                                    className="flex justify-between py-1"
-                                                >
-                                                    <h2 className="text-gray-400">
-                                                        {item.product.name}{' '}
-                                                        {item.product.brand?.name}
-                                                    </h2>
-                                                    <p className=" text-gray-400">
-                                                        {item.quantity} u. x $
-                                                        {item.product.price}
-                                                    </p>
-                                                </li>
-                                            );
-                                        })}
+
+                                <div className="space-y-4 p-4">
+                                    <div className="space-y-2">
+                                        <h3 className="text-sm font-bold">Productos</h3>
+
+                                        <BaseTable
+                                            columns={productColumns}
+                                            data={contract.contractItems}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <h3 className="text-sm font-bold">Servicios</h3>
+
+                                        <BaseTable
+                                            columns={serviceColumns}
+                                            data={contract.contractItems.flatMap(
+                                                (item) => {
+                                                    return item.serviceItems.map(
+                                                        (serviceItem) => ({
+                                                            ...serviceItem,
+                                                            product: item.product,
+                                                        }),
+                                                    );
+                                                },
+                                            )}
+                                        />
                                     </div>
                                 </div>
                                 <div className="mr-2 flex justify-between border-b p-2">
                                     <p className="ml-2 font-bold">Total</p>
                                     <b className="text-xl font-normal">
-                                        ${contract.total}
+                                        ${formatNumberAsPrice(contract.total)}
                                     </b>
                                 </div>
                                 <div className="flex justify-end">
+                                    <Link
+                                        href={`/contratos/add?duplicateId=${contract.id}`}
+                                        className="border-x px-8 py-4  text-gray-400 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
+                                    >
+                                        Duplicar contrato
+                                    </Link>
+
                                     <Link
                                         href={`/contratos/${contract.id}`}
                                         className="border-x px-8 py-4  text-gray-400 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
                                     >
                                         Ver mas detalles
                                     </Link>
-
-                                    <StatusButton
-                                        id={contract.id}
-                                        status={contract.latestHistoryEntry!.status}
-                                    />
                                 </div>
                             </div>
                         ))}

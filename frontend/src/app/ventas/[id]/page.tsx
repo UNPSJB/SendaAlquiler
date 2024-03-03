@@ -1,14 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
-import {
-    ColumnDef,
-    createColumnHelper,
-    flexRender,
-    getCoreRowModel,
-    useReactTable,
-} from '@tanstack/react-table';
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 
 import { SaleByIdQuery } from '@/api/graphql';
 import { useSaleById } from '@/api/hooks';
@@ -20,19 +15,12 @@ import { formatDateTime } from '@/modules/dayjs/utils';
 import ChevronRight from '@/modules/icons/ChevronRight';
 
 import Avatar from '@/components/Avatar';
+import { BaseTable } from '@/components/base-table';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import { DashboardLayoutContentLoading } from '@/components/page-loading';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableFooter,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 import { formatNumberAsPrice } from '@/lib/utils';
 
 const getAvatarText = (firstName: string, lastName: string) => {
@@ -45,12 +33,18 @@ const getDasboardTitle = (sale: SaleByIdQuery['saleById'] | undefined) => {
     }
 
     return (
-        <div className="flex items-center space-x-4">
-            <DashboardLayoutBigTitle>Ventas</DashboardLayoutBigTitle>
-            <ChevronRight />
-            <span className="font-headings text-sm">
-                {sale.client.firstName} {sale.client.lastName} / #{sale.id}
-            </span>
+        <div className="flex items-center justify-between space-x-4">
+            <div className="flex items-center space-x-4">
+                <DashboardLayoutBigTitle>Ventas</DashboardLayoutBigTitle>
+                <ChevronRight />
+                <span className="font-headings text-sm">
+                    {sale.client.firstName} {sale.client.lastName} / #{sale.id}
+                </span>
+            </div>
+
+            <Button asChild>
+                <Link href={`/ventas/add?duplicateId=${sale.id}`}>Duplicar venta</Link>
+            </Button>
         </div>
     );
 };
@@ -74,7 +68,7 @@ const columns: ColumnDef<SaleItemDetail, any>[] = [
             return props.getValue();
         },
     }),
-    columnsHelper.accessor('product.price', {
+    columnsHelper.accessor('productPrice', {
         id: 'price',
         header: 'Precio',
         cell: (props) => {
@@ -118,112 +112,6 @@ const columns: ColumnDef<SaleItemDetail, any>[] = [
         },
     }),
 ];
-
-type MyTableProps = {
-    data: SaleItemDetail[];
-};
-
-const MyTable = ({ data }: MyTableProps) => {
-    const table = useReactTable({
-        data,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        defaultColumn: {
-            minSize: 0,
-            size: Number.MAX_SAFE_INTEGER,
-            maxSize: Number.MAX_SAFE_INTEGER,
-        },
-    });
-
-    return (
-        <div className="rounded-md border bg-white">
-            <Table>
-                <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => {
-                                return (
-                                    <TableHead
-                                        style={{
-                                            width:
-                                                header.getSize() ===
-                                                Number.MAX_SAFE_INTEGER
-                                                    ? 'auto'
-                                                    : header.getSize(),
-                                        }}
-                                        key={header.id}
-                                    >
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef.header,
-                                                  header.getContext(),
-                                              )}
-                                    </TableHead>
-                                );
-                            })}
-                        </TableRow>
-                    ))}
-                </TableHeader>
-
-                <TableBody>
-                    {table.getRowModel().rows?.length ? (
-                        table.getRowModel().rows.map((row) => (
-                            <TableRow
-                                key={row.id}
-                                data-state={row.getIsSelected() && 'selected'}
-                            >
-                                {row.getVisibleCells().map((cell) => (
-                                    <TableCell
-                                        style={{
-                                            width:
-                                                cell.column.getSize() ===
-                                                Number.MAX_SAFE_INTEGER
-                                                    ? 'auto'
-                                                    : cell.column.getSize(),
-                                        }}
-                                        key={cell.id}
-                                    >
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext(),
-                                        )}
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                            <TableCell
-                                colSpan={columns.length}
-                                className="h-24 text-center"
-                            >
-                                No se encontraron resultados.
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-
-                <TableFooter>
-                    {table.getFooterGroups().map((footerGroup) => (
-                        <TableRow key={footerGroup.id}>
-                            {footerGroup.headers.map((footer) => {
-                                return (
-                                    <TableCell key={footer.id}>
-                                        {flexRender(
-                                            footer.column.columnDef.footer,
-                                            footer.getContext(),
-                                        )}
-                                    </TableCell>
-                                );
-                            })}
-                        </TableRow>
-                    ))}
-                </TableFooter>
-            </Table>
-        </div>
-    );
-};
 
 const Page = () => {
     const { id } = useParams();
@@ -278,6 +166,12 @@ const Page = () => {
                                         {sale.client.email} | {sale.client.phoneCode}
                                         {sale.client.phoneNumber}
                                     </p>
+
+                                    <Button variant="link" asChild className="pl-0">
+                                        <Link href={`/clientes/${sale.client.id}`}>
+                                            Ver cliente
+                                        </Link>
+                                    </Button>
                                 </div>
                             </header>
 
@@ -292,7 +186,7 @@ const Page = () => {
                                         </p>
                                     </div>
 
-                                    <MyTable data={sale.saleItems} />
+                                    <BaseTable columns={columns} data={sale.saleItems} />
                                 </section>
                             </div>
                         </div>

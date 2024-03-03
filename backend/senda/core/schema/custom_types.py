@@ -32,6 +32,7 @@ from senda.core.models.contract import (
     Contract,
     ContractHistoryStatusChoices,
     ContractItemService,
+    ContractItemProductAllocation
 )
 from senda.core.models.suppliers import SupplierModel
 from senda.core.models.admin import AdminModel
@@ -265,3 +266,8 @@ class ContractItemServiceType(DjangoObjectType):
     class Meta:
         name = "ContractItemService"
         model = ContractItemService
+
+class ContractItemProductAllocationType(DjangoObjectType):
+    class Meta:
+        name = "ContractItemProductAllocation"
+        model = ContractItemProductAllocation

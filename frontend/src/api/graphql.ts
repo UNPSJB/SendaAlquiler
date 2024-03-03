@@ -155,6 +155,7 @@ export type ContractInput = {
 
 export type ContractItem = {
     __typename?: 'ContractItem';
+    allocations: Array<ContractItemProductAllocation>;
     contract: Contract;
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
@@ -183,6 +184,16 @@ export type ContractItemInput = {
     productDiscount: InputMaybe<Scalars['Int']['input']>;
     productId: Scalars['ID']['input'];
     serviceItems: InputMaybe<Array<InputMaybe<ContractItemServiceItemInput>>>;
+};
+
+export type ContractItemProductAllocation = {
+    __typename?: 'ContractItemProductAllocation';
+    id: Scalars['ID']['output'];
+    internalOrder: Maybe<InternalOrder>;
+    item: ContractItem;
+    office: Office;
+    quantity: Scalars['Int']['output'];
+    shippingCost: Scalars['BigInt']['output'];
 };
 
 export type ContractItemProductAllocationInput = {
@@ -434,6 +445,7 @@ export type InProgressInternalOrderItemInput = {
 export type InternalOrder = {
     __typename?: 'InternalOrder';
     approximateDeliveryDate: Maybe<Scalars['Date']['output']>;
+    contractItemProductAllocation: Maybe<ContractItemProductAllocation>;
     createdOn: Scalars['DateTime']['output'];
     historyEntries: Array<InternalOrderHistory>;
     id: Scalars['ID']['output'];
@@ -721,6 +733,7 @@ export type ObtainJsonWebToken = {
 
 export type Office = {
     __typename?: 'Office';
+    contractItemsAllocations: Array<ContractItemProductAllocation>;
     contracts: Array<Contract>;
     createdOn: Scalars['DateTime']['output'];
     employees: Array<EmployeeOffice>;
@@ -1455,13 +1468,31 @@ export type ContractsByClientIdQuery = {
         contractItems: Array<{
             __typename?: 'ContractItem';
             id: string;
+            productPrice: any;
             quantity: number;
+            productSubtotal: any;
+            servicesSubtotal: number;
+            shippingSubtotal: number;
+            productDiscount: any;
+            servicesDiscount: any;
+            shippingDiscount: any;
+            total: any;
             product: {
                 __typename?: 'Product';
                 name: string;
-                price: any | null;
+                sku: string | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
+            serviceItems: Array<{
+                __typename?: 'ContractItemService';
+                price: any;
+                discount: any;
+                subtotal: any;
+                total: any;
+                billingType: CoreContractItemServiceBillingTypeChoices;
+                billingPeriod: number | null;
+                service: { __typename?: 'ProductService'; name: string };
+            }>;
         }>;
     }>;
 };
@@ -1480,11 +1511,14 @@ export type SalesByClientIdQuery = {
         saleItems: Array<{
             __typename?: 'SaleItem';
             id: string;
+            productPrice: any;
             quantity: number;
+            subtotal: any;
+            discount: any;
+            total: any;
             product: {
                 __typename?: 'Product';
                 name: string;
-                price: any | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
         }>;
@@ -1601,6 +1635,7 @@ export type ContractByIdQuery = {
         numberOfRentalDays: number;
         client: {
             __typename?: 'Client';
+            id: string;
             firstName: string;
             dni: string;
             email: string;
@@ -1612,6 +1647,7 @@ export type ContractByIdQuery = {
             streetName: string;
             locality: {
                 __typename?: 'Locality';
+                id: string;
                 name: string;
                 state: StateChoices;
                 postalCode: string;
@@ -1627,6 +1663,7 @@ export type ContractByIdQuery = {
             street: string;
             houseNumber: string;
         };
+        locality: { __typename?: 'Locality'; id: string; name: string };
         historyEntries: Array<{
             __typename?: 'ContractHistory';
             id: string;
@@ -1654,10 +1691,16 @@ export type ContractByIdQuery = {
             total: any;
             product: {
                 __typename?: 'Product';
+                id: string;
                 name: string;
                 sku: string | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
+            allocations: Array<{
+                __typename?: 'ContractItemProductAllocation';
+                quantity: number;
+                office: { __typename?: 'Office'; id: string; name: string };
+            }>;
             serviceItems: Array<{
                 __typename?: 'ContractItemService';
                 price: any;
@@ -1666,7 +1709,14 @@ export type ContractByIdQuery = {
                 total: any;
                 billingType: CoreContractItemServiceBillingTypeChoices;
                 billingPeriod: number | null;
-                service: { __typename?: 'ProductService'; name: string };
+                service: {
+                    __typename?: 'ProductService';
+                    name: string;
+                    id: string;
+                    price: any;
+                    billingType: CoreProductServiceBillingTypeChoices;
+                    billingPeriod: number | null;
+                };
             }>;
         }>;
     } | null;
@@ -2559,12 +2609,14 @@ export type SaleByIdQuery = {
         total: any;
         saleItems: Array<{
             __typename?: 'SaleItem';
+            productPrice: any;
             quantity: number;
             total: any;
             subtotal: any;
             discount: any;
             product: {
                 __typename?: 'Product';
+                id: string;
                 name: string;
                 price: any | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
@@ -2572,11 +2624,24 @@ export type SaleByIdQuery = {
         }>;
         client: {
             __typename?: 'Client';
+            id: string;
             firstName: string;
             lastName: string;
             email: string;
             phoneCode: string;
             phoneNumber: string;
+            dni: string;
+            streetName: string;
+            houseNumber: string;
+            houseUnit: string | null;
+            note: string | null;
+            locality: {
+                __typename?: 'Locality';
+                id: string;
+                name: string;
+                state: StateChoices;
+                postalCode: string;
+            };
         };
     } | null;
 };
@@ -4001,6 +4066,25 @@ export const ContractsByClientIdDocument = {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
+                                                                value: 'brand',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
                                                                 value: 'name',
                                                             },
                                                         },
@@ -4008,7 +4092,33 @@ export const ContractsByClientIdDocument = {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'brand',
+                                                                value: 'sku',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productPrice',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'serviceItems',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'service',
                                                             },
                                                             selectionSet: {
                                                                 kind: 'SelectionSet',
@@ -4030,12 +4140,93 @@ export const ContractsByClientIdDocument = {
                                                                 value: 'price',
                                                             },
                                                         },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'discount',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'subtotal',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'total',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'billingType',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'billingPeriod',
+                                                            },
+                                                        },
                                                     ],
                                                 },
                                             },
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'quantity' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productSubtotal',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'servicesSubtotal',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'shippingSubtotal',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productDiscount',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'servicesDiscount',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'shippingDiscount',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'total' },
                                             },
                                         ],
                                     },
@@ -4133,19 +4324,31 @@ export const SalesByClientIdDocument = {
                                                                 ],
                                                             },
                                                         },
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'price',
-                                                            },
-                                                        },
                                                     ],
                                                 },
                                             },
                                             {
                                                 kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productPrice',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'quantity' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'subtotal' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'discount' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'total' },
                                             },
                                         ],
                                     },
@@ -4688,6 +4891,10 @@ export const ContractByIdDocument = {
                                         selections: [
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
                                                     value: 'firstName',
@@ -4725,6 +4932,13 @@ export const ContractByIdDocument = {
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
                                                         {
                                                             kind: 'Field',
                                                             name: {
@@ -4835,6 +5049,23 @@ export const ContractByIdDocument = {
                                 },
                                 {
                                     kind: 'Field',
+                                    name: { kind: 'Name', value: 'locality' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'name' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
                                     name: { kind: 'Name', value: 'streetName' },
                                 },
                                 { kind: 'Field', name: { kind: 'Name', value: 'total' } },
@@ -4923,6 +5154,13 @@ export const ContractByIdDocument = {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
                                                                 value: 'brand',
                                                             },
                                                             selectionSet: {
@@ -4966,6 +5204,51 @@ export const ContractByIdDocument = {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
+                                                    value: 'allocations',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'office',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'quantity',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
                                                     value: 'serviceItems',
                                                 },
                                                 selectionSet: {
@@ -4985,6 +5268,34 @@ export const ContractByIdDocument = {
                                                                         name: {
                                                                             kind: 'Name',
                                                                             value: 'name',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'price',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'billingType',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'billingPeriod',
                                                                         },
                                                                     },
                                                                 ],
@@ -9173,6 +9484,13 @@ export const SaleByIdDocument = {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
                                                                 value: 'name',
                                                             },
                                                         },
@@ -9207,6 +9525,13 @@ export const SaleByIdDocument = {
                                             },
                                             {
                                                 kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productPrice',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'quantity' },
                                             },
                                             {
@@ -9230,6 +9555,10 @@ export const SaleByIdDocument = {
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
                                             {
                                                 kind: 'Field',
                                                 name: {
@@ -9257,6 +9586,72 @@ export const SaleByIdDocument = {
                                                 name: {
                                                     kind: 'Name',
                                                     value: 'phoneNumber',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'dni' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'streetName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'houseNumber',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'houseUnit',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'note' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'locality' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'state',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'postalCode',
+                                                            },
+                                                        },
+                                                    ],
                                                 },
                                             },
                                         ],

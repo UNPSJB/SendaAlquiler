@@ -5,7 +5,6 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
 import { print } from 'graphql/language/printer';
 import { getServerSession } from 'next-auth';
 
-import 'server-only';
 import { authOptions } from '@/modules/auth/auth';
 
 const url = process.env.NEXT_PUBLIC_API_HOST;

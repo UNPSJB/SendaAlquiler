@@ -28,6 +28,7 @@ query contractById($id: ID!) {
         firstDepositAmount
         finalDepositAmount
         client {
+            id
             firstName
             dni
             email
@@ -35,6 +36,7 @@ query contractById($id: ID!) {
             houseUnit
             lastName
             locality {
+                id
                 name
                 state
                 postalCode
@@ -56,6 +58,10 @@ query contractById($id: ID!) {
             street
             houseNumber
         }
+        locality {
+            id
+            name
+        }
         streetName
         total
         numberOfRentalDays
@@ -74,6 +80,7 @@ query contractById($id: ID!) {
             id
 
             product {
+                id
                 brand {
                     name
                 }
@@ -82,9 +89,22 @@ query contractById($id: ID!) {
             }
             productPrice
 
+            allocations {
+                office {
+                    id
+                    name
+                }
+
+                quantity
+            }
+
             serviceItems {
                 service {
                     name
+                    id
+                    price
+                    billingType
+                    billingPeriod
                 }
                 price
                 discount

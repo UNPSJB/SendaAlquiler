@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 
 export const ContractFormEditorBilling = () => {
     const formMethods = useFormContext<ContractFormEditorValues>();
@@ -192,17 +191,6 @@ export const ContractFormEditorBilling = () => {
                     <Input
                         name="client.data.houseUnit"
                         value={client?.data?.houseUnit || ''}
-                        disabled
-                        className="bg-muted text-muted-foreground"
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Notas adicionales</Label>
-
-                    <Textarea
-                        name="client.data.note"
-                        value={client?.data?.note || ''}
                         disabled
                         className="bg-muted text-muted-foreground"
                     />

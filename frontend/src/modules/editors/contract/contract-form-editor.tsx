@@ -8,8 +8,10 @@ import { useEffect } from 'react';
 import { SubmitErrorHandler, SubmitHandler, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
-import { ClientsQuery, ContractItemInput, ProductsQuery } from '@/api/graphql';
+import { ContractItemInput, ProductsQuery, StateChoices } from '@/api/graphql';
 import { useCreateContract, useClients } from '@/api/hooks';
+
+import { ContractFormEditorDiscountType } from '@/app/contratos/add/page';
 
 import { ContractFormEditorBilling } from './contract-form-editor-billing';
 import { ContractFormEditorDetails } from './contract-form-editor-details';
@@ -22,21 +24,32 @@ import { formatNumberAsPrice } from '@/lib/utils';
 
 type CreateContractFormProps = {
     cancelHref: string;
+    defaultValues?: ContractFormEditorValues;
 };
 
 type ProductDetails = ProductsQuery['products']['results'][0];
-
-export enum ContractFormEditorDiscountType {
-    PERCENTAGE = 'percentage',
-    AMOUNT = 'amount',
-    NONE = 'none',
-}
 
 export type ContractFormEditorValues = {
     client?: {
         label: string;
         value: string;
-        data: ClientsQuery['clients']['results'][0];
+        data: {
+            firstName: string;
+            lastName: string;
+            email: string;
+            phoneCode: string;
+            phoneNumber: string;
+            dni: string;
+            streetName: string;
+            houseNumber: string;
+            houseUnit: string | null;
+            locality: {
+                id: string;
+                name: string;
+                state: StateChoices;
+                postalCode: string;
+            };
+        };
     };
     orders:
         | {
@@ -112,9 +125,12 @@ export type ContractFormEditorValues = {
     } | null;
 };
 
-export const ContractFormEditor: React.FC<CreateContractFormProps> = ({ cancelHref }) => {
+export const ContractFormEditor: React.FC<CreateContractFormProps> = ({
+    cancelHref,
+    defaultValues,
+}) => {
     const clientsResult = useClients();
-    const formMethods = useForm<ContractFormEditorValues>();
+    const formMethods = useForm<ContractFormEditorValues>({ defaultValues });
     const { watch, setValue } = formMethods;
     const router = useRouter();
 
@@ -177,7 +193,7 @@ export const ContractFormEditor: React.FC<CreateContractFormProps> = ({ cancelHr
     const total = subtotal - discount;
 
     const onSubmit: SubmitHandler<ContractFormEditorValues> = (data) => {
-        const client = data.client?.data.id;
+        const client = data.client?.value;
         const orders = data.orders
             ? data.orders.map((order) => {
                   const next: ContractItemInput = {

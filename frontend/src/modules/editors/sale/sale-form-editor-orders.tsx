@@ -6,8 +6,9 @@ import { ProductTypeChoices } from '@/api/graphql';
 import { useInfiniteProducts } from '@/api/hooks';
 
 import { useOfficeContext } from '@/app/OfficeProvider';
+import { SaleFormEditorDiscountType } from '@/app/ventas/add/page';
 
-import { SaleFormEditorDiscountType, SaleFormEditorValues } from './sale-form-editor';
+import { SaleFormEditorValues } from './sale-form-editor';
 
 import { ComboboxInfinite } from '@/components/combobox';
 import { Button } from '@/components/ui/button';
@@ -99,7 +100,7 @@ export const SaleFormEditorOrders = () => {
                                         ordersFieldArray.remove(index);
                                     }}
                                 >
-                                    <Trash className="h-4 w-4" />
+                                    <Trash className="size-4" />
                                 </Button>
                             </div>
 
