@@ -13,14 +13,12 @@ import {
     ProductStockInOfficeDocument,
 } from '@/api/graphql';
 
-import { internalOrderStatusToText } from '@/modules/internal-order-utils';
-
 import { useOfficeContext } from '@/app/OfficeProvider';
 
 import { InternalOrderStatusEditorFormValues } from './page';
 
+import { InternalOrderStatusBadge } from '@/components/badges';
 import { BaseTable } from '@/components/base-table';
-import { Badge } from '@/components/ui/badge';
 import {
     FormControl,
     FormDescription,
@@ -29,7 +27,7 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { cn, inputToNumber } from '@/lib/utils';
+import { inputToNumber } from '@/lib/utils';
 
 type Item = NonNullable<InternalOrderByIdQuery['internalOrderById']>['orderItems'][0];
 
@@ -212,28 +210,6 @@ const productColumns: ColumnDef<Item, any>[] = [
     }),
 ];
 
-const StatusBadge = ({ status }: { status: InternalOrderHistoryStatusChoices }) => {
-    const circleClassByStatus = {
-        [InternalOrderHistoryStatusChoices.Canceled]: 'bg-red-500',
-        [InternalOrderHistoryStatusChoices.Completed]: 'bg-green-500',
-        [InternalOrderHistoryStatusChoices.InProgress]: 'bg-yellow-500',
-        [InternalOrderHistoryStatusChoices.Pending]: 'bg-blue-500',
-    };
-
-    return (
-        <Badge variant="outline" className="flex space-x-2">
-            <span
-                className={cn(
-                    'mr-1 inline-block h-2.5 w-2.5 rounded-full',
-                    circleClassByStatus[status],
-                )}
-            ></span>
-
-            <span>{internalOrderStatusToText(status)}</span>
-        </Badge>
-    );
-};
-
 type Props = {
     internalOrder: NonNullable<InternalOrderByIdQuery['internalOrderById']>;
 };
@@ -251,7 +227,9 @@ export const InternalOrderDetails = ({ internalOrder }: Props) => {
                     </p>
                 </div>
 
-                <StatusBadge status={internalOrder.latestHistoryEntry!.status!} />
+                <InternalOrderStatusBadge
+                    status={internalOrder.latestHistoryEntry!.status!}
+                />
             </div>
 
             <div className="space-y-2">

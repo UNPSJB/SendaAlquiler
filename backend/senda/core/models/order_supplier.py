@@ -89,7 +89,7 @@ class SupplierOrderManager(models.Manager["SupplierOrder"]):
                         item_data["quantity_ordered"] * product_supplier_relation.price
                     )
 
-                    order_item = SupplierOrderLineItem(
+                    order_item = SupplierOrderItem(
                         supplier_order=supplier_order,
                         product=product,
                         quantity_ordered=item_data["quantity_ordered"],
@@ -98,14 +98,14 @@ class SupplierOrderManager(models.Manager["SupplierOrder"]):
                     )
                     order_items.append(order_item)
 
-                SupplierOrderLineItem.objects.bulk_create(order_items)
+                SupplierOrderItem.objects.bulk_create(order_items)
 
                 # Actualizar el total de la orden
                 supplier_order.update_totals()
 
                 # Crear la entrada inicial en el historial
                 supplier_order.set_status(
-                    status=SupplierOrderHistoryStatusChoices.PENDING, user=user
+                    status=SupplierOrderHistoryStatusChoices.PENDING, responsible_user=user
                 )
 
                 return supplier_order
@@ -115,8 +115,13 @@ class SupplierOrderManager(models.Manager["SupplierOrder"]):
             raise SupplierOrderCreationError(f"Failed to create supplier order: {e}")
 
 
+class CompletedOrderItemDetailsDict(TypedDict):
+    item_id: int
+    quantity_received: int
+
+
 class SupplierOrder(TimeStampedModel):
-    order_items: models.QuerySet["SupplierOrderLineItem"]
+    order_items: models.QuerySet["SupplierOrderItem"]
     history_entries: models.QuerySet["SupplierOrderHistory"]
 
     supplier = models.ForeignKey(
@@ -150,15 +155,87 @@ class SupplierOrder(TimeStampedModel):
         self.total = self.order_items.aggregate(models.Sum("total"))["total__sum"]
         self.save()
 
-    def set_status(self, status: str, user: Optional["UserModel"] = None):
+    def set_status(
+        self,
+        status: str,
+        responsible_user: Optional["UserModel"] = None,
+        note: str = None,
+        completed_order_items: Optional[List[CompletedOrderItemDetailsDict]] = None,
+    ) -> "SupplierOrderHistory":
+        if self.latest_history_entry:
+            if (
+                self.latest_history_entry.status
+                == SupplierOrderHistoryStatusChoices.COMPLETED
+            ):
+                raise ValidationError("Cannot change status of a completed order.")
+
+            if status == self.latest_history_entry.status:
+                raise ValidationError(f"Order is already in {status} status.")
+
+            if status == SupplierOrderHistoryStatusChoices.PENDING:
+                raise ValidationError("Cannot set status to PENDING.")
+
+        if status == SupplierOrderHistoryStatusChoices.COMPLETED:
+            if not completed_order_items:
+                raise ValidationError("Completed orders must have completed items.")
+
+            for item in self.order_items.all():
+                completed_order_item_details_dict: Optional[
+                    CompletedOrderItemDetailsDict
+                ] = None
+                for completed_item_dict in completed_order_items:
+                    if completed_item_dict["item_id"] == item.pk:
+                        completed_order_item_details_dict = completed_item_dict
+                        break
+
+                if not completed_order_item_details_dict:
+                    raise ValidationError(
+                        f"Item {item.pk} not found in completed_order_items."
+                    )
+
+                if (
+                    completed_order_item_details_dict["quantity_received"]
+                    > item.quantity_ordered
+                ):
+                    raise ValidationError(
+                        f"Quantity received for item {item.pk} must be less than or equal to quantity ordered."
+                    )
+
+                if completed_order_item_details_dict["quantity_received"] < 0:
+                    raise ValidationError(
+                        f"Quantity received for item {item.pk} must be positive."
+                    )
+
+                item.target_office_quantity_before_receive = (
+                    item.product.get_stock_for_office(office_id=self.target_office.pk)
+                    or 0
+                )
+                item.product.increase_stock_in_office(
+                    office_id=self.target_office.pk,
+                    quantity=completed_order_item_details_dict["quantity_received"],
+                )
+                item.target_office_quantity_after_receive = (
+                    item.product.get_stock_for_office(office_id=self.target_office.pk)
+                )
+
+                item.quantity_received = completed_order_item_details_dict[
+                    "quantity_received"
+                ]
+                item.save()
+
         history = SupplierOrderHistory.objects.create(
-            user=user, supplier_order=self, status=status
+            status=status,
+            supplier_order=self,
+            responsible_user=responsible_user,
+            note=note,
         )
         self.latest_history_entry = history
         self.save()
 
+        return history
 
-class SupplierOrderLineItem(TimeStampedModel):
+
+class SupplierOrderItem(TimeStampedModel):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="related_supplier_orders"
     )
@@ -168,6 +245,9 @@ class SupplierOrderLineItem(TimeStampedModel):
 
     quantity_ordered = models.PositiveIntegerField(default=0)
     quantity_received = models.PositiveIntegerField(default=0)
+
+    target_office_quantity_before_receive = models.PositiveIntegerField(default=0)
+    target_office_quantity_after_receive = models.PositiveIntegerField(default=0)
 
     product_price = models.PositiveBigIntegerField(blank=True)
     total = models.PositiveBigIntegerField(blank=True)
@@ -205,7 +285,7 @@ class SupplierOrderHistory(TimeStampedModel):
     supplier_order = models.ForeignKey(
         SupplierOrder, on_delete=models.CASCADE, related_name="history_entries"
     )
-    user = models.ForeignKey(
+    responsible_user = models.ForeignKey(
         UserModel,
         on_delete=models.SET_NULL,
         null=True,
@@ -216,5 +296,7 @@ class SupplierOrderHistory(TimeStampedModel):
     status = models.CharField(
         max_length=20, choices=SupplierOrderHistoryStatusChoices.choices
     )
+
+    note = models.TextField(blank=True, null=True)
 
     objects = models.Manager()

@@ -29,7 +29,7 @@ export const EmployeeByIdDetailsTab: React.FC<EmployeeByIdTabComponentProps> = (
                             Última sesión:{' '}
                             {employee.user.lastLogin === null
                                 ? 'Nunca inició sesión'
-                                : employee.user.lastLogin}
+                                : format(new Date(employee.user.lastLogin), 'dd/MM/yyyy')}
                         </p>
                     </div>
                 </div>

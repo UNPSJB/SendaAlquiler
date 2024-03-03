@@ -13,7 +13,8 @@ from senda.core.models.order_internal import (
 from senda.core.models.order_supplier import (
     SupplierOrder,
     SupplierOrderHistory,
-    SupplierOrderLineItem,
+    SupplierOrderItem,
+    SupplierOrderHistoryStatusChoices,
 )
 from senda.core.models.products import (
     Brand,
@@ -30,7 +31,7 @@ from senda.core.models.contract import (
     ContractItem,
     Contract,
     ContractStatusChoices,
-    ContractItemService
+    ContractItemService,
 )
 from senda.core.models.suppliers import SupplierModel
 from senda.core.models.admin import AdminModel
@@ -40,6 +41,9 @@ from utils.graphene import non_null_list_of
 StateChoicesEnum = graphene.Enum.from_enum(StateChoices)
 InternalOrderHistoryStatusEnum = graphene.Enum.from_enum(
     InternalOrderHistoryStatusChoices
+)
+SupplierOrderHistoryStatusEnum = graphene.Enum.from_enum(
+    SupplierOrderHistoryStatusChoices
 )
 ProductTypeChoicesEnum = graphene.Enum.from_enum(ProductTypeChoices)
 ContractStatusChoicesEnum = graphene.Enum.from_enum(ContractStatusChoices)
@@ -215,15 +219,17 @@ class ProductServiceType(DjangoObjectType):
 
 
 class SupplierOrderHistoryType(DjangoObjectType):
+    status = SupplierOrderHistoryStatusEnum(required=True)
+
     class Meta:
         name = "SupplierOrderHistory"
         model = SupplierOrderHistory
 
 
-class SupplierOrderProductType(DjangoObjectType):
+class SupplierOrderItemType(DjangoObjectType):
     class Meta:
-        name = "SupplierOrderProduct"
-        model = SupplierOrderLineItem
+        name = "SupplierOrderItem"
+        model = SupplierOrderItem
 
 
 class EmployeeOfficeType(DjangoObjectType):
@@ -247,6 +253,7 @@ class ProductSupplierType(DjangoObjectType):
     class Meta:
         name = "ProductSupplier"
         model = ProductSupplier
+
 
 class ContractItemServiceType(DjangoObjectType):
     class Meta:

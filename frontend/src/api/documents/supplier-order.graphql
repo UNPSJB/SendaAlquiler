@@ -1,0 +1,163 @@
+mutation receiveSupplierOrder(
+    $id: ID!
+    $note: String
+    $items: [ReceiveSupplierOrderItemInput!]!
+) {
+    receiveSupplierOrder(id: $id, note: $note, items: $items) {
+        supplierOrder {
+            id
+            latestHistoryEntry {
+                status
+            }
+            historyEntries {
+                ...SupplierOrderHistoryEntryItem
+            }
+            orderItems {
+                ...SupplierOrderListItem
+            }
+        }
+        error
+    }
+}
+
+mutation cancelSupplierOrder($id: ID!, $note: String) {
+    cancelSupplierOrder(id: $id, note: $note) {
+        supplierOrder {
+            id
+            latestHistoryEntry {
+                status
+            }
+            historyEntries {
+                ...SupplierOrderHistoryEntryItem
+            }
+        }
+        error
+    }
+}
+
+mutation createSupplierOrder($data: CreateSupplierOrderInput!) {
+    createSupplierOrder(data: $data) {
+        supplierOrder {
+            id
+        }
+        error
+    }
+}
+
+query supplierOrders($page: Int) {
+    supplierOrders(page: $page) {
+        count
+        numPages
+        results {
+            id
+            supplier {
+                name
+            }
+            targetOffice {
+                name
+            }
+            createdOn
+            latestHistoryEntry {
+                status
+            }
+        }
+    }
+}
+
+query supplierOrderById($id: ID!) {
+    supplierOrderById(id: $id) {
+        id
+        createdOn
+        supplier {
+            cuit
+            name
+            email
+            locality {
+                name
+                postalCode
+                state
+            }
+            houseNumber
+            streetName
+            phoneCode
+            phoneNumber
+        }
+        targetOffice {
+            id
+            name
+            street
+            houseNumber
+            locality {
+                name
+            }
+        }
+        latestHistoryEntry {
+            status
+        }
+        orderItems {
+            ...SupplierOrderListItem
+        }
+        historyEntries {
+            ...SupplierOrderHistoryEntryItem
+        }
+    }
+}
+
+query supplierOrdersBySupplierId($id: ID!) {
+    supplierOrdersBySupplierId(id: $id) {
+        id
+        createdOn
+        targetOffice {
+            name
+            street
+            houseNumber
+        }
+        latestHistoryEntry {
+            status
+            createdOn
+        }
+        orderItems {
+            ...SupplierOrderListItem
+        }
+        historyEntries {
+            ...SupplierOrderHistoryEntryItem
+        }
+    }
+}
+
+mutation deleteSupplierOrder($id: ID!) {
+    deleteSupplierOrder(id: $id) {
+        success
+    }
+}
+
+fragment SupplierOrderListItem on SupplierOrderItem {
+    id
+    product {
+        id
+        name
+        brand {
+            name
+        }
+        name
+        price
+        type
+    }
+    quantityOrdered
+    quantityReceived
+
+    targetOfficeQuantityBeforeReceive
+    targetOfficeQuantityAfterReceive
+}
+
+fragment SupplierOrderHistoryEntryItem on SupplierOrderHistory {
+    id
+    createdOn
+    status
+    note
+    responsibleUser {
+        firstName
+        lastName
+        email
+    }
+}

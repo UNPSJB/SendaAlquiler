@@ -266,7 +266,7 @@
             },
             {
                 "kind": "OBJECT",
-                "name": "CancelOrderSupplier",
+                "name": "CancelSupplierOrder",
                 "description": null,
                 "fields": [
                     {
@@ -282,17 +282,13 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "orderSupplier",
+                        "name": "supplierOrder",
                         "description": null,
                         "args": [],
                         "type": {
-                            "kind": "NON_NULL",
-                            "name": null,
-                            "ofType": {
-                                "kind": "SCALAR",
-                                "name": "ID",
-                                "ofType": null
-                            }
+                            "kind": "OBJECT",
+                            "name": "OrderSupplier",
+                            "ofType": null
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -1923,41 +1919,6 @@
                     {
                         "name": "WEEKLY",
                         "description": "WEEKLY",
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    }
-                ],
-                "possibleTypes": null
-            },
-            {
-                "kind": "ENUM",
-                "name": "CoreSupplierOrderHistoryStatusChoices",
-                "description": "An enumeration.",
-                "fields": null,
-                "inputFields": null,
-                "interfaces": null,
-                "enumValues": [
-                    {
-                        "name": "CANCELED",
-                        "description": "Cancelado",
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "COMPLETED",
-                        "description": "Completado",
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "IN_PROGRESS",
-                        "description": "En progreso",
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "PENDING",
-                        "description": "Pendiente",
                         "isDeprecated": false,
                         "deprecationReason": null
                     }
@@ -4548,11 +4509,11 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "cancelOrderSupplier",
+                        "name": "cancelSupplierOrder",
                         "description": null,
                         "args": [
                             {
-                                "name": "orderSupplierId",
+                                "name": "id",
                                 "description": null,
                                 "type": {
                                     "kind": "NON_NULL",
@@ -4566,11 +4527,23 @@
                                 "defaultValue": null,
                                 "isDeprecated": false,
                                 "deprecationReason": null
+                            },
+                            {
+                                "name": "note",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
                             }
                         ],
                         "type": {
                             "kind": "OBJECT",
-                            "name": "CancelOrderSupplier",
+                            "name": "CancelSupplierOrder",
                             "ofType": null
                         },
                         "isDeprecated": false,
@@ -5552,11 +5525,11 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "receiveOrderSupplier",
+                        "name": "receiveSupplierOrder",
                         "description": null,
                         "args": [
                             {
-                                "name": "orderSupplierId",
+                                "name": "id",
                                 "description": null,
                                 "type": {
                                     "kind": "NON_NULL",
@@ -5570,11 +5543,47 @@
                                 "defaultValue": null,
                                 "isDeprecated": false,
                                 "deprecationReason": null
+                            },
+                            {
+                                "name": "items",
+                                "description": null,
+                                "type": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "LIST",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "NON_NULL",
+                                            "name": null,
+                                            "ofType": {
+                                                "kind": "INPUT_OBJECT",
+                                                "name": "ReceiveSupplierOrderItemInput",
+                                                "ofType": null
+                                            }
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "note",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
                             }
                         ],
                         "type": {
                             "kind": "OBJECT",
-                            "name": "ReceiveOrderSupplier",
+                            "name": "ReceiveSupplierOrder",
                             "ofType": null
                         },
                         "isDeprecated": false,
@@ -6563,7 +6572,7 @@
                                     "name": null,
                                     "ofType": {
                                         "kind": "OBJECT",
-                                        "name": "SupplierOrderProduct",
+                                        "name": "SupplierOrderItem",
                                         "ofType": null
                                     }
                                 }
@@ -7479,7 +7488,7 @@
                                     "name": null,
                                     "ofType": {
                                         "kind": "OBJECT",
-                                        "name": "SupplierOrderProduct",
+                                        "name": "SupplierOrderItem",
                                         "ofType": null
                                     }
                                 }
@@ -9843,7 +9852,7 @@
             },
             {
                 "kind": "OBJECT",
-                "name": "ReceiveOrderSupplier",
+                "name": "ReceiveSupplierOrder",
                 "description": null,
                 "fields": [
                     {
@@ -9859,9 +9868,32 @@
                         "deprecationReason": null
                     },
                     {
-                        "name": "orderSupplier",
+                        "name": "supplierOrder",
                         "description": null,
                         "args": [],
+                        "type": {
+                            "kind": "OBJECT",
+                            "name": "OrderSupplier",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "inputFields": null,
+                "interfaces": [],
+                "enumValues": null,
+                "possibleTypes": null
+            },
+            {
+                "kind": "INPUT_OBJECT",
+                "name": "ReceiveSupplierOrderItemInput",
+                "description": null,
+                "fields": null,
+                "inputFields": [
+                    {
+                        "name": "id",
+                        "description": null,
                         "type": {
                             "kind": "NON_NULL",
                             "name": null,
@@ -9871,12 +9903,28 @@
                                 "ofType": null
                             }
                         },
+                        "defaultValue": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "quantityReceived",
+                        "description": null,
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Int",
+                                "ofType": null
+                            }
+                        },
+                        "defaultValue": null,
                         "isDeprecated": false,
                         "deprecationReason": null
                     }
                 ],
-                "inputFields": null,
-                "interfaces": [],
+                "interfaces": null,
                 "enumValues": null,
                 "possibleTypes": null
             },
@@ -10913,6 +10961,30 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "note",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "responsibleUser",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "OBJECT",
+                            "name": "User",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "status",
                         "description": null,
                         "args": [],
@@ -10921,7 +10993,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "ENUM",
-                                "name": "CoreSupplierOrderHistoryStatusChoices",
+                                "name": "SupplierOrderHistoryStatusChoices",
                                 "ofType": null
                             }
                         },
@@ -10943,18 +11015,6 @@
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
-                    },
-                    {
-                        "name": "user",
-                        "description": null,
-                        "args": [],
-                        "type": {
-                            "kind": "OBJECT",
-                            "name": "User",
-                            "ofType": null
-                        },
-                        "isDeprecated": false,
-                        "deprecationReason": null
                     }
                 ],
                 "inputFields": null,
@@ -10963,8 +11023,43 @@
                 "possibleTypes": null
             },
             {
+                "kind": "ENUM",
+                "name": "SupplierOrderHistoryStatusChoices",
+                "description": "An enumeration.",
+                "fields": null,
+                "inputFields": null,
+                "interfaces": null,
+                "enumValues": [
+                    {
+                        "name": "CANCELED",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "COMPLETED",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "IN_PROGRESS",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "PENDING",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "possibleTypes": null
+            },
+            {
                 "kind": "OBJECT",
-                "name": "SupplierOrderProduct",
+                "name": "SupplierOrderItem",
                 "description": null,
                 "fields": [
                     {
@@ -11089,6 +11184,38 @@
                             "ofType": {
                                 "kind": "OBJECT",
                                 "name": "OrderSupplier",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "targetOfficeQuantityAfterReceive",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Int",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "targetOfficeQuantityBeforeReceive",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Int",
                                 "ofType": null
                             }
                         },

@@ -8,6 +8,7 @@ from graphql_jwt.shortcuts import get_token
 
 from users.models import UserModel
 from users.schema.types import User
+from django.utils import timezone
 
 
 class Login(graphene.Mutation):
@@ -28,6 +29,8 @@ class Login(graphene.Mutation):
             if not user or not user.is_active:
                 raise GraphQLError("Contraseña incorrecta")
 
+            user.last_login = timezone.now()
+            user.save()
             token = get_token(user)
             return Login(user=user, token=token)
         except Exception as e:

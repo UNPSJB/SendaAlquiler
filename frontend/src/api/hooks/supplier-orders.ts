@@ -19,9 +19,13 @@ import {
     CreateSupplierOrderMutation,
     DeleteSupplierOrderDocument,
     DeleteSupplierOrderMutation,
-    ReceiveOrderSupplierDocument,
     SupplierOrderByIdQuery,
-    CoreSupplierOrderHistoryStatusChoices,
+    CancelSupplierOrderDocument,
+    ReceiveSupplierOrderMutationVariables,
+    ReceiveSupplierOrderDocument,
+    CancelSupplierOrderMutationVariables,
+    ReceiveSupplierOrderMutation,
+    CancelSupplierOrderMutation,
 } from '../graphql';
 
 export const useSupplierOrders = () => {
@@ -124,46 +128,87 @@ export const useDeleteSupplierOrder = ({
     );
 };
 
-export const useReceiveOrderSupplierOrder = () => {
-    const client = useQueryClient();
+const updateSupplierOrderStatus = (
+    client: ReturnType<typeof useQueryClient>,
+    id: string,
+    responseOrder:
+        | NonNullable<
+              NonNullable<
+                  ReceiveSupplierOrderMutation['receiveSupplierOrder']
+              >['supplierOrder']
+          >
+        | NonNullable<
+              NonNullable<
+                  CancelSupplierOrderMutation['cancelSupplierOrder']
+              >['supplierOrder']
+          >,
+) => {
+    client.invalidateQueries(queryKeys.supplierOrdersPaginatedList());
+    client.setQueryData<SupplierOrderByIdQuery>(
+        queryKeys.supplierOrderDetailsById(id),
+        (prev) => {
+            const prevOrder = prev?.supplierOrderById;
 
-    return useMutation(
-        (id: string) => {
-            return fetchClient(ReceiveOrderSupplierDocument, {
-                orderSupplierId: id,
-            });
-        },
-        {
-            onSuccess: (data) => {
-                client.invalidateQueries(queryKeys.supplierOrdersPaginatedList());
+            if (!prev || !prevOrder) {
+                return prev;
+            }
 
-                const id = data.receiveOrderSupplier?.orderSupplier;
-
-                if (!id) return;
-
-                client.setQueryData<SupplierOrderByIdQuery>(
-                    queryKeys.supplierOrderDetailsById(id),
-                    (prev) => {
-                        const order = prev?.supplierOrderById;
-                        if (!order || !prev) {
-                            return prev;
-                        }
-
-                        const next: SupplierOrderByIdQuery = {
-                            ...prev,
-                            supplierOrderById: {
-                                ...order,
-                                latestHistoryEntry: {
-                                    status: CoreSupplierOrderHistoryStatusChoices.Completed,
-                                    user: order.latestHistoryEntry?.user || null,
-                                },
-                            },
-                        };
-
-                        return next;
+            const next: SupplierOrderByIdQuery = {
+                ...prev,
+                supplierOrderById: {
+                    ...prevOrder,
+                    latestHistoryEntry: {
+                        status: responseOrder.latestHistoryEntry!.status,
                     },
-                );
-            },
+                    historyEntries: responseOrder.historyEntries,
+                    orderItems:
+                        'orderItems' in responseOrder
+                            ? responseOrder.orderItems
+                            : 'orderItems' in prevOrder
+                              ? prevOrder.orderItems
+                              : [],
+                },
+            };
+
+            return next;
         },
     );
+};
+
+export const useSetSupplierOrderAsCompleted = () => {
+    const client = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: ReceiveSupplierOrderMutationVariables) => {
+            return fetchClient(ReceiveSupplierOrderDocument, data);
+        },
+        onSuccess: (data) => {
+            if (data.receiveSupplierOrder?.supplierOrder) {
+                updateSupplierOrderStatus(
+                    client,
+                    data.receiveSupplierOrder.supplierOrder.id,
+                    data.receiveSupplierOrder.supplierOrder,
+                );
+            }
+        },
+    });
+};
+
+export const useSetSupplierOrderAsCanceled = () => {
+    const client = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: CancelSupplierOrderMutationVariables) => {
+            return fetchClient(CancelSupplierOrderDocument, data);
+        },
+        onSuccess: (data) => {
+            if (data.cancelSupplierOrder?.supplierOrder) {
+                updateSupplierOrderStatus(
+                    client,
+                    data.cancelSupplierOrder.supplierOrder.id,
+                    data.cancelSupplierOrder.supplierOrder,
+                );
+            }
+        },
+    });
 };

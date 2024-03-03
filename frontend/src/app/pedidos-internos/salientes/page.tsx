@@ -7,7 +7,7 @@ import { MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { InternalOrderHistoryStatusChoices, InternalOrdersQuery } from '@/api/graphql';
+import { InternalOrdersQuery } from '@/api/graphql';
 import {
     useDeleteInternalOrder,
     useExportInternalOrdersCsv,
@@ -22,6 +22,7 @@ import { useOfficeContext } from '@/app/OfficeProvider';
 
 import { AdminDataTable } from '@/components/admin-data-table';
 import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import { InternalOrderStatusBadge } from '@/components/badges';
 import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
@@ -83,7 +84,11 @@ const columns: ColumnDef<InternalOrder, any>[] = [
                 return '-';
             }
 
-            return <Status status={internalOrder.latestHistoryEntry.status} />;
+            return (
+                <InternalOrderStatusBadge
+                    status={internalOrder.latestHistoryEntry.status}
+                />
+            );
         },
     }),
     columnsHelper.display({
@@ -165,38 +170,6 @@ const RowActions = ({ internalOrder }: { internalOrder: InternalOrder }) => {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-    );
-};
-
-const Status = ({ status }: { status: InternalOrderHistoryStatusChoices }) => {
-    if (status === InternalOrderHistoryStatusChoices.Completed) {
-        return (
-            <span className="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
-                Completado
-            </span>
-        );
-    }
-
-    if (status === InternalOrderHistoryStatusChoices.InProgress) {
-        return (
-            <span className="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold leading-5 text-blue-800">
-                En progreso
-            </span>
-        );
-    }
-
-    if (status === InternalOrderHistoryStatusChoices.Pending) {
-        return (
-            <span className="inline-flex rounded-full bg-yellow-100 px-2 text-xs font-semibold leading-5 text-yellow-800">
-                Pendiente
-            </span>
-        );
-    }
-
-    return (
-        <span className="inline-flex rounded-full bg-red-100 px-2 text-xs font-semibold leading-5 text-red-800">
-            Cancelado
-        </span>
     );
 };
 

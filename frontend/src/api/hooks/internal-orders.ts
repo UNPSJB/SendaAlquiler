@@ -4,7 +4,6 @@ import {
     useQuery,
     useQueryClient,
 } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 
 import usePaginatedQuery from '@/modules/usePaginatedQuery';
 
@@ -185,9 +184,6 @@ export const useSetInternalOrderAsInProgress = () => {
                 );
             }
         },
-        onError: () => {
-            toast.error('Hubo un error al actualizar el estado del pedido');
-        },
     });
 };
 
@@ -207,9 +203,6 @@ export const useSetInternalOrderAsCompleted = () => {
                 );
             }
         },
-        onError: () => {
-            toast.error('Hubo un error al actualizar el estado del pedido');
-        },
     });
 };
 
@@ -228,9 +221,6 @@ export const useSetInternalOrderAsCanceled = () => {
                     data.cancelInternalOrder.internalOrder,
                 );
             }
-        },
-        onError: () => {
-            toast.error('Hubo un error al actualizar el estado del pedido');
         },
     });
 };

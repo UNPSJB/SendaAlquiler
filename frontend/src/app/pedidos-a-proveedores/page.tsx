@@ -20,6 +20,7 @@ import DashboardLayout, {
 
 import { AdminDataTable } from '@/components/admin-data-table';
 import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import { SupplierOrderStatusBadge } from '@/components/badges';
 import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
@@ -74,6 +75,15 @@ const columns: ColumnDef<OrderSupplier, any>[] = [
     columnsHelper.accessor('latestHistoryEntry.status', {
         id: 'status',
         header: 'Estado',
+        cell: (props) => {
+            const order = props.row.original;
+
+            if (!order.latestHistoryEntry) {
+                return '-';
+            }
+
+            return <SupplierOrderStatusBadge status={order.latestHistoryEntry.status} />;
+        },
     }),
     columnsHelper.display({
         id: 'actions',

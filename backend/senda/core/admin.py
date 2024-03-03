@@ -11,7 +11,7 @@ from .models.order_internal import (
 )
 from .models.order_supplier import (
     SupplierOrder,
-    SupplierOrderLineItem,
+    SupplierOrderItem,
     SupplierOrderHistory,
 )
 from .models.products import Brand, Product, ProductService, StockItem, ProductSupplier
@@ -123,8 +123,8 @@ class SaleModelAdmin(admin.ModelAdmin[Sale]):
     pass
 
 
-@admin.register(SupplierOrderLineItem)
-class SupplierOrderProductAdmin(admin.ModelAdmin[SupplierOrderLineItem]):
+@admin.register(SupplierOrderItem)
+class SupplierOrderProductAdmin(admin.ModelAdmin[SupplierOrderItem]):
     pass
 
 

@@ -33,12 +33,14 @@ from senda.core.models.order_internal import (
     InternalOrderItemDetailsDict,
     InternalOrderHistoryStatusChoices,
     InProgressOrderItemDetailsDict,
-    CompletedOrderItemDetailsDict,
+    CompletedOrderItemDetailsDict as InternalCompletedOrderItemDetailsDict,
 )
 from senda.core.models.order_supplier import (
     SupplierOrder,
     SupplierOrderDetailsDict,
     SupplierOrderItemDetailsDict,
+    SupplierOrderHistoryStatusChoices,
+    CompletedOrderItemDetailsDict as SupplierCompletedOrderItemDetailsDict,
 )
 from senda.core.models.sale import Sale
 from senda.core.models.contract import (
@@ -446,7 +448,7 @@ def create_internal_orders():
                     responsible_user=EmployeeModel.objects.order_by("?").first().user,
                     note=fake.sentence(),
                     completed_order_items=[
-                        CompletedOrderItemDetailsDict(
+                        InternalCompletedOrderItemDetailsDict(
                             item_id=order_item.pk,
                             quantity_received=random.randint(
                                 0, order_item.quantity_sent
@@ -499,7 +501,38 @@ def create_supplier_orders():
             ).order_by("?")[0 : random.randint(1, 5)]
         ]
 
-        SupplierOrder.objects.create_supplier_order(order_data, items_data)
+        supplier_order = SupplierOrder.objects.create_supplier_order(order_data, items_data)
+
+        is_completed = random.choice([True, False, None])
+        if is_completed:
+            history = supplier_order.set_status(
+                SupplierOrderHistoryStatusChoices.COMPLETED,
+                responsible_user=EmployeeModel.objects.order_by("?").first().user,
+                note=fake.sentence(),
+                completed_order_items=[
+                    SupplierCompletedOrderItemDetailsDict(
+                        item_id=order_item.pk,
+                        quantity_received=random.randint(0, order_item.quantity_ordered),
+                    ) for order_item in supplier_order.order_items.all()
+                ],
+            )
+            history.created_on = requested_for_date + timedelta(
+                days=random.randint(1, 30)
+            )
+
+            history.save()
+        elif is_completed is False:
+            history = supplier_order.set_status(
+                SupplierOrderHistoryStatusChoices.CANCELED,
+                responsible_user=EmployeeModel.objects.order_by("?").first().user,
+                note=fake.sentence(),
+            )
+
+            history.created_on = requested_for_date + timedelta(
+                days=random.randint(1, 30)
+            )
+            history.save()
+
 
 
 def create_sales():
