@@ -3,7 +3,7 @@ import Link from 'next/link';
 import clsx from 'clsx';
 import { PropsWithChildren } from 'react';
 
-import { ContractStatusChoices } from '@/api/graphql';
+import { ContractHistoryStatusChoices } from '@/api/graphql';
 import {
     usePayContractDepositMutation,
     usePayTotalContractMutation,
@@ -29,51 +29,51 @@ const SN: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 const dataByStatus: Record<
-    ContractStatusChoices,
+    ContractHistoryStatusChoices,
     {
         bg: string;
         text: string;
     }
 > = {
-    [ContractStatusChoices.Presupuestado]: {
+    [ContractHistoryStatusChoices.Presupuestado]: {
         bg: 'bg-orange-500',
         text: 'Presupuestado',
     },
-    [ContractStatusChoices.ConDeposito]: {
+    [ContractHistoryStatusChoices.ConDeposito]: {
         bg: 'bg-yellow-500',
         text: 'Señado',
     },
-    [ContractStatusChoices.Activo]: {
+    [ContractHistoryStatusChoices.Activo]: {
         bg: 'bg-blue-500',
         text: 'Enviado',
     },
-    [ContractStatusChoices.Pagado]: {
+    [ContractHistoryStatusChoices.Pagado]: {
         bg: 'bg-green-500',
         text: 'Aceptado',
     },
-    [ContractStatusChoices.Cancelado]: {
+    [ContractHistoryStatusChoices.Cancelado]: {
         bg: 'bg-red-500',
         text: 'Rechazado',
     },
-    [ContractStatusChoices.DevolucionExitosa]: {
+    [ContractHistoryStatusChoices.DevolucionExitosa]: {
         bg: '',
         text: '',
     },
-    [ContractStatusChoices.DevolucionFallida]: {
+    [ContractHistoryStatusChoices.DevolucionFallida]: {
         bg: '',
         text: '',
     },
-    [ContractStatusChoices.Finalizado]: {
+    [ContractHistoryStatusChoices.Finalizado]: {
         bg: '',
         text: '',
     },
-    [ContractStatusChoices.Vencido]: {
+    [ContractHistoryStatusChoices.Vencido]: {
         bg: '',
         text: '',
     },
 };
 
-type StatusIndicatorProps = { status: ContractStatusChoices };
+type StatusIndicatorProps = { status: ContractHistoryStatusChoices };
 
 const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status }) => {
     return (
@@ -89,13 +89,13 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status }) => {
     );
 };
 
-type StatusButtonProps = { status: ContractStatusChoices; id: string };
+type StatusButtonProps = { status: ContractHistoryStatusChoices; id: string };
 
 const StatusButton: React.FC<StatusButtonProps> = ({ status, id }) => {
     const { mutate: payContractDeposit } = usePayContractDepositMutation();
     const { mutate: payContractTotal } = usePayTotalContractMutation();
 
-    if (status === ContractStatusChoices.Presupuestado) {
+    if (status === ContractHistoryStatusChoices.Presupuestado) {
         return (
             <button
                 onClick={() => {
@@ -108,7 +108,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({ status, id }) => {
         );
     }
 
-    if (status === ContractStatusChoices.ConDeposito) {
+    if (status === ContractHistoryStatusChoices.ConDeposito) {
         return (
             <button
                 onClick={() => {

@@ -49,6 +49,8 @@ export const ProductFormEditorDetails = ({ originalSku }: Props) => {
         );
     };
 
+    const watchedType = formMethods.watch('type');
+
     return (
         <div className="space-y-4">
             <h2 className="text-lg font-bold">Detalles del Producto</h2>
@@ -236,6 +238,10 @@ export const ProductFormEditorDetails = ({ originalSku }: Props) => {
                                     value={valueAsPrice}
                                 />
                             </FormControl>
+
+                            {watchedType?.value === ProductTypeChoices.Alquilable && (
+                                <p className="text-sm text-gray-500">El precio por día</p>
+                            )}
 
                             <FormMessage />
                         </FormItem>

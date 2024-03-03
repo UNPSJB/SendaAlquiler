@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from senda.core.models.contract import (
     ContractHistory,
     Contract,
-    ContractStatusChoices,
+    ContractHistoryStatusChoices,
     ContractDetailsDict,
     ContractItemDetailsDict,
     ContractItemProductAllocationDetailsDict,
@@ -154,8 +154,8 @@ class BaseChangeContractStatus(graphene.Mutation):
     def check_contract_status_is_one_of_and_update_status(
         cls,
         contract: Contract,
-        status: List[ContractStatusChoices],
-        new_status: ContractStatusChoices,
+        status: List[ContractHistoryStatusChoices],
+        new_status: ContractHistoryStatusChoices,
     ) -> None:
         if (
             not contract.latest_history_entry
@@ -179,8 +179,8 @@ class PayContractDeposit(BaseChangeContractStatus):
             contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
-                [ContractStatusChoices.PRESUPUESTADO],
-                ContractStatusChoices.CON_DEPOSITO,
+                [ContractHistoryStatusChoices.PRESUPUESTADO],
+                ContractHistoryStatusChoices.CON_DEPOSITO,
             )
 
             return BaseChangeContractStatus(contract=contract)
@@ -197,8 +197,8 @@ class PayTotalContract(BaseChangeContractStatus):
             contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
-                [ContractStatusChoices.CON_DEPOSITO],
-                ContractStatusChoices.PAGADO,
+                [ContractHistoryStatusChoices.CON_DEPOSITO],
+                ContractHistoryStatusChoices.PAGADO,
             )
 
             return BaseChangeContractStatus(contract=contract)
@@ -216,10 +216,10 @@ class CancelContract(BaseChangeContractStatus):
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
                 [
-                    ContractStatusChoices.CON_DEPOSITO,
-                    ContractStatusChoices.PAGADO,
+                    ContractHistoryStatusChoices.CON_DEPOSITO,
+                    ContractHistoryStatusChoices.PAGADO,
                 ],
-                ContractStatusChoices.CANCELADO,
+                ContractHistoryStatusChoices.CANCELADO,
             )
 
             return BaseChangeContractStatus(contract=contract)
@@ -236,8 +236,8 @@ class StartContract(BaseChangeContractStatus):
             contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
-                [ContractStatusChoices.PAGADO],
-                ContractStatusChoices.ACTIVO,
+                [ContractHistoryStatusChoices.PAGADO],
+                ContractHistoryStatusChoices.ACTIVO,
             )
 
             return BaseChangeContractStatus(contract=contract)
@@ -255,10 +255,10 @@ class ExpiredContract(BaseChangeContractStatus):
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
                 [
-                    ContractStatusChoices.CON_DEPOSITO,
-                    ContractStatusChoices.PRESUPUESTADO,
+                    ContractHistoryStatusChoices.CON_DEPOSITO,
+                    ContractHistoryStatusChoices.PRESUPUESTADO,
                 ],
-                ContractStatusChoices.VENCIDO,
+                ContractHistoryStatusChoices.VENCIDO,
             )
 
             return BaseChangeContractStatus(contract=contract)
@@ -275,8 +275,8 @@ class FinishContract(BaseChangeContractStatus):
             contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
-                [ContractStatusChoices.ACTIVO],
-                ContractStatusChoices.FINALIZADO,
+                [ContractHistoryStatusChoices.ACTIVO],
+                ContractHistoryStatusChoices.FINALIZADO,
             )
 
             return BaseChangeContractStatus(contract=contract)
@@ -293,8 +293,8 @@ class FailedReturnContract(BaseChangeContractStatus):
             contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
-                [ContractStatusChoices.FINALIZADO],
-                ContractStatusChoices.DEVOLUCION_FALLIDA,
+                [ContractHistoryStatusChoices.FINALIZADO],
+                ContractHistoryStatusChoices.DEVOLUCION_FALLIDA,
             )
 
             return BaseChangeContractStatus(contract=contract)
@@ -311,8 +311,8 @@ class SuccessfulReturnContract(BaseChangeContractStatus):
             contract = cls.get_contract(id)
             cls.check_contract_status_is_one_of_and_update_status(
                 contract,
-                [ContractStatusChoices.FINALIZADO],
-                ContractStatusChoices.DEVOLUCION_EXITOSA,
+                [ContractHistoryStatusChoices.FINALIZADO],
+                ContractHistoryStatusChoices.DEVOLUCION_EXITOSA,
             )
 
             return BaseChangeContractStatus(contract=contract)

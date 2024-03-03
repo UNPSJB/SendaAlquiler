@@ -92,7 +92,7 @@ const LoginForm = () => {
                     <FormField
                         name="email"
                         rules={{
-                            required: true,
+                            required: 'El correo electrónico es requerido',
                             pattern: {
                                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
                                 message: 'Correo electrónico inválido',
@@ -106,7 +106,6 @@ const LoginForm = () => {
                                 <FormControl>
                                     <Input
                                         data-cy="login-email-input"
-                                        type="email"
                                         placeholder="brunodiaz@gmail.com"
                                         {...field}
                                         value={field.value || ''}
@@ -120,7 +119,7 @@ const LoginForm = () => {
 
                     <FormField
                         name="password"
-                        rules={{ required: true }}
+                        rules={{ required: 'La contraseña es requerida' }}
                         control={formMethods.control}
                         render={({ field }) => (
                             <FormItem>

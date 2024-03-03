@@ -129,16 +129,14 @@ export const ProductFormEditor = ({ cancelHref, defaultValues, idToUpdate }: Pro
     const onSubmit: SubmitHandler<ProductFormEditorValues> = (data) => {
         if (
             !data.name ||
-            !data.description ||
             !data.brand ||
             !data.type ||
-            !data.stocks ||
-            !data.suppliers ||
             !data.price ||
             !data.sku ||
             isCreatingOrUpdating
-        )
+        ) {
             return;
+        }
 
         const services = (data.services || [])
             .filter((service) => service.service && service.price)
@@ -153,7 +151,7 @@ export const ProductFormEditor = ({ cancelHref, defaultValues, idToUpdate }: Pro
 
                 return next;
             });
-        const stockItems = data.stocks
+        const stockItems = (data.stocks || [])
             .filter((stock) => stock.office && stock.quantity)
             .map((stock) => {
                 const next: ProductStockItemInput = {
@@ -163,7 +161,7 @@ export const ProductFormEditor = ({ cancelHref, defaultValues, idToUpdate }: Pro
 
                 return next;
             });
-        const suppliers = data.suppliers
+        const suppliers = (data.suppliers || [])
             .filter((supplier) => supplier.supplier && supplier.price)
             .map((supplier) => {
                 const next: ProductSupplierInput = {
@@ -178,7 +176,7 @@ export const ProductFormEditor = ({ cancelHref, defaultValues, idToUpdate }: Pro
             createProductMutation.mutate({
                 productData: {
                     brandId: data.brand.value,
-                    description: data.description,
+                    description: data.description || null,
                     name: data.name,
                     price: data.price,
                     sku: data.sku,
@@ -193,7 +191,7 @@ export const ProductFormEditor = ({ cancelHref, defaultValues, idToUpdate }: Pro
                 id: idToUpdate,
                 productData: {
                     brandId: data.brand.value,
-                    description: data.description,
+                    description: data.description || null,
                     name: data.name,
                     price: data.price,
                     sku: data.sku,

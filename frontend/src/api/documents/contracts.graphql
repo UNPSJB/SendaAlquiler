@@ -23,6 +23,8 @@ query contracts($page: Int) {
 
 query contractById($id: ID!) {
     contractById(id: $id) {
+        id
+        createdOn
         client {
             firstName
             dni
@@ -55,6 +57,17 @@ query contractById($id: ID!) {
         streetName
         total
         numberOfRentalDays
+        historyEntries {
+            id
+            createdOn
+            status
+            note
+            responsibleUser {
+                firstName
+                lastName
+                email
+            }
+        }
         contractItems {
             id
 

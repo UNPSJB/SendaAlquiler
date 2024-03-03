@@ -16,6 +16,7 @@ import DashboardLayout, {
 
 import { AdminDataTable } from '@/components/admin-data-table';
 import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import { ContractStatusBadge } from '@/components/badges';
 import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
@@ -63,6 +64,15 @@ const columns: ColumnDef<Contract, any>[] = [
     columnsHelper.accessor('latestHistoryEntry.status', {
         id: 'status',
         header: 'Estado',
+        cell: (props) => {
+            const contract = props.row.original;
+
+            if (!contract.latestHistoryEntry) {
+                return '-';
+            }
+
+            return <ContractStatusBadge status={contract.latestHistoryEntry.status} />;
+        },
     }),
     columnsHelper.display({
         id: 'actions',

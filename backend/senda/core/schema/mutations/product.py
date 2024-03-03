@@ -113,7 +113,7 @@ class CreateProduct(graphene.Mutation):
                         product_id=product.pk,
                         services_data=[
                             ProductServiceDataDict(
-                                service_id=int(service.service_id),
+                                service_id=int(service.service_id) if service.service_id else None,
                                 name=service.name,
                                 price=service.price,
                                 product_id=product.pk,

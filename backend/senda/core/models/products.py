@@ -185,7 +185,7 @@ class Product(TimeStampedModel):
         blank=True,
     )
     type = models.CharField(max_length=50, choices=ProductTypeChoices.choices)
-    price = models.IntegerField(
+    price = models.PositiveBigIntegerField(
         null=True,
         blank=True,
     )
@@ -252,7 +252,7 @@ class Product(TimeStampedModel):
         # TODO: TAKE INTO ACCOUNT INTERNAL ORDERS
 
         from senda.core.models.contract import (
-            ContractStatusChoices,
+            ContractHistoryStatusChoices,
             ContractItemProductAllocation,
         )
 
@@ -262,8 +262,8 @@ class Product(TimeStampedModel):
         allocated_stock_qs = ContractItemProductAllocation.objects.filter(
             item__product_id=self.id,
             item__contract__latest_history_entry__status__in=[
-                ContractStatusChoices.CON_DEPOSITO,
-                ContractStatusChoices.ACTIVO,
+                ContractHistoryStatusChoices.CON_DEPOSITO,
+                ContractHistoryStatusChoices.ACTIVO,
             ],
             item__contract__contract_start_datetime__date__range=(
                 start_date,
@@ -280,13 +280,13 @@ class Product(TimeStampedModel):
         self, start_date: datetime, end_date: datetime
     ) -> int:
         """Calculates global available stock subtracting reserved items within a date range across all offices."""
-        from senda.core.models.contract import ContractStatusChoices
+        from senda.core.models.contract import ContractHistoryStatusChoices
 
         available_stock = self.available_stock
         reserved_stock_qs = self.contract_items.filter(
             contract__latest_history_entry__status__in=[
-                ContractStatusChoices.CON_DEPOSITO,
-                ContractStatusChoices.ACTIVO,
+                ContractHistoryStatusChoices.CON_DEPOSITO,
+                ContractHistoryStatusChoices.ACTIVO,
             ],
             contract__contract_start_datetime__date__range=(
                 start_date,
@@ -326,7 +326,7 @@ class ProductSupplier(TimeStampedModel):
     supplier = models.ForeignKey(
         SupplierModel, on_delete=models.CASCADE, related_name="products"
     )
-    price = models.IntegerField()
+    price = models.PositiveBigIntegerField()
 
     def __str__(self) -> str:
         return f"{self.product} - {self.supplier}"
@@ -347,7 +347,7 @@ class ProductService(TimeStampedModel):
     )
 
     name = models.CharField(max_length=100)
-    price = models.IntegerField()
+    price = models.PositiveBigIntegerField()
     billing_type = models.CharField(
         max_length=50, choices=ProductServiceBillingTypeChoices.choices
     )

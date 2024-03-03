@@ -98,7 +98,7 @@ export type Contract = {
     createdOn: Scalars['DateTime']['output'];
     discountAmount: Scalars['BigInt']['output'];
     expirationDate: Scalars['DateTime']['output'];
-    history: Array<ContractHistory>;
+    historyEntries: Array<ContractHistory>;
     /** Número de la calle donde vive el cliente */
     houseNumber: Scalars['String']['output'];
     /** Número de la casa o departamento */
@@ -122,8 +122,23 @@ export type ContractHistory = {
     currentContract: Maybe<Contract>;
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
-    status: ContractStatusChoices;
+    note: Maybe<Scalars['String']['output']>;
+    responsibleUser: Maybe<User>;
+    status: ContractHistoryStatusChoices;
 };
+
+/** An enumeration. */
+export enum ContractHistoryStatusChoices {
+    Activo = 'ACTIVO',
+    Cancelado = 'CANCELADO',
+    ConDeposito = 'CON_DEPOSITO',
+    DevolucionExitosa = 'DEVOLUCION_EXITOSA',
+    DevolucionFallida = 'DEVOLUCION_FALLIDA',
+    Finalizado = 'FINALIZADO',
+    Pagado = 'PAGADO',
+    Presupuestado = 'PRESUPUESTADO',
+    Vencido = 'VENCIDO',
+}
 
 export type ContractInput = {
     clientId: Scalars['ID']['input'];
@@ -189,19 +204,6 @@ export type ContractItemServiceItemInput = {
     discount: InputMaybe<Scalars['Int']['input']>;
     serviceId: Scalars['ID']['input'];
 };
-
-/** An enumeration. */
-export enum ContractStatusChoices {
-    Activo = 'ACTIVO',
-    Cancelado = 'CANCELADO',
-    ConDeposito = 'CON_DEPOSITO',
-    DevolucionExitosa = 'DEVOLUCION_EXITOSA',
-    DevolucionFallida = 'DEVOLUCION_FALLIDA',
-    Finalizado = 'FINALIZADO',
-    Pagado = 'PAGADO',
-    Presupuestado = 'PRESUPUESTADO',
-    Vencido = 'VENCIDO',
-}
 
 /** An enumeration. */
 export enum CoreContractItemServiceBillingTypeChoices {
@@ -1379,6 +1381,7 @@ export type UpdateSupplierInput = {
 export type User = {
     __typename?: 'User';
     admin: Maybe<Admin>;
+    contractHistories: Array<ContractHistory>;
     contractsCreated: Array<Contract>;
     dateJoined: Scalars['DateTime']['output'];
     email: Scalars['String']['output'];
@@ -1504,7 +1507,7 @@ export type ContractsByClientIdQuery = {
         total: any;
         latestHistoryEntry: {
             __typename?: 'ContractHistory';
-            status: ContractStatusChoices;
+            status: ContractHistoryStatusChoices;
         } | null;
         locality: { __typename?: 'Locality'; name: string; state: StateChoices };
         contractItems: Array<{
@@ -1656,7 +1659,7 @@ export type ContractsQuery = {
             office: { __typename?: 'Office'; name: string };
             latestHistoryEntry: {
                 __typename?: 'ContractHistory';
-                status: ContractStatusChoices;
+                status: ContractHistoryStatusChoices;
             } | null;
         }>;
     };
@@ -1670,6 +1673,8 @@ export type ContractByIdQuery = {
     __typename?: 'Query';
     contractById: {
         __typename?: 'Contract';
+        id: string;
+        createdOn: any;
         contractEndDatetime: any;
         contractStartDatetime: any;
         expirationDate: any;
@@ -1698,7 +1703,7 @@ export type ContractByIdQuery = {
         };
         latestHistoryEntry: {
             __typename?: 'ContractHistory';
-            status: ContractStatusChoices;
+            status: ContractHistoryStatusChoices;
         } | null;
         office: {
             __typename?: 'Office';
@@ -1706,6 +1711,19 @@ export type ContractByIdQuery = {
             street: string;
             houseNumber: string;
         };
+        historyEntries: Array<{
+            __typename?: 'ContractHistory';
+            id: string;
+            createdOn: any;
+            status: ContractHistoryStatusChoices;
+            note: string | null;
+            responsibleUser: {
+                __typename?: 'User';
+                firstName: string;
+                lastName: string;
+                email: string;
+            } | null;
+        }>;
         contractItems: Array<{
             __typename?: 'ContractItem';
             id: string;
@@ -1775,7 +1793,7 @@ export type PayContractDepositMutation = {
             id: string;
             latestHistoryEntry: {
                 __typename?: 'ContractHistory';
-                status: ContractStatusChoices;
+                status: ContractHistoryStatusChoices;
             } | null;
         } | null;
     } | null;
@@ -1795,7 +1813,7 @@ export type PayTotalContractMutation = {
             id: string;
             latestHistoryEntry: {
                 __typename?: 'ContractHistory';
-                status: ContractStatusChoices;
+                status: ContractHistoryStatusChoices;
             } | null;
         } | null;
     } | null;
@@ -1815,7 +1833,7 @@ export type CancelContractMutation = {
             id: string;
             latestHistoryEntry: {
                 __typename?: 'ContractHistory';
-                status: ContractStatusChoices;
+                status: ContractHistoryStatusChoices;
             } | null;
         } | null;
     } | null;
@@ -4866,6 +4884,11 @@ export const ContractByIdDocument = {
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'createdOn' },
+                                },
                                 {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'client' },
@@ -5027,6 +5050,67 @@ export const ContractByIdDocument = {
                                 {
                                     kind: 'Field',
                                     name: { kind: 'Name', value: 'numberOfRentalDays' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'historyEntries' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'createdOn',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'note' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'responsibleUser',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'firstName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'lastName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'email',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
                                 },
                                 {
                                     kind: 'Field',

@@ -5,6 +5,7 @@ from django.db import models, transaction
 
 from extensions.db.models import TimeStampedModel
 
+from users.models import UserModel
 from .clients import Client
 from .localities import LocalityModel
 from .offices import Office
@@ -259,7 +260,7 @@ class ContractManager(models.Manager["Contract"]):
                         )
 
                 contract.update_totals()
-                contract.set_status(ContractStatusChoices.PRESUPUESTADO)
+                contract.set_status(ContractHistoryStatusChoices.PRESUPUESTADO)
 
                 return contract
         except ValidationError as e:
@@ -342,7 +343,7 @@ class Contract(TimeStampedModel):
         self.save()
 
 
-class ContractStatusChoices(models.TextChoices):
+class ContractHistoryStatusChoices(models.TextChoices):
     PRESUPUESTADO = "PRESUPUESTADO", "PRESUPUESTADO"
     CON_DEPOSITO = "CON_DEPOSITO", "SEÑADO"
     PAGADO = "PAGADO", "PAGADO"
@@ -358,9 +359,17 @@ class ContractHistory(TimeStampedModel):
     contract = models.ForeignKey(
         Contract,
         on_delete=models.CASCADE,
-        related_name="history",
+        related_name="history_entries",
     )
-    status = models.CharField(max_length=50, choices=ContractStatusChoices.choices)
+    status = models.CharField(max_length=50, choices=ContractHistoryStatusChoices.choices)
+    responsible_user = models.ForeignKey(
+        UserModel,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="contract_histories",
+    )
+    note = models.TextField(blank=True, null=True)
 
     def __str__(self) -> str:
         return f"{self.contract} - {self.status}"
@@ -490,7 +499,7 @@ class ContractItemProductAllocation(models.Model):
     )
     quantity = models.PositiveIntegerField()
 
-    shipping_cost = models.PositiveIntegerField(default=0)
+    shipping_cost = models.PositiveBigIntegerField(default=0)
 
     objects = models.Manager()
 

@@ -30,7 +30,7 @@ from senda.core.models.contract import (
     ContractHistory,
     ContractItem,
     Contract,
-    ContractStatusChoices,
+    ContractHistoryStatusChoices,
     ContractItemService,
 )
 from senda.core.models.suppliers import SupplierModel
@@ -46,7 +46,7 @@ SupplierOrderHistoryStatusEnum = graphene.Enum.from_enum(
     SupplierOrderHistoryStatusChoices
 )
 ProductTypeChoicesEnum = graphene.Enum.from_enum(ProductTypeChoices)
-ContractStatusChoicesEnum = graphene.Enum.from_enum(ContractStatusChoices)
+ContractHistoryStatusChoicesEnum = graphene.Enum.from_enum(ContractHistoryStatusChoices)
 ProductServiceBillingTypeChoicesEnum = graphene.Enum.from_enum(
     ProductServiceBillingTypeChoices
 )
@@ -205,7 +205,7 @@ class ContractItemType(DjangoObjectType):
 
 
 class ContractHistoryType(DjangoObjectType):
-    status = ContractStatusChoicesEnum(required=True)
+    status = ContractHistoryStatusChoicesEnum(required=True)
 
     class Meta:
         name = "ContractHistory"

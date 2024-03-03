@@ -111,7 +111,7 @@ export const ProductFormEditorStocks = () => {
                                                     );
                                                 }}
                                                 value={
-                                                    field.value
+                                                    typeof field.value === 'number'
                                                         ? formatNumberWithThousandsSeparator(
                                                               field.value,
                                                           )

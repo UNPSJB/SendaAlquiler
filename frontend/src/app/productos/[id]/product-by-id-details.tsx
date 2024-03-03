@@ -1,3 +1,5 @@
+import { ProductTypeChoices } from '@/api/graphql';
+
 import { ProductByIdTabComponentProps } from './page';
 
 import { formatNumberAsPrice } from '@/lib/utils';
@@ -15,72 +17,88 @@ export const ProductByIdDetailsTab: React.FC<ProductByIdTabComponentProps> = ({
                         <p className="text-sm">Marca: {product.brand?.name || '-'}</p>
                         <p className="text-sm">Tipo: {product.type}</p>
                         <p className="text-sm">
-                            Precio:{' '}
-                            {product.price
-                                ? `$${formatNumberAsPrice(product.price)}`
-                                : '-'}
+                            Precio: {`$${formatNumberAsPrice(product.price || 0)}`}
                         </p>
                     </div>
                 </div>
 
                 <div>
                     <h2 className="mb-2 font-bold">Stocks</h2>
-                    <div className="space-y-2">
-                        {product.stockItems.map((stock) => (
-                            <div
-                                key={stock.office.id}
-                                className="space-y-2 rounded border bg-white p-3"
-                            >
-                                <p className="text-sm">Oficina: {stock.office.name}</p>
-                                <p className="text-sm">
-                                    Localidad: {stock.office.locality.name}
-                                </p>
-                                <p className="text-sm">Stock: {stock.quantity}</p>
-                            </div>
-                        ))}
-                    </div>
+
+                    {product.stockItems.length === 0 ? (
+                        <p className="text-sm">No hay stocks asociados</p>
+                    ) : (
+                        <div className="space-y-2">
+                            {product.stockItems.map((stock) => (
+                                <div
+                                    key={stock.office.id}
+                                    className="space-y-2 rounded border bg-white p-3"
+                                >
+                                    <p className="text-sm">
+                                        Oficina: {stock.office.name}
+                                    </p>
+                                    <p className="text-sm">
+                                        Localidad: {stock.office.locality.name}
+                                    </p>
+                                    <p className="text-sm">Stock: {stock.quantity}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                <div>
-                    <h2 className="mb-2 font-bold">Servicios</h2>
-                    <div className="space-y-2">
-                        {product.services.map((service) => (
-                            <div
-                                className="space-y-2 rounded border bg-white p-3"
-                                key={service.id}
-                            >
-                                <p className="text-sm">Nombre: {service.name}</p>
-                                <p className="text-sm">
-                                    Precio:{' '}
-                                    {service.price
-                                        ? `$${formatNumberAsPrice(service.price)}`
-                                        : '-'}
-                                </p>
+                {product.type === ProductTypeChoices.Alquilable && (
+                    <div>
+                        <h2 className="mb-2 font-bold">Servicios</h2>
+
+                        {product.services.length === 0 ? (
+                            <p className="text-sm">No hay servicios asociados</p>
+                        ) : (
+                            <div className="space-y-2">
+                                {product.services.map((service) => (
+                                    <div
+                                        className="space-y-2 rounded border bg-white p-3"
+                                        key={service.id}
+                                    >
+                                        <p className="text-sm">Nombre: {service.name}</p>
+                                        <p className="text-sm">
+                                            Precio:{' '}
+                                            {service.price
+                                                ? `$${formatNumberAsPrice(service.price)}`
+                                                : '-'}
+                                        </p>
+                                    </div>
+                                ))}
                             </div>
-                        ))}
+                        )}
                     </div>
-                </div>
+                )}
 
                 <div>
                     <h2 className="mb-2 font-bold">Proveedores</h2>
-                    <div className="space-y-2">
-                        {product.suppliers.map((supplier) => (
-                            <div
-                                key={supplier.supplier.id}
-                                className="space-y-2 rounded border bg-white p-3"
-                            >
-                                <p className="text-sm">
-                                    Nombre: {supplier.supplier.name}
-                                </p>
-                                <p className="text-sm">
-                                    Precio:{' '}
-                                    {supplier.price
-                                        ? `$${formatNumberAsPrice(supplier.price)}`
-                                        : '-'}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
+
+                    {product.suppliers.length === 0 ? (
+                        <p className="text-sm">No hay proveedores asociados</p>
+                    ) : (
+                        <div className="space-y-2">
+                            {product.suppliers.map((supplier) => (
+                                <div
+                                    key={supplier.supplier.id}
+                                    className="space-y-2 rounded border bg-white p-3"
+                                >
+                                    <p className="text-sm">
+                                        Nombre: {supplier.supplier.name}
+                                    </p>
+                                    <p className="text-sm">
+                                        Precio:{' '}
+                                        {supplier.price
+                                            ? `$${formatNumberAsPrice(supplier.price)}`
+                                            : '-'}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
