@@ -20,7 +20,7 @@ import { InternalOrderStatusEditor } from './internal-order-status-editor';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import Spinner from '@/components/Spinner/Spinner';
+import { DashboardLayoutContentLoading } from '@/components/page-loading';
 import { Form } from '@/components/ui/form';
 
 const useHeader = (
@@ -74,11 +74,7 @@ const Page = () => {
         <DashboardLayout header={header}>
             <FetchedDataRenderer
                 {...useInternalOrderByIdResult}
-                Loading={
-                    <div className="flex w-full flex-1 items-center justify-center">
-                        <Spinner />
-                    </div>
-                }
+                Loading={<DashboardLayoutContentLoading />}
                 Error={
                     <div className="flex w-full flex-1 items-center justify-center">
                         <FetchStatusMessageWithDescription

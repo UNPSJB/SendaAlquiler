@@ -19,7 +19,7 @@ import { ContractStatusEditor } from './contract-status-editor';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import Spinner from '@/components/Spinner/Spinner';
+import { DashboardLayoutContentLoading } from '@/components/page-loading';
 import { Form } from '@/components/ui/form';
 
 const useHeader = (contract: ContractByIdQuery['contractById'] | undefined) => {
@@ -71,11 +71,7 @@ const Page = () => {
         <DashboardLayout header={header}>
             <FetchedDataRenderer
                 {...useContractByIdResult}
-                Loading={
-                    <div className="flex w-full flex-1 items-center justify-center">
-                        <Spinner />
-                    </div>
-                }
+                Loading={<DashboardLayoutContentLoading />}
                 Error={
                     <div className="flex w-full flex-1 items-center justify-center">
                         <FetchStatusMessageWithDescription

@@ -8,7 +8,7 @@ import { SupplierOrderBySupplierIdTabComponentProps } from './page';
 
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import Spinner from '@/components/Spinner/Spinner';
+import { DashboardLayoutContentLoading } from '@/components/page-loading';
 
 const UL: React.FC<PropsWithChildren> = ({ children }) => {
     return <ul className="mt-4">{children}</ul>;
@@ -32,7 +32,7 @@ const SupplierByIdOrdersTab: React.FC<SupplierOrderBySupplierIdTabComponentProps
     return (
         <FetchedDataRenderer
             {...useSupplierOrdersBySupplierIdResult}
-            Loading={<Spinner />}
+            Loading={<DashboardLayoutContentLoading />}
             Error={
                 <FetchStatusMessageWithDescription
                     title="Error al obtener los pedidos"

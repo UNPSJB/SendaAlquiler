@@ -5,7 +5,7 @@ import { SalesByClientIdTabComponentProps } from './page';
 import DeprecatedButton from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import Spinner from '@/components/Spinner/Spinner';
+import { DashboardLayoutContentLoading } from '@/components/page-loading';
 
 const ClientByIdSalesTab: React.FC<SalesByClientIdTabComponentProps> = ({ id }) => {
     const useSalesByClientIdResult = useSalesByClientId(id);
@@ -13,7 +13,7 @@ const ClientByIdSalesTab: React.FC<SalesByClientIdTabComponentProps> = ({ id }) 
     return (
         <FetchedDataRenderer
             {...useSalesByClientIdResult}
-            Loading={<Spinner />}
+            Loading={<DashboardLayoutContentLoading />}
             Error={
                 <FetchStatusMessageWithDescription
                     title="Error al obtener las compras"

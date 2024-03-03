@@ -55,7 +55,7 @@ export function Combobox<TData extends string | number | Record<string, any>>(
                             ? options.find((option) => option.key === value)?.label
                             : placeholder}
                     </span>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
 
@@ -181,7 +181,7 @@ export const ComboboxCreatable: React.FC<ComboboxCreatableProps> = ({
                         {value?.label || placeholder}
                     </span>
 
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
 
@@ -282,7 +282,7 @@ export const ComboboxSimple = <TData extends ComboboxOption>({
                         {value?.label || placeholder}
                     </span>
 
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
 
@@ -391,7 +391,7 @@ export const ComboboxInfinite = <TData extends ComboboxOption>({
                         {value?.label || placeholder}
                     </span>
 
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
 

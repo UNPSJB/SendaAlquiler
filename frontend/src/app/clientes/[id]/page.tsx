@@ -22,7 +22,7 @@ import DeprecatedButton from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import Spinner from '@/components/Spinner/Spinner';
+import { DashboardLayoutContentLoading } from '@/components/page-loading';
 
 const getAvatarText = (firstName: string, lastName: string) => {
     return (firstName[0] + lastName[0]).toUpperCase();
@@ -97,11 +97,7 @@ const Page = () => {
         >
             <FetchedDataRenderer
                 {...useClientByIdResult}
-                Loading={
-                    <div className="flex w-full flex-1 items-center justify-center">
-                        <Spinner />
-                    </div>
-                }
+                Loading={<DashboardLayoutContentLoading />}
                 Error={
                     <div className="flex w-full flex-1 items-center justify-center">
                         <FetchStatusMessageWithDescription
@@ -151,8 +147,8 @@ const Page = () => {
                                 />
                             </header>
 
-                            <div className="flex-1 bg-gray-100">
-                                <section className="pl-8 ">
+                            <div className="flex flex-1 bg-gray-100">
+                                <section className="pr-container flex w-full flex-1 flex-col pl-8">
                                     <Component client={client} id={id as string} />
                                 </section>
                             </div>

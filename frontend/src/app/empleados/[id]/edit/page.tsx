@@ -9,7 +9,7 @@ import { EmployeeFormEditor } from '@/modules/editors/employee/employee-form-edi
 
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
-import Spinner from '@/components/Spinner/Spinner';
+import { DashboardLayoutContentLoading } from '@/components/page-loading';
 
 const Page = () => {
     const { id } = useParams();
@@ -26,11 +26,7 @@ const Page = () => {
                         btnHref={`/empleados/${id}`}
                     />
                 }
-                Loading={
-                    <div className="flex w-full flex-1 items-center justify-center">
-                        <Spinner />
-                    </div>
-                }
+                Loading={<DashboardLayoutContentLoading />}
             >
                 {({ employeeById }) => {
                     if (!employeeById) {

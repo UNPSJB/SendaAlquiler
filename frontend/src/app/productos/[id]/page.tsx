@@ -19,7 +19,7 @@ import { ProductByIdDetailsTab } from './product-by-id-details';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
-import Spinner from '@/components/Spinner/Spinner';
+import { DashboardLayoutContentLoading } from '@/components/page-loading';
 import { Button } from '@/components/ui/button';
 
 const getDasboardTitle = (
@@ -72,11 +72,7 @@ const Page = () => {
         <DashboardLayout header={getDasboardTitle(product, id as string)}>
             <FetchedDataRenderer
                 {...useProductByIdResult}
-                Loading={
-                    <div className="flex w-full flex-1 items-center justify-center">
-                        <Spinner />
-                    </div>
-                }
+                Loading={<DashboardLayoutContentLoading />}
                 Error={
                     <div className="flex w-full flex-1 items-center justify-center">
                         <FetchStatusMessageWithDescription
@@ -121,8 +117,8 @@ const Page = () => {
                                 />
                             </header>
 
-                            <div className="flex-1 bg-gray-100">
-                                <section className="px-8">
+                            <div className="flex flex-1 bg-gray-100">
+                                <section className="pr-container flex w-full flex-1 flex-col pl-8">
                                     <Component product={product} />
                                 </section>
                             </div>

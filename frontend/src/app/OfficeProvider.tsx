@@ -20,6 +20,7 @@ import { useUserContext } from './UserProvider';
 
 import DeprecatedButton from '@/components/Button';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
+import { PageLoading } from '@/components/page-loading';
 import Spinner from '@/components/Spinner/Spinner';
 
 type Office = EmployeeUser['employee']['offices'][0];
@@ -108,7 +109,7 @@ const EmployeeContent: React.FC<EmployeeContentProps> = ({
     }
 
     if (isLoading) {
-        return <Spinner className="border-b-black" />;
+        return <PageLoading />;
     }
 
     return (

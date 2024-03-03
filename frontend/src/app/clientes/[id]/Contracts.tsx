@@ -18,6 +18,7 @@ import { ContractsByClientIdTabComponentProps } from './page';
 import DeprecatedButton from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
+import { DashboardLayoutContentLoading } from '@/components/page-loading';
 import Spinner from '@/components/Spinner/Spinner';
 
 const LI: React.FC<PropsWithChildren> = ({ children }) => {
@@ -79,10 +80,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status }) => {
     return (
         <>
             <div
-                className={clsx(
-                    'mr-2 mt-1 h-4 w-4 rounded-full',
-                    dataByStatus[status].bg,
-                )}
+                className={clsx('mr-2 mt-1 size-4 rounded-full', dataByStatus[status].bg)}
             ></div>
             <b>{dataByStatus[status].text}</b>
         </>
@@ -132,7 +130,7 @@ const ClientByIdContractsTab: React.FC<ContractsByClientIdTabComponentProps> = (
     return (
         <FetchedDataRenderer
             {...useContractsByClientIdResult}
-            Loading={<Spinner />}
+            Loading={<DashboardLayoutContentLoading />}
             Error={
                 <FetchStatusMessageWithDescription
                     title="Error al obtener los contratos"
