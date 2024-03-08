@@ -52,7 +52,7 @@ export default withAuth(
         if (!token || !userExists) {
             if (!isGuestRoute) {
                 const redirectUrl = new URL(`${host}/login`);
-                const next = `${host}/${request.nextUrl.pathname}`;
+                const next = request.nextUrl.pathname;
                 redirectUrl.searchParams.set('next', next);
                 return NextResponse.redirect(redirectUrl);
             }
