@@ -44,6 +44,14 @@ query supplierById($id: ID!) {
             postalCode
         }
         note
+        products {
+            id
+            price
+            product {
+                id
+                name
+            }
+        }
     }
 }
 

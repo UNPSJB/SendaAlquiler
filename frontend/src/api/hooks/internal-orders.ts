@@ -28,6 +28,7 @@ import {
     CancelInternalOrderDocument,
     CancelInternalOrderMutationVariables,
     CancelInternalOrderMutation,
+    InternalOrderQueryDirection,
 } from '../graphql';
 
 export const useInternalOrderById = (id: string | undefined) => {
@@ -42,14 +43,18 @@ export const useInternalOrderById = (id: string | undefined) => {
     });
 };
 
-export const usePaginatedInternalOrders = () => {
+export const usePaginatedInternalOrders = (direction: InternalOrderQueryDirection) => {
     return usePaginatedQuery(
         queryKeys.internalOrdersPaginatedList,
         InternalOrdersDocument,
         'internalOrders',
-        {},
+        {
+            direction,
+            status: null,
+        },
         {
             page: { type: 'int' },
+            status: { type: 'multiple-string' },
         },
     );
 };

@@ -102,8 +102,12 @@ fragment InternalOrderHistoryEntryItem on InternalOrderHistory {
     }
 }
 
-query internalOrders($page: Int) {
-    internalOrders(page: $page) {
+query internalOrders(
+    $page: Int
+    $direction: InternalOrderQueryDirection!
+    $status: [InternalOrderHistoryStatusChoices!]
+) {
+    internalOrders(page: $page, direction: $direction, status: $status) {
         count
         numPages
         results {

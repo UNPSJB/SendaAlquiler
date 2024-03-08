@@ -493,6 +493,11 @@ export type InternalOrderItem = {
     targetOfficeQuantityBeforeReceive: Scalars['Int']['output'];
 };
 
+export enum InternalOrderQueryDirection {
+    Incoming = 'INCOMING',
+    Outgoing = 'OUTGOING',
+}
+
 export type Locality = {
     __typename?: 'Locality';
     clients: Array<Client>;
@@ -1052,7 +1057,9 @@ export type QueryInternalOrderByIdArgs = {
 };
 
 export type QueryInternalOrdersArgs = {
+    direction: InternalOrderQueryDirection;
     page: InputMaybe<Scalars['Int']['input']>;
+    status: InputMaybe<Array<InternalOrderHistoryStatusChoices>>;
 };
 
 export type QueryLocalitiesArgs = {
@@ -2174,6 +2181,10 @@ export type InternalOrderHistoryEntryItemFragment = {
 
 export type InternalOrdersQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
+    direction: InternalOrderQueryDirection;
+    status: InputMaybe<
+        Array<InternalOrderHistoryStatusChoices> | InternalOrderHistoryStatusChoices
+    >;
 }>;
 
 export type InternalOrdersQuery = {
@@ -3069,6 +3080,12 @@ export type SupplierByIdQuery = {
             state: StateChoices;
             postalCode: string;
         };
+        products: Array<{
+            __typename?: 'ProductSupplier';
+            id: string;
+            price: any;
+            product: { __typename?: 'Product'; id: string; name: string };
+        }>;
     } | null;
 };
 
@@ -7315,6 +7332,40 @@ export const InternalOrdersDocument = {
                     variable: { kind: 'Variable', name: { kind: 'Name', value: 'page' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'direction' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'InternalOrderQueryDirection' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'status' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: {
+                                    kind: 'Name',
+                                    value: 'InternalOrderHistoryStatusChoices',
+                                },
+                            },
+                        },
+                    },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -7329,6 +7380,22 @@ export const InternalOrdersDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'page' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'direction' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'direction' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'status' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'status' },
                                 },
                             },
                         ],
@@ -11330,6 +11397,46 @@ export const SupplierByIdDocument = {
                                     },
                                 },
                                 { kind: 'Field', name: { kind: 'Name', value: 'note' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'products' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'price' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'product' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
                             ],
                         },
                     },

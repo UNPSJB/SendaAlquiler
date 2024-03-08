@@ -38,7 +38,7 @@ export const AdminTableFilter = ({
         <Popover>
             <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="h-10 border-dashed">
-                    <PlusCircledIcon className="mr-2 h-4 w-4" />
+                    <PlusCircledIcon className="mr-2 size-4" />
                     {title}
 
                     {selectedValues && selectedValues.length > 0 && (
@@ -111,11 +111,11 @@ export const AdminTableFilter = ({
                                                     : 'opacity-50 [&_svg]:invisible',
                                             )}
                                         >
-                                            <CheckIcon className="h-4 w-4" />
+                                            <CheckIcon className="size-4" />
                                         </div>
 
                                         {option.icon && (
-                                            <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                                            <option.icon className="mr-2 size-4 text-muted-foreground" />
                                         )}
 
                                         <span>{option.label}</span>

@@ -7,7 +7,11 @@ import { MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { InternalOrdersQuery } from '@/api/graphql';
+import {
+    InternalOrderHistoryStatusChoices,
+    InternalOrderQueryDirection,
+    InternalOrdersQuery,
+} from '@/api/graphql';
 import {
     useDeleteInternalOrder,
     useExportInternalOrdersCsv,
@@ -22,6 +26,7 @@ import { useOfficeContext } from '@/app/OfficeProvider';
 
 import { AdminDataTable } from '@/components/admin-data-table';
 import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import { AdminTableFilter } from '@/components/admin-table-filter';
 import { InternalOrderStatusBadge } from '@/components/badges';
 import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
@@ -130,7 +135,7 @@ const RowActions = ({ internalOrder }: { internalOrder: InternalOrder }) => {
         >
             <DropdownMenu>
                 <DropdownMenuTrigger>
-                    <MoreVertical className="h-5 w-5" />
+                    <MoreVertical className="size-5" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent>
@@ -174,8 +179,8 @@ const RowActions = ({ internalOrder }: { internalOrder: InternalOrder }) => {
 };
 
 const Page = () => {
-    const { setVariables, activePage, noPages, queryResult } =
-        usePaginatedInternalOrders();
+    const { setVariables, activePage, noPages, queryResult, variables } =
+        usePaginatedInternalOrders(InternalOrderQueryDirection.Outgoing);
 
     const { exportCsv } = useExportInternalOrdersCsv();
     const officeContext = useOfficeContext();
@@ -203,6 +208,37 @@ const Page = () => {
                 </div>
             }
         >
+            <div className="pr-container mb-4 flex space-x-2 pl-8 pt-5">
+                <AdminTableFilter
+                    title="Filtrar por estado"
+                    options={[
+                        {
+                            label: 'Pendiente',
+                            value: InternalOrderHistoryStatusChoices.Pending,
+                        },
+                        {
+                            label: 'En progreso',
+                            value: InternalOrderHistoryStatusChoices.InProgress,
+                        },
+                        {
+                            label: 'Completado',
+                            value: InternalOrderHistoryStatusChoices.Completed,
+                        },
+                        {
+                            label: 'Cancelado',
+                            value: InternalOrderHistoryStatusChoices.Canceled,
+                        },
+                    ]}
+                    onSelect={(selected) => {
+                        setVariables('status', selected);
+                    }}
+                    selectedValues={variables.status}
+                    onClear={() => {
+                        setVariables('status', []);
+                    }}
+                />
+            </div>
+
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
@@ -232,7 +268,7 @@ const Page = () => {
                     }
 
                     return (
-                        <div className="pr-container flex-1 pl-8 pt-8">
+                        <div className="pr-container flex-1 pl-8">
                             <AdminDataTable
                                 columns={columns}
                                 currentPage={activePage}
