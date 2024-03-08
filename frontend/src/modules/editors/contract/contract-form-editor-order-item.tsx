@@ -1,10 +1,17 @@
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { differenceInCalendarDays } from 'date-fns';
-import { Trash } from 'lucide-react';
+import { PencilIcon, Trash } from 'lucide-react';
 import { useState } from 'react';
 import { UseFieldArrayReturn, useFieldArray, useFormContext } from 'react-hook-form';
 
 import { ProductTypeChoices } from '@/api/graphql';
 import { useInfiniteProducts, useProductStocksInDateRange } from '@/api/hooks';
+
+import {
+    calculateContractProductItemSubtotal,
+    calculateContractProductItemTotal,
+    calculateContractServiceItemSubtotal,
+} from '@/modules/contract-utils';
 
 import { ContractFormEditorDiscountType } from '@/app/contratos/add/page';
 
@@ -12,8 +19,16 @@ import { ContractFormEditorValues } from './contract-form-editor';
 import { ContractFormEditorOrderItemAllocation } from './contract-form-editor-order-item-allocation';
 import { ContractFormEditorOrderItemService } from './contract-form-editor-order-item-service';
 
+import { BaseTable } from '@/components/base-table';
 import { ComboboxInfinite, ComboboxSimple } from '@/components/combobox';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogFooter,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import {
     FormControl,
     FormField,
@@ -23,6 +38,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import {
     calculateDiscountAmountFromPercentage,
     calculateDiscountPercentageFromAmount,
@@ -36,10 +52,188 @@ type OrderItemProps = {
     ordersFieldArray: UseFieldArrayReturn<ContractFormEditorValues, 'orders', 'id'>;
 };
 
-export const ContractFormEditorOrderItem = ({
-    orderIndex,
-    ordersFieldArray,
-}: OrderItemProps) => {
+type OrderRow = NonNullable<ContractFormEditorValues['orders']>[0] & {
+    numberOfDays: number;
+};
+
+const productColumnsHelper = createColumnHelper<OrderRow>();
+const productColumns: ColumnDef<OrderRow, any>[] = [
+    productColumnsHelper.accessor('product.data.name', {
+        header: 'Descripción',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return (
+                <div>
+                    <p className="font-bold">{value}</p>
+                </div>
+            );
+        },
+        size: 225,
+    }),
+    productColumnsHelper.accessor('allocations', {
+        header: 'Cantidad',
+        cell: (cell) => {
+            const value = (cell.getValue() || []) as NonNullable<OrderRow['allocations']>;
+            return value.reduce((acc, allocation) => acc + (allocation.quantity || 0), 0);
+        },
+    }),
+    productColumnsHelper.accessor('product.data.price', {
+        header: 'Precio u. x día',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return `$${formatNumberAsPrice(value)}`;
+        },
+    }),
+    productColumnsHelper.display({
+        header: 'Subtotal',
+        cell: (cell) => {
+            const data = cell.row.original;
+
+            if (
+                !data.product?.data.price ||
+                !data.allocations ||
+                !data.allocations.length
+            ) {
+                return '-';
+            }
+
+            const total = calculateContractProductItemSubtotal({
+                allocations: data.allocations.map((allocation) => ({
+                    quantity: allocation.quantity || 0,
+                })),
+                days: data.numberOfDays,
+                unitPricePerDay: data.product.data.price,
+            });
+
+            return `$${formatNumberAsPrice(total)}`;
+        },
+    }),
+    productColumnsHelper.accessor('productDiscountAmount', {
+        header: 'Descuento',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return `$${formatNumberAsPrice(value || 0)}`;
+        },
+    }),
+    productColumnsHelper.display({
+        header: 'Total',
+        cell: (cell) => {
+            const data = cell.row.original;
+
+            if (
+                !data.product?.data.price ||
+                !data.allocations ||
+                !data.allocations.length
+            ) {
+                return '-';
+            }
+
+            const total = calculateContractProductItemTotal({
+                allocations: data.allocations.map((allocation) => ({
+                    quantity: allocation.quantity || 0,
+                })),
+                days: data.numberOfDays,
+                discount: data.productDiscountAmount || 0,
+                unitPricePerDay: data.product.data.price,
+            });
+
+            return `$${formatNumberAsPrice(total)}`;
+        },
+    }),
+];
+
+type ServiceRow = NonNullable<OrderRow['services']>[0] & {
+    numberOfDays: number;
+};
+
+const serviceColumnsHelper = createColumnHelper<ServiceRow>();
+
+const serviceColumns: ColumnDef<ServiceRow, any>[] = [
+    serviceColumnsHelper.accessor('service.data.name', {
+        header: 'Descripción',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return (
+                <div>
+                    <p className="font-bold">{value}</p>
+                </div>
+            );
+        },
+    }),
+    serviceColumnsHelper.accessor('service.data.price', {
+        header: 'Precio',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return value ? `$${formatNumberAsPrice(value)}` : '-';
+        },
+    }),
+    serviceColumnsHelper.accessor('service.data.billingType', {
+        header: 'Tipo de facturación',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return value;
+        },
+    }),
+    serviceColumnsHelper.accessor('service.data.billingPeriod', {
+        header: 'Periodo de facturación',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return value ? `${value} días` : '-';
+        },
+    }),
+    serviceColumnsHelper.display({
+        header: 'Subtotal',
+        cell: (cell) => {
+            const data = cell.row.original;
+
+            if (!data?.service?.data.price) {
+                return '-';
+            }
+
+            const subtotal = calculateContractServiceItemSubtotal({
+                billingPeriod: data.service.data.billingPeriod || 0,
+                billingType: data.service.data.billingType,
+                days: data.numberOfDays,
+                unitPrice: data.service.data.price,
+            });
+
+            return `$${formatNumberAsPrice(subtotal)}`;
+        },
+    }),
+    serviceColumnsHelper.accessor('serviceDiscountAmount', {
+        header: 'Descuento',
+        cell: (cell) => {
+            const value = cell.getValue();
+            return value ? `$${formatNumberAsPrice(value)}` : '-';
+        },
+    }),
+    serviceColumnsHelper.display({
+        header: 'Total',
+        cell: (cell) => {
+            const data = cell.row.original;
+
+            if (!data?.service?.data.price) {
+                return '-';
+            }
+
+            const total = calculateContractServiceItemSubtotal({
+                billingPeriod: data.service.data.billingPeriod || 0,
+                billingType: data.service.data.billingType,
+                days: data.numberOfDays,
+                unitPrice: data.service.data.price,
+            });
+
+            return `$${formatNumberAsPrice(total - (data.serviceDiscountAmount || 0))}`;
+        },
+    }),
+];
+
+type OrderEditorProps = {
+    orderIndex: number;
+    ordersFieldArray: UseFieldArrayReturn<ContractFormEditorValues, 'orders', 'id'>;
+};
+
+const OrderEditor = ({ orderIndex, ordersFieldArray }: OrderEditorProps) => {
     const formMethods = useFormContext<ContractFormEditorValues>();
     const { setValue } = formMethods;
 
@@ -97,8 +291,30 @@ export const ContractFormEditorOrderItem = ({
             (product.data.price || 0) * requestedQuantity * contractDurationInDays;
     }
 
+    const existentOrders = formMethods.watch('orders') || [];
+    const productOptions = (productsQuery.data ? productsQuery.data.pages : []).flatMap(
+        (page) => {
+            return page.products.results
+                .filter((someProduct) => {
+                    const alreadySelected = existentOrders.some((order, index) => {
+                        return (
+                            index !== orderIndex &&
+                            order.product?.value === someProduct.id
+                        );
+                    });
+
+                    return !alreadySelected;
+                })
+                .map((product) => ({
+                    value: product.id,
+                    label: product.name,
+                    data: product,
+                }));
+        },
+    );
+
     return (
-        <div className="space-y-4 rounded-lg border border-muted p-4 shadow-sm">
+        <div className="space-y-4 p-6">
             <div className="flex items-center justify-between">
                 <h3 className="font-bold italic">Producto #{orderIndex + 1}</h3>
 
@@ -129,18 +345,7 @@ export const ContractFormEditorOrderItem = ({
                                         <ComboboxInfinite
                                             placeholder="Selecciona un producto"
                                             isLoading={productsQuery.isPending}
-                                            options={(productsQuery.data
-                                                ? productsQuery.data.pages
-                                                      .map(
-                                                          (page) => page.products.results,
-                                                      )
-                                                      .flat()
-                                                : []
-                                            ).map((product) => ({
-                                                value: product.id,
-                                                label: product.name,
-                                                data: product,
-                                            }))}
+                                            options={productOptions}
                                             queryValue={query}
                                             setQueryValue={setQuery}
                                             onChange={(next) => {
@@ -298,9 +503,10 @@ export const ContractFormEditorOrderItem = ({
                                 validate: (value) => {
                                     if (
                                         productDiscountType?.value ===
-                                        ContractFormEditorDiscountType.PERCENTAGE
+                                            ContractFormEditorDiscountType.PERCENTAGE &&
+                                        typeof value !== 'number'
                                     ) {
-                                        return value ? true : 'Este campo es requerido';
+                                        return 'Este campo es requerido';
                                     }
 
                                     return true;
@@ -360,9 +566,10 @@ export const ContractFormEditorOrderItem = ({
                                 validate: (value) => {
                                     if (
                                         productDiscountType?.value ===
-                                        ContractFormEditorDiscountType.AMOUNT
+                                            ContractFormEditorDiscountType.AMOUNT &&
+                                        typeof value !== 'number'
                                     ) {
-                                        return value ? true : 'Este campo es requerido';
+                                        return 'Este campo es requerido';
                                     }
 
                                     return true;
@@ -386,7 +593,7 @@ export const ContractFormEditorOrderItem = ({
                                                 ContractFormEditorDiscountType.AMOUNT
                                             }
                                             value={
-                                                field.value
+                                                typeof field.value === 'number'
                                                     ? formatNumberAsPrice(field.value)
                                                     : ''
                                             }
@@ -478,6 +685,89 @@ export const ContractFormEditorOrderItem = ({
                     <p>Selecciona un producto para añadir servicios</p>
                 )}
             </div>
+        </div>
+    );
+};
+
+export const ContractFormEditorOrderItem = ({
+    orderIndex,
+    ordersFieldArray,
+}: OrderItemProps) => {
+    const formMethods = useFormContext<ContractFormEditorValues>();
+    const watchedField = formMethods.watch(`orders.${orderIndex}`);
+    const watchedEndDate = formMethods.watch('endDatetime');
+    const watchedStartDate = formMethods.watch('startDatetime');
+
+    const numberOfDays =
+        watchedEndDate && watchedStartDate
+            ? differenceInCalendarDays(watchedEndDate, watchedStartDate)
+            : 0;
+
+    return (
+        <div className="space-y-4 rounded-lg border border-gray-400 p-4">
+            <div className="flex items-center justify-between">
+                <h3 className="font-bold italic">Producto #{orderIndex + 1}</h3>
+
+                <div className="space-x-4">
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button variant={'outline'}>
+                                <PencilIcon className="size-4" />
+                            </Button>
+                        </DialogTrigger>
+
+                        <DialogContent className="w-10/12 max-w-full p-0 pt-12">
+                            <div className="h-[70vh] overflow-scroll border-y border-border">
+                                <OrderEditor
+                                    orderIndex={orderIndex}
+                                    ordersFieldArray={ordersFieldArray}
+                                />
+                            </div>
+
+                            <DialogFooter className="pb-4 pr-6 pt-0">
+                                <DialogClose>
+                                    <Button>Cerrar</Button>
+                                </DialogClose>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            ordersFieldArray.remove(orderIndex);
+                        }}
+                    >
+                        <Trash className="size-4" />
+                    </Button>
+                </div>
+            </div>
+
+            <BaseTable
+                columns={productColumns}
+                data={[
+                    {
+                        ...watchedField,
+                        numberOfDays: numberOfDays,
+                    },
+                ]}
+            />
+
+            <Separator />
+
+            <h2 className="font-medium">Servicios</h2>
+
+            {watchedField.services && watchedField.services.length ? (
+                <BaseTable
+                    columns={serviceColumns as any}
+                    data={watchedField.services.map((service) => ({
+                        ...service,
+                        numberOfDays: numberOfDays,
+                    }))}
+                />
+            ) : (
+                <p>No hay servicios añadidos</p>
+            )}
         </div>
     );
 };

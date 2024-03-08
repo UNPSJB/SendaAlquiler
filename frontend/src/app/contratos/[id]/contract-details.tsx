@@ -281,10 +281,7 @@ export const ContractDetails = ({ contract }: Props) => {
                     </p>
                 </div>
 
-                <Accordion
-                    type="multiple"
-                    defaultValue={[AccordionValue.LocationDetails]}
-                >
+                <Accordion type="multiple">
                     <AccordionItem value={AccordionValue.LocationDetails}>
                         <AccordionTrigger>
                             <h3 className="text-sm text-muted-foreground">

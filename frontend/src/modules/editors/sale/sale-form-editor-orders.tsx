@@ -360,11 +360,10 @@ export const SaleFormEditorOrders = () => {
                                             validate: (value) => {
                                                 if (
                                                     discountType ===
-                                                    SaleFormEditorDiscountType.PERCENTAGE
+                                                        SaleFormEditorDiscountType.PERCENTAGE &&
+                                                    typeof value !== 'number'
                                                 ) {
-                                                    if (!value) {
-                                                        return 'Este campo es requerido';
-                                                    }
+                                                    return 'Este campo es requerido';
                                                 }
 
                                                 return true;
@@ -427,11 +426,10 @@ export const SaleFormEditorOrders = () => {
                                             validate: (value) => {
                                                 if (
                                                     discountType ===
-                                                    SaleFormEditorDiscountType.AMOUNT
+                                                        SaleFormEditorDiscountType.AMOUNT &&
+                                                    typeof value !== 'number'
                                                 ) {
-                                                    if (!value) {
-                                                        return 'Este campo es requerido';
-                                                    }
+                                                    return 'Este campo es requerido';
                                                 }
 
                                                 return true;
@@ -455,7 +453,8 @@ export const SaleFormEditorOrders = () => {
                                                             SaleFormEditorDiscountType.AMOUNT
                                                         }
                                                         value={
-                                                            field.value
+                                                            typeof field.value ===
+                                                            'number'
                                                                 ? formatNumberAsPrice(
                                                                       field.value,
                                                                   )

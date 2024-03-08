@@ -247,18 +247,6 @@ export enum CoreContractItemServiceBillingTypeChoices {
     Weekly = 'WEEKLY',
 }
 
-/** An enumeration. */
-export enum CoreProductServiceBillingTypeChoices {
-    /** CUSTOM */
-    Custom = 'CUSTOM',
-    /** MONTHLY */
-    Monthly = 'MONTHLY',
-    /** ONE_TIME */
-    OneTime = 'ONE_TIME',
-    /** WEEKLY */
-    Weekly = 'WEEKLY',
-}
-
 export type CreateBrand = {
     __typename?: 'CreateBrand';
     brand: Maybe<Brand>;
@@ -903,7 +891,7 @@ export type ProductService = {
     __typename?: 'ProductService';
     /** Periodo de facturación en días */
     billingPeriod: Maybe<Scalars['Int']['output']>;
-    billingType: CoreProductServiceBillingTypeChoices;
+    billingType: ProductServiceBillingTypeChoices;
     contractItems: Array<ContractItemService>;
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
@@ -1764,7 +1752,7 @@ export type ContractByIdQuery = {
                     name: string;
                     id: string;
                     price: any;
-                    billingType: CoreProductServiceBillingTypeChoices;
+                    billingType: ProductServiceBillingTypeChoices;
                     billingPeriod: number | null;
                 };
             }>;
@@ -2405,7 +2393,7 @@ export type ProductListItemFragment = {
         id: string;
         name: string;
         price: any;
-        billingType: CoreProductServiceBillingTypeChoices;
+        billingType: ProductServiceBillingTypeChoices;
         billingPeriod: number | null;
     }>;
 };
@@ -2438,7 +2426,7 @@ export type ProductsQuery = {
                 id: string;
                 name: string;
                 price: any;
-                billingType: CoreProductServiceBillingTypeChoices;
+                billingType: ProductServiceBillingTypeChoices;
                 billingPeriod: number | null;
             }>;
         }>;
@@ -2509,7 +2497,7 @@ export type CreateProductMutation = {
                 id: string;
                 name: string;
                 price: any;
-                billingType: CoreProductServiceBillingTypeChoices;
+                billingType: ProductServiceBillingTypeChoices;
                 billingPeriod: number | null;
             }>;
         } | null;
@@ -2543,7 +2531,7 @@ export type UpdateProductMutation = {
                 id: string;
                 name: string;
                 price: any;
-                billingType: CoreProductServiceBillingTypeChoices;
+                billingType: ProductServiceBillingTypeChoices;
                 billingPeriod: number | null;
             }>;
         } | null;

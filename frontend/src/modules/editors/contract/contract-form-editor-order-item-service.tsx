@@ -1,8 +1,10 @@
-import { differenceInDays, differenceInMonths, differenceInWeeks } from 'date-fns';
+import { differenceInCalendarDays } from 'date-fns';
 import { Trash } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
 
-import { CoreProductServiceBillingTypeChoices } from '@/api/graphql';
+import { ProductServiceBillingTypeChoices } from '@/api/graphql';
+
+import { calculateContractServiceItemSubtotal } from '@/modules/contract-utils';
 
 import { ContractFormEditorDiscountType } from '@/app/contratos/add/page';
 
@@ -26,46 +28,6 @@ type ServiceItemProps = {
     index: number;
     product: NonNullable<NonNullable<ContractFormEditorValues['orders']>[0]['product']>;
     onDelete: () => void;
-};
-
-type CalculateServiceSubtotalOptions = {
-    service: ServiceItemProps['product']['data']['services'][0];
-    startDatetime: Date | undefined | null;
-    endDatetime: Date | undefined | null;
-};
-
-const calculateServiceSubtotal = (props: CalculateServiceSubtotalOptions) => {
-    const { service } = props;
-
-    if (service.billingType === CoreProductServiceBillingTypeChoices.OneTime) {
-        return service.price;
-    }
-
-    if (!props.startDatetime || !props.endDatetime) {
-        return 0;
-    }
-
-    const days = differenceInDays(props.endDatetime, props.startDatetime);
-    const weeks = differenceInWeeks(props.endDatetime, props.startDatetime);
-    const months = differenceInMonths(props.endDatetime, props.startDatetime);
-
-    let subtotal = 0;
-    if (
-        service.billingType === CoreProductServiceBillingTypeChoices.Custom &&
-        service.billingPeriod
-    ) {
-        subtotal = service.price * (days / service.billingPeriod);
-    }
-
-    if (service.billingType === CoreProductServiceBillingTypeChoices.Weekly) {
-        subtotal = service.price * weeks;
-    }
-
-    if (service.billingType === CoreProductServiceBillingTypeChoices.Monthly) {
-        subtotal = service.price * months;
-    }
-
-    return subtotal;
 };
 
 export const ContractFormEditorOrderItemService = ({
@@ -95,17 +57,22 @@ export const ContractFormEditorOrderItemService = ({
         });
     });
 
+    const daysOfContract =
+        startDatetime && endDatetime
+            ? differenceInCalendarDays(new Date(endDatetime), new Date(startDatetime))
+            : 0;
     let serviceSubtotal = 0;
     if (
         price &&
         watchedField?.service?.data &&
-        (billingType === CoreProductServiceBillingTypeChoices.OneTime ||
+        (billingType === ProductServiceBillingTypeChoices.OneTime ||
             (startDatetime && endDatetime))
     ) {
-        serviceSubtotal = calculateServiceSubtotal({
-            service: watchedField?.service?.data,
-            startDatetime: startDatetime,
-            endDatetime: endDatetime,
+        serviceSubtotal = calculateContractServiceItemSubtotal({
+            billingPeriod: watchedField.service.data.billingPeriod || 0,
+            billingType: watchedField.service.data.billingType,
+            days: daysOfContract,
+            unitPrice: price,
         });
     }
 
@@ -179,7 +146,7 @@ export const ContractFormEditorOrderItemService = ({
                     />
 
                     {billingType &&
-                        billingType !== CoreProductServiceBillingTypeChoices.OneTime && (
+                        billingType !== ProductServiceBillingTypeChoices.OneTime && (
                             <>
                                 {startDatetime && endDatetime ? (
                                     <p className="text-sm text-muted-foreground">
@@ -239,7 +206,7 @@ export const ContractFormEditorOrderItemService = ({
                             if (
                                 serviceDiscountType?.value ===
                                     ContractFormEditorDiscountType.PERCENTAGE &&
-                                !val
+                                typeof val !== 'number'
                             ) {
                                 return 'Este campo es requerido';
                             }

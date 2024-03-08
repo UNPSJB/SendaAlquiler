@@ -16,6 +16,11 @@ export const ContractFormEditorOrders = () => {
     });
     const startDatetime = formMethods.watch('startDatetime');
     const endDatetime = formMethods.watch('endDatetime');
+    const existentOrders = formMethods.watch('orders') || [];
+
+    const lastOrderHasProduct =
+        existentOrders.length > 0 &&
+        existentOrders[existentOrders.length - 1].product?.value;
 
     return (
         <section className="space-y-4 border-t border-gray-200 py-8">
@@ -33,25 +38,27 @@ export const ContractFormEditorOrders = () => {
                         );
                     })}
 
-                    <Button
-                        variant="outline"
-                        onClick={() => {
-                            ordersFieldArray.append({
-                                product: null,
-                                productDiscountAmount: null,
-                                productDiscountPercentage: null,
-                                productDiscountType: {
-                                    value: ContractFormEditorDiscountType.NONE,
-                                    label: 'Sin descuento',
-                                },
+                    {lastOrderHasProduct && (
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                ordersFieldArray.append({
+                                    product: null,
+                                    productDiscountAmount: null,
+                                    productDiscountPercentage: null,
+                                    productDiscountType: {
+                                        value: ContractFormEditorDiscountType.NONE,
+                                        label: 'Sin descuento',
+                                    },
 
-                                services: [],
-                                allocations: [],
-                            });
-                        }}
-                    >
-                        + Añadir producto
-                    </Button>
+                                    services: [],
+                                    allocations: [],
+                                });
+                            }}
+                        >
+                            + Añadir producto
+                        </Button>
+                    )}
                 </div>
             ) : (
                 <p className="text-sm">

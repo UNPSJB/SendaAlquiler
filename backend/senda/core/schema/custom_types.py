@@ -220,6 +220,8 @@ class ContractHistoryType(DjangoObjectType):
 
 
 class ProductServiceType(DjangoObjectType):
+    billing_type = ProductServiceBillingTypeChoicesEnum(required=True)
+
     class Meta:
         name = "ProductService"
         model = ProductService

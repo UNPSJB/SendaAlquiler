@@ -2187,41 +2187,6 @@
                 "possibleTypes": null
             },
             {
-                "kind": "ENUM",
-                "name": "CoreProductServiceBillingTypeChoices",
-                "description": "An enumeration.",
-                "fields": null,
-                "inputFields": null,
-                "interfaces": null,
-                "enumValues": [
-                    {
-                        "name": "CUSTOM",
-                        "description": "CUSTOM",
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "MONTHLY",
-                        "description": "MONTHLY",
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "ONE_TIME",
-                        "description": "ONE_TIME",
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    },
-                    {
-                        "name": "WEEKLY",
-                        "description": "WEEKLY",
-                        "isDeprecated": false,
-                        "deprecationReason": null
-                    }
-                ],
-                "possibleTypes": null
-            },
-            {
                 "kind": "OBJECT",
                 "name": "CreateBrand",
                 "description": null,
@@ -8069,7 +8034,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "ENUM",
-                                "name": "CoreProductServiceBillingTypeChoices",
+                                "name": "ProductServiceBillingTypeChoices",
                                 "ofType": null
                             }
                         },
