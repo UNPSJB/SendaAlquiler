@@ -90,4 +90,8 @@ export default withAuth(
     },
 );
 
-const guestRoutes = ['/login'];
+const guestRoutes = [
+    '/login',
+    '/solicitar-recuperacion-contrasena',
+    '/recuperar-contrasena',
+];

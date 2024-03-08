@@ -1,0 +1,8 @@
+¡Hola, {{ employee.user.first_name }} {{ employee.user.last_name }}!
+
+Te damos la bienvenida a Senda. Aquí están tus credenciales de inicio de sesión:
+
+Email: {{ employee.user.email }}
+Contraseña: {{ password }}
+
+Si tienes alguna pregunta, no dudes en contactar a tu encargado de Recursos Humanos.

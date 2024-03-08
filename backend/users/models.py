@@ -2,7 +2,10 @@
 Mixin classes used to create this class may be found in mixins.py
 The UserManager is found in managers.py
 """
+
 from .model_mixins import AbstractUser
+
+from django.db import models
 
 from typing import TYPE_CHECKING, Optional
 
@@ -20,6 +23,8 @@ class UserModel(AbstractUser):
 
     employee: Optional["EmployeeModel"]
     admin: Optional["AdminModel"]
+
+    token_version = models.IntegerField(default=0)
 
     def is_employee(self):
         return hasattr(self, "employee") and self.employee is not None

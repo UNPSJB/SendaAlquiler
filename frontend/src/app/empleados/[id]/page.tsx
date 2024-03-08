@@ -3,9 +3,11 @@
 import { useParams } from 'next/navigation';
 
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import { EmployeeByIdQuery } from '@/api/graphql';
 import { useEmployeeById } from '@/api/hooks';
+import { useSendPasswordRecoveryEmail } from '@/api/hooks/profile';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -17,6 +19,7 @@ import { EmployeeByIdDetailsTab } from './employee-by-id-details';
 
 import Avatar from '@/components/Avatar';
 import DeprecatedButton from '@/components/Button';
+import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
@@ -26,7 +29,13 @@ const getAvatarText = (firstName: string, lastName: string) => {
     return (firstName[0] + lastName[0]).toUpperCase();
 };
 
-const getDasboardTitle = (employee: EmployeeByIdQuery['employeeById'] | undefined) => {
+type DasboardTitleProps = {
+    employee: EmployeeByIdQuery['employeeById'] | undefined;
+};
+
+const DasboardTitle = ({ employee }: DasboardTitleProps) => {
+    const recoverPasswordMutation = useSendPasswordRecoveryEmail();
+
     if (!employee) {
         return <DashboardLayoutBigTitle>Empleados</DashboardLayoutBigTitle>;
     }
@@ -41,9 +50,43 @@ const getDasboardTitle = (employee: EmployeeByIdQuery['employeeById'] | undefine
                 </span>
             </div>
 
-            <DeprecatedButton href={`/empleados/${employee.id}/edit`}>
-                Editar
-            </DeprecatedButton>
+            <div className="flex space-x-4">
+                <ButtonWithSpinner
+                    variant="secondary"
+                    showSpinner={recoverPasswordMutation.isPending}
+                    onClick={() => {
+                        recoverPasswordMutation.mutate(
+                            {
+                                email: employee.user.email,
+                            },
+                            {
+                                onSuccess: (data) => {
+                                    if (data.sendPasswordRecoveryEmail?.success) {
+                                        toast.success(
+                                            'Se ha enviado un correo electrónico al empleado con las instrucciones para recuperar su contraseña.',
+                                        );
+                                    }
+
+                                    if (data.sendPasswordRecoveryEmail?.error) {
+                                        toast.error(data.sendPasswordRecoveryEmail.error);
+                                    }
+                                },
+                                onError: () => {
+                                    toast.error(
+                                        'Hubo un error al enviar el correo electrónico. Por favor, intenta de nuevo.',
+                                    );
+                                },
+                            },
+                        );
+                    }}
+                >
+                    Recuperar contraseña
+                </ButtonWithSpinner>
+
+                <DeprecatedButton href={`/empleados/${employee.id}/edit`}>
+                    Editar
+                </DeprecatedButton>
+            </div>
         </div>
     );
 };
@@ -70,7 +113,7 @@ const Page = () => {
     const Component = tabs.find((tab) => tab.key === activeTab)!.Component;
 
     return (
-        <DashboardLayout header={getDasboardTitle(employee)}>
+        <DashboardLayout header={<DasboardTitle employee={employee} />}>
             <FetchedDataRenderer
                 {...useEmployeeByIdResult}
                 Loading={<DashboardLayoutContentLoading />}

@@ -61,6 +61,18 @@ export type ChangeContractStatus = {
     error: Maybe<Scalars['String']['output']>;
 };
 
+export type ChangePasswordLoggedIn = {
+    __typename?: 'ChangePasswordLoggedIn';
+    error: Maybe<Scalars['String']['output']>;
+    success: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type ChangePasswordWithToken = {
+    __typename?: 'ChangePasswordWithToken';
+    error: Maybe<Scalars['String']['output']>;
+    success: Maybe<Scalars['Boolean']['output']>;
+};
+
 export type Client = {
     __typename?: 'Client';
     contracts: Array<Contract>;
@@ -518,6 +530,8 @@ export type Mutation = {
     cancelInternalOrder: Maybe<CancelInternalOrder>;
     cancelSupplierOrder: Maybe<CancelSupplierOrder>;
     changeContractStatus: Maybe<ChangeContractStatus>;
+    changePasswordLoggedIn: Maybe<ChangePasswordLoggedIn>;
+    changePasswordWithToken: Maybe<ChangePasswordWithToken>;
     createBrand: Maybe<CreateBrand>;
     createClient: Maybe<CreateClient>;
     createContract: Maybe<CreateContract>;
@@ -542,12 +556,13 @@ export type Mutation = {
     receiveInternalOrder: Maybe<ReceiveInternalOrder>;
     receiveSupplierOrder: Maybe<ReceiveSupplierOrder>;
     refreshToken: Maybe<Refresh>;
-    resetEmployeePassword: Maybe<ResetEmployeePassword>;
+    sendPasswordRecoveryEmail: Maybe<SendPasswordRecoveryEmail>;
     /** Obtain JSON Web Token mutation */
     tokenAuth: Maybe<ObtainJsonWebToken>;
     updateClient: Maybe<UpdateClient>;
     updateEmployee: Maybe<UpdateEmployee>;
     updateLocality: Maybe<UpdateLocality>;
+    updateMyBasicInfo: Maybe<UpdateMyBasicInfo>;
     updateProduct: Maybe<UpdateProduct>;
     updateSupplier: Maybe<UpdateSupplier>;
     verifyToken: Maybe<Verify>;
@@ -569,6 +584,16 @@ export type MutationChangeContractStatusArgs = {
     id: Scalars['ID']['input'];
     note: InputMaybe<Scalars['String']['input']>;
     status: Scalars['String']['input'];
+};
+
+export type MutationChangePasswordLoggedInArgs = {
+    newPassword: Scalars['String']['input'];
+    oldPassword: Scalars['String']['input'];
+};
+
+export type MutationChangePasswordWithTokenArgs = {
+    newPassword: Scalars['String']['input'];
+    token: Scalars['String']['input'];
 };
 
 export type MutationCreateBrandArgs = {
@@ -680,8 +705,8 @@ export type MutationRefreshTokenArgs = {
     token: InputMaybe<Scalars['String']['input']>;
 };
 
-export type MutationResetEmployeePasswordArgs = {
-    id: Scalars['ID']['input'];
+export type MutationSendPasswordRecoveryEmailArgs = {
+    email: Scalars['String']['input'];
 };
 
 export type MutationTokenAuthArgs = {
@@ -704,6 +729,12 @@ export type MutationUpdateLocalityArgs = {
     name: InputMaybe<Scalars['String']['input']>;
     postalCode: InputMaybe<Scalars['String']['input']>;
     state: InputMaybe<StateChoices>;
+};
+
+export type MutationUpdateMyBasicInfoArgs = {
+    email: Scalars['String']['input'];
+    firstName: Scalars['String']['input'];
+    lastName: Scalars['String']['input'];
 };
 
 export type MutationUpdateProductArgs = {
@@ -989,6 +1020,7 @@ export type Query = {
     suppliersOrdersCsv: Scalars['String']['output'];
     user: Maybe<User>;
     users: Array<User>;
+    validateToken: Maybe<ValidateToken>;
 };
 
 export type QueryClientByIdArgs = {
@@ -1110,6 +1142,10 @@ export type QuerySuppliersArgs = {
     query: InputMaybe<Scalars['String']['input']>;
 };
 
+export type QueryValidateTokenArgs = {
+    token: Scalars['String']['input'];
+};
+
 export type ReceiveInternalOrder = {
     __typename?: 'ReceiveInternalOrder';
     error: Maybe<Scalars['String']['output']>;
@@ -1137,11 +1173,6 @@ export type Refresh = {
     payload: Scalars['GenericScalar']['output'];
     refreshExpiresIn: Scalars['Int']['output'];
     token: Scalars['String']['output'];
-};
-
-export type ResetEmployeePassword = {
-    __typename?: 'ResetEmployeePassword';
-    success: Scalars['Boolean']['output'];
 };
 
 export type Sale = {
@@ -1175,6 +1206,12 @@ export type SaleOrderItemInput = {
     discount: Scalars['Int']['input'];
     product: Scalars['String']['input'];
     quantity: Scalars['Int']['input'];
+};
+
+export type SendPasswordRecoveryEmail = {
+    __typename?: 'SendPasswordRecoveryEmail';
+    error: Maybe<Scalars['String']['output']>;
+    success: Maybe<Scalars['Boolean']['output']>;
 };
 
 /**
@@ -1307,6 +1344,12 @@ export type UpdateLocality = {
     locality: Maybe<Locality>;
 };
 
+export type UpdateMyBasicInfo = {
+    __typename?: 'UpdateMyBasicInfo';
+    error: Maybe<Scalars['String']['output']>;
+    success: Maybe<Scalars['Boolean']['output']>;
+};
+
 export type UpdateProduct = {
     __typename?: 'UpdateProduct';
     error: Maybe<Scalars['String']['output']>;
@@ -1352,6 +1395,13 @@ export type User = {
     lastLogin: Maybe<Scalars['DateTime']['output']>;
     lastName: Scalars['String']['output'];
     supplierOrderHistories: Array<SupplierOrderHistory>;
+    tokenVersion: Scalars['Int']['output'];
+};
+
+export type ValidateToken = {
+    __typename?: 'ValidateToken';
+    error: Maybe<Scalars['String']['output']>;
+    isValid: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type Verify = {
@@ -3184,6 +3234,75 @@ export type UsersQuery = {
         lastName: string;
         email: string;
     }>;
+};
+
+export type SendPasswordRecoveryEmailMutationVariables = Exact<{
+    email: Scalars['String']['input'];
+}>;
+
+export type SendPasswordRecoveryEmailMutation = {
+    __typename?: 'Mutation';
+    sendPasswordRecoveryEmail: {
+        __typename?: 'SendPasswordRecoveryEmail';
+        success: boolean | null;
+        error: string | null;
+    } | null;
+};
+
+export type ChangePasswordLoggedInMutationVariables = Exact<{
+    oldPassword: Scalars['String']['input'];
+    newPassword: Scalars['String']['input'];
+}>;
+
+export type ChangePasswordLoggedInMutation = {
+    __typename?: 'Mutation';
+    changePasswordLoggedIn: {
+        __typename?: 'ChangePasswordLoggedIn';
+        success: boolean | null;
+        error: string | null;
+    } | null;
+};
+
+export type ChangePasswordWithTokenMutationVariables = Exact<{
+    token: Scalars['String']['input'];
+    newPassword: Scalars['String']['input'];
+}>;
+
+export type ChangePasswordWithTokenMutation = {
+    __typename?: 'Mutation';
+    changePasswordWithToken: {
+        __typename?: 'ChangePasswordWithToken';
+        success: boolean | null;
+        error: string | null;
+    } | null;
+};
+
+export type UpdateMyBasicInfoMutationVariables = Exact<{
+    firstName: Scalars['String']['input'];
+    lastName: Scalars['String']['input'];
+    email: Scalars['String']['input'];
+}>;
+
+export type UpdateMyBasicInfoMutation = {
+    __typename?: 'Mutation';
+    updateMyBasicInfo: {
+        __typename?: 'UpdateMyBasicInfo';
+        success: boolean | null;
+        error: string | null;
+    } | null;
+};
+
+export type ValidateTokenQueryVariables = Exact<{
+    token: Scalars['String']['input'];
+}>;
+
+export type ValidateTokenQuery = {
+    __typename?: 'Query';
+    validateToken: {
+        __typename?: 'ValidateToken';
+        isValid: boolean | null;
+        error: string | null;
+    } | null;
 };
 
 export const InternalOrderListItemFragmentDoc = {
@@ -11913,3 +12032,378 @@ export const UsersDocument = {
         },
     ],
 } as unknown as DocumentNode<UsersQuery, UsersQueryVariables>;
+export const SendPasswordRecoveryEmailDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'SendPasswordRecoveryEmail' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'email' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'sendPasswordRecoveryEmail' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'email' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'email' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    SendPasswordRecoveryEmailMutation,
+    SendPasswordRecoveryEmailMutationVariables
+>;
+export const ChangePasswordLoggedInDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'ChangePasswordLoggedIn' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'oldPassword' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'newPassword' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'changePasswordLoggedIn' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'oldPassword' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'oldPassword' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'newPassword' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'newPassword' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    ChangePasswordLoggedInMutation,
+    ChangePasswordLoggedInMutationVariables
+>;
+export const ChangePasswordWithTokenDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'ChangePasswordWithToken' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'token' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'newPassword' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'changePasswordWithToken' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'token' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'token' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'newPassword' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'newPassword' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    ChangePasswordWithTokenMutation,
+    ChangePasswordWithTokenMutationVariables
+>;
+export const UpdateMyBasicInfoDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'mutation',
+            name: { kind: 'Name', value: 'UpdateMyBasicInfo' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'firstName' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'lastName' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'email' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'updateMyBasicInfo' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'firstName' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'firstName' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'lastName' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'lastName' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'email' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'email' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'success' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    UpdateMyBasicInfoMutation,
+    UpdateMyBasicInfoMutationVariables
+>;
+export const ValidateTokenDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'validateToken' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'token' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'validateToken' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'token' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'token' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'isValid' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'error' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<ValidateTokenQuery, ValidateTokenQueryVariables>;

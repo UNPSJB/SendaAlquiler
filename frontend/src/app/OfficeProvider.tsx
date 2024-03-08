@@ -21,7 +21,7 @@ import { useUserContext } from './UserProvider';
 import DeprecatedButton from '@/components/Button';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import { PageLoading } from '@/components/page-loading';
-import Spinner from '@/components/Spinner/Spinner';
+import { Button } from '@/components/ui/button';
 
 type Office = EmployeeUser['employee']['offices'][0];
 
@@ -101,10 +101,26 @@ const EmployeeContent: React.FC<EmployeeContentProps> = ({
 
     if (!offices || offices.length === 0) {
         return (
-            <FetchStatusMessageWithDescription
-                title="No tienes oficinas asignadas"
-                line1="Contacta con tu administrador para que te asigne una oficina"
-            />
+            <main className="flex min-h-screen items-center justify-center py-24">
+                <div className="fixed inset-x-0 top-0 border-b border-border">
+                    <div className="container flex items-center justify-end space-x-4 py-4">
+                        <span className="text-sm">{user?.email}</span>
+
+                        <Button
+                            onClick={() => {
+                                signOut();
+                            }}
+                        >
+                            Cerrar sesión
+                        </Button>
+                    </div>
+                </div>
+
+                <FetchStatusMessageWithDescription
+                    title="No tienes oficinas asignadas"
+                    line1="Contactate con tu administrador para que te asigne una oficina"
+                />
+            </main>
         );
     }
 
@@ -156,6 +172,12 @@ const EmployeeContent: React.FC<EmployeeContentProps> = ({
     );
 };
 
+const guestRoutes = [
+    '/login',
+    '/solicitar-recuperacion-contrasena',
+    '/recuperar-contrasena',
+];
+
 const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
     const pathname = usePathname();
     const { user } = useUserContext();
@@ -186,7 +208,7 @@ const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
         }
     };
 
-    if (!user && pathname === '/login') {
+    if (!user && guestRoutes.includes(pathname)) {
         return children;
     }
 

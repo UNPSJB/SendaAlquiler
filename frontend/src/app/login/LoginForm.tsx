@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 import { signIn } from 'next-auth/react';
@@ -145,6 +146,16 @@ const LoginForm = () => {
                     Iniciar sesión
                 </DeprecatedButton>
             </form>
+
+            <div className="flex justify-center pt-4">
+                <p className="text-center text-sm">
+                    ¿Olvidaste tu contraseña?{' '}
+                    <Link className="underline" href="/solicitar-recuperacion-contrasena">
+                        Recupera tu contraseña
+                    </Link>
+                    .
+                </p>
+            </div>
         </Form>
     );
 };

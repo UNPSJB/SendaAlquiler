@@ -3,6 +3,7 @@ from django.db import models
 from extensions.db.models import TimeStampedModel
 from senda.core.managers import EmployeeModelManager
 from users.models import UserModel
+import random
 
 
 class EmployeeModel(TimeStampedModel):
@@ -25,6 +26,16 @@ class EmployeeModel(TimeStampedModel):
         return self.user.email
 
     objects: EmployeeModelManager = EmployeeModelManager()
+
+    @staticmethod
+    def create_random_password() -> str:
+        """
+        Generates a random 6-digit password for the employee.
+
+        Returns:
+            str: A 6-digit password.
+        """
+        return "".join([str(random.randint(0, 9)) for _ in range(6)])
 
 
 class EmployeeOffice(TimeStampedModel):

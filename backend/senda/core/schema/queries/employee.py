@@ -12,6 +12,13 @@ import io
 
 from senda.core.decorators import employee_or_admin_required, CustomInfo
 
+from senda.core.services.token_service import TokenService
+
+
+class ValidateToken(graphene.ObjectType):
+    is_valid = graphene.Boolean()
+    error = graphene.String()
+
 
 class Query(graphene.ObjectType):
     employees = graphene.NonNull(
@@ -81,3 +88,15 @@ class Query(graphene.ObjectType):
             )
 
         return csv_buffer.getvalue()
+
+    validate_token = graphene.Field(
+        ValidateToken,
+        token=graphene.String(required=True),
+    )
+
+    def resolve_validate_token(self, info, token):
+        check_token = TokenService.check_token(token)
+        if check_token["user"] is not None:
+            return ValidateToken(is_valid=True, error=None)
+
+        return ValidateToken(is_valid=False, error="El token no es válido")

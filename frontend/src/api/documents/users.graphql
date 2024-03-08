@@ -52,3 +52,38 @@ query users {
         email
     }
 }
+
+mutation SendPasswordRecoveryEmail($email: String!) {
+    sendPasswordRecoveryEmail(email: $email) {
+        success
+        error
+    }
+}
+
+mutation ChangePasswordLoggedIn($oldPassword: String!, $newPassword: String!) {
+    changePasswordLoggedIn(oldPassword: $oldPassword, newPassword: $newPassword) {
+        success
+        error
+    }
+}
+
+mutation ChangePasswordWithToken($token: String!, $newPassword: String!) {
+    changePasswordWithToken(token: $token, newPassword: $newPassword) {
+        success
+        error
+    }
+}
+
+mutation UpdateMyBasicInfo($firstName: String!, $lastName: String!, $email: String!) {
+    updateMyBasicInfo(firstName: $firstName, lastName: $lastName, email: $email) {
+        success
+        error
+    }
+}
+
+query validateToken($token: String!) {
+    validateToken(token: $token) {
+        isValid
+        error
+    }
+}

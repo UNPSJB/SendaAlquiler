@@ -155,7 +155,9 @@ class Common(Configuration):
 
     SITE_NAME = "Senda"
     ENVIRONMENT = "devel"
+
     SERVER_ADDRESS = "http://127.0.0.1:8000"
+    FRONTEND_ADDRESS = "http://localhost:3000"
 
     EMAIL_HOST = config("EMAIL_HOST", default="localhost")
     EMAIL_PORT = config("EMAIL_PORT", default=25, cast=int)
