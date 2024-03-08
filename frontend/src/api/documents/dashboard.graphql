@@ -1,21 +1,37 @@
-query dashboard {
-    allSales {
-        id
-        createdOn
-        total
-        client {
-            firstName
-            lastName
+query DashboardStats($period: DashboardStatsPeriod!) {
+    dashboardStats(period: $period) {
+        noSalesCurrentPeriod
+        noSalesPreviousPeriod
+        noClientsCurrentPeriod
+        noClientsPreviousPeriod
+        noContractsCurrentPeriod
+        noContractsPreviousPeriod
+        topSellingProducts {
+            product {
+                id
+                name
+            }
+            sales
+            count
         }
-    }
-    # allClients {
-    #     id
-    # }
-    allProducts {
-        id
-        name
-        saleItems {
+        recentSales {
+            id
+            total
+            client {
+                id
+                firstName
+                lastName
+                email
+            }
+        }
+        salesPerPeriod {
+            period
             quantity
+            amount
+        }
+        upcomingContracts {
+            id
+            contractStartDatetime
         }
     }
 }

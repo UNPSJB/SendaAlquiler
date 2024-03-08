@@ -368,6 +368,39 @@ export type CreateSupplierOrderProductInput = {
     quantity: Scalars['Int']['input'];
 };
 
+export type DashboardStats = {
+    __typename?: 'DashboardStats';
+    noClientsCurrentPeriod: Scalars['Int']['output'];
+    noClientsPreviousPeriod: Scalars['Int']['output'];
+    noContractsCurrentPeriod: Scalars['Int']['output'];
+    noContractsPreviousPeriod: Scalars['Int']['output'];
+    noSalesCurrentPeriod: Scalars['Int']['output'];
+    noSalesPreviousPeriod: Scalars['Int']['output'];
+    recentSales: Array<Sale>;
+    salesPerPeriod: Array<DashboardStatsSalesPerPeriodItem>;
+    topSellingProducts: Array<DashboardStatsTopSellingProduct>;
+    upcomingContracts: Array<Contract>;
+};
+
+export enum DashboardStatsPeriod {
+    Months_1 = 'MONTHS_1',
+    Months_12 = 'MONTHS_12',
+}
+
+export type DashboardStatsSalesPerPeriodItem = {
+    __typename?: 'DashboardStatsSalesPerPeriodItem';
+    amount: Scalars['Int']['output'];
+    period: Scalars['String']['output'];
+    quantity: Scalars['Int']['output'];
+};
+
+export type DashboardStatsTopSellingProduct = {
+    __typename?: 'DashboardStatsTopSellingProduct';
+    count: Scalars['Int']['output'];
+    product: Product;
+    sales: Scalars['Int']['output'];
+};
+
 export type DeleteClient = {
     __typename?: 'DeleteClient';
     success: Scalars['Boolean']['output'];
@@ -979,6 +1012,7 @@ export type Query = {
     contracts: PaginatedContractQueryResult;
     contractsByClientId: Array<Contract>;
     contractsCsv: Scalars['String']['output'];
+    dashboardStats: DashboardStats;
     employeeById: Maybe<Employee>;
     employees: PaginatedEmployeeQueryResult;
     employeesCsv: Scalars['String']['output'];
@@ -1041,6 +1075,10 @@ export type QueryContractsArgs = {
 
 export type QueryContractsByClientIdArgs = {
     id: Scalars['ID']['input'];
+};
+
+export type QueryDashboardStatsArgs = {
+    period: DashboardStatsPeriod;
 };
 
 export type QueryEmployeeByIdArgs = {
@@ -1872,23 +1910,50 @@ export type SuppliersOrdersCsvQuery = {
     suppliersOrdersCsv: string;
 };
 
-export type DashboardQueryVariables = Exact<{ [key: string]: never }>;
+export type DashboardStatsQueryVariables = Exact<{
+    period: DashboardStatsPeriod;
+}>;
 
-export type DashboardQuery = {
+export type DashboardStatsQuery = {
     __typename?: 'Query';
-    allSales: Array<{
-        __typename?: 'Sale';
-        id: string;
-        createdOn: any;
-        total: any;
-        client: { __typename?: 'Client'; firstName: string; lastName: string };
-    }>;
-    allProducts: Array<{
-        __typename?: 'Product';
-        id: string;
-        name: string;
-        saleItems: Array<{ __typename?: 'SaleItem'; quantity: number }>;
-    }>;
+    dashboardStats: {
+        __typename?: 'DashboardStats';
+        noSalesCurrentPeriod: number;
+        noSalesPreviousPeriod: number;
+        noClientsCurrentPeriod: number;
+        noClientsPreviousPeriod: number;
+        noContractsCurrentPeriod: number;
+        noContractsPreviousPeriod: number;
+        topSellingProducts: Array<{
+            __typename?: 'DashboardStatsTopSellingProduct';
+            sales: number;
+            count: number;
+            product: { __typename?: 'Product'; id: string; name: string };
+        }>;
+        recentSales: Array<{
+            __typename?: 'Sale';
+            id: string;
+            total: any;
+            client: {
+                __typename?: 'Client';
+                id: string;
+                firstName: string;
+                lastName: string;
+                email: string;
+            };
+        }>;
+        salesPerPeriod: Array<{
+            __typename?: 'DashboardStatsSalesPerPeriodItem';
+            period: string;
+            quantity: number;
+            amount: number;
+        }>;
+        upcomingContracts: Array<{
+            __typename?: 'Contract';
+            id: string;
+            contractStartDatetime: any;
+        }>;
+    };
 };
 
 export type EmployeesQueryVariables = Exact<{
@@ -6057,68 +6122,218 @@ export const SuppliersOrdersCsvDocument = {
         },
     ],
 } as unknown as DocumentNode<SuppliersOrdersCsvQuery, SuppliersOrdersCsvQueryVariables>;
-export const DashboardDocument = {
+export const DashboardStatsDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'dashboard' },
+            name: { kind: 'Name', value: 'DashboardStats' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'period' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'DashboardStatsPeriod' },
+                        },
+                    },
+                },
+            ],
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'allSales' },
+                        name: { kind: 'Name', value: 'dashboardStats' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'period' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'period' },
+                                },
+                            },
+                        ],
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'createdOn' },
+                                    name: { kind: 'Name', value: 'noSalesCurrentPeriod' },
                                 },
-                                { kind: 'Field', name: { kind: 'Name', value: 'total' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'client' },
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'noSalesPreviousPeriod',
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'noClientsCurrentPeriod',
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'noClientsPreviousPeriod',
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'noContractsCurrentPeriod',
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'noContractsPreviousPeriod',
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'topSellingProducts' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
                                             {
                                                 kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'firstName',
+                                                name: { kind: 'Name', value: 'product' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
                                                 },
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'lastName' },
+                                                name: { kind: 'Name', value: 'sales' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'count' },
                                             },
                                         ],
                                     },
                                 },
-                            ],
-                        },
-                    },
-                    {
-                        kind: 'Field',
-                        name: { kind: 'Name', value: 'allProducts' },
-                        selectionSet: {
-                            kind: 'SelectionSet',
-                            selections: [
-                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
-                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'saleItems' },
+                                    name: { kind: 'Name', value: 'recentSales' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
                                             {
                                                 kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'total' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'client' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'firstName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'lastName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'email',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'salesPerPeriod' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'period' },
+                                            },
+                                            {
+                                                kind: 'Field',
                                                 name: { kind: 'Name', value: 'quantity' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'amount' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'upcomingContracts' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'id' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'contractStartDatetime',
+                                                },
                                             },
                                         ],
                                     },
@@ -6130,7 +6345,7 @@ export const DashboardDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<DashboardQuery, DashboardQueryVariables>;
+} as unknown as DocumentNode<DashboardStatsQuery, DashboardStatsQueryVariables>;
 export const EmployeesDocument = {
     kind: 'Document',
     definitions: [
