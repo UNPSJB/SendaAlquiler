@@ -42,9 +42,14 @@ class SaleManager(models.Manager["Sale"]):
                 f"Product with id {item.get('product_id')} is not available for sale in this office."
             )
 
-        if stock_for_office < item.get("quantity"):
+        if stock_for_office < item["quantity"]:
             raise SaleCreationError(
                 f"Product with id {item.get('product_id')} does not have enough stock."
+            )
+
+        if item["quantity"] <= 0:
+            raise SaleCreationError(
+                f"Product with id {item.get('product_id')} quantity must be greater than 0."
             )
 
     def calculate_item_totals(
@@ -77,7 +82,7 @@ class SaleManager(models.Manager["Sale"]):
                         sale=sale,
                         product=product,
                         product_price=product.price,
-                        quantity=item.get("quantity"),
+                        quantity=item["quantity"],
                         subtotal=item_totals.get("subtotal", 0),
                         discount=item_totals.get("discount", 0),
                         total=item_totals.get("total", 0),
@@ -89,7 +94,6 @@ class SaleManager(models.Manager["Sale"]):
                     )
 
                 SaleItemModel.objects.bulk_create(sale_items)
-
                 sale.update_totals()
                 return sale
         except ValidationError as e:
@@ -111,14 +115,12 @@ class Sale(TimeStampedModel):
     objects: SaleManager = SaleManager()
 
     def update_totals(self):
-        self.subtotal = self.sale_items.aggregate(models.Sum("subtotal"))[
-            "subtotal__sum"
+        self.subtotal = self.sale_items.aggregate(subtotal_sum=models.Sum("subtotal"))[
+            "subtotal_sum"
         ]
-
-        self.discount = self.sale_items.aggregate(models.Sum("discount"))[
-            "discount__sum"
+        self.discount = self.sale_items.aggregate(discount_sum=models.Sum("discount"))[
+            "discount_sum"
         ]
-
         self.total = self.subtotal - self.discount
         self.save()
 

@@ -6,7 +6,7 @@ export { gql } from 'graphql-request';
 
 import { getSession, signOut } from 'next-auth/react';
 
-const url = process.env.NEXT_PUBLIC_API_HOST;
+const url = `${process.env.NEXT_PUBLIC_API_HOST}/graphql`;
 
 export async function fetchClient<T, V>(
     query: TypedDocumentNode<T, V>,

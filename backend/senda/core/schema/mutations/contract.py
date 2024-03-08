@@ -1,4 +1,4 @@
-from typing import  List
+from typing import List
 
 import graphene
 from django.core.exceptions import ObjectDoesNotExist
@@ -15,8 +15,9 @@ from senda.core.models.contract import (
 from senda.core.decorators import employee_or_admin_required, CustomInfo
 from senda.core.schema.custom_types import (
     ContractType,
-    ContractHistoryStatusChoicesEnum,
 )
+
+from senda.core.services.mail_service import MailService
 
 from senda.core.decorators import CustomInfo
 from utils.graphene import non_null_list_of
@@ -131,6 +132,9 @@ class CreateContract(graphene.Mutation):
                 ),
                 items_data=items_data_dicts,
             )
+
+            MailService.send_contract_proposal_email(contract.pk)
+
             return CreateContract(ok=True, contract_id=contract.id)
         except ContractCreationError as e:
             return CreateContract(ok=False, error=str(e))

@@ -80,6 +80,26 @@ class ContractManager(models.Manager["Contract"]):
         """Return the number of weeks between two dates."""
         return (start_date - end_date).days / 7
 
+    def calculate_service_quantity(
+        self,
+        service: ProductService,
+        start_date: datetime,
+        end_date: datetime,
+    ) -> int:
+        if (
+            service.billing_type == ProductServiceBillingTypeChoices.CUSTOM
+            and service.billing_period
+        ):
+            return int((start_date - end_date).days / service.billing_period)
+        elif service.billing_type == ProductServiceBillingTypeChoices.ONE_TIME:
+            return 1
+        elif service.billing_type == ProductServiceBillingTypeChoices.MONTHLY:
+            return self._diff_month(start_date, end_date)
+        elif service.billing_type == ProductServiceBillingTypeChoices.WEEKLY:
+            return self._diff_week(start_date, end_date)
+        else:
+            raise ValidationError(f"Invalid billing type {service.billing_type}")
+
     def _calculate_service_totals(
         self,
         service: ProductService,
@@ -87,25 +107,9 @@ class ContractManager(models.Manager["Contract"]):
         start_date: datetime,
         end_date: datetime,
     ) -> ContractItemServiceTotalDetailsDict:
-        service_subtotal = 0
-
-        if (
-            service.billing_type == ProductServiceBillingTypeChoices.CUSTOM
-            and service.billing_period
-        ):
-            service_subtotal = (
-                int((start_date - end_date).days / service.billing_period)
-                * service.price
-            )
-        elif service.billing_type == ProductServiceBillingTypeChoices.ONE_TIME:
-            service_subtotal = service.price
-        elif service.billing_type == ProductServiceBillingTypeChoices.MONTHLY:
-            service_subtotal = self._diff_month(start_date, end_date) * service.price
-        elif service.billing_type == ProductServiceBillingTypeChoices.WEEKLY:
-            service_subtotal = self._diff_week(start_date, end_date) * service.price
-        else:
-            raise ValidationError(f"Invalid billing type {service.billing_type}")
-
+        service_subtotal = service.price * self.calculate_service_quantity(
+            service, start_date, end_date
+        )
         total = service_subtotal - discount
 
         return ContractItemServiceTotalDetailsDict(
@@ -338,6 +342,48 @@ class Contract(TimeStampedModel):
         verbose_name_plural = "Rental Contracts"
 
     def update_totals(self):
+        self.subtotal = (
+            (
+                self.contract_items.aggregate(subtotal=models.Sum("product_subtotal"))[
+                    "subtotal"
+                ]
+                or 0
+            )
+            + (
+                self.contract_items.aggregate(subtotal=models.Sum("services_subtotal"))[
+                    "subtotal"
+                ]
+                or 0
+            )
+            + (
+                self.contract_items.aggregate(subtotal=models.Sum("shipping_subtotal"))[
+                    "subtotal"
+                ]
+                or 0
+            )
+        )
+
+        self.discount_amount = (
+            (
+                self.contract_items.aggregate(discount=models.Sum("product_discount"))[
+                    "discount"
+                ]
+                or 0
+            )
+            + (
+                self.contract_items.aggregate(discount=models.Sum("services_discount"))[
+                    "discount"
+                ]
+                or 0
+            )
+            + (
+                self.contract_items.aggregate(discount=models.Sum("shipping_discount"))[
+                    "discount"
+                ]
+                or 0
+            )
+        )
+
         self.total = (
             self.contract_items.aggregate(total=models.Sum("total"))["total"] or 0
         )
@@ -461,6 +507,7 @@ class ContractHistory(TimeStampedModel):
 
 class ContractItem(TimeStampedModel):
     allocations: models.QuerySet["ContractItemProductAllocation"]
+    service_items: models.QuerySet["ContractItemService"]
 
     contract = models.ForeignKey(
         Contract,

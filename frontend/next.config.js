@@ -20,9 +20,9 @@ const envConfigData = {
         staging: 'mysecret',
     },
     NEXT_PUBLIC_API_HOST: {
-        development: 'http://localhost:8000/graphql/',
-        production: 'http://localhost:8000/graphql/',
-        staging: 'http://localhost:8000/graphql/',
+        development: 'http://localhost:8000',
+        production: 'http://localhost:8000',
+        staging: 'http://localhost:8000',
     },
     NEXT_PUBLIC_HOST: {
         development: 'http://localhost:3000',

@@ -2,7 +2,9 @@
 
 import { useParams } from 'next/navigation';
 
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 
 import { ContractByIdQuery, ContractHistoryStatusChoices } from '@/api/graphql';
 import { useContractById } from '@/api/hooks';
@@ -16,13 +18,55 @@ import { ContractDetails } from './contract-details';
 import { ContractHistorEntriesTracker } from './contract-history-entries-tracker';
 import { ContractStatusEditor } from './contract-status-editor';
 
+import ButtonWithSpinner from '@/components/ButtonWithSpinner';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
 import FetchStatusMessageWithButton from '@/components/FetchStatusMessageWithButton';
 import FetchStatusMessageWithDescription from '@/components/FetchStatusMessageWithDescription';
 import { DashboardLayoutContentLoading } from '@/components/page-loading';
+import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 
-const useHeader = (contract: ContractByIdQuery['contractById'] | undefined) => {
+type HeaderProps = {
+    contract: ContractByIdQuery['contractById'] | undefined;
+};
+
+const Header = ({ contract }: HeaderProps) => {
+    const printPDFMutation = useMutation({
+        mutationFn: async (contractId: string) => {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_HOST}/api/download-contract-pdf/${contractId}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/pdf',
+                    },
+                },
+            );
+
+            if (!response.ok) {
+                throw new Error('Error al descargar el PDF');
+            }
+
+            const blob = await response.blob();
+
+            // Create a new object URL for the blob
+            const url = window.URL.createObjectURL(blob);
+
+            // Create a link and programmatically click it to download the file
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'file.pdf');
+            document.body.appendChild(link);
+            link.click();
+
+            // Remove the link when done
+            document.body.removeChild(link);
+        },
+        onError: () => {
+            toast.error('Error al descargar el PDF');
+        },
+    });
+
     if (!contract) {
         return <DashboardLayoutBigTitle>Contratos</DashboardLayoutBigTitle>;
     }
@@ -34,6 +78,15 @@ const useHeader = (contract: ContractByIdQuery['contractById'] | undefined) => {
                 <ChevronRight />
                 <span className="font-headings text-sm">Contrato #{contract.id}</span>
             </div>
+
+            <ButtonWithSpinner
+                onClick={() => {
+                    printPDFMutation.mutate(contract.id);
+                }}
+                showSpinner={printPDFMutation.isPending}
+            >
+                Imprimir PDF
+            </ButtonWithSpinner>
         </div>
     );
 };
@@ -59,8 +112,6 @@ const Page = () => {
 
     const contract = useContractByIdResult.data?.contractById;
 
-    const header = useHeader(contract);
-
     const formMethods = useForm<ContractStatusEditorFormValues>({
         defaultValues: {
             ordersById: {},
@@ -68,7 +119,7 @@ const Page = () => {
     });
 
     return (
-        <DashboardLayout header={header}>
+        <DashboardLayout header={<Header contract={contract} />}>
             <FetchedDataRenderer
                 {...useContractByIdResult}
                 Loading={<DashboardLayoutContentLoading />}

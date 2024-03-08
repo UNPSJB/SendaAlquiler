@@ -7,7 +7,7 @@ import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/modules/auth/auth';
 
-const url = process.env.NEXT_PUBLIC_API_HOST;
+const url = `${process.env.NEXT_PUBLIC_API_HOST}/graphql`;
 
 export async function fetchServer<T, V>(
     query: TypedDocumentNode<T, V>,

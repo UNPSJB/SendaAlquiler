@@ -1,69 +1,138 @@
 <!DOCTYPE html>
-<html>
-<head>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contract Proposal</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            color: #333;
-            max-width: 800px;
-            margin: auto;
-        }
-        .invoice-title {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .invoice-details, .client-details {
-            margin-bottom: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .total-amount {
-            text-align: right;
-            font-size: 20px;
-            margin-top: 30px;
-        }
+      @import url("https://fonts.googleapis.com/css2?family=Lato:wght@700&family=Roboto:wght@400;700&display=swap");
+
+      body {
+        font-family: "Roboto", sans-serif;
+        padding: 40px;
+        background-color: #fff;
+        color: #333;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: auto;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+
+      .header h1 {
+        font-family: "Lato", sans-serif;
+        font-size: 28px;
+        color: #212121; /* Primary color */
+      }
+
+      .header p {
+        margin: 5px 0;
+        font-size: 16px;
+      }
+
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 40px;
+      }
+
+      .table th,
+      .table td {
+        text-align: left;
+        padding: 12px;
+        font-size: 14px;
+      }
+
+      .table th {
+        background-color: #212121; /* Secondary color */
+        color: #ffffff;
+      }
+
+      .table tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      /* Style Last Row */
+      .table tr:last-child {
+        font-weight: bold;
+        background: #d3d3d3;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        font-family: "Lato", sans-serif;
+        color: #888;
+      }
+
+      .footer p {
+        font-size: 14px;
+      }
     </style>
-</head>
-<body>
-    <h1 class="invoice-title">Presupuesto</h1>
-    <div class="invoice-details">
-        <strong>Fecha:</strong> {{ invoice.date }}
-    </div>
-    <div class="client-details">
-        <strong>Cliente:</strong> {{ client.name }}<br>
-        <strong>Dirección:</strong> {{ client.address }}
-    </div>
-    <table>
-        <tr>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Presupuesto de contrato</h1>
+        <p>Cliente: {{ client.name }}</p>
+        <p>Creado el: {{ invoice.date }}</p>
+        <p>Valido hasta: {{ invoice.expiration_date }}</p>
+        <p>Ubicación: {{ contract.location }}</p>
+        <p>Fecha y hora de Inicio: {{ contract.start_datetime }}</p>
+        <p>Fecha y hora de Finalización: {{ contract.end_datetime }}</p>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
             <th>Descripción</th>
             <th>Cantidad</th>
-            <th>Precio</th>
+            <th>Precio Unitario</th>
+            <th>Subtotal</th>
             <th>Descuento</th>
             <th>Total</th>
-        </tr>
-        {% for item in items %}
-        <tr>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
             <td>{{ item.name }}</td>
-            <td>{{ item.units }}</td>
-            <td>{{ item.price }}</td>
-            <td>{{ item.discount }}</td>
-            <td>{{ item.total }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <div class="total-amount">
-        <strong>Total:</strong> {{ total_amount }}
+            <td>{{ item.quantity }}</td>
+            <td>${{ item.price }}</td>
+            <td>${{ item.subtotal }}</td>
+            <td>${{ item.discount }}</td>
+            <td>${{ item.total }}</td>
+          </tr>
+
+          {% for service in item.services %}
+          <tr>
+            <td>Servicio: {{ service.name }}</td>
+            <td>{{ service.quantity }}</td>
+            <td>${{ service.price }}</td>
+            <td>${{ service.subtotal }}</td>
+            <td>${{ service.discount }}</td>
+            <td>${{ service.total }}</td>
+          </tr>
+          {% endfor %} {% endfor %}
+
+          <tr>
+            <td colspan="3"></td>
+            <td>${{ invoice.subtotal }}</td>
+            <td>${{ invoice.discount }}</td>
+            <td>${{ invoice.total }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="footer">
+        <p>
+          Presupuesto por Senda | Velero Mimosa 152, U9100 Trelew, Chubut,
+          Argentina | +54 9 280 436-3461
+        </p>
+      </div>
     </div>
-</body>
+  </body>
 </html>

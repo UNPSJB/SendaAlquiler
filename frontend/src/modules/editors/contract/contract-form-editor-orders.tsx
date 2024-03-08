@@ -19,8 +19,9 @@ export const ContractFormEditorOrders = () => {
     const existentOrders = formMethods.watch('orders') || [];
 
     const lastOrderHasProduct =
-        existentOrders.length > 0 &&
-        existentOrders[existentOrders.length - 1].product?.value;
+        existentOrders.length == 0 ||
+        (existentOrders.length > 0 &&
+            existentOrders[existentOrders.length - 1].product?.value);
 
     return (
         <section className="space-y-4 border-t border-gray-200 py-8">
