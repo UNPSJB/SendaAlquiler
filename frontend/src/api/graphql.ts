@@ -1071,6 +1071,7 @@ export type QueryContractByIdArgs = {
 
 export type QueryContractsArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
+    status: InputMaybe<Array<ContractHistoryStatusChoices>>;
 };
 
 export type QueryContractsByClientIdArgs = {
@@ -1674,6 +1675,9 @@ export type ClientExistsQuery = { __typename?: 'Query'; clientExists: boolean };
 
 export type ContractsQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
+    status: InputMaybe<
+        Array<ContractHistoryStatusChoices> | ContractHistoryStatusChoices
+    >;
 }>;
 
 export type ContractsQuery = {
@@ -4904,6 +4908,26 @@ export const ContractsDocument = {
                     variable: { kind: 'Variable', name: { kind: 'Name', value: 'page' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'status' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: {
+                                    kind: 'Name',
+                                    value: 'ContractHistoryStatusChoices',
+                                },
+                            },
+                        },
+                    },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -4918,6 +4942,14 @@ export const ContractsDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'page' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'status' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'status' },
                                 },
                             },
                         ],

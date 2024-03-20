@@ -39,6 +39,21 @@ export const useContracts = () => {
     );
 };
 
+export const usePaginatedContracts = () => {
+    return usePaginatedQuery(
+        queryKeys.contractsPaginatedList,
+        ContractsDocument,
+        'contracts',
+        {
+            status: null,
+        },
+        {
+            page: { type: 'int' },
+            status: { type: 'multiple-string' },
+        },
+    );
+};
+
 export const useContractById = (id: string | undefined) => {
     return useQuery({
         queryKey: queryKeys.contractDetailsById(id),

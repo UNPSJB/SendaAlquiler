@@ -12,7 +12,6 @@ import {
     useDeleteSupplierOrder,
     useExportSupplierOrdersCsv,
     usePaginatedSupplierOrders,
-    useSupplierOrders,
 } from '@/api/hooks';
 
 import DashboardLayout, {

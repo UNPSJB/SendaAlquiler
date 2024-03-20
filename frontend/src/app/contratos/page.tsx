@@ -7,8 +7,12 @@ import { MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { ContractsQuery } from '@/api/graphql';
-import { useContracts, useDeleteContract, useExportContractsCsv } from '@/api/hooks';
+import { ContractsQuery, ContractHistoryStatusChoices } from '@/api/graphql';
+import {
+    usePaginatedContracts,
+    useDeleteContract,
+    useExportContractsCsv,
+} from '@/api/hooks';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -16,6 +20,7 @@ import DashboardLayout, {
 
 import { AdminDataTable } from '@/components/admin-data-table';
 import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import { AdminTableFilter } from '@/components/admin-table-filter';
 import { ContractStatusBadge } from '@/components/badges';
 import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
@@ -113,7 +118,7 @@ const RowActions = ({ contract }: { contract: Contract }) => {
         >
             <DropdownMenu>
                 <DropdownMenuTrigger>
-                    <MoreVertical className="h-5 w-5" />
+                    <MoreVertical className="size-5" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent>
@@ -155,7 +160,8 @@ const RowActions = ({ contract }: { contract: Contract }) => {
 };
 
 const Page = () => {
-    const { setVariables, activePage, noPages, queryResult } = useContracts();
+    const { setVariables, activePage, noPages, queryResult, variables } =
+        usePaginatedContracts();
 
     const { exportCsv } = useExportContractsCsv();
 
@@ -182,6 +188,56 @@ const Page = () => {
                 </div>
             }
         >
+            <div className="pr-container mb-4 flex space-x-2 pl-8 pt-5">
+                <AdminTableFilter
+                    title="Filtrar por estado"
+                    options={[
+                        {
+                            label: 'Activo',
+                            value: ContractHistoryStatusChoices.Activo,
+                        },
+                        {
+                            label: 'Cancelado',
+                            value: ContractHistoryStatusChoices.Cancelado,
+                        },
+                        {
+                            label: 'Con deposito',
+                            value: ContractHistoryStatusChoices.ConDeposito,
+                        },
+                        {
+                            label: 'Devolucion exitosa',
+                            value: ContractHistoryStatusChoices.DevolucionExitosa,
+                        },
+                        {
+                            label: 'Devolucion fallida',
+                            value: ContractHistoryStatusChoices.DevolucionFallida,
+                        },
+                        {
+                            label: 'Finalizado',
+                            value: ContractHistoryStatusChoices.Finalizado,
+                        },
+                        {
+                            label: 'Pagado',
+                            value: ContractHistoryStatusChoices.Pagado,
+                        },
+                        {
+                            label: 'Presupuestado',
+                            value: ContractHistoryStatusChoices.Presupuestado,
+                        },
+                        {
+                            label: 'Vencido',
+                            value: ContractHistoryStatusChoices.Vencido,
+                        },
+                    ]}
+                    onSelect={(selected) => {
+                        setVariables('status', selected);
+                    }}
+                    selectedValues={variables.status}
+                    onClear={() => {
+                        setVariables('status', []);
+                    }}
+                />
+            </div>
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={

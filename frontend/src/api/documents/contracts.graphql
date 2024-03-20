@@ -1,5 +1,5 @@
-query contracts($page: Int) {
-    contracts(page: $page) {
+query contracts($page: Int, $status: [ContractHistoryStatusChoices!]) {
+    contracts(page: $page, status: $status) {
         count
         numPages
         results {
