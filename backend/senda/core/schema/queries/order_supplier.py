@@ -1,11 +1,15 @@
-from typing import Any
+from typing import List
 
 import graphene  # pyright: ignore
 
-from senda.core.models.order_supplier import SupplierOrder
+from senda.core.models.order_supplier import (
+    SupplierOrder,
+    SupplierOrderHistoryStatusChoices,
+)
 from senda.core.schema.custom_types import (
     OrderSupplierType,
     PaginatedOrderSupplierQueryResult,
+    SupplierOrderHistoryStatusEnum,
 )
 from utils.graphene import get_paginated_model
 
@@ -19,15 +23,28 @@ class Query(graphene.ObjectType):
     supplier_orders = graphene.NonNull(
         PaginatedOrderSupplierQueryResult,
         page=graphene.Int(),
+        status=graphene.List(graphene.NonNull(SupplierOrderHistoryStatusEnum)),
     )
 
     @employee_or_admin_required
-    def resolve_supplier_orders(self, info: CustomInfo, page: int):
-        paginator, selected_page = get_paginated_model(
-            SupplierOrder.objects.filter(
-                target_office=info.context.office_id
-            ).order_by("-created_on"), page
-        )
+    def resolve_supplier_orders(
+        self,
+        info: CustomInfo,
+        page: int,
+        status: List[SupplierOrderHistoryStatusChoices] = None,
+    ):
+        current_office_id = info.context.office_id
+
+        results = SupplierOrder.objects.none()
+
+        results = SupplierOrder.objects.filter(target_office=current_office_id)
+
+        if status:
+            results = results.filter(latest_history_entry__status__in=status)
+
+        results = results.order_by("-created_on")
+
+        paginator, selected_page = get_paginated_model(results, page)
 
         return PaginatedOrderSupplierQueryResult(
             count=paginator.count,
@@ -35,7 +52,9 @@ class Query(graphene.ObjectType):
             num_pages=paginator.num_pages,
         )
 
-    supplier_order_by_id = graphene.Field(OrderSupplierType, id=graphene.ID(required=True))
+    supplier_order_by_id = graphene.Field(
+        OrderSupplierType, id=graphene.ID(required=True)
+    )
 
     @employee_or_admin_required
     def resolve_supplier_order_by_id(self, info: CustomInfo, id: str):

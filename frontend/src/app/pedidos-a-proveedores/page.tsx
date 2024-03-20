@@ -7,10 +7,11 @@ import { MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
-import { SupplierOrdersQuery } from '@/api/graphql';
+import { SupplierOrderHistoryStatusChoices, SupplierOrdersQuery } from '@/api/graphql';
 import {
     useDeleteSupplierOrder,
     useExportSupplierOrdersCsv,
+    usePaginatedSupplierOrders,
     useSupplierOrders,
 } from '@/api/hooks';
 
@@ -20,6 +21,7 @@ import DashboardLayout, {
 
 import { AdminDataTable } from '@/components/admin-data-table';
 import { AdminDataTableLoading } from '@/components/admin-data-table-skeleton';
+import { AdminTableFilter } from '@/components/admin-table-filter';
 import { SupplierOrderStatusBadge } from '@/components/badges';
 import DeprecatedButton, { ButtonVariant } from '@/components/Button';
 import FetchedDataRenderer from '@/components/FetchedDataRenderer';
@@ -124,7 +126,7 @@ const RowActions = ({ supplierOrder }: { supplierOrder: OrderSupplier }) => {
         >
             <DropdownMenu>
                 <DropdownMenuTrigger>
-                    <MoreVertical className="h-5 w-5" />
+                    <MoreVertical className="size-5" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent>
@@ -171,7 +173,8 @@ const RowActions = ({ supplierOrder }: { supplierOrder: OrderSupplier }) => {
 };
 
 const Page = () => {
-    const { setVariables, activePage, noPages, queryResult } = useSupplierOrders();
+    const { setVariables, activePage, noPages, queryResult, variables } =
+        usePaginatedSupplierOrders();
 
     const { exportCsv } = useExportSupplierOrdersCsv();
 
@@ -200,6 +203,36 @@ const Page = () => {
                 </div>
             }
         >
+            <div className="pr-container mb-4 flex space-x-2 pl-8 pt-5">
+                <AdminTableFilter
+                    title="Filtrar por estado"
+                    options={[
+                        {
+                            label: 'Pendiente',
+                            value: SupplierOrderHistoryStatusChoices.Pending,
+                        },
+                        {
+                            label: 'En progreso',
+                            value: SupplierOrderHistoryStatusChoices.InProgress,
+                        },
+                        {
+                            label: 'Completado',
+                            value: SupplierOrderHistoryStatusChoices.Completed,
+                        },
+                        {
+                            label: 'Cancelado',
+                            value: SupplierOrderHistoryStatusChoices.Canceled,
+                        },
+                    ]}
+                    onSelect={(selected) => {
+                        setVariables('status', selected);
+                    }}
+                    selectedValues={variables.status}
+                    onClear={() => {
+                        setVariables('status', []);
+                    }}
+                />
+            </div>
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={
