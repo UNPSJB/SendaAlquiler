@@ -21,18 +21,6 @@ import {
     SalesByClientIdDocument,
 } from '../graphql';
 
-export const useSales = () => {
-    return usePaginatedQuery(
-        queryKeys.salesPaginatedList,
-        SalesDocument,
-        'sales',
-        {},
-        {
-            page: { type: 'int' },
-        },
-    );
-};
-
 export const useSaleById = (id: string | undefined) => {
     return useQuery({
         queryKey: queryKeys.saleDetailsById(id),
@@ -75,6 +63,25 @@ export const useCreateSale = ({ onSuccess, ...options }: UseCreateSaleOptions = 
         },
         ...options,
     });
+};
+
+export const useSales = () => {
+    return usePaginatedQuery(
+        queryKeys.salesPaginatedList,
+        SalesDocument,
+        'sales',
+        {
+            query: null,
+        },
+        {
+            page: {
+                type: 'int',
+            },
+            query: {
+                type: 'string',
+            },
+        },
+    );
 };
 
 export const useDeleteSale = ({

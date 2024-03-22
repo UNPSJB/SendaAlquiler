@@ -1071,6 +1071,7 @@ export type QueryContractByIdArgs = {
 
 export type QueryContractsArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
+    status: InputMaybe<Array<ContractHistoryStatusChoices>>;
 };
 
 export type QueryContractsByClientIdArgs = {
@@ -1148,6 +1149,7 @@ export type QuerySaleByIdArgs = {
 
 export type QuerySalesArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
+    query: InputMaybe<Scalars['String']['input']>;
 };
 
 export type QuerySalesByClientIdArgs = {
@@ -1164,6 +1166,7 @@ export type QuerySupplierOrderByIdArgs = {
 
 export type QuerySupplierOrdersArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
+    status: InputMaybe<Array<SupplierOrderHistoryStatusChoices>>;
 };
 
 export type QuerySupplierOrdersBySupplierIdArgs = {
@@ -1672,6 +1675,9 @@ export type ClientExistsQuery = { __typename?: 'Query'; clientExists: boolean };
 
 export type ContractsQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
+    status: InputMaybe<
+        Array<ContractHistoryStatusChoices> | ContractHistoryStatusChoices
+    >;
 }>;
 
 export type ContractsQuery = {
@@ -2687,6 +2693,7 @@ export type ProductStockInOfficeQuery = {
 
 export type SalesQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
+    query: InputMaybe<Scalars['String']['input']>;
 }>;
 
 export type SalesQuery = {
@@ -2901,6 +2908,9 @@ export type CreateSupplierOrderMutation = {
 
 export type SupplierOrdersQueryVariables = Exact<{
     page: InputMaybe<Scalars['Int']['input']>;
+    status: InputMaybe<
+        Array<SupplierOrderHistoryStatusChoices> | SupplierOrderHistoryStatusChoices
+    >;
 }>;
 
 export type SupplierOrdersQuery = {
@@ -4898,6 +4908,26 @@ export const ContractsDocument = {
                     variable: { kind: 'Variable', name: { kind: 'Name', value: 'page' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'status' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: {
+                                    kind: 'Name',
+                                    value: 'ContractHistoryStatusChoices',
+                                },
+                            },
+                        },
+                    },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -4912,6 +4942,14 @@ export const ContractsDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'page' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'status' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'status' },
                                 },
                             },
                         ],
@@ -9735,6 +9773,14 @@ export const SalesDocument = {
                     variable: { kind: 'Variable', name: { kind: 'Name', value: 'page' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'query' },
+                    },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'String' } },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -9749,6 +9795,14 @@ export const SalesDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'page' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'query' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'query' },
                                 },
                             },
                         ],
@@ -10675,6 +10729,26 @@ export const SupplierOrdersDocument = {
                     variable: { kind: 'Variable', name: { kind: 'Name', value: 'page' } },
                     type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'status' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: {
+                                    kind: 'Name',
+                                    value: 'SupplierOrderHistoryStatusChoices',
+                                },
+                            },
+                        },
+                    },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -10689,6 +10763,14 @@ export const SupplierOrdersDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'page' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'status' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'status' },
                                 },
                             },
                         ],

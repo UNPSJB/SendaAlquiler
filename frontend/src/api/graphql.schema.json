@@ -9334,6 +9334,26 @@
                                 "defaultValue": null,
                                 "isDeprecated": false,
                                 "deprecationReason": null
+                            },
+                            {
+                                "name": "status",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "ENUM",
+                                            "name": "ContractHistoryStatusChoices",
+                                            "ofType": null
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
                             }
                         ],
                         "type": {
@@ -10171,6 +10191,18 @@
                                 "defaultValue": null,
                                 "isDeprecated": false,
                                 "deprecationReason": null
+                            },
+                            {
+                                "name": "query",
+                                "description": null,
+                                "type": {
+                                    "kind": "SCALAR",
+                                    "name": "String",
+                                    "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
                             }
                         ],
                         "type": {
@@ -10311,6 +10343,26 @@
                                     "kind": "SCALAR",
                                     "name": "Int",
                                     "ofType": null
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "status",
+                                "description": null,
+                                "type": {
+                                    "kind": "LIST",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "ENUM",
+                                            "name": "SupplierOrderHistoryStatusChoices",
+                                            "ofType": null
+                                        }
+                                    }
                                 },
                                 "defaultValue": null,
                                 "isDeprecated": false,

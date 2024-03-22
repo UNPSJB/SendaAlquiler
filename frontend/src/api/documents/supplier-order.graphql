@@ -44,8 +44,8 @@ mutation createSupplierOrder($data: CreateSupplierOrderInput!) {
     }
 }
 
-query supplierOrders($page: Int) {
-    supplierOrders(page: $page) {
+query supplierOrders($page: Int, $status: [SupplierOrderHistoryStatusChoices!]) {
+    supplierOrders(page: $page, status: $status) {
         count
         numPages
         results {

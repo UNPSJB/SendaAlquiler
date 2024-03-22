@@ -37,6 +37,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import { formatNumberAsPrice } from '@/lib/utils';
 
 type Sale = SalesQuery['sales']['results'][0];
@@ -119,7 +120,7 @@ const RowActions = ({ sale }: { sale: Sale }) => {
         >
             <DropdownMenu>
                 <DropdownMenuTrigger>
-                    <MoreVertical className="h-5 w-5" />
+                    <MoreVertical className="size-5" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent>
@@ -167,7 +168,7 @@ const RowActions = ({ sale }: { sale: Sale }) => {
 };
 
 const Page = () => {
-    const { setVariables, activePage, noPages, queryResult } = useSales();
+    const { setVariables, activePage, noPages, queryResult, variables } = useSales();
 
     const { exportCsv } = useExportSalesCsv();
 
@@ -194,6 +195,17 @@ const Page = () => {
                 </div>
             }
         >
+            <div className="pr-container mb-4 flex space-x-2 pl-8 pt-5">
+                <Input
+                    placeholder="Buscar por email, nombre o apellido"
+                    value={variables.query || ''}
+                    onChange={(e) => {
+                        setVariables('query', e.target.value || '');
+                    }}
+                    className="max-w-xs"
+                />
+            </div>
+
             <FetchedDataRenderer
                 {...queryResult}
                 Loading={

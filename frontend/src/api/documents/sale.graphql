@@ -1,5 +1,5 @@
-query sales($page: Int) {
-    sales(page: $page) {
+query sales($page: Int, $query: String) {
+    sales(page: $page, query: $query) {
         count
         numPages
         results {
