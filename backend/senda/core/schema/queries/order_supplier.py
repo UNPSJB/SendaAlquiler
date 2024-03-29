@@ -1,11 +1,16 @@
-from typing import Any
+from typing import List
 
 import graphene  # pyright: ignore
+import datetime
 
-from senda.core.models.order_supplier import SupplierOrder
+from senda.core.models.order_supplier import (
+    SupplierOrder,
+    SupplierOrderHistoryStatusChoices,
+)
 from senda.core.schema.custom_types import (
     OrderSupplierType,
     PaginatedOrderSupplierQueryResult,
+    SupplierOrderHistoryStatusEnum,
 )
 from utils.graphene import get_paginated_model
 
@@ -19,15 +24,26 @@ class Query(graphene.ObjectType):
     supplier_orders = graphene.NonNull(
         PaginatedOrderSupplierQueryResult,
         page=graphene.Int(),
+        status=graphene.List(graphene.NonNull(SupplierOrderHistoryStatusEnum)),
     )
 
     @employee_or_admin_required
-    def resolve_supplier_orders(self, info: CustomInfo, page: int):
-        paginator, selected_page = get_paginated_model(
-            SupplierOrder.objects.filter(
-                target_office=info.context.office_id
-            ).order_by("-created_on"), page
-        )
+    def resolve_supplier_orders(
+        self,
+        info: CustomInfo,
+        page: int,
+        status: List[SupplierOrderHistoryStatusChoices] = None,
+    ):
+        current_office_id = info.context.office_id
+
+        results = SupplierOrder.objects.filter(target_office=current_office_id)
+
+        if status:
+            results = results.filter(latest_history_entry__status__in=status)
+
+        results = results.order_by("-created_on")
+
+        paginator, selected_page = get_paginated_model(results, page)
 
         return PaginatedOrderSupplierQueryResult(
             count=paginator.count,
@@ -35,7 +51,9 @@ class Query(graphene.ObjectType):
             num_pages=paginator.num_pages,
         )
 
-    supplier_order_by_id = graphene.Field(OrderSupplierType, id=graphene.ID(required=True))
+    supplier_order_by_id = graphene.Field(
+        OrderSupplierType, id=graphene.ID(required=True)
+    )
 
     @employee_or_admin_required
     def resolve_supplier_order_by_id(self, info: CustomInfo, id: str):
@@ -49,7 +67,7 @@ class Query(graphene.ObjectType):
             target_office=info.context.office_id
         ).prefetch_related(
             "supplier",
-            "orders",
+            "order_items",
         )
         output = io.StringIO()
 
@@ -65,7 +83,7 @@ class Query(graphene.ObjectType):
             "Precio",
             "Cantidad pedida",
             "Cantidad recibida",
-            "Total",
+            "Total ($ ARS)",
         ]
 
         writer = csv.DictWriter(output, fieldnames=fieldnames)
@@ -73,10 +91,12 @@ class Query(graphene.ObjectType):
 
         for supplier_order in supplier_orders:
             for supplier_order_item in supplier_order.order_items.all():
+                formatted_created_on = supplier_order.created_on.strftime('%H:%M %d/%m/%Y')
+
                 writer.writerow(
                     {
                         "ID de orden": supplier_order.id,
-                        "Fecha de creacion": supplier_order.created_on,
+                        "Fecha de creacion": formatted_created_on,
                         "Proveedor": supplier_order.supplier.name,
                         "Sucursal de destino": supplier_order.target_office.name,
                         "Estado": supplier_order.latest_history_entry.get_status_display(),
@@ -86,7 +106,7 @@ class Query(graphene.ObjectType):
                         "Precio": supplier_order_item.product_price,
                         "Cantidad pedida": supplier_order_item.quantity_ordered,
                         "Cantidad recibida": supplier_order_item.quantity_received,
-                        "Total": supplier_order_item.total,
+                        "Total ($ ARS)": supplier_order_item.total,
                     }
                 )
 

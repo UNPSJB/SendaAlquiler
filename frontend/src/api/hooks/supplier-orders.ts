@@ -52,6 +52,21 @@ export const useSupplierOrderById = (id: string | undefined) => {
     });
 };
 
+export const usePaginatedSupplierOrders = () => {
+    return usePaginatedQuery(
+        queryKeys.supplierOrdersPaginatedList,
+        SupplierOrdersDocument,
+        'supplierOrders',
+        {
+            status: null,
+        },
+        {
+            page: { type: 'int' },
+            status: { type: 'multiple-string' },
+        },
+    );
+};
+
 export const useSupplierOrdersBySupplierId = (id: string | undefined) => {
     return useQuery({
         queryKey: queryKeys.supplierOrderDetailsBySupplierId(id),
