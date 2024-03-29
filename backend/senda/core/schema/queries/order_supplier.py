@@ -36,8 +36,6 @@ class Query(graphene.ObjectType):
     ):
         current_office_id = info.context.office_id
 
-        results = SupplierOrder.objects.none()
-
         results = SupplierOrder.objects.filter(target_office=current_office_id)
 
         if status:
