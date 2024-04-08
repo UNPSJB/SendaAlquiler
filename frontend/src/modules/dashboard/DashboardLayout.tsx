@@ -22,6 +22,7 @@ import {
     ShoppingBagIcon,
     UserIcon,
     WarehouseIcon,
+    ClipboardPlus,
 } from 'lucide-react';
 import { signOut } from 'next-auth/react';
 import { PropsWithChildren, useEffect, useState } from 'react';
@@ -79,6 +80,7 @@ type NavLink = {
 
 const MAIN_LINKS: NavLink[] = [
     { href: '/', label: 'Dashboard', Icon: LayoutDashboardIcon },
+    { href: '/reportes', label: 'Reportes', Icon: ClipboardPlus },
     { href: '/productos', label: 'Productos', Icon: ShoppingBagIcon },
     { href: '/clientes', label: 'Clientes', Icon: ContactIcon },
     {
