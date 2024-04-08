@@ -13,23 +13,46 @@ from utils.graphene import non_null_list_of, get_paginated_model
 
 import csv
 import io
+from django.db import models
+
+from django.db.models import Value
+from django.db.models.functions import Concat
 
 from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class Query(graphene.ObjectType):
-    sales = graphene.NonNull(PaginatedSaleQueryResult, page=graphene.Int())
+    sales = graphene.NonNull(
+        PaginatedSaleQueryResult,
+        page=graphene.Int(),
+        query=graphene.String(),
+    )
 
     @employee_or_admin_required
-    def resolve_sales(self, info: CustomInfo, page: int):
-        paginator, selected_page = get_paginated_model(
-            Sale.objects.filter(office=info.context.office_id).order_by("-created_on"),
-            page,
-        )
+    def resolve_sales(
+        self,
+        info: CustomInfo,
+        page: int,
+        query: str = None,
+    ):
+        results = Sale.objects.all().order_by("-created_on")
+
+        if query is not None:
+            results = results.annotate(
+                full_name=Concat("client__first_name", Value(" "), "client__last_name")
+            ).filter(
+                models.Q(client__first_name__icontains=query)
+                | models.Q(client__last_name__icontains=query)
+                | models.Q(client__email__icontains=query)
+                | models.Q(client__full_name__icontains=query)
+            )
+        paginator, selected_page = get_paginated_model(results, page)
+
         return PaginatedSaleQueryResult(
             count=paginator.count,
             results=selected_page.object_list,
             num_pages=paginator.num_pages,
+            current_page=selected_page.number,
         )
 
     all_sales = non_null_list_of(SaleType)

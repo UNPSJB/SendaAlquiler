@@ -1,6 +1,7 @@
 from typing import List
 
 import graphene
+import datetime
 
 from senda.core.models.order_internal import (
     InternalOrder,
@@ -92,8 +93,8 @@ class Query(graphene.ObjectType):
             "latest_history_entry",
             "source_office",
             "target_office",
-            "orders",
-            "orders__product",
+            "order_items",
+            
         )
         csv_buffer = io.StringIO()
 
@@ -107,6 +108,7 @@ class Query(graphene.ObjectType):
             "Nombre de producto",
             "Cantidad pedida",
             "Cantidad recibida",
+            "Cantidad enviada",
         ]
 
         writer = csv.DictWriter(csv_buffer, fieldnames=fieldnames)
@@ -114,10 +116,12 @@ class Query(graphene.ObjectType):
 
         for internal_order in internal_orders:
             for order_item in internal_order.order_items.all():
+                formatted_created_on = internal_order.created_on.strftime('%H:%M %d/%m/%Y')
+
                 writer.writerow(
                     {
                         "ID de orden": internal_order.id,
-                        "Fecha de creacion": internal_order.created_on,
+                        "Fecha de creacion": formatted_created_on,
                         "Sucursal de origen": internal_order.source_office.name,
                         "Sucursal de destino": internal_order.target_office.name,
                         "Estado actual": internal_order.latest_history_entry.get_status_display(),
@@ -125,6 +129,7 @@ class Query(graphene.ObjectType):
                         "Nombre de producto": order_item.product.name,
                         "Cantidad pedida": order_item.quantity_ordered,
                         "Cantidad recibida": order_item.quantity_received,
+                        "Cantidad enviada": order_item.quantity_sent,
                     }
                 )
 

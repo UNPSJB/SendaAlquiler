@@ -1,11 +1,12 @@
-from typing import Any
+from typing import List
 
 import graphene
 
-from senda.core.models.contract import Contract
+from senda.core.models.contract import Contract, ContractHistoryStatusChoices
 from senda.core.schema.custom_types import (
     ContractType,
     PaginatedContractQueryResult,
+    ContractHistoryStatusChoicesEnum,
 )
 from utils.graphene import get_paginated_model
 
@@ -16,16 +17,29 @@ from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class Query(graphene.ObjectType):
-    contracts = graphene.NonNull(PaginatedContractQueryResult, page=graphene.Int())
+    contracts = graphene.NonNull(
+        PaginatedContractQueryResult,
+        page=graphene.Int(),
+        status=graphene.List(graphene.NonNull(ContractHistoryStatusChoicesEnum)),
+    )
 
     @employee_or_admin_required
-    def resolve_contracts(self, info: CustomInfo, page: int):
-        paginator, selected_page = get_paginated_model(
-            Contract.objects.filter(office=info.context.office_id).order_by(
-                "-created_on"
-            ),
-            page,
-        )
+    def resolve_contracts(
+        self,
+        info: CustomInfo,
+        page: int,
+        status: List[ContractHistoryStatusChoices] = None,
+    ):
+        current_office_id = info.context.office_id
+
+        results = Contract.objects.filter(office_id=current_office_id)
+
+        if status:
+            results = results.filter(latest_history_entry__status__in=status)
+
+        results = results.order_by("-created_on")
+
+        paginator, selected_page = get_paginated_model(results, page)
 
         return PaginatedContractQueryResult(
             count=paginator.count,
