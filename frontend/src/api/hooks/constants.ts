@@ -10,6 +10,7 @@ export const queryDomains = {
     internalOrders: 'internal-orders',
     offices: 'offices',
     products: 'products',
+    reports: 'reports',
 };
 
 const buildPaginatedListkey = (domain: string) => (filters?: any) => {
@@ -48,6 +49,8 @@ export const queryKeys = {
 
     localitiesPaginatedList: buildPaginatedListkey(queryDomains.localities),
     localitiesNonPaginated: [queryDomains.localities, 'list', 'non-paginated'],
+
+    reportMostSoldProducts: [queryDomains.reports, 'most-sold-products'],
 
     salesPaginatedList: buildPaginatedListkey(queryDomains.sales),
     saleDetailsById: buildDetailKey(queryDomains.sales),

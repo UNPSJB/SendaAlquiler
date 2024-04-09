@@ -13,13 +13,13 @@ from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 
 class ReportMostSoldProductsProductItem(graphene.ObjectType):
-    product = graphene.Field(ProductType)
+    product = graphene.NonNull(ProductType)
     quantity = graphene.NonNull(graphene.Int)
     total_amount = graphene.NonNull(graphene.Int)
 
 
 class ReportMostSoldProductsByOfficeItem(graphene.ObjectType):
-    office = graphene.Field(OfficeType)
+    office = graphene.NonNull(OfficeType)
     items = non_null_list_of(ReportMostSoldProductsProductItem)
     total_quantity = graphene.NonNull(graphene.Int)
     total_amount = graphene.NonNull(graphene.Int)
@@ -32,7 +32,7 @@ class ReportMostSoldProductsGeneral(graphene.ObjectType):
 
 
 class ReportMostSoldProductsQuery(graphene.ObjectType):
-    general = graphene.Field(ReportMostSoldProductsGeneral)
+    general = graphene.NonNull(ReportMostSoldProductsGeneral)
     by_office = non_null_list_of(ReportMostSoldProductsByOfficeItem)
 
 

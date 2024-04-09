@@ -11,8 +11,6 @@ import DashboardLayout, {
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 
 const Page = () => {
-    //const {queryResult, variables, setVariables } = useClients();
-
     return (
         <DashboardLayout
             header={
@@ -25,12 +23,12 @@ const Page = () => {
                 <div>
                     <div className="mb-4 grid grid-cols-2 gap-4">
                         <Link href={'/reportes/productos-por-sucursal'}>
-                            <Card>
-                                <CardHeader className="flex flex-row items-center justify-evenly space-y-0 pb-6">
-                                    <CardTitle className="text-base font-bold">
-                                        Producto mas vendido por sucursal
+                            <Card className="!border-none">
+                                <CardHeader className="flex flex-row items-center space-y-0 pb-6 hover:bg-muted">
+                                    <ShoppingBagIcon className="mr-8" />
+                                    <CardTitle className="mx-6 px-8 text-base font-bold">
+                                        Producto más vendido por sucursal
                                     </CardTitle>
-                                    <ShoppingBagIcon />
                                 </CardHeader>
                             </Card>
                         </Link>

@@ -1,0 +1,40 @@
+query reportMostSoldProducts {
+    reportMostSoldProducts {
+        general {
+            items {
+                product {
+                    id
+                    name
+                    sku
+                    brand {
+                        name
+                    }
+                }
+                quantity
+                totalAmount
+            }
+            totalQuantity
+            totalAmount
+        }
+        byOffice {
+            items {
+                product {
+                    id
+                    name
+                    sku
+                    brand {
+                        name
+                    }
+                }
+                quantity
+                totalAmount
+            }
+            totalQuantity
+            totalAmount
+            office {
+                id
+                name
+            }
+        }
+    }
+}

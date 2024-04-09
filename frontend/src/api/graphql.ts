@@ -1033,6 +1033,7 @@ export type Query = {
     productsCsv: Scalars['String']['output'];
     productsStocksByOfficeId: Array<ProductStockInOffice>;
     productsSuppliedBySupplierId: Array<Product>;
+    reportMostSoldProducts: Maybe<ReportMostSoldProductsQuery>;
     saleById: Maybe<Sale>;
     saleItems: Array<SaleItem>;
     sales: PaginatedSaleQueryResult;
@@ -1209,6 +1210,34 @@ export type Refresh = {
     payload: Scalars['GenericScalar']['output'];
     refreshExpiresIn: Scalars['Int']['output'];
     token: Scalars['String']['output'];
+};
+
+export type ReportMostSoldProductsByOfficeItem = {
+    __typename?: 'ReportMostSoldProductsByOfficeItem';
+    items: Array<ReportMostSoldProductsProductItem>;
+    office: Office;
+    totalAmount: Scalars['Int']['output'];
+    totalQuantity: Scalars['Int']['output'];
+};
+
+export type ReportMostSoldProductsGeneral = {
+    __typename?: 'ReportMostSoldProductsGeneral';
+    items: Array<ReportMostSoldProductsProductItem>;
+    totalAmount: Scalars['Int']['output'];
+    totalQuantity: Scalars['Int']['output'];
+};
+
+export type ReportMostSoldProductsProductItem = {
+    __typename?: 'ReportMostSoldProductsProductItem';
+    product: Product;
+    quantity: Scalars['Int']['output'];
+    totalAmount: Scalars['Int']['output'];
+};
+
+export type ReportMostSoldProductsQuery = {
+    __typename?: 'ReportMostSoldProductsQuery';
+    byOffice: Array<ReportMostSoldProductsByOfficeItem>;
+    general: ReportMostSoldProductsGeneral;
 };
 
 export type Sale = {
@@ -2688,6 +2717,50 @@ export type ProductStockInOfficeQuery = {
     productStockInOffice: {
         __typename?: 'ProductStockInOffice';
         quantity: number;
+    } | null;
+};
+
+export type ReportMostSoldProductsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type ReportMostSoldProductsQuery = {
+    __typename?: 'Query';
+    reportMostSoldProducts: {
+        __typename?: 'ReportMostSoldProductsQuery';
+        general: {
+            __typename?: 'ReportMostSoldProductsGeneral';
+            totalQuantity: number;
+            totalAmount: number;
+            items: Array<{
+                __typename?: 'ReportMostSoldProductsProductItem';
+                quantity: number;
+                totalAmount: number;
+                product: {
+                    __typename?: 'Product';
+                    id: string;
+                    name: string;
+                    sku: string | null;
+                    brand: { __typename?: 'Brand'; name: string } | null;
+                };
+            }>;
+        };
+        byOffice: Array<{
+            __typename?: 'ReportMostSoldProductsByOfficeItem';
+            totalQuantity: number;
+            totalAmount: number;
+            items: Array<{
+                __typename?: 'ReportMostSoldProductsProductItem';
+                quantity: number;
+                totalAmount: number;
+                product: {
+                    __typename?: 'Product';
+                    id: string;
+                    name: string;
+                    sku: string | null;
+                    brand: { __typename?: 'Brand'; name: string } | null;
+                };
+            }>;
+            office: { __typename?: 'Office'; id: string; name: string };
+        }>;
     } | null;
 };
 
@@ -9759,6 +9832,252 @@ export const ProductStockInOfficeDocument = {
 } as unknown as DocumentNode<
     ProductStockInOfficeQuery,
     ProductStockInOfficeQueryVariables
+>;
+export const ReportMostSoldProductsDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'reportMostSoldProducts' },
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'reportMostSoldProducts' },
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'general' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'items' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'product',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'sku',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'brand',
+                                                                        },
+                                                                        selectionSet: {
+                                                                            kind: 'SelectionSet',
+                                                                            selections: [
+                                                                                {
+                                                                                    kind: 'Field',
+                                                                                    name: {
+                                                                                        kind: 'Name',
+                                                                                        value: 'name',
+                                                                                    },
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'quantity',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'totalAmount',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalQuantity',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalAmount',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'byOffice' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'items' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'product',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'sku',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'brand',
+                                                                        },
+                                                                        selectionSet: {
+                                                                            kind: 'SelectionSet',
+                                                                            selections: [
+                                                                                {
+                                                                                    kind: 'Field',
+                                                                                    name: {
+                                                                                        kind: 'Name',
+                                                                                        value: 'name',
+                                                                                    },
+                                                                                },
+                                                                            ],
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'quantity',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'totalAmount',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalQuantity',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalAmount',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'office' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<
+    ReportMostSoldProductsQuery,
+    ReportMostSoldProductsQueryVariables
 >;
 export const SalesDocument = {
     kind: 'Document',
