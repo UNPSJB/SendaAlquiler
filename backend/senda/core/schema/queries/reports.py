@@ -37,7 +37,7 @@ class ReportMostSoldProductsQuery(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
-    report_most_sold_products = graphene.Field(
+    report_most_sold_products = graphene.NonNull(
         ReportMostSoldProductsQuery,
     )
 

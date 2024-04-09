@@ -1033,7 +1033,7 @@ export type Query = {
     productsCsv: Scalars['String']['output'];
     productsStocksByOfficeId: Array<ProductStockInOffice>;
     productsSuppliedBySupplierId: Array<Product>;
-    reportMostSoldProducts: Maybe<ReportMostSoldProductsQuery>;
+    reportMostSoldProducts: ReportMostSoldProductsQuery;
     saleById: Maybe<Sale>;
     saleItems: Array<SaleItem>;
     sales: PaginatedSaleQueryResult;
@@ -2720,9 +2720,9 @@ export type ProductStockInOfficeQuery = {
     } | null;
 };
 
-export type ReportMostSoldProductsQueryVariables = Exact<{ [key: string]: never }>;
+export type AdminReportMostSoldProductsQueryVariables = Exact<{ [key: string]: never }>;
 
-export type ReportMostSoldProductsQuery = {
+export type AdminReportMostSoldProductsQuery = {
     __typename?: 'Query';
     reportMostSoldProducts: {
         __typename?: 'ReportMostSoldProductsQuery';
@@ -2761,7 +2761,7 @@ export type ReportMostSoldProductsQuery = {
             }>;
             office: { __typename?: 'Office'; id: string; name: string };
         }>;
-    } | null;
+    };
 };
 
 export type SalesQueryVariables = Exact<{
@@ -9833,13 +9833,13 @@ export const ProductStockInOfficeDocument = {
     ProductStockInOfficeQuery,
     ProductStockInOfficeQueryVariables
 >;
-export const ReportMostSoldProductsDocument = {
+export const AdminReportMostSoldProductsDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'reportMostSoldProducts' },
+            name: { kind: 'Name', value: 'adminReportMostSoldProducts' },
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
@@ -10076,8 +10076,8 @@ export const ReportMostSoldProductsDocument = {
         },
     ],
 } as unknown as DocumentNode<
-    ReportMostSoldProductsQuery,
-    ReportMostSoldProductsQueryVariables
+    AdminReportMostSoldProductsQuery,
+    AdminReportMostSoldProductsQueryVariables
 >;
 export const SalesDocument = {
     kind: 'Document',

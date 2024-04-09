@@ -1,4 +1,4 @@
-query reportMostSoldProducts {
+query adminReportMostSoldProducts {
     reportMostSoldProducts {
         general {
             items {

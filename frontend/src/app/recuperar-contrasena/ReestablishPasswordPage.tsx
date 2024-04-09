@@ -172,12 +172,7 @@ const ReestablishPasswordPage: React.FC<Props> = ({ token }) => {
                                 )}
                             </div>
 
-                            <div
-                                className={clsx(
-                                    'flex justify-center',
-                                    !passwordIsValid && 'pointer-events-none opacity-50',
-                                )}
-                            >
+                            <div className={clsx('flex justify-center')}>
                                 <ButtonWithSpinner type="submit" showSpinner={isPending}>
                                     Reestablecer contraseña
                                 </ButtonWithSpinner>

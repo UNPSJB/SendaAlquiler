@@ -10128,9 +10128,13 @@
                         "description": null,
                         "args": [],
                         "type": {
-                            "kind": "OBJECT",
-                            "name": "ReportMostSoldProductsQuery",
-                            "ofType": null
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "OBJECT",
+                                "name": "ReportMostSoldProductsQuery",
+                                "ofType": null
+                            }
                         },
                         "isDeprecated": false,
                         "deprecationReason": null

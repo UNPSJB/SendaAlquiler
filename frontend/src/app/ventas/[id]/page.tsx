@@ -176,7 +176,7 @@ const Page = () => {
                             </header>
 
                             <div className="flex-1 bg-gray-100 py-8">
-                                <section className="items-center space-y-4 px-8">
+                                <section className="items-center space-y-4 bg-white px-8 py-4">
                                     <div>
                                         <h1 className="text-xl font-bold">
                                             Venta #{sale.id}
