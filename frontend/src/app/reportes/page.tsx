@@ -24,12 +24,11 @@ const Page = () => {
                     <div className="mb-4 grid grid-cols-2 gap-4">
                         <Link href={'/reportes/productos-por-sucursal'}>
                             <Card className="!border-none">
-                                <CardHeader className="flex flex-row items-center space-y-0 pb-6 hover:bg-muted">
-                                    <ShoppingBagIcon className="mr-8" />
-                                    <CardTitle className="mx-6 px-8 text-base font-bold">
-                                        Producto más vendido por sucursal
-                                    </CardTitle>
-                                </CardHeader>
+                                <div className="flex flex-row items-center justify-center space-x-4 rounded-md py-6 transition duration-200 hover:bg-black hover:text-white">
+                                    <ShoppingBagIcon />
+
+                                    <span>Producto más vendido por sucursal</span>
+                                </div>
                             </Card>
                         </Link>
                     </div>
