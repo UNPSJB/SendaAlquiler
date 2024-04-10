@@ -1144,6 +1144,11 @@ export type QueryProductsSuppliedBySupplierIdArgs = {
     supplierId: Scalars['ID']['input'];
 };
 
+export type QueryReportMostSoldProductsArgs = {
+    endDate: InputMaybe<Scalars['Date']['input']>;
+    startDate: InputMaybe<Scalars['Date']['input']>;
+};
+
 export type QuerySaleByIdArgs = {
     id: Scalars['ID']['input'];
 };
@@ -2720,7 +2725,10 @@ export type ProductStockInOfficeQuery = {
     } | null;
 };
 
-export type AdminReportMostSoldProductsQueryVariables = Exact<{ [key: string]: never }>;
+export type AdminReportMostSoldProductsQueryVariables = Exact<{
+    startDate: Scalars['Date']['input'];
+    endDate: Scalars['Date']['input'];
+}>;
 
 export type AdminReportMostSoldProductsQuery = {
     __typename?: 'Query';
@@ -9840,12 +9848,60 @@ export const AdminReportMostSoldProductsDocument = {
             kind: 'OperationDefinition',
             operation: 'query',
             name: { kind: 'Name', value: 'adminReportMostSoldProducts' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'startDate' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'Date' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'endDate' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'Date' },
+                        },
+                    },
+                },
+            ],
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
                     {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'reportMostSoldProducts' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'startDate' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'startDate' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'endDate' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'endDate' },
+                                },
+                            },
+                        ],
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [

@@ -1,5 +1,5 @@
-query adminReportMostSoldProducts {
-    reportMostSoldProducts {
+query adminReportMostSoldProducts($startDate: Date!, $endDate: Date!) {
+    reportMostSoldProducts(startDate: $startDate, endDate: $endDate) {
         general {
             items {
                 product {

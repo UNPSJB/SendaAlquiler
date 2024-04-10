@@ -8,7 +8,7 @@ import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
 
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 
 const Page = () => {
     return (

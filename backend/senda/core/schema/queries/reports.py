@@ -8,6 +8,8 @@ from senda.core.models.products import Product
 from utils.graphene import non_null_list_of
 from django.db import models
 
+from django.utils import timezone
+
 
 from senda.core.decorators import employee_or_admin_required, CustomInfo
 
@@ -39,18 +41,53 @@ class ReportMostSoldProductsQuery(graphene.ObjectType):
 class Query(graphene.ObjectType):
     report_most_sold_products = graphene.NonNull(
         ReportMostSoldProductsQuery,
+        start_date=graphene.Date(),
+        end_date=graphene.Date(),
     )
 
     def resolve_report_most_sold_products(
         self,
         info: CustomInfo,
-        **kwargs: Any,
+        start_date: str = None,
+        end_date: str = None,
     ) -> ReportMostSoldProductsQuery:
+        # start_date = start_date or timezone.now().replace(year=2021, month=1, day=1)
+        # start_date = start_date or timezone.now().replace(year=2024, month=1, day=1)
+        # end_date = end_date or timezone.now()
+
         # top 10 most sold products
         most_sold_products = (
             Product.objects.annotate(
-                total_quantity=models.Sum("sale_items__quantity"),
-                total_amount=models.Sum("sale_items__total"),
+                total_quantity=models.Sum(
+                    models.Case(
+                        models.When(
+                            models.Q(
+                                sale_items__sale__created_on__range=[
+                                    start_date,
+                                    end_date,
+                                ]
+                            ),
+                            then="sale_items__quantity",
+                        ),
+                        default=0,
+                        output_field=models.IntegerField(),
+                    )
+                ),
+                total_amount=models.Sum(
+                    models.Case(
+                        models.When(
+                            models.Q(
+                                sale_items__sale__created_on__range=[
+                                    start_date,
+                                    end_date,
+                                ]
+                            ),
+                            then="sale_items__total",
+                        ),
+                        default=0,
+                        output_field=models.DecimalField(),
+                    )
+                ),
             )
             .order_by("-total_quantity")
             .values("id", "name", "total_quantity", "total_amount")
@@ -62,10 +99,39 @@ class Query(graphene.ObjectType):
         by_office: List[ReportMostSoldProductsByOfficeItem] = []
         for office in Office.objects.all():
             most_sold_products_by_office = (
-                Product.objects.filter(sale_items__sale__office=office)
-                .annotate(
-                    total_quantity=models.Sum("sale_items__quantity"),
-                    total_amount=models.Sum("sale_items__total"),
+                Product.objects.annotate(
+                    total_quantity=models.Sum(
+                        models.Case(
+                            models.When(
+                                models.Q(
+                                    sale_items__sale__office=office,
+                                    sale_items__sale__created_on__range=[
+                                        start_date,
+                                        end_date,
+                                    ],
+                                ),
+                                then="sale_items__quantity",
+                            ),
+                            default=0,
+                            output_field=models.IntegerField(),
+                        )
+                    ),
+                    total_amount=models.Sum(
+                        models.Case(
+                            models.When(
+                                models.Q(
+                                    sale_items__sale__office=office,
+                                    sale_items__sale__created_on__range=[
+                                        start_date,
+                                        end_date,
+                                    ],
+                                ),
+                                then="sale_items__total",
+                            ),
+                            default=0,
+                            output_field=models.DecimalField(),
+                        )
+                    ),
                 )
                 .order_by("-total_quantity")
                 .values("id", "name", "total_quantity", "total_amount")
