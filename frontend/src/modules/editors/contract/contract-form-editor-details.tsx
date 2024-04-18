@@ -172,7 +172,20 @@ export const ContractFormEditorDetails = () => {
 
                     <FormField
                         name="endDatetime"
-                        rules={{ required: 'Este campo es requerido' }}
+                        rules={{
+                            required: 'Este campo es requerido',
+                            validate: (val) => {
+                                if (!val) return;
+
+                                const startDatetime =
+                                    formMethods.getValues('startDatetime');
+                                if (!startDatetime) return;
+
+                                if (dayjs(val).isBefore(startDatetime)) {
+                                    return 'La fecha de fin debe ser posterior a la fecha de inicio';
+                                }
+                            },
+                        }}
                         control={formMethods.control}
                         render={({ field }) => (
                             <FormItem className="flex flex-col space-y-2">
@@ -201,7 +214,20 @@ export const ContractFormEditorDetails = () => {
 
                     <FormField
                         name="expirationDatetime"
-                        rules={{ required: 'Este campo es requerido' }}
+                        rules={{
+                            required: 'Este campo es requerido',
+                            validate: (val) => {
+                                if (!val) return;
+
+                                const startDatetime =
+                                    formMethods.getValues('startDatetime');
+                                if (!startDatetime) return;
+
+                                if (dayjs(startDatetime).isBefore(val)) {
+                                    return 'La fecha de aceptación debe ser anterior a la fecha de inicio';
+                                }
+                            },
+                        }}
                         control={formMethods.control}
                         render={({ field }) => (
                             <FormItem className="col-span-2 flex flex-col space-y-2">
