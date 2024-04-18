@@ -3246,7 +3246,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "SCALAR",
-                                "name": "Int",
+                                "name": "BigInt",
                                 "ofType": null
                             }
                         },
@@ -3262,7 +3262,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "SCALAR",
-                                "name": "Int",
+                                "name": "BigInt",
                                 "ofType": null
                             }
                         },
@@ -3278,7 +3278,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "SCALAR",
-                                "name": "Int",
+                                "name": "BigInt",
                                 "ofType": null
                             }
                         },
@@ -3294,7 +3294,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "SCALAR",
-                                "name": "Int",
+                                "name": "BigInt",
                                 "ofType": null
                             }
                         },
@@ -3310,7 +3310,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "SCALAR",
-                                "name": "Int",
+                                "name": "BigInt",
                                 "ofType": null
                             }
                         },
@@ -3326,7 +3326,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "SCALAR",
-                                "name": "Int",
+                                "name": "BigInt",
                                 "ofType": null
                             }
                         },
@@ -3472,7 +3472,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "SCALAR",
-                                "name": "Int",
+                                "name": "BigInt",
                                 "ofType": null
                             }
                         },
@@ -3504,7 +3504,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "SCALAR",
-                                "name": "Int",
+                                "name": "BigInt",
                                 "ofType": null
                             }
                         },
@@ -3531,7 +3531,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "SCALAR",
-                                "name": "Int",
+                                "name": "BigInt",
                                 "ofType": null
                             }
                         },
@@ -3563,7 +3563,7 @@
                             "name": null,
                             "ofType": {
                                 "kind": "SCALAR",
-                                "name": "Int",
+                                "name": "BigInt",
                                 "ofType": null
                             }
                         },

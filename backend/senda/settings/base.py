@@ -144,7 +144,7 @@ class Common(Configuration):
     # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
     DEFAULT_AUTO_FIELD: str = "django.db.models.BigAutoField"
 
-    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOW_ALL_ORIGINS = True
 
     NOTEBOOK_ARGUMENTS = [
         "--ip",

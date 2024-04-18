@@ -5,7 +5,10 @@ import { useParams } from 'next/navigation';
 import { useProductById } from '@/api/hooks';
 
 import DashboardLayout from '@/modules/dashboard/DashboardLayout';
-import { ProductFormEditor } from '@/modules/editors/product/product-form-editor';
+import {
+    ProductFormEditor,
+    ProductFormEditorValues,
+} from '@/modules/editors/product/product-form-editor';
 
 const Page = () => {
     const { id } = useParams();
@@ -46,55 +49,58 @@ const Page = () => {
     }
 
     const product = productByIdQuery.data.productById;
+    console.log(product);
+
+    const defaultValues: ProductFormEditorValues = {
+        sku: product.sku,
+        description: product.description,
+        name: product.name,
+        price: product.price,
+        brand: product.brand
+            ? {
+                  value: product.brand.id,
+                  label: product.brand.name,
+              }
+            : null,
+        type: {
+            value: product.type,
+            label: product.type,
+        },
+        stocks: product.stockItems.map((item) => {
+            return {
+                office: {
+                    value: item.office.id,
+                    label: item.office.name,
+                },
+                quantity: item.quantity,
+            };
+        }),
+        suppliers: product.suppliers.map((item) => {
+            return {
+                supplier: {
+                    value: item.supplier.id,
+                    label: item.supplier.name,
+                },
+                price: item.price,
+            };
+        }),
+        services: product.services.map((service) => {
+            return {
+                price: service.price,
+                service: {
+                    label: service.name,
+                    value: service.id,
+                },
+            };
+        }),
+    };
 
     return (
         <DashboardLayout>
             <ProductFormEditor
                 cancelHref={`/productos/${id}`}
                 idToUpdate={id as string}
-                defaultValues={{
-                    sku: product.sku,
-                    description: product.description,
-                    name: product.name,
-                    price: product.price,
-                    brand: product.brand
-                        ? {
-                              value: product.brand.id,
-                              label: product.brand.name,
-                          }
-                        : null,
-                    type: {
-                        value: product.type,
-                        label: product.type,
-                    },
-                    stocks: product.stockItems.map((item) => {
-                        return {
-                            office: {
-                                value: item.office.id,
-                                label: item.office.name,
-                            },
-                            stock: item.quantity,
-                        };
-                    }),
-                    suppliers: product.suppliers.map((item) => {
-                        return {
-                            supplier: {
-                                value: item.supplier.id,
-                                label: item.supplier.name,
-                            },
-                            price: item.price,
-                        };
-                    }),
-                    services: product.services.map((service) => {
-                        return {
-                            price: service.price,
-                            service: {
-                                label: service.name,
-                                value: service.id,
-                            },
-                        };
-                    }),
-                }}
+                defaultValues={defaultValues}
             />
         </DashboardLayout>
     );

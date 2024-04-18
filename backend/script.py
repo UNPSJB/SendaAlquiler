@@ -290,7 +290,7 @@ def create_product_with_details(name, product_type, services=None):
     # Create a single product
     product = Product.objects.create_product(
         ProductDataDict(
-            sku=fake.ean(length=13),
+            sku=fake.ean(length=13)[:10],
             name=name,
             description=fake.sentence(),
             brand_id=Brand.objects.order_by("?").first().pk,
@@ -304,7 +304,7 @@ def create_product_with_details(name, product_type, services=None):
         ProductStockItemDataDict(
             product_id=product.pk,
             office_id=office.pk,
-            quantity=random.randint(0, 320),
+            quantity=random.randint(40, 3650)
         )
         for office in Office.objects.all().order_by("?")[0 : random.randint(1, 3)]
     ]
@@ -536,7 +536,7 @@ def create_supplier_orders():
 
 
 def create_sales():
-    for i in range(random.randint(50, 80)):
+    for i in range(random.randint(300, 365)):
         naive_contract_start_datetime = fake.date_time_between(
             start_date="-1y", end_date="now", tzinfo=None
         )
@@ -562,10 +562,11 @@ def create_sales():
                 office.pk, start_date=sale_date, end_date=sale_date
             )
 
-            if stock_availability == 0:
+            max_rand_quantity = int(stock_availability * 0.1)
+            if max_rand_quantity == 0:
                 continue
 
-            quantity = random.randint(1, stock_availability)
+            quantity = random.randint(1, max_rand_quantity)
             max_discount = int((product.price * quantity) * 0.1)
 
             sale_item_dicts.append(

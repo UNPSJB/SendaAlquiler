@@ -93,7 +93,8 @@ class ProductType(DjangoObjectType):
     current_office_quantity = graphene.Int(default_value=0, required=True)
 
     def resolve_current_office_quantity(parent: Product, info: CustomInfo):
-        return parent.get_stock_for_office(int(info.context.office_id)) or 0
+        stock = parent.get_stock_for_office(int(info.context.office_id))
+        return stock or 0
 
     class Meta:
         name = "Product"

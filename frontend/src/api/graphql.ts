@@ -370,12 +370,12 @@ export type CreateSupplierOrderProductInput = {
 
 export type DashboardStats = {
     __typename?: 'DashboardStats';
-    noClientsCurrentPeriod: Scalars['Int']['output'];
-    noClientsPreviousPeriod: Scalars['Int']['output'];
-    noContractsCurrentPeriod: Scalars['Int']['output'];
-    noContractsPreviousPeriod: Scalars['Int']['output'];
-    noSalesCurrentPeriod: Scalars['Int']['output'];
-    noSalesPreviousPeriod: Scalars['Int']['output'];
+    noClientsCurrentPeriod: Scalars['BigInt']['output'];
+    noClientsPreviousPeriod: Scalars['BigInt']['output'];
+    noContractsCurrentPeriod: Scalars['BigInt']['output'];
+    noContractsPreviousPeriod: Scalars['BigInt']['output'];
+    noSalesCurrentPeriod: Scalars['BigInt']['output'];
+    noSalesPreviousPeriod: Scalars['BigInt']['output'];
     recentSales: Array<Sale>;
     salesPerPeriod: Array<DashboardStatsSalesPerPeriodItem>;
     topSellingProducts: Array<DashboardStatsTopSellingProduct>;
@@ -389,16 +389,16 @@ export enum DashboardStatsPeriod {
 
 export type DashboardStatsSalesPerPeriodItem = {
     __typename?: 'DashboardStatsSalesPerPeriodItem';
-    amount: Scalars['Int']['output'];
+    amount: Scalars['BigInt']['output'];
     period: Scalars['String']['output'];
-    quantity: Scalars['Int']['output'];
+    quantity: Scalars['BigInt']['output'];
 };
 
 export type DashboardStatsTopSellingProduct = {
     __typename?: 'DashboardStatsTopSellingProduct';
-    count: Scalars['Int']['output'];
+    count: Scalars['BigInt']['output'];
     product: Product;
-    sales: Scalars['Int']['output'];
+    sales: Scalars['BigInt']['output'];
 };
 
 export type DeleteClient = {
@@ -1958,16 +1958,16 @@ export type DashboardStatsQuery = {
     __typename?: 'Query';
     dashboardStats: {
         __typename?: 'DashboardStats';
-        noSalesCurrentPeriod: number;
-        noSalesPreviousPeriod: number;
-        noClientsCurrentPeriod: number;
-        noClientsPreviousPeriod: number;
-        noContractsCurrentPeriod: number;
-        noContractsPreviousPeriod: number;
+        noSalesCurrentPeriod: any;
+        noSalesPreviousPeriod: any;
+        noClientsCurrentPeriod: any;
+        noClientsPreviousPeriod: any;
+        noContractsCurrentPeriod: any;
+        noContractsPreviousPeriod: any;
         topSellingProducts: Array<{
             __typename?: 'DashboardStatsTopSellingProduct';
-            sales: number;
-            count: number;
+            sales: any;
+            count: any;
             product: { __typename?: 'Product'; id: string; name: string };
         }>;
         recentSales: Array<{
@@ -1985,8 +1985,8 @@ export type DashboardStatsQuery = {
         salesPerPeriod: Array<{
             __typename?: 'DashboardStatsSalesPerPeriodItem';
             period: string;
-            quantity: number;
-            amount: number;
+            quantity: any;
+            amount: any;
         }>;
         upcomingContracts: Array<{
             __typename?: 'Contract';

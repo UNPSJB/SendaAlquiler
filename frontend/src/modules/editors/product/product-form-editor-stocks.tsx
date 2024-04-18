@@ -128,7 +128,7 @@ export const ProductFormEditorStocks = () => {
 
                         <div className="flex pt-7">
                             <button
-                                className="h-4 w-4"
+                                className="size-4"
                                 type="button"
                                 onClick={() => {
                                     if (stock.office) {
@@ -142,7 +142,7 @@ export const ProductFormEditorStocks = () => {
                                     stocksFieldArray.remove(index);
                                 }}
                             >
-                                <Trash className="h-5 w-5" />
+                                <Trash className="size-5" />
                             </button>
                         </div>
                     </div>

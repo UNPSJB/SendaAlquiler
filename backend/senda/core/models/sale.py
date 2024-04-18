@@ -117,11 +117,11 @@ class Sale(TimeStampedModel):
     def update_totals(self):
         self.subtotal = self.sale_items.aggregate(subtotal_sum=models.Sum("subtotal"))[
             "subtotal_sum"
-        ]
+        ] or 0
         self.discount = self.sale_items.aggregate(discount_sum=models.Sum("discount"))[
             "discount_sum"
-        ]
-        self.total = self.subtotal - self.discount
+        ] or 0
+        self.total = (self.subtotal or 0) - (self.discount or 0)
         self.save()
 
     def __str__(self):

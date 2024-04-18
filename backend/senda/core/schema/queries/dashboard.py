@@ -18,25 +18,25 @@ from senda.core.decorators import employee_or_admin_required, CustomInfo
 
 class DashboardStatsSalesPerPeriodItem(graphene.ObjectType):
     period = graphene.String(required=True)
-    quantity = graphene.Int(required=True)
-    amount = graphene.Int(required=True)
+    quantity = graphene.BigInt(required=True)
+    amount = graphene.BigInt(required=True)
 
 
 class DashboardStatsTopSellingProduct(graphene.ObjectType):
     product = graphene.NonNull(ProductType)
-    sales = graphene.Int(required=True)
-    count = graphene.Int(required=True)
+    sales = graphene.BigInt(required=True)
+    count = graphene.BigInt(required=True)
 
 
 class DashboardStats(graphene.ObjectType):
-    no_sales_current_period = graphene.Int(required=True)
-    no_sales_previous_period = graphene.Int(required=True)
+    no_sales_current_period = graphene.BigInt(required=True)
+    no_sales_previous_period = graphene.BigInt(required=True)
 
-    no_clients_current_period = graphene.Int(required=True)
-    no_clients_previous_period = graphene.Int(required=True)
+    no_clients_current_period = graphene.BigInt(required=True)
+    no_clients_previous_period = graphene.BigInt(required=True)
 
-    no_contracts_current_period = graphene.Int(required=True)
-    no_contracts_previous_period = graphene.Int(required=True)
+    no_contracts_current_period = graphene.BigInt(required=True)
+    no_contracts_previous_period = graphene.BigInt(required=True)
 
     top_selling_products = non_null_list_of(DashboardStatsTopSellingProduct)
 

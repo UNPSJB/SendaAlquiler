@@ -56,23 +56,43 @@ const columns: ColumnDef<ProductListItemFragment, any>[] = [
             const product = props.row.original;
 
             return (
-                <Link className="text-violet-600" href={`/productos/${product.id}`}>
-                    {product.name}
-                </Link>
+                <div className="flex flex-col space-y-1">
+                    <Link className="text-violet-600" href={`/productos/${product.id}`}>
+                        {product.name}
+                    </Link>
+
+                    <span className="text-xs text-muted-foreground">
+                        SKU: {product.sku}
+                    </span>
+                </div>
             );
         },
         size: 300,
-    }),
-    columnsHelper.accessor('sku', {
-        id: 'sku',
-        header: 'SKU',
-        cell: (props) => props.row.original.sku || '-',
-        size: 200,
     }),
     columnsHelper.accessor('brand', {
         id: 'brand',
         header: 'Marca',
         cell: (props) => props.row.original.brand?.name || '-',
+        size: 200,
+    }),
+    columnsHelper.accessor('currentOfficeQuantity', {
+        id: 'currentOfficeQuantity',
+        header: 'Stock en sucursal actual',
+        cell: (props) => {
+            return (
+                <div className="flex flex-col">
+                    {props.row.original.currentOfficeQuantity === 0 ? (
+                        <span className="text-red-500">Sin Stock</span>
+                    ) : (
+                        <span className="text-green-500">Con Stock</span>
+                    )}
+
+                    <span className="text-muted-foreground">
+                        ({props.row.original.currentOfficeQuantity})
+                    </span>
+                </div>
+            );
+        },
         size: 200,
     }),
     columnsHelper.accessor('type', {
@@ -140,7 +160,7 @@ const RowActions = ({ product }: { product: ProductListItemFragment }) => {
         >
             <DropdownMenu>
                 <DropdownMenuTrigger>
-                    <MoreVertical className="h-5 w-5" />
+                    <MoreVertical className="size-5" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent>
@@ -271,7 +291,7 @@ const Page = () => {
                     ) {
                         return (
                             <div className="flex flex-1 flex-col">
-                                <div className="flex h-full w-full flex-1 items-center justify-center">
+                                <div className="flex size-full flex-1 items-center justify-center">
                                     <FetchStatusMessageWithDescription
                                         title="No se encontraron resultados"
                                         line1="No se encontraron productos con el termino de busqueda"

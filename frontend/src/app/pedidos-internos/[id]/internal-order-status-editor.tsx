@@ -10,6 +10,8 @@ import {
     useSetInternalOrderAsInProgress,
 } from '@/api/hooks';
 
+import { useOfficeContext } from '@/app/OfficeProvider';
+
 import { InternalOrderStatusEditorFormValues } from './page';
 
 import ButtonWithSpinner from '@/components/ButtonWithSpinner';
@@ -32,6 +34,8 @@ export const InternalOrderStatusEditor = ({ internalOrder }: Props) => {
     const statusToInProgressMutation = useSetInternalOrderAsInProgress();
     const statusToCompletedMutation = useSetInternalOrderAsCompleted();
     const statusToCanceledMutation = useSetInternalOrderAsCanceled();
+
+    const { office } = useOfficeContext();
 
     const onSubmit = (data: InternalOrderStatusEditorFormValues) => {
         if (!internalOrder) return;
@@ -147,10 +151,14 @@ export const InternalOrderStatusEditor = ({ internalOrder }: Props) => {
                                 internalOrder.latestHistoryEntry?.status ===
                                 InternalOrderHistoryStatusChoices.Pending
                                     ? [
-                                          {
-                                              value: InternalOrderHistoryStatusChoices.InProgress,
-                                              label: 'En progreso',
-                                          },
+                                          ...(office === internalOrder.sourceOffice
+                                              ? [
+                                                    {
+                                                        value: InternalOrderHistoryStatusChoices.InProgress,
+                                                        label: 'En progreso',
+                                                    },
+                                                ]
+                                              : []),
                                           {
                                               value: InternalOrderHistoryStatusChoices.Canceled,
                                               label: 'Cancelar',
