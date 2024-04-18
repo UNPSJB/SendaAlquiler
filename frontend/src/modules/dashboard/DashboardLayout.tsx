@@ -80,7 +80,12 @@ type NavLink = {
 
 const MAIN_LINKS: NavLink[] = [
     { href: '/', label: 'Dashboard', Icon: LayoutDashboardIcon },
-    { href: '/reportes', label: 'Reportes', Icon: ClipboardPlus },
+    {
+        href: '/reportes',
+        label: 'Reportes',
+        Icon: ClipboardPlus,
+        userCanAccess: (user) => isAdmin(user),
+    },
     { href: '/productos', label: 'Productos', Icon: ShoppingBagIcon },
     { href: '/clientes', label: 'Clientes', Icon: ContactIcon },
     {
