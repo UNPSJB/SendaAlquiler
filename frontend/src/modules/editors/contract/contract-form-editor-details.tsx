@@ -25,7 +25,6 @@ export const ContractFormEditorDetails = () => {
 
     const watchedClient = formMethods.watch('client')?.data;
     const watchedStartDatetime = formMethods.watch('startDatetime');
-    const watchedEndDatetime = formMethods.watch('endDatetime');
 
     return (
         <section className="flex border-t border-gray-200 py-8">
@@ -183,22 +182,6 @@ export const ContractFormEditorDetails = () => {
                                     <DateTimePicker
                                         onChange={(val) => {
                                             field.onChange(val);
-
-                                            const expirationDatetime =
-                                                formMethods.getValues(
-                                                    'expirationDatetime',
-                                                );
-
-                                            if (
-                                                val &&
-                                                (!expirationDatetime ||
-                                                    val > expirationDatetime)
-                                            ) {
-                                                formMethods.setValue(
-                                                    'expirationDatetime',
-                                                    dayjs(val).add(7, 'day').toDate(),
-                                                );
-                                            }
                                         }}
                                         value={field.value || null}
                                         fromDate={
@@ -228,19 +211,14 @@ export const ContractFormEditorDetails = () => {
                                     <DateTimePicker
                                         onChange={field.onChange}
                                         value={field.value || null}
-                                        fromDate={
-                                            watchedEndDatetime
-                                                ? dayjs(watchedEndDatetime)
-                                                      .add(7, 'day')
-                                                      .toDate()
-                                                : dayjs().add(7, 'day').toDate()
-                                        }
+                                        fromDate={dayjs().toDate()}
+                                        toDate={watchedStartDatetime || undefined}
                                     />
                                 </FormControl>
 
                                 <FormDescription>
                                     Fecha máxima para la aceptación del contrato. Por
-                                    defecto, 7 días después de la fecha de fin.
+                                    defecto, 7 días después de la fecha de creación.
                                 </FormDescription>
 
                                 <FormMessage />

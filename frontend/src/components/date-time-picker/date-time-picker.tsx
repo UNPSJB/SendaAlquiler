@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 type Props = {
     onChange: (date: Date | null) => void;
     value: Date | null;
-} & Pick<CalendarProps, 'fromDate'>;
+} & Pick<CalendarProps, 'fromDate' | 'toDate'>;
 
 export function DateTimePicker({ onChange, value: date, ...props }: Props) {
     return (
