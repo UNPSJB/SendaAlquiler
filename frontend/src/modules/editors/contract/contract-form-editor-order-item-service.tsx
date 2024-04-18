@@ -290,7 +290,7 @@ export const ContractFormEditorOrderItemService = ({
                                         ContractFormEditorDiscountType.AMOUNT
                                     }
                                     value={
-                                        field.value
+                                        typeof field.value === 'number'
                                             ? formatNumberAsPrice(field.value)
                                             : ''
                                     }
