@@ -260,7 +260,9 @@ export const ContractFormEditor: React.FC<CreateContractFormProps> = ({
 
                     const contract = data.createContract?.contractId;
                     if (contract) {
-                        toast.success('Contrato creado exitosamente');
+                        toast.success(
+                            'Contrato creado exitosamente. Presupuesto enviado por email.',
+                        );
                         router.push('/contratos');
                     }
                 },
