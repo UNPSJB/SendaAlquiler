@@ -1,35 +1,12 @@
-'use client';
+import { getServerSession } from 'next-auth';
 
-import LoginFooter from './LoginFooter';
-import LoginForm from './LoginForm';
-import LoginHeader from './LoginHeader';
+import { authOptions } from '@/modules/auth/auth';
 
-const LoginPage = () => {
-    return (
-        <>
-            <LoginHeader />
+import { LoginPage } from './page-content';
 
-            <main className="flex min-h-screen items-center py-24">
-                <div className="container">
-                    <div className="mb-8 text-center">
-                        <h1
-                            data-cy="login-page-title"
-                            className="mb-1 text-3xl font-bold"
-                        >
-                            Hola de nuevo
-                        </h1>
-                        <p className="text-muted-foreground lg:text-base">
-                            Ingresa tus credenciales para acceder a tu cuenta
-                        </p>
-                    </div>
-
-                    <LoginForm />
-                </div>
-            </main>
-
-            <LoginFooter />
-        </>
-    );
+const Page = async () => {
+    const res = await getServerSession(authOptions);
+    return <LoginPage shouldSignOut={!!res?.error} />;
 };
 
-export default LoginPage;
+export default Page;
