@@ -1,46 +1,33 @@
-import type { NextAuthOptions } from 'next-auth';
-import type { JWT } from 'next-auth/jwt';
+import { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
 import fetchClient from '@/api/fetch-client';
 import fetchServer from '@/api/fetch-server';
-import { CurrentUserDocument, LoginDocument, RefreshTokenDocument } from '@/api/graphql';
-import { clearOfficeCookieAction } from '@/api/server-actions';
-
-import { jwt } from './jwt-utils';
-import { CurrentUser } from './user-utils';
+import { CurrentUserDocument, LoginDocument } from '@/api/graphql';
 
 import { getCleanErrorMessage } from '../utils';
 
-const MAX_AGE_14_DAYS_IN_SECONDS = 60 * 60 * 24 * 14;
-
-export const authOptions: NextAuthOptions = {
-    secret: process.env.NEXTAUTH_SECRET,
-    pages: {
-        signIn: '/login',
-        error: '/login',
-    },
+export const authOptions: AuthOptions = {
+    // Configure JWT
     session: {
         strategy: 'jwt',
-        maxAge: MAX_AGE_14_DAYS_IN_SECONDS,
     },
     providers: [
         CredentialsProvider({
-            name: 'credentials',
+            name: 'Credentials',
             credentials: {
                 email: {
                     label: 'Email',
                     type: 'email',
+                    placeholder: 'jsmith@example.com',
                 },
-                password: {
-                    label: 'Password',
-                    type: 'password',
-                },
+                password: { label: 'Password', type: 'password' },
             },
-            async authorize(credentials) {
+            authorize: async (credentials) => {
                 try {
                     const email = credentials?.email;
                     const password = credentials?.password;
+
                     if (!email || !password) {
                         throw new Error('Credenciales inválidas');
                     }
@@ -57,8 +44,9 @@ export const authOptions: NextAuthOptions = {
                     const { token, user } = response.login;
 
                     return {
+                        id: '',
                         user: user,
-                        accessToken: token,
+                        token: token,
                     };
                 } catch (error) {
                     console.error(error);
@@ -73,112 +61,51 @@ export const authOptions: NextAuthOptions = {
         }),
     ],
     callbacks: {
-        async session(params) {
-            const { session, token } = params;
-
-            if (token.error) {
-                return {
-                    user: null,
-                    error: token.error,
-                    accessToken: token.accessToken,
-                    expires: session.expires,
-                };
+        jwt: async ({ token, user }) => {
+            // Initial sign in
+            if (user) {
+                token.token = user.token;
+                token.user = user.user;
             }
-
-            let updatedUser = token.user as CurrentUser;
 
             try {
                 const { user } = await fetchServer(
                     CurrentUserDocument,
                     {},
                     {},
-                    token.accessToken,
+                    token.token,
                 );
 
                 if (!user) {
                     return {
+                        ...token,
                         user: null,
                         error: 'TOKEN_EXPIRED',
-                        accessToken: token.accessToken,
-                        expires: session.expires,
                     };
                 }
 
-                updatedUser = user;
-            } catch (error) {}
+                token.user = user;
+            } catch (error) {
+                console.error(error);
 
-            const newSession = {
-                user: updatedUser,
-                accessToken: token.accessToken,
-                expires: session.expires,
-            };
-
-            return newSession;
-        },
-        async jwt(params) {
-            const { token, user, trigger } = params;
-            if (trigger === 'update') {
-                const { user } = await fetchClient(
-                    CurrentUserDocument,
-                    {},
-                    { token: token.accessToken },
-                );
-
-                return { ...token, ...user };
-            }
-
-            if (user) {
-                return { ...token, ...user };
-            }
-
-            const { exp: accessTokenExpires } = jwt.decode(token.accessToken);
-            if (!accessTokenExpires) {
                 return {
                     ...token,
-                    error: 'AccessTokenError',
+                    user: null,
+                    error: 'TOKEN_EXPIRED',
                 };
-            }
-
-            const currentUnixTimestamp = Math.floor(Date.now() / 1000);
-            const accessTokenHasExpired = currentUnixTimestamp > accessTokenExpires;
-
-            if (accessTokenHasExpired) {
-                const res = await refreshAccessToken(token);
-                return res;
             }
 
             return token;
         },
-    },
-    events: {
-        async signOut() {
-            clearOfficeCookieAction();
+        session: async ({ session, token }) => {
+            session.token = token.token;
+            session.error = token.error;
+            session.user = token.user;
+
+            return session;
         },
     },
+    pages: {
+        signIn: '/login', // You should create this custom sign-in page if you need it
+    },
 };
-
-async function refreshAccessToken(token: JWT) {
-    try {
-        const response = await fetchClient(RefreshTokenDocument, {
-            token: token.accessToken,
-        });
-
-        if (!response.refreshToken) {
-            throw new Error(encodeURIComponent('Hubo un error al refrescar el token'));
-        }
-
-        const refreshedAccessToken = response.refreshToken.token;
-        const { exp } = jwt.decode(refreshedAccessToken);
-
-        return {
-            ...token,
-            accessToken: refreshedAccessToken,
-            exp,
-        };
-    } catch (error) {
-        return {
-            ...token,
-            error: 'RefreshAccessTokenError',
-        };
-    }
-}
