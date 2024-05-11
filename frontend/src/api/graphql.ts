@@ -464,6 +464,16 @@ export type EmployeeOffice = {
     office: Office;
 };
 
+export type FrequencyDataType = {
+    __typename?: 'FrequencyDataType';
+    date: Maybe<Scalars['Date']['output']>;
+    month: Maybe<Scalars['Int']['output']>;
+    totalSoldAmount: Scalars['Float']['output'];
+    totalSoldUnits: Scalars['Int']['output'];
+    week: Maybe<Scalars['Int']['output']>;
+    year: Maybe<Scalars['Int']['output']>;
+};
+
 export type InProgressInternalOrder = {
     __typename?: 'InProgressInternalOrder';
     error: Maybe<Scalars['String']['output']>;
@@ -808,6 +818,15 @@ export type Office = {
     street: Scalars['String']['output'];
 };
 
+export type OfficeDataType = {
+    __typename?: 'OfficeDataType';
+    frequencyData: Array<FrequencyDataType>;
+    officeId: Scalars['Int']['output'];
+    officeName: Scalars['String']['output'];
+    totalSoldAmount: Scalars['Float']['output'];
+    totalSoldUnits: Scalars['Int']['output'];
+};
+
 export type OrderSupplier = {
     __typename?: 'OrderSupplier';
     approximateDeliveryDate: Maybe<Scalars['Date']['output']>;
@@ -1033,7 +1052,7 @@ export type Query = {
     productsCsv: Scalars['String']['output'];
     productsStocksByOfficeId: Array<ProductStockInOffice>;
     productsSuppliedBySupplierId: Array<Product>;
-    reportMostSoldProducts: ReportMostSoldProductsQuery;
+    report: ReportType;
     saleById: Maybe<Sale>;
     saleItems: Array<SaleItem>;
     sales: PaginatedSaleQueryResult;
@@ -1144,9 +1163,12 @@ export type QueryProductsSuppliedBySupplierIdArgs = {
     supplierId: Scalars['ID']['input'];
 };
 
-export type QueryReportMostSoldProductsArgs = {
-    endDate: InputMaybe<Scalars['Date']['input']>;
-    startDate: InputMaybe<Scalars['Date']['input']>;
+export type QueryReportArgs = {
+    endDate: Scalars['Date']['input'];
+    frequency: Scalars['String']['input'];
+    officeIds: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+    productIds: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+    startDate: Scalars['Date']['input'];
 };
 
 export type QuerySaleByIdArgs = {
@@ -1217,32 +1239,11 @@ export type Refresh = {
     token: Scalars['String']['output'];
 };
 
-export type ReportMostSoldProductsByOfficeItem = {
-    __typename?: 'ReportMostSoldProductsByOfficeItem';
-    items: Array<ReportMostSoldProductsProductItem>;
-    office: Office;
-    totalAmount: Scalars['Int']['output'];
-    totalQuantity: Scalars['Int']['output'];
-};
-
-export type ReportMostSoldProductsGeneral = {
-    __typename?: 'ReportMostSoldProductsGeneral';
-    items: Array<ReportMostSoldProductsProductItem>;
-    totalAmount: Scalars['Int']['output'];
-    totalQuantity: Scalars['Int']['output'];
-};
-
-export type ReportMostSoldProductsProductItem = {
-    __typename?: 'ReportMostSoldProductsProductItem';
-    product: Product;
-    quantity: Scalars['Int']['output'];
-    totalAmount: Scalars['Int']['output'];
-};
-
-export type ReportMostSoldProductsQuery = {
-    __typename?: 'ReportMostSoldProductsQuery';
-    byOffice: Array<ReportMostSoldProductsByOfficeItem>;
-    general: ReportMostSoldProductsGeneral;
+export type ReportType = {
+    __typename?: 'ReportType';
+    officeData: Array<OfficeDataType>;
+    topProductsByAmount: Array<TopProductType>;
+    topProductsByQuantity: Array<TopProductType>;
 };
 
 export type Sale = {
@@ -1374,6 +1375,14 @@ export type SupplierOrderItem = {
     targetOfficeQuantityAfterReceive: Scalars['Int']['output'];
     targetOfficeQuantityBeforeReceive: Scalars['Int']['output'];
     total: Scalars['BigInt']['output'];
+};
+
+export type TopProductType = {
+    __typename?: 'TopProductType';
+    productId: Scalars['Int']['output'];
+    productName: Scalars['String']['output'];
+    totalSoldAmount: Scalars['Float']['output'];
+    totalSoldUnits: Scalars['Int']['output'];
 };
 
 export type UpdateClient = {
@@ -1992,6 +2001,31 @@ export type DashboardStatsQuery = {
             __typename?: 'Contract';
             id: string;
             contractStartDatetime: any;
+            contractEndDatetime: any;
+            client: {
+                __typename?: 'Client';
+                id: string;
+                firstName: string;
+                dni: string;
+                email: string;
+                houseNumber: string;
+                houseUnit: string | null;
+                lastName: string;
+                phoneNumber: string;
+                phoneCode: string;
+                streetName: string;
+                locality: {
+                    __typename?: 'Locality';
+                    id: string;
+                    name: string;
+                    state: StateChoices;
+                    postalCode: string;
+                };
+            };
+            latestHistoryEntry: {
+                __typename?: 'ContractHistory';
+                status: ContractHistoryStatusChoices;
+            } | null;
         }>;
     };
 };
@@ -2725,49 +2759,45 @@ export type ProductStockInOfficeQuery = {
     } | null;
 };
 
-export type AdminReportMostSoldProductsQueryVariables = Exact<{
+export type ReportSalesQueryVariables = Exact<{
+    frequency: Scalars['String']['input'];
     startDate: Scalars['Date']['input'];
     endDate: Scalars['Date']['input'];
+    officeIds: InputMaybe<Array<Scalars['Int']['input']> | Scalars['Int']['input']>;
+    productIds: InputMaybe<Array<Scalars['Int']['input']> | Scalars['Int']['input']>;
 }>;
 
-export type AdminReportMostSoldProductsQuery = {
+export type ReportSalesQuery = {
     __typename?: 'Query';
-    reportMostSoldProducts: {
-        __typename?: 'ReportMostSoldProductsQuery';
-        general: {
-            __typename?: 'ReportMostSoldProductsGeneral';
-            totalQuantity: number;
-            totalAmount: number;
-            items: Array<{
-                __typename?: 'ReportMostSoldProductsProductItem';
-                quantity: number;
-                totalAmount: number;
-                product: {
-                    __typename?: 'Product';
-                    id: string;
-                    name: string;
-                    sku: string | null;
-                    brand: { __typename?: 'Brand'; name: string } | null;
-                };
+    report: {
+        __typename?: 'ReportType';
+        officeData: Array<{
+            __typename?: 'OfficeDataType';
+            officeId: number;
+            officeName: string;
+            frequencyData: Array<{
+                __typename?: 'FrequencyDataType';
+                date: string | null;
+                month: number | null;
+                week: number | null;
+                year: number | null;
+                totalSoldUnits: number;
+                totalSoldAmount: number;
             }>;
-        };
-        byOffice: Array<{
-            __typename?: 'ReportMostSoldProductsByOfficeItem';
-            totalQuantity: number;
-            totalAmount: number;
-            items: Array<{
-                __typename?: 'ReportMostSoldProductsProductItem';
-                quantity: number;
-                totalAmount: number;
-                product: {
-                    __typename?: 'Product';
-                    id: string;
-                    name: string;
-                    sku: string | null;
-                    brand: { __typename?: 'Brand'; name: string } | null;
-                };
-            }>;
-            office: { __typename?: 'Office'; id: string; name: string };
+        }>;
+        topProductsByQuantity: Array<{
+            __typename?: 'TopProductType';
+            productId: number;
+            productName: string;
+            totalSoldUnits: number;
+            totalSoldAmount: number;
+        }>;
+        topProductsByAmount: Array<{
+            __typename?: 'TopProductType';
+            productId: number;
+            productName: string;
+            totalSoldUnits: number;
+            totalSoldAmount: number;
         }>;
     };
 };
@@ -6454,6 +6484,151 @@ export const DashboardStatsDocument = {
                                                     value: 'contractStartDatetime',
                                                 },
                                             },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'contractEndDatetime',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'client' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'firstName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'dni',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'email',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'houseNumber',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'houseUnit',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'lastName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'locality',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'state',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'postalCode',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'phoneNumber',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'phoneCode',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'streetName',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'latestHistoryEntry',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'status',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
                                         ],
                                     },
                                 },
@@ -9841,14 +10016,28 @@ export const ProductStockInOfficeDocument = {
     ProductStockInOfficeQuery,
     ProductStockInOfficeQueryVariables
 >;
-export const AdminReportMostSoldProductsDocument = {
+export const ReportSalesDocument = {
     kind: 'Document',
     definitions: [
         {
             kind: 'OperationDefinition',
             operation: 'query',
-            name: { kind: 'Name', value: 'adminReportMostSoldProducts' },
+            name: { kind: 'Name', value: 'reportSales' },
             variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'frequency' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
                 {
                     kind: 'VariableDefinition',
                     variable: {
@@ -9877,14 +10066,56 @@ export const AdminReportMostSoldProductsDocument = {
                         },
                     },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'officeIds' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: { kind: 'Name', value: 'Int' },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'productIds' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: { kind: 'Name', value: 'Int' },
+                            },
+                        },
+                    },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'reportMostSoldProducts' },
+                        name: { kind: 'Name', value: 'report' },
                         arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'frequency' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'frequency' },
+                                },
+                            },
                             {
                                 kind: 'Argument',
                                 name: { kind: 'Name', value: 'startDate' },
@@ -9901,19 +10132,49 @@ export const AdminReportMostSoldProductsDocument = {
                                     name: { kind: 'Name', value: 'endDate' },
                                 },
                             },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'officeIds' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'officeIds' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'productIds' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'productIds' },
+                                },
+                            },
                         ],
                         selectionSet: {
                             kind: 'SelectionSet',
                             selections: [
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'general' },
+                                    name: { kind: 'Name', value: 'officeData' },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'items' },
+                                                name: { kind: 'Name', value: 'officeId' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'officeName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'frequencyData',
+                                                },
                                                 selectionSet: {
                                                     kind: 'SelectionSet',
                                                     selections: [
@@ -9921,83 +10182,45 @@ export const AdminReportMostSoldProductsDocument = {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'product',
-                                                            },
-                                                            selectionSet: {
-                                                                kind: 'SelectionSet',
-                                                                selections: [
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'id',
-                                                                        },
-                                                                    },
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'name',
-                                                                        },
-                                                                    },
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'sku',
-                                                                        },
-                                                                    },
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'brand',
-                                                                        },
-                                                                        selectionSet: {
-                                                                            kind: 'SelectionSet',
-                                                                            selections: [
-                                                                                {
-                                                                                    kind: 'Field',
-                                                                                    name: {
-                                                                                        kind: 'Name',
-                                                                                        value: 'name',
-                                                                                    },
-                                                                                },
-                                                                            ],
-                                                                        },
-                                                                    },
-                                                                ],
+                                                                value: 'date',
                                                             },
                                                         },
                                                         {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'quantity',
+                                                                value: 'month',
                                                             },
                                                         },
                                                         {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'totalAmount',
+                                                                value: 'week',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'year',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'totalSoldUnits',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'totalSoldAmount',
                                                             },
                                                         },
                                                     ],
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'totalQuantity',
-                                                },
-                                            },
-                                            {
-                                                kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'totalAmount',
                                                 },
                                             },
                                         ],
@@ -10005,120 +10228,76 @@ export const AdminReportMostSoldProductsDocument = {
                                 },
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'byOffice' },
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'topProductsByQuantity',
+                                    },
                                     selectionSet: {
                                         kind: 'SelectionSet',
                                         selections: [
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'items' },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'product',
-                                                            },
-                                                            selectionSet: {
-                                                                kind: 'SelectionSet',
-                                                                selections: [
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'id',
-                                                                        },
-                                                                    },
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'name',
-                                                                        },
-                                                                    },
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'sku',
-                                                                        },
-                                                                    },
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'brand',
-                                                                        },
-                                                                        selectionSet: {
-                                                                            kind: 'SelectionSet',
-                                                                            selections: [
-                                                                                {
-                                                                                    kind: 'Field',
-                                                                                    name: {
-                                                                                        kind: 'Name',
-                                                                                        value: 'name',
-                                                                                    },
-                                                                                },
-                                                                            ],
-                                                                        },
-                                                                    },
-                                                                ],
-                                                            },
-                                                        },
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'quantity',
-                                                            },
-                                                        },
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'totalAmount',
-                                                            },
-                                                        },
-                                                    ],
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productId',
                                                 },
                                             },
                                             {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'totalQuantity',
+                                                    value: 'productName',
                                                 },
                                             },
                                             {
                                                 kind: 'Field',
                                                 name: {
                                                     kind: 'Name',
-                                                    value: 'totalAmount',
+                                                    value: 'totalSoldUnits',
                                                 },
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: { kind: 'Name', value: 'office' },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'id',
-                                                            },
-                                                        },
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'name',
-                                                            },
-                                                        },
-                                                    ],
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalSoldAmount',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'topProductsByAmount' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productId',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalSoldUnits',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalSoldAmount',
                                                 },
                                             },
                                         ],
@@ -10131,10 +10310,7 @@ export const AdminReportMostSoldProductsDocument = {
             },
         },
     ],
-} as unknown as DocumentNode<
-    AdminReportMostSoldProductsQuery,
-    AdminReportMostSoldProductsQueryVariables
->;
+} as unknown as DocumentNode<ReportSalesQuery, ReportSalesQueryVariables>;
 export const SalesDocument = {
     kind: 'Document',
     definitions: [

@@ -8,7 +8,7 @@ import { useState } from 'react';
 import { DateRange, DayPickerRangeProps } from 'react-day-picker';
 import { useForm } from 'react-hook-form';
 
-import { AdminReportMostSoldProductsQuery } from '@/api/graphql';
+import { ReportSalesDocument } from '@/api/graphql';
 import { useReportMostSoldProducts } from '@/api/hooks/reports';
 
 import DashboardLayout, {

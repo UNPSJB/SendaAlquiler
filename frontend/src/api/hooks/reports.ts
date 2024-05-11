@@ -4,18 +4,19 @@ import { queryKeys } from './constants';
 
 import fetchClient from '../fetch-client';
 import {
-    AdminReportMostSoldProductsDocument,
-    AdminReportMostSoldProductsQuery,
-    AdminReportMostSoldProductsQueryVariables,
+    ReportSalesQuery,
+    ReportSalesDocument,
+    ReportSalesQueryVariables,
 } from '../graphql';
 
-export const useReportMostSoldProducts = (
-    variables: AdminReportMostSoldProductsQueryVariables,
-): UseQueryResult<AdminReportMostSoldProductsQuery> => {
+export const useReportSales = (
+    variables: ReportSalesQueryVariables,
+): UseQueryResult<ReportSalesQuery> => {
     return useQuery({
-        queryKey: queryKeys.reportMostSoldProducts(variables),
+        queryKey: queryKeys.reportSales(variables),
         queryFn: () => {
-            return fetchClient(AdminReportMostSoldProductsDocument, variables);
+            return fetchClient(ReportSalesDocument, variables);
         },
+        enabled: variables.startDate !== null && variables.endDate !== null,
     });
 };
