@@ -823,6 +823,8 @@ export type OfficeDataType = {
     frequencyData: Array<FrequencyDataType>;
     officeId: Scalars['Int']['output'];
     officeName: Scalars['String']['output'];
+    topProductsByAmount: Array<TopProductType>;
+    topProductsByQuantity: Array<TopProductType>;
     totalSoldAmount: Scalars['Float']['output'];
     totalSoldUnits: Scalars['Int']['output'];
 };
@@ -1166,8 +1168,8 @@ export type QueryProductsSuppliedBySupplierIdArgs = {
 export type QueryReportArgs = {
     endDate: Scalars['Date']['input'];
     frequency: Scalars['String']['input'];
-    officeIds: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
-    productIds: InputMaybe<Array<InputMaybe<Scalars['Int']['input']>>>;
+    officeIds: InputMaybe<Array<Scalars['Int']['input']>>;
+    productIds: InputMaybe<Array<Scalars['ID']['input']>>;
     startDate: Scalars['Date']['input'];
 };
 
@@ -2764,7 +2766,7 @@ export type ReportSalesQueryVariables = Exact<{
     startDate: Scalars['Date']['input'];
     endDate: Scalars['Date']['input'];
     officeIds: InputMaybe<Array<Scalars['Int']['input']> | Scalars['Int']['input']>;
-    productIds: InputMaybe<Array<Scalars['Int']['input']> | Scalars['Int']['input']>;
+    productIds: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
 }>;
 
 export type ReportSalesQuery = {
@@ -2775,6 +2777,22 @@ export type ReportSalesQuery = {
             __typename?: 'OfficeDataType';
             officeId: number;
             officeName: string;
+            totalSoldUnits: number;
+            totalSoldAmount: number;
+            topProductsByQuantity: Array<{
+                __typename?: 'TopProductType';
+                productId: number;
+                productName: string;
+                totalSoldUnits: number;
+                totalSoldAmount: number;
+            }>;
+            topProductsByAmount: Array<{
+                __typename?: 'TopProductType';
+                productId: number;
+                productName: string;
+                totalSoldUnits: number;
+                totalSoldAmount: number;
+            }>;
             frequencyData: Array<{
                 __typename?: 'FrequencyDataType';
                 date: string | null;
@@ -10095,7 +10113,7 @@ export const ReportSalesDocument = {
                             kind: 'NonNullType',
                             type: {
                                 kind: 'NamedType',
-                                name: { kind: 'Name', value: 'Int' },
+                                name: { kind: 'Name', value: 'ID' },
                             },
                         },
                     },
@@ -10167,6 +10185,100 @@ export const ReportSalesDocument = {
                                                 name: {
                                                     kind: 'Name',
                                                     value: 'officeName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalSoldUnits',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalSoldAmount',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'topProductsByQuantity',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'productId',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'productName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'totalSoldUnits',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'totalSoldAmount',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'topProductsByAmount',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'productId',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'productName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'totalSoldUnits',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'totalSoldAmount',
+                                                            },
+                                                        },
+                                                    ],
                                                 },
                                             },
                                             {

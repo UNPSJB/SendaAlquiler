@@ -20,7 +20,7 @@ export async function fetchClient<T, V>(
 ) {
     try {
         const session = await getSession();
-        const accessToken = token || session?.accessToken;
+        const accessToken = token || session?.token;
 
         const fetchConfig: RequestInit = {
             method: 'POST',

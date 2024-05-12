@@ -18,7 +18,7 @@ export async function fetchServer<T, V>(
     try {
         let accessToken = token;
         if (!accessToken) {
-            accessToken = (await getServerSession(authOptions))?.accessToken;
+            accessToken = (await getServerSession(authOptions))?.token;
         }
 
         const response = await fetch(url, {
@@ -46,7 +46,6 @@ export async function fetchServer<T, V>(
         const json = await response.json();
         return json.data as T;
     } catch (error) {
-        console.error(error);
         if (error instanceof Response) {
             if (error.status === 401) {
                 return redirect('/login');

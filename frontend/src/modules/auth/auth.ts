@@ -49,7 +49,6 @@ export const authOptions: AuthOptions = {
                         token: token,
                     };
                 } catch (error) {
-                    console.error(error);
                     if (error instanceof Response) {
                         return null;
                     }
@@ -86,8 +85,6 @@ export const authOptions: AuthOptions = {
 
                 token.user = user;
             } catch (error) {
-                console.error(error);
-
                 return {
                     ...token,
                     user: null,

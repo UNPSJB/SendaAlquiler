@@ -3,7 +3,7 @@ query reportSales(
     $startDate: Date!
     $endDate: Date!
     $officeIds: [Int!]
-    $productIds: [Int!]
+    $productIds: [ID!]
 ) {
     report(
         frequency: $frequency
@@ -15,6 +15,20 @@ query reportSales(
         officeData {
             officeId
             officeName
+            totalSoldUnits
+            totalSoldAmount
+            topProductsByQuantity {
+                productId
+                productName
+                totalSoldUnits
+                totalSoldAmount
+            }
+            topProductsByAmount {
+                productId
+                productName
+                totalSoldUnits
+                totalSoldAmount
+            }
             frequencyData {
                 date
                 month
