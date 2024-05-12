@@ -1,7 +1,5 @@
 import graphene
-from senda.core.models.offices import Office
 from senda.core.models.sale import Sale, SaleItemModel
-from senda.core.models.products import Product
 from django.db.models import Sum
 from django.db.models.functions import Coalesce
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
