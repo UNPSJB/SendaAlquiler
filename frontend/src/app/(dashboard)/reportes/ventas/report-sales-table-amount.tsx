@@ -6,7 +6,9 @@ import { BaseTable } from '@/components/base-table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatNumberAsPrice } from '@/lib/utils';
 
-type TopProductItem = NonNullable<ReportSalesQuery['report']>['topProductsByAmount'][0];
+type TopProductItem = NonNullable<
+    ReportSalesQuery['salesReport']
+>['topProductsByAmount'][0];
 
 const columnHelper = createColumnHelper<TopProductItem>();
 
@@ -25,7 +27,7 @@ const COLUMNS_AMOUNT: ColumnDef<TopProductItem, any>[] = [
 ];
 
 type Props = {
-    report: NonNullable<ReportSalesQuery['report']>;
+    report: NonNullable<ReportSalesQuery['salesReport']>;
 };
 
 export const ReportSalesTableAmount = ({ report }: Props) => {

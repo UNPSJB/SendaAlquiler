@@ -5,7 +5,7 @@ query reportSales(
     $officeIds: [Int!]
     $productIds: [ID!]
 ) {
-    report(
+    salesReport(
         frequency: $frequency
         startDate: $startDate
         endDate: $endDate

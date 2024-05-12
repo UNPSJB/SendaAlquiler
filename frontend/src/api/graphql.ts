@@ -1054,12 +1054,12 @@ export type Query = {
     productsCsv: Scalars['String']['output'];
     productsStocksByOfficeId: Array<ProductStockInOffice>;
     productsSuppliedBySupplierId: Array<Product>;
-    report: ReportType;
     saleById: Maybe<Sale>;
     saleItems: Array<SaleItem>;
     sales: PaginatedSaleQueryResult;
     salesByClientId: Array<Sale>;
     salesCsv: Scalars['String']['output'];
+    salesReport: ReportType;
     supplierById: Maybe<Supplier>;
     supplierOrderById: Maybe<OrderSupplier>;
     supplierOrders: PaginatedOrderSupplierQueryResult;
@@ -1165,14 +1165,6 @@ export type QueryProductsSuppliedBySupplierIdArgs = {
     supplierId: Scalars['ID']['input'];
 };
 
-export type QueryReportArgs = {
-    endDate: Scalars['Date']['input'];
-    frequency: Scalars['String']['input'];
-    officeIds: InputMaybe<Array<Scalars['Int']['input']>>;
-    productIds: InputMaybe<Array<Scalars['ID']['input']>>;
-    startDate: Scalars['Date']['input'];
-};
-
 export type QuerySaleByIdArgs = {
     id: Scalars['ID']['input'];
 };
@@ -1184,6 +1176,14 @@ export type QuerySalesArgs = {
 
 export type QuerySalesByClientIdArgs = {
     id: Scalars['ID']['input'];
+};
+
+export type QuerySalesReportArgs = {
+    endDate: Scalars['Date']['input'];
+    frequency: Scalars['String']['input'];
+    officeIds: InputMaybe<Array<Scalars['Int']['input']>>;
+    productIds: InputMaybe<Array<Scalars['ID']['input']>>;
+    startDate: Scalars['Date']['input'];
 };
 
 export type QuerySupplierByIdArgs = {
@@ -2771,7 +2771,7 @@ export type ReportSalesQueryVariables = Exact<{
 
 export type ReportSalesQuery = {
     __typename?: 'Query';
-    report: {
+    salesReport: {
         __typename?: 'ReportType';
         officeData: Array<{
             __typename?: 'OfficeDataType';
@@ -10124,7 +10124,7 @@ export const ReportSalesDocument = {
                 selections: [
                     {
                         kind: 'Field',
-                        name: { kind: 'Name', value: 'report' },
+                        name: { kind: 'Name', value: 'salesReport' },
                         arguments: [
                             {
                                 kind: 'Argument',

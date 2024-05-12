@@ -40,7 +40,7 @@ class ReportType(graphene.ObjectType):
 
 
 class Query(graphene.ObjectType):
-    report = graphene.Field(
+    sales_report = graphene.Field(
         graphene.NonNull(ReportType),
         frequency=graphene.String(required=True),
         start_date=graphene.Date(required=True),
@@ -49,7 +49,7 @@ class Query(graphene.ObjectType):
         product_ids=graphene.List(graphene.NonNull(graphene.ID)),
     )
 
-    def resolve_report(
+    def resolve_sales_report(
         self, info, frequency, start_date, end_date, office_ids=None, product_ids=None
     ):
         # Filter sales based on date range

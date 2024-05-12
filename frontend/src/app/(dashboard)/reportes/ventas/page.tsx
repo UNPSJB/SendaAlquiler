@@ -45,7 +45,7 @@ type FormValues = {
 };
 
 type ChartsProps = {
-    report: NonNullable<ReportSalesQuery['report']>;
+    report: NonNullable<ReportSalesQuery['salesReport']>;
     range: CalendarRangePredefinedRange;
     frequency: FormValues['frequency'];
     metric: FormValues['metric'];
@@ -152,7 +152,7 @@ const ReportSales = () => {
 
     if (
         reportQuery.error ||
-        (!reportQuery.data?.report?.officeData && !reportQuery.isFetching)
+        (!reportQuery.data?.salesReport?.officeData && !reportQuery.isFetching)
     ) {
         return <p>Error</p>;
     }
@@ -310,7 +310,7 @@ const ReportSales = () => {
                     <Skeleton className="h-96 w-full" />
                 ) : (
                     <Charts
-                        report={reportQuery.data.report}
+                        report={reportQuery.data.salesReport}
                         frequency={watchedFrequency}
                         range={previousValidRange}
                         metric={formMethods.watch('metric')}

@@ -20,7 +20,7 @@ import { REPORT_SALES_COLORS } from './report-sales-constants';
 import { formatNumberWithThousandsSeparator, formatNumberAsPrice } from '@/lib/utils';
 
 type Props = {
-    report: NonNullable<ReportSalesQuery['report']>;
+    report: NonNullable<ReportSalesQuery['salesReport']>;
     range: CalendarRangePredefinedRange;
     frequency: 'daily' | 'monthly' | 'yearly';
     metricKey: 'totalSoldUnits' | 'totalSoldAmount';
