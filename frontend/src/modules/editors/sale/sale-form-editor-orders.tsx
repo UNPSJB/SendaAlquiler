@@ -5,8 +5,8 @@ import { useFieldArray, useFormContext } from 'react-hook-form';
 import { ProductTypeChoices } from '@/api/graphql';
 import { useInfiniteProducts } from '@/api/hooks';
 
+import { SaleFormEditorDiscountType } from '@/app/(dashboard)/ventas/add/page';
 import { useOfficeContext } from '@/app/OfficeProvider';
-import { SaleFormEditorDiscountType } from '@/app/ventas/add/page';
 
 import { SaleFormEditorValues } from './sale-form-editor';
 

@@ -66,7 +66,6 @@ const ReestablishPasswordPage: React.FC<Props> = ({ token }) => {
     const passwordValue = formMethods.watch('password');
     const passwordConfirmValue = formMethods.watch('password_confirmation');
     const passwordsMatch = passwordValue === passwordConfirmValue;
-    const passwordIsValid = passwordValue && passwordValue.length >= 8 && passwordsMatch;
 
     return (
         <div className="container flex min-h-screen items-center">

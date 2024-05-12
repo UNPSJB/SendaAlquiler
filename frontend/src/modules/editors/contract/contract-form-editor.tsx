@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 import { ContractItemInput, ProductsQuery, StateChoices } from '@/api/graphql';
 import { useCreateContract, useClients } from '@/api/hooks';
 
-import { ContractFormEditorDiscountType } from '@/app/contratos/add/page';
+import { ContractFormEditorDiscountType } from '@/app/(dashboard)/contratos/add/page';
 
 import { ContractFormEditorBilling } from './contract-form-editor-billing';
 import { ContractFormEditorDetails } from './contract-form-editor-details';

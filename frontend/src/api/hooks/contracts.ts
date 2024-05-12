@@ -29,7 +29,7 @@ export const useContracts = () => {
         ContractsDocument,
         'contracts',
         {
-            page: null,
+            status: null,
         },
         {
             page: {

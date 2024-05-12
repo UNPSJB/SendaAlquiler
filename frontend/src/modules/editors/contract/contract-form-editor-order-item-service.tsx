@@ -6,7 +6,7 @@ import { ProductServiceBillingTypeChoices } from '@/api/graphql';
 
 import { calculateContractServiceItemSubtotal } from '@/modules/contract-utils';
 
-import { ContractFormEditorDiscountType } from '@/app/contratos/add/page';
+import { ContractFormEditorDiscountType } from '@/app/(dashboard)/contratos/add/page';
 
 import { ContractFormEditorValues } from './contract-form-editor';
 
