@@ -23,6 +23,7 @@ import {
     useCalendarRangeField,
 } from '@/components/calendar-range-field';
 import { ComboboxMultiInfinite } from '@/components/combobox';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { Label } from '@/components/ui/label';
 import {
@@ -36,7 +37,7 @@ import {
 type FormValues = {
     calendarRange: CalendarRangePredefinedRange | undefined;
     frequency: 'daily' | 'monthly' | 'yearly';
-    metric: 'numOrders' | 'totalQuantity';
+    metric: 'numOrders' | 'numUnits';
     products: {
         value: string;
         label: string;
@@ -48,6 +49,26 @@ type ChartsProps = {
     range: CalendarRangePredefinedRange;
     frequency: FormValues['frequency'];
     metric: FormValues['metric'];
+};
+
+type DashboardCardProps = {
+    title: string;
+    value: string;
+    percentage: string;
+};
+
+const DashboardCard = ({ title, value, percentage }: DashboardCardProps) => {
+    return (
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">{value}</div>
+                <p className="text-xs text-muted-foreground">{percentage}</p>
+            </CardContent>
+        </Card>
+    );
 };
 
 const Charts = ({ report, range, frequency, metric }: ChartsProps) => {
@@ -81,6 +102,26 @@ const Charts = ({ report, range, frequency, metric }: ChartsProps) => {
                     <h2 className="text-xl font-bold">Detalles</h2>
                 </div>
 
+                <div className="grid grid-cols-4 gap-4">
+                    <DashboardCard
+                        title="Número de pedidos"
+                        value={report.numOrders.toString()}
+                        percentage="100% del total"
+                    />
+
+                    <DashboardCard
+                        title="Unidades ordenadas"
+                        value={report.numUnits.toString()}
+                        percentage="100% del total"
+                    />
+
+                    <DashboardCard
+                        title="Número de productos"
+                        value={report.numOfOrderedProducts.toString()}
+                        percentage="100% del total"
+                    />
+                </div>
+
                 <ReportSuppliersOrdersTable report={report} />
             </div>
         </div>
@@ -99,7 +140,7 @@ const ReportSuppliersOrders = () => {
         defaultValues: {
             calendarRange: previousValidRange,
             frequency: 'daily',
-            metric: 'totalQuantity',
+            metric: 'numUnits',
             products: [],
         },
     });
@@ -249,7 +290,7 @@ const ReportSuppliersOrders = () => {
                                                 <SelectItem value="numOrders">
                                                     Número de pedidos
                                                 </SelectItem>
-                                                <SelectItem value="totalQuantity">
+                                                <SelectItem value="numUnits">
                                                     Unidades ordenadas
                                                 </SelectItem>
                                             </SelectContent>

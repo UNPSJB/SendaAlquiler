@@ -93,15 +93,32 @@ export const ReportSalesChartLine = ({ range, frequency, report, metricKey }: Pr
         const frequencyFormat = getFrequencyFormat(frequency);
 
         for (let i = 0; i < diff; i++) {
-            const date = fromDate.add(i, frequency as dayjs.ManipulateType).toDate();
+            const date = fromDate
+                .add(
+                    i,
+                    frequency === 'daily'
+                        ? 'day'
+                        : frequency === 'monthly'
+                          ? 'month'
+                          : 'year',
+                )
+                .toDate();
+
             const dataByOffice = getDataByOffice(report, date, frequency, metricKey);
 
-            chartDataByFrequency.push({
-                frequency: formatDate(date, frequencyFormat, { locale: es }),
-                ...Object.fromEntries(
-                    dataByOffice.map((item) => [item.officeName, item[metricKey]]),
-                ),
-            });
+            if (
+                dataByOffice.filter((item) => (item[metricKey] as number) > 0).length >
+                    0 ||
+                i === 0 ||
+                i === diff - 1
+            ) {
+                chartDataByFrequency.push({
+                    frequency: formatDate(date, frequencyFormat, { locale: es }),
+                    ...Object.fromEntries(
+                        dataByOffice.map((item) => [item.officeName, item[metricKey]]),
+                    ),
+                });
+            }
         }
     }
 

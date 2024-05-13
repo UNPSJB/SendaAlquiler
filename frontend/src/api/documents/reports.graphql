@@ -69,13 +69,15 @@ query reportSupplierOrders(
         suppliersIds: $suppliersIds
         frequency: $frequency
     ) {
-        totalOrders
+        numUnits
+        numOrders
+        numOfOrderedProducts
         mostOrderedProducts {
             product {
                 id
                 name
             }
-            totalQuantity
+            numUnits
             numOrders
         }
         officeOrderDetails {
@@ -83,19 +85,19 @@ query reportSupplierOrders(
                 id
                 name
             }
-            totalQuantity
+            numUnits
             numOrders
             mostOrderedProducts {
                 product {
                     id
                     name
                 }
-                totalQuantity
+                numUnits
                 numOrders
             }
             ordersTrend {
                 numOrders
-                totalQuantity
+                numUnits
                 date
                 month
                 year

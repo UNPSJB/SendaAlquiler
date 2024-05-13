@@ -564,8 +564,8 @@ export type Login = {
 export type MostOrderedProductType = {
     __typename?: 'MostOrderedProductType';
     numOrders: Scalars['Int']['output'];
+    numUnits: Scalars['Int']['output'];
     product: ProductType;
-    totalQuantity: Scalars['Int']['output'];
 };
 
 export type Mutation = {
@@ -840,9 +840,9 @@ export type OfficeOrderDetailsType = {
     __typename?: 'OfficeOrderDetailsType';
     mostOrderedProducts: Array<MostOrderedProductType>;
     numOrders: Scalars['Int']['output'];
+    numUnits: Scalars['Int']['output'];
     office: OfficeType;
     ordersTrend: Array<OrderTrendType>;
-    totalQuantity: Scalars['Int']['output'];
 };
 
 export type OfficeType = {
@@ -871,7 +871,7 @@ export type OrderTrendType = {
     date: Maybe<Scalars['Date']['output']>;
     month: Maybe<Scalars['Int']['output']>;
     numOrders: Scalars['Int']['output'];
-    totalQuantity: Scalars['Int']['output'];
+    numUnits: Scalars['Int']['output'];
     week: Maybe<Scalars['Int']['output']>;
     year: Maybe<Scalars['Int']['output']>;
 };
@@ -1430,8 +1430,10 @@ export type SupplierOrderItem = {
 export type SupplierOrderReportType = {
     __typename?: 'SupplierOrderReportType';
     mostOrderedProducts: Array<MostOrderedProductType>;
+    numOfOrderedProducts: Scalars['Int']['output'];
+    numOrders: Scalars['Int']['output'];
+    numUnits: Scalars['Int']['output'];
     officeOrderDetails: Array<OfficeOrderDetailsType>;
-    totalOrders: Scalars['Int']['output'];
 };
 
 export type TopProductType = {
@@ -2888,28 +2890,30 @@ export type ReportSupplierOrdersQuery = {
     __typename?: 'Query';
     supplierOrdersReport: {
         __typename?: 'SupplierOrderReportType';
-        totalOrders: number;
+        numUnits: number;
+        numOrders: number;
+        numOfOrderedProducts: number;
         mostOrderedProducts: Array<{
             __typename?: 'MostOrderedProductType';
-            totalQuantity: number;
+            numUnits: number;
             numOrders: number;
             product: { __typename?: 'ProductType'; id: string; name: string };
         }>;
         officeOrderDetails: Array<{
             __typename?: 'OfficeOrderDetailsType';
-            totalQuantity: number;
+            numUnits: number;
             numOrders: number;
             office: { __typename?: 'OfficeType'; id: string; name: string };
             mostOrderedProducts: Array<{
                 __typename?: 'MostOrderedProductType';
-                totalQuantity: number;
+                numUnits: number;
                 numOrders: number;
                 product: { __typename?: 'ProductType'; id: string; name: string };
             }>;
             ordersTrend: Array<{
                 __typename?: 'OrderTrendType';
                 numOrders: number;
-                totalQuantity: number;
+                numUnits: number;
                 date: string | null;
                 month: number | null;
                 year: number | null;
@@ -10684,7 +10688,15 @@ export const ReportSupplierOrdersDocument = {
                             selections: [
                                 {
                                     kind: 'Field',
-                                    name: { kind: 'Name', value: 'totalOrders' },
+                                    name: { kind: 'Name', value: 'numUnits' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'numOrders' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'numOfOrderedProducts' },
                                 },
                                 {
                                     kind: 'Field',
@@ -10717,10 +10729,7 @@ export const ReportSupplierOrdersDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'totalQuantity',
-                                                },
+                                                name: { kind: 'Name', value: 'numUnits' },
                                             },
                                             {
                                                 kind: 'Field',
@@ -10763,10 +10772,7 @@ export const ReportSupplierOrdersDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'totalQuantity',
-                                                },
+                                                name: { kind: 'Name', value: 'numUnits' },
                                             },
                                             {
                                                 kind: 'Field',
@@ -10814,7 +10820,7 @@ export const ReportSupplierOrdersDocument = {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'totalQuantity',
+                                                                value: 'numUnits',
                                                             },
                                                         },
                                                         {
@@ -10847,7 +10853,7 @@ export const ReportSupplierOrdersDocument = {
                                                             kind: 'Field',
                                                             name: {
                                                                 kind: 'Name',
-                                                                value: 'totalQuantity',
+                                                                value: 'numUnits',
                                                             },
                                                         },
                                                         {

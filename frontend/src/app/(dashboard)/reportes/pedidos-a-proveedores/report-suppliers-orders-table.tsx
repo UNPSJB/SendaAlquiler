@@ -22,7 +22,7 @@ const COLUMNS_AMOUNT: ColumnDef<TopProductItem, any>[] = [
             return <span>{formatNumberWithThousandsSeparator(cell.getValue())}</span>;
         },
     }),
-    columnHelper.accessor('totalQuantity', {
+    columnHelper.accessor('numUnits', {
         header: 'Unidades ordenadas',
         cell: (cell) => {
             return <span>{formatNumberWithThousandsSeparator(cell.getValue())}</span>;

@@ -8,7 +8,7 @@ import { formatNumberWithThousandsSeparator } from '@/lib/utils';
 
 type Props = {
     report: NonNullable<ReportSupplierOrdersQuery['supplierOrdersReport']>;
-    metric: 'numOrders' | 'totalQuantity';
+    metric: 'numOrders' | 'numUnits';
 };
 
 export const ReportSuppliersOrdersChartPie = ({ report, metric }: Props) => {

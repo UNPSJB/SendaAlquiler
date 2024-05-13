@@ -18,7 +18,7 @@ class OfficeType(graphene.ObjectType):
 
 
 class OrderTrendType(graphene.ObjectType):
-    total_quantity = graphene.NonNull(graphene.Int)
+    num_units = graphene.NonNull(graphene.Int)
     num_orders = graphene.NonNull(graphene.Int)
     date = graphene.Date()
     week = graphene.Int()
@@ -33,22 +33,24 @@ class ProductType(graphene.ObjectType):
 
 class MostOrderedProductType(graphene.ObjectType):
     product = graphene.NonNull(ProductType)
-    total_quantity = graphene.NonNull(graphene.Int)
+    num_units = graphene.NonNull(graphene.Int)
     num_orders = graphene.NonNull(graphene.Int)
 
 
 class OfficeOrderDetailsType(graphene.ObjectType):
     office = graphene.NonNull(OfficeType)
-    total_quantity = graphene.NonNull(graphene.Int)
+    num_units = graphene.NonNull(graphene.Int)
     num_orders = graphene.NonNull(graphene.Int)
     most_ordered_products = non_null_list_of(MostOrderedProductType)
     orders_trend = non_null_list_of(OrderTrendType)
 
 
 class SupplierOrderReportType(graphene.ObjectType):
-    total_orders = graphene.NonNull(graphene.Int)
     office_order_details = non_null_list_of(OfficeOrderDetailsType)
     most_ordered_products = non_null_list_of(MostOrderedProductType)
+    num_orders = graphene.NonNull(graphene.Int)
+    num_units = graphene.NonNull(graphene.Int)
+    num_of_ordered_products = graphene.NonNull(graphene.Int)
 
 
 class Query(graphene.ObjectType):
@@ -83,17 +85,14 @@ class Query(graphene.ObjectType):
         if suppliers_ids:
             orders = orders.filter(supplier_id__in=suppliers_ids)
 
-        # Obtener el total de órdenes
-        total_orders = orders.count()
-
         # Obtener los detalles de pedidos por sucursal
         office_order_details = (
             orders.values("target_office__id", "target_office__name")
             .annotate(
-                total_quantity=Sum("order_items__quantity_ordered"),
+                num_units=Sum("order_items__quantity_ordered"),
                 num_orders=Count("id"),
             )
-            .order_by("-total_quantity")
+            .order_by("-num_units")
         )
 
         global_most_ordered_products_items = SupplierOrderItem.objects.filter(
@@ -108,10 +107,10 @@ class Query(graphene.ObjectType):
         most_ordered_products = (
             global_most_ordered_products_items.values("product__id", "product__name")
             .annotate(
-                total_quantity=Sum("quantity_ordered"),
+                num_units=Sum("quantity_ordered"),
                 num_orders=Count("supplier_order"),
             )
-            .order_by("-total_quantity")
+            .order_by("-num_units")
         )[0:5]
 
         # Obtener los productos más pedidos por sucursal
@@ -129,10 +128,10 @@ class Query(graphene.ObjectType):
             office_detail["most_ordered_products"] = (
                 office_most_ordered_products.values("product__id", "product__name")
                 .annotate(
-                    total_quantity=Sum("quantity_ordered"),
+                    num_units=Sum("quantity_ordered"),
                     num_orders=Count("supplier_order"),
                 )
-                .order_by("-total_quantity")[:5]
+                .order_by("-num_units")[:5]
             )
 
         # Obtener las tendencias de pedidos por fecha
@@ -154,7 +153,7 @@ class Query(graphene.ObjectType):
                         date=TruncDay("supplier_order__created_on")
                     )
                     .annotate(
-                        total_quantity=Sum("quantity_ordered"),
+                        num_units=Sum("quantity_ordered"),
                         num_orders=Count("supplier_order"),
                     )
                     .order_by("date")
@@ -165,7 +164,7 @@ class Query(graphene.ObjectType):
                         week=TruncWeek("supplier_order__created_on")
                     )
                     .annotate(
-                        total_quantity=Sum("quantity_ordered"),
+                        num_units=Sum("quantity_ordered"),
                         num_orders=Count("supplier_order"),
                     )
                     .order_by("week")
@@ -177,7 +176,7 @@ class Query(graphene.ObjectType):
                         year=TruncYear("supplier_order__created_on"),
                     )
                     .annotate(
-                        total_quantity=Sum("quantity_ordered"),
+                        num_units=Sum("quantity_ordered"),
                         num_orders=Count("supplier_order"),
                     )
                     .order_by("month")
@@ -188,7 +187,7 @@ class Query(graphene.ObjectType):
                         year=TruncYear("supplier_order__created_on")
                     )
                     .annotate(
-                        total_quantity=Sum("quantity_ordered"),
+                        num_units=Sum("quantity_ordered"),
                         num_orders=Count("supplier_order"),
                     )
                     .order_by("year")
@@ -196,15 +195,25 @@ class Query(graphene.ObjectType):
 
             office_detail["orders_trend"] = office_trends_items
 
+        num_orders = orders.count()
+        num_units = orders.aggregate(
+            num_units=Coalesce(Sum("order_items__quantity_ordered"), 0)
+        )["num_units"]
+        num_of_ordered_products = (
+            orders.values("order_items__product_id").distinct().count()
+        )
+
         return SupplierOrderReportType(
-            total_orders=total_orders,
+            num_orders=num_orders,
+            num_units=num_units,
+            num_of_ordered_products=num_of_ordered_products,
             most_ordered_products=(
                 [
                     MostOrderedProductType(
                         product=ProductType(
                             id=product["product__id"], name=product["product__name"]
                         ),
-                        total_quantity=product["total_quantity"],
+                        num_units=product["num_units"],
                         num_orders=product["num_orders"],
                     )
                     for product in most_ordered_products
@@ -216,21 +225,21 @@ class Query(graphene.ObjectType):
                         id=detail["target_office__id"],
                         name=detail["target_office__name"],
                     ),
-                    total_quantity=detail["total_quantity"],
+                    num_units=detail["num_units"],
                     num_orders=detail["num_orders"],
                     most_ordered_products=[
                         MostOrderedProductType(
                             product=ProductType(
                                 id=product["product__id"], name=product["product__name"]
                             ),
-                            total_quantity=product["total_quantity"],
+                            num_units=product["num_units"],
                             num_orders=product["num_orders"],
                         )
                         for product in detail["most_ordered_products"]
                     ],
                     orders_trend=[
                         OrderTrendType(
-                            total_quantity=trend["total_quantity"],
+                            num_units=trend["num_units"],
                             num_orders=trend["num_orders"],
                             date=trend.get("date"),
                             week=trend.get("week"),

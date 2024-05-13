@@ -23,7 +23,7 @@ type Props = {
     report: NonNullable<ReportSupplierOrdersQuery['supplierOrdersReport']>;
     range: CalendarRangePredefinedRange;
     frequency: 'daily' | 'monthly' | 'yearly';
-    metricKey: 'numOrders' | 'totalQuantity';
+    metricKey: 'numOrders' | 'numUnits';
 };
 
 const getFrequencyDiff = (frequency: string, fromDate: Dayjs, toDate: Dayjs) => {
@@ -76,7 +76,7 @@ const getDataByOffice = (
         return {
             officeId: item.office.id,
             officeName: item.office.name,
-            [metricKey]: itemSameDate?.[metricKey] || 0,
+            [metricKey]: (itemSameDate?.[metricKey] || 0) as number,
         };
     });
 };
@@ -108,14 +108,23 @@ export const ReportSuppliersOrdersChartLine = ({
                 .toDate();
             const dataByOffice = getDataByOffice(report, date, frequency, metricKey);
 
-            chartDataByFrequency.push({
-                frequency: formatDate(date, frequencyFormat, { locale: es }),
-                ...Object.fromEntries(
-                    dataByOffice.map((item) => [item.officeName, item[metricKey]]),
-                ),
-            });
+            if (
+                dataByOffice.filter((item) => (item[metricKey] as number) > 0).length >
+                    0 ||
+                i === 0 ||
+                i === diff - 1
+            ) {
+                chartDataByFrequency.push({
+                    frequency: formatDate(date, frequencyFormat, { locale: es }),
+                    ...Object.fromEntries(
+                        dataByOffice.map((item) => [item.officeName, item[metricKey]]),
+                    ),
+                });
+            }
         }
     }
+
+    console.log(chartDataByFrequency);
 
     return (
         <ResponsiveContainer width="100%" height={400}>
@@ -139,6 +148,7 @@ export const ReportSuppliersOrdersChartLine = ({
                             stroke={
                                 REPORT_SALES_COLORS[index % REPORT_SALES_COLORS.length]
                             }
+                            connectNulls
                         />
                     );
                 })}
