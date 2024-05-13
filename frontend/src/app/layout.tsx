@@ -14,7 +14,6 @@ import { getServerSession } from 'next-auth';
 
 import { authOptions } from '@/modules/auth/auth';
 import UserProvider from './UserProvider';
-import OfficeProvider from './OfficeProvider';
 
 const poppins = Poppins({
     variable: '--font-poppins',
@@ -42,7 +41,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
                 <AuthProvider session={session}>
                     <LayoutReactQuery>
                         <UserProvider user={session?.user || null}>
-                            <OfficeProvider>{children}</OfficeProvider>
+                            {children}
                         </UserProvider>
                     </LayoutReactQuery>
                 </AuthProvider>

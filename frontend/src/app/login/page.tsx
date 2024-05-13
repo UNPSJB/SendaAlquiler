@@ -9,12 +9,11 @@ import { LoginPage } from './page-content';
 const Page = async () => {
     const session = await getServerSession(authOptions);
     let shouldSignOut = false;
-    console.log('session', session);
-    if (!session?.user || session.error) {
+    if (session && (!session?.user || session.error)) {
         shouldSignOut = true;
     }
 
-    if (!shouldSignOut) {
+    if (session && !shouldSignOut) {
         redirect('/');
     }
 
