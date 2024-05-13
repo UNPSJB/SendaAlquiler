@@ -9,6 +9,9 @@ import {
     ReportSalesQuery,
     ReportSalesDocument,
     ReportSalesQueryVariables,
+    ReportSupplierOrdersQuery,
+    ReportSupplierOrdersDocument,
+    ReportSupplierOrdersQueryVariables,
 } from '../graphql';
 
 export const useReportSales = (
@@ -23,6 +26,27 @@ export const useReportSales = (
         ),
         queryFn: () => {
             return fetchClient(ReportSalesDocument, {
+                ...variables,
+                startDate: dateToInputValue(variables.startDate as Date),
+                endDate: dateToInputValue(variables.endDate as Date),
+            });
+        },
+        enabled: !!variables.startDate && !!variables.endDate,
+    });
+};
+
+export const useReportSupplierOrders = (
+    variables: Omit<ReportSupplierOrdersQueryVariables, 'startDate' | 'endDate'> & {
+        startDate: Date | null | undefined;
+        endDate: Date | null | undefined;
+    },
+): UseQueryResult<ReportSupplierOrdersQuery> => {
+    return useQuery({
+        queryKey: queryKeys.reportSupplierOrders(
+            variables as unknown as ReportSupplierOrdersQueryVariables,
+        ),
+        queryFn: () => {
+            return fetchClient(ReportSupplierOrdersDocument, {
                 ...variables,
                 startDate: dateToInputValue(variables.startDate as Date),
                 endDate: dateToInputValue(variables.endDate as Date),

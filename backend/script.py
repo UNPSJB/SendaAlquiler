@@ -479,10 +479,14 @@ def create_supplier_orders():
         supplier = SupplierModel.objects.order_by("?").first()
         target_office = Office.objects.order_by("?").first()
 
-        requested_for_date = fake.date_time_this_year()
+        requested_for_date = fake.date_time_between(
+            start_date="-1y", end_date="now", tzinfo=None
+        )
         approximate_delivery_date = requested_for_date + timedelta(
             days=random.randint(1, 30)
         )
+
+        created_on = requested_for_date - timedelta(days=random.randint(1, 30))
 
         order_data = SupplierOrderDetailsDict(
             supplier_id=supplier.pk,
@@ -502,6 +506,8 @@ def create_supplier_orders():
         ]
 
         supplier_order = SupplierOrder.objects.create_supplier_order(order_data, items_data)
+        supplier_order.created_on = created_on
+        supplier_order.save()
 
         is_completed = random.choice([True, False, None])
         if is_completed:

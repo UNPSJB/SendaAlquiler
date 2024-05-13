@@ -12,18 +12,18 @@ import {
     ResponsiveContainer,
 } from 'recharts';
 
-import { ReportSalesQuery } from '@/api/graphql';
+import { ReportSupplierOrdersQuery } from '@/api/graphql';
 
 import { REPORT_SALES_COLORS } from './report-sales-constants';
 
 import { CalendarRangePredefinedRange } from '@/components/calendar-range-field';
-import { formatNumberWithThousandsSeparator, formatNumberAsPrice } from '@/lib/utils';
+import { formatNumberWithThousandsSeparator } from '@/lib/utils';
 
 type Props = {
-    report: NonNullable<ReportSalesQuery['salesReport']>;
+    report: NonNullable<ReportSupplierOrdersQuery['supplierOrdersReport']>;
     range: CalendarRangePredefinedRange;
     frequency: 'daily' | 'monthly' | 'yearly';
-    metricKey: 'totalSoldUnits' | 'totalSoldAmount';
+    metricKey: 'numOrders' | 'totalQuantity';
 };
 
 const getFrequencyDiff = (frequency: string, fromDate: Dayjs, toDate: Dayjs) => {
@@ -53,13 +53,13 @@ const getFrequencyFormat = (frequency: string) => {
 };
 
 const getDataByOffice = (
-    report: NonNullable<ReportSalesQuery['salesReport']>,
+    report: Props['report'],
     date: Date,
     frequency: string,
-    metricKey: 'totalSoldUnits' | 'totalSoldAmount',
+    metricKey: Props['metricKey'],
 ) => {
-    return report.officeData.map((item) => {
-        const frequencyData = item.frequencyData;
+    return report.officeOrderDetails.map((item) => {
+        const frequencyData = item.ordersTrend;
         const itemSameDate = frequencyData.find((data) => {
             switch (frequency) {
                 case 'daily':
@@ -74,16 +74,19 @@ const getDataByOffice = (
         });
 
         return {
-            officeId: item.officeId,
-            officeName: item.officeName,
-            totalSoldUnits: itemSameDate?.totalSoldUnits || 0,
-            totalSoldAmount: itemSameDate?.totalSoldAmount || 0,
+            officeId: item.office.id,
+            officeName: item.office.name,
             [metricKey]: itemSameDate?.[metricKey] || 0,
         };
     });
 };
 
-export const ReportSalesChartLine = ({ range, frequency, report, metricKey }: Props) => {
+export const ReportSuppliersOrdersChartLine = ({
+    range,
+    frequency,
+    report,
+    metricKey,
+}: Props) => {
     const fromDate = range.range.from ? dayjs(range.range.from) : null;
     const toDate = range.range.to ? dayjs(range.range.to) : null;
 
@@ -93,7 +96,16 @@ export const ReportSalesChartLine = ({ range, frequency, report, metricKey }: Pr
         const frequencyFormat = getFrequencyFormat(frequency);
 
         for (let i = 0; i < diff; i++) {
-            const date = fromDate.add(i, frequency as dayjs.ManipulateType).toDate();
+            const date = fromDate
+                .add(
+                    i,
+                    frequency === 'daily'
+                        ? 'days'
+                        : frequency === 'monthly'
+                          ? 'months'
+                          : 'years',
+                )
+                .toDate();
             const dataByOffice = getDataByOffice(report, date, frequency, metricKey);
 
             chartDataByFrequency.push({
@@ -112,20 +124,18 @@ export const ReportSalesChartLine = ({ range, frequency, report, metricKey }: Pr
                 <YAxis
                     width={108}
                     tickFormatter={(value) => {
-                        return metricKey === 'totalSoldUnits'
-                            ? formatNumberWithThousandsSeparator(value)
-                            : `$${formatNumberAsPrice(value)}`;
+                        return formatNumberWithThousandsSeparator(value);
                     }}
                 />
 
                 <CartesianGrid stroke="#eee" strokeDasharray="5 5" />
 
-                {report.officeData.map((item, index) => {
+                {report.officeOrderDetails.map((item, index) => {
                     return (
                         <Line
-                            key={item.officeId}
+                            key={item.office.id}
                             type="monotone"
-                            dataKey={item.officeName}
+                            dataKey={item.office.name}
                             stroke={
                                 REPORT_SALES_COLORS[index % REPORT_SALES_COLORS.length]
                             }
@@ -135,9 +145,7 @@ export const ReportSalesChartLine = ({ range, frequency, report, metricKey }: Pr
 
                 <Tooltip
                     formatter={(value: number) => {
-                        return metricKey === 'totalSoldUnits'
-                            ? formatNumberWithThousandsSeparator(value)
-                            : `$${formatNumberAsPrice(value)}`;
+                        return formatNumberWithThousandsSeparator(value);
                     }}
                 />
 

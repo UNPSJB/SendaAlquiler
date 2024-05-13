@@ -33,7 +33,7 @@ class OfficeDataType(graphene.ObjectType):
     top_products_by_amount = non_null_list_of(TopProductType)
 
 
-class ReportType(graphene.ObjectType):
+class SalesReportType(graphene.ObjectType):
     office_data = non_null_list_of(OfficeDataType)
     top_products_by_quantity = non_null_list_of(TopProductType)
     top_products_by_amount = non_null_list_of(TopProductType)
@@ -41,7 +41,7 @@ class ReportType(graphene.ObjectType):
 
 class Query(graphene.ObjectType):
     sales_report = graphene.Field(
-        graphene.NonNull(ReportType),
+        graphene.NonNull(SalesReportType),
         frequency=graphene.String(required=True),
         start_date=graphene.Date(required=True),
         end_date=graphene.Date(required=True),
@@ -211,7 +211,7 @@ class Query(graphene.ObjectType):
             .order_by("-total_sold_amount")[:10]
         )
 
-        return ReportType(
+        return SalesReportType(
             office_data=[
                 OfficeDataType(
                     office_id=office_data["office_id"],

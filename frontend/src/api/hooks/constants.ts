@@ -1,4 +1,7 @@
-import { ReportSalesQueryVariables } from '../graphql';
+import {
+    ReportSalesQueryVariables,
+    ReportSupplierOrdersQueryVariables,
+} from '../graphql';
 
 export const queryDomains = {
     clients: 'clients',
@@ -55,6 +58,11 @@ export const queryKeys = {
     reportSales: (variables: ReportSalesQueryVariables) => [
         queryDomains.reports,
         'sales',
+        variables,
+    ],
+    reportSupplierOrders: (variables: ReportSupplierOrdersQueryVariables) => [
+        queryDomains.reports,
+        'supplier-orders',
         variables,
     ],
 

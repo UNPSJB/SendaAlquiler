@@ -11,7 +11,8 @@ from .supplier import Query as SupplierQuery
 from .employee import Query as EmployeeQuery
 from .order_supplier import Query as SupplierOrderQuery
 from .dashboard import Query as DashboardQuery
-from .reports import Query as ReportsQuery
+from .report_sales import Query as SalesReportQuery
+from .report_supplier_order import Query as SupplierOrderReportQuery
 
 
 class Query(
@@ -26,7 +27,8 @@ class Query(
     InteralOrderQuery,
     ContractQuery,
     DashboardQuery,
-    ReportsQuery,
+    SalesReportQuery,
+    SupplierOrderReportQuery,
     graphene.ObjectType,
 ):
     pass

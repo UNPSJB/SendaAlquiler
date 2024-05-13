@@ -4,18 +4,17 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Skeleton from 'react-loading-skeleton';
 
-import { ProductTypeChoices, ReportSalesQuery } from '@/api/graphql';
+import { ProductTypeChoices, ReportSupplierOrdersQuery } from '@/api/graphql';
 import { useInfiniteProducts } from '@/api/hooks';
-import { useReportSales } from '@/api/hooks/reports';
+import { useReportSupplierOrders } from '@/api/hooks/reports';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
 } from '@/modules/dashboard/DashboardLayout';
 
-import { ReportSalesChartLine } from './report-sales-chart-line';
-import { ReportSalesChartPie } from './report-sales-chart-pie';
-import { ReportSalesTableAmount } from './report-sales-table-amount';
-import { ReportSalesTableUnity } from './report-sales-table-unity';
+import { ReportSuppliersOrdersChartLine } from './report-suppliers-orders-chart-line';
+import { ReportSuppliersOrdersChartPie } from './report-suppliers-orders-chart-pie';
+import { ReportSuppliersOrdersTable } from './report-suppliers-orders-table';
 
 import {
     CalendarRangeField,
@@ -37,7 +36,7 @@ import {
 type FormValues = {
     calendarRange: CalendarRangePredefinedRange | undefined;
     frequency: 'daily' | 'monthly' | 'yearly';
-    metric: 'soldUnits' | 'soldAmount';
+    metric: 'numOrders' | 'totalQuantity';
     products: {
         value: string;
         label: string;
@@ -45,31 +44,34 @@ type FormValues = {
 };
 
 type ChartsProps = {
-    report: NonNullable<ReportSalesQuery['salesReport']>;
+    report: NonNullable<ReportSupplierOrdersQuery['supplierOrdersReport']>;
     range: CalendarRangePredefinedRange;
     frequency: FormValues['frequency'];
     metric: FormValues['metric'];
 };
 
 const Charts = ({ report, range, frequency, metric }: ChartsProps) => {
-    const metricKey: 'totalSoldUnits' | 'totalSoldAmount' =
-        metric === 'soldUnits' ? 'totalSoldUnits' : 'totalSoldAmount';
-
     return (
         <div className="space-y-8">
             <div className="grid grid-cols-12 gap-4">
                 <div className="col-span-8 rounded bg-white p-4">
-                    <ReportSalesChartLine
+                    <ReportSuppliersOrdersChartLine
                         report={report}
                         range={range}
                         frequency={frequency}
-                        metricKey={metricKey}
+                        metricKey={metric}
                     />
                 </div>
 
-                <div className="col-span-4 flex flex-col space-y-4">
-                    <div className="bg-white p-4">
-                        <ReportSalesChartPie report={report} metricKey={metricKey} />
+                <div className="col-span-4 flex flex-col space-y-2">
+                    <div className="space-y-4 bg-white p-4">
+                        <h2 className="text-lg font-medium">
+                            {metric === 'numOrders'
+                                ? 'Número de pedidos'
+                                : 'Unidades ordenadas'}
+                        </h2>
+
+                        <ReportSuppliersOrdersChartPie report={report} metric={metric} />
                     </div>
                 </div>
             </div>
@@ -77,25 +79,15 @@ const Charts = ({ report, range, frequency, metric }: ChartsProps) => {
             <div className="space-y-4">
                 <div className="space-y-2">
                     <h2 className="text-xl font-bold">Detalles</h2>
-
-                    <p>
-                        {metric === 'soldUnits'
-                            ? `En esta tabla se muestran los top 10 productos más vendidos por unidades en el rango de fechas seleccionado.`
-                            : `En esta tabla se muestran los top 10 productos más vendidos por monto en el rango de fechas seleccionado.`}
-                    </p>
                 </div>
 
-                {metric === 'soldAmount' ? (
-                    <ReportSalesTableAmount report={report} />
-                ) : (
-                    <ReportSalesTableUnity report={report} />
-                )}
+                <ReportSuppliersOrdersTable report={report} />
             </div>
         </div>
     );
 };
 
-const ReportSales = () => {
+const ReportSuppliersOrders = () => {
     const { predefinedRanges, getPredefinedRangeByKey } = useCalendarRangeField();
 
     const [previousValidRange, setPreviousValidRange] =
@@ -107,7 +99,7 @@ const ReportSales = () => {
         defaultValues: {
             calendarRange: previousValidRange,
             frequency: 'daily',
-            metric: 'soldUnits',
+            metric: 'totalQuantity',
             products: [],
         },
     });
@@ -116,12 +108,13 @@ const ReportSales = () => {
 
     const watchedFrequency = formMethods.watch('frequency');
 
-    const reportQuery = useReportSales({
+    const reportQuery = useReportSupplierOrders({
         startDate: previousValidRange.range.from,
         endDate: previousValidRange.range.to,
+        officesIds: null,
+        productsIds: formMethods.watch('products').map((product) => product.value),
+        suppliersIds: null,
         frequency: watchedFrequency,
-        officeIds: null,
-        productIds: formWatch('products').map((product) => product.value),
     });
 
     const [productNameQuery, setProductNameQuery] = useState<string>('');
@@ -152,7 +145,7 @@ const ReportSales = () => {
 
     if (
         reportQuery.error ||
-        (!reportQuery.data?.salesReport?.officeData && !reportQuery.isFetching)
+        (!reportQuery.data?.supplierOrdersReport && !reportQuery.isFetching)
     ) {
         return <p>Error</p>;
     }
@@ -161,7 +154,9 @@ const ReportSales = () => {
         <DashboardLayout
             header={
                 <div className="flex items-center justify-between">
-                    <DashboardLayoutBigTitle>Reporte de ventas</DashboardLayoutBigTitle>
+                    <DashboardLayoutBigTitle>
+                        Reporte de pedidos a proveedores
+                    </DashboardLayoutBigTitle>
                 </div>
             }
         >
@@ -251,11 +246,11 @@ const ReportSales = () => {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="soldUnits">
-                                                    Unidades vendidas
+                                                <SelectItem value="numOrders">
+                                                    Número de pedidos
                                                 </SelectItem>
-                                                <SelectItem value="soldAmount">
-                                                    Monto vendido
+                                                <SelectItem value="totalQuantity">
+                                                    Unidades ordenadas
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -310,7 +305,7 @@ const ReportSales = () => {
                     <Skeleton className="h-96 w-full" />
                 ) : (
                     <Charts
-                        report={reportQuery.data.salesReport}
+                        report={reportQuery.data.supplierOrdersReport}
                         frequency={watchedFrequency}
                         range={previousValidRange}
                         metric={formMethods.watch('metric')}
@@ -321,4 +316,4 @@ const ReportSales = () => {
     );
 };
 
-export default ReportSales;
+export default ReportSuppliersOrders;

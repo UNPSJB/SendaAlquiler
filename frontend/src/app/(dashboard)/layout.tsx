@@ -7,6 +7,7 @@ import { authOptions } from '@/modules/auth/auth';
 
 const DashboardLayout = async ({ children }: PropsWithChildren) => {
     const session = await getServerSession(authOptions);
+    console.log('session', session);
     if (!session?.user || session.error) {
         redirect('/login');
     }

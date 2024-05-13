@@ -52,3 +52,54 @@ query reportSales(
         }
     }
 }
+
+query reportSupplierOrders(
+    $startDate: Date!
+    $endDate: Date!
+    $officesIds: [ID!]
+    $productsIds: [ID!]
+    $suppliersIds: [ID!]
+    $frequency: String!
+) {
+    supplierOrdersReport(
+        startDate: $startDate
+        endDate: $endDate
+        officesIds: $officesIds
+        productsIds: $productsIds
+        suppliersIds: $suppliersIds
+        frequency: $frequency
+    ) {
+        totalOrders
+        mostOrderedProducts {
+            product {
+                id
+                name
+            }
+            totalQuantity
+            numOrders
+        }
+        officeOrderDetails {
+            office {
+                id
+                name
+            }
+            totalQuantity
+            numOrders
+            mostOrderedProducts {
+                product {
+                    id
+                    name
+                }
+                totalQuantity
+                numOrders
+            }
+            ordersTrend {
+                numOrders
+                totalQuantity
+                date
+                month
+                year
+            }
+        }
+    }
+}
