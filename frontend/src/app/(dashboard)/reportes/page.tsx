@@ -22,12 +22,12 @@ const Page = () => {
             <div className="container flex-1 bg-muted py-8">
                 <div>
                     <div className="mb-4 grid grid-cols-2 gap-4">
-                        <Link href={'/reportes/productos-por-sucursal'}>
+                        <Link href={'/reportes/ventas'}>
                             <Card className="!border-none">
                                 <div className="flex flex-row items-center justify-center space-x-4 rounded-md py-6 transition duration-200 hover:bg-black hover:text-white">
                                     <ShoppingBagIcon />
 
-                                    <span>Producto más vendido por sucursal</span>
+                                    <span>Ventas</span>
                                 </div>
                             </Card>
                         </Link>

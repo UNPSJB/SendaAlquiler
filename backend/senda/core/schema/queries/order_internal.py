@@ -94,7 +94,7 @@ class Query(graphene.ObjectType):
             "source_office",
             "target_office",
             "order_items",
-            
+
         )
         csv_buffer = io.StringIO()
 

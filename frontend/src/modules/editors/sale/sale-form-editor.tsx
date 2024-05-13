@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import { SaleOrderItemInput, StateChoices } from '@/api/graphql';
 import { useCreateSale, useClients } from '@/api/hooks';
 
-import { SaleFormEditorDiscountType } from '@/app/ventas/add/page';
+import { SaleFormEditorDiscountType } from '@/app/(dashboard)/ventas/add/page';
 
 import { SaleFormEditorBilling } from './sale-form-editor-billing';
 import { SaleFormEditorOrders } from './sale-form-editor-orders';

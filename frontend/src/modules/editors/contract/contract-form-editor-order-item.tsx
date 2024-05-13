@@ -13,7 +13,7 @@ import {
     calculateContractServiceItemSubtotal,
 } from '@/modules/contract-utils';
 
-import { ContractFormEditorDiscountType } from '@/app/contratos/add/page';
+import { ContractFormEditorDiscountType } from '@/app/(dashboard)/contratos/add/page';
 
 import { ContractFormEditorValues } from './contract-form-editor';
 import { ContractFormEditorOrderItemAllocation } from './contract-form-editor-order-item-allocation';

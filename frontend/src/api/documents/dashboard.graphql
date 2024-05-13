@@ -32,6 +32,28 @@ query DashboardStats($period: DashboardStatsPeriod!) {
         upcomingContracts {
             id
             contractStartDatetime
+            contractEndDatetime
+            client {
+                id
+                firstName
+                dni
+                email
+                houseNumber
+                houseUnit
+                lastName
+                locality {
+                    id
+                    name
+                    state
+                    postalCode
+                }
+                phoneNumber
+                phoneCode
+                streetName
+            }
+            latestHistoryEntry {
+                status
+            }
         }
     }
 }

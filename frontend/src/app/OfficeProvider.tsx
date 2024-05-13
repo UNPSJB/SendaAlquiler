@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -214,8 +215,12 @@ const OfficeProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
     if (!user) {
         return (
-            <main className="flex h-screen items-center justify-center">
+            <main className="flex h-screen flex-col items-center justify-center space-y-2">
                 <p>Debes iniciar sesión para acceder a esta página</p>
+
+                <Button asChild>
+                    <Link href="/login">Iniciar sesión</Link>
+                </Button>
             </main>
         );
     }

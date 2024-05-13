@@ -1,4 +1,4 @@
-import { AdminReportMostSoldProductsQueryVariables } from '../graphql';
+import { ReportSalesQueryVariables } from '../graphql';
 
 export const queryDomains = {
     clients: 'clients',
@@ -52,9 +52,9 @@ export const queryKeys = {
     localitiesPaginatedList: buildPaginatedListkey(queryDomains.localities),
     localitiesNonPaginated: [queryDomains.localities, 'list', 'non-paginated'],
 
-    reportMostSoldProducts: (variables: AdminReportMostSoldProductsQueryVariables) => [
+    reportSales: (variables: ReportSalesQueryVariables) => [
         queryDomains.reports,
-        'most-sold-products',
+        'sales',
         variables,
     ],
 

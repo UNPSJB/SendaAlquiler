@@ -1,180 +1,279 @@
-from typing import Any, List
-
 import graphene
-from senda.core.schema.custom_types import ProductType, OfficeType
-from senda.core.models.offices import Office
 from senda.core.models.sale import Sale, SaleItemModel
-from senda.core.models.products import Product
+from django.db.models import Sum
+from django.db.models.functions import Coalesce
+from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
+
 from utils.graphene import non_null_list_of
-from django.db import models
-
-from django.utils import timezone
 
 
-from senda.core.decorators import employee_or_admin_required, CustomInfo
+class FrequencyDataType(graphene.ObjectType):
+    total_sold_units = graphene.Int(required=True)
+    total_sold_amount = graphene.Float(required=True)
+    date = graphene.Date()
+    week = graphene.Int()
+    month = graphene.Int()
+    year = graphene.Int()
 
 
-class ReportMostSoldProductsProductItem(graphene.ObjectType):
-    product = graphene.NonNull(ProductType)
-    quantity = graphene.NonNull(graphene.Int)
-    total_amount = graphene.NonNull(graphene.Int)
+class TopProductType(graphene.ObjectType):
+    product_id = graphene.Int(required=True)
+    product_name = graphene.String(required=True)
+    total_sold_units = graphene.Int(required=True)
+    total_sold_amount = graphene.Float(required=True)
 
 
-class ReportMostSoldProductsByOfficeItem(graphene.ObjectType):
-    office = graphene.NonNull(OfficeType)
-    items = non_null_list_of(ReportMostSoldProductsProductItem)
-    total_quantity = graphene.NonNull(graphene.Int)
-    total_amount = graphene.NonNull(graphene.Int)
+class OfficeDataType(graphene.ObjectType):
+    office_id = graphene.Int(required=True)
+    office_name = graphene.String(required=True)
+    total_sold_units = graphene.Int(required=True)
+    total_sold_amount = graphene.Float(required=True)
+    frequency_data = non_null_list_of(FrequencyDataType)
+    top_products_by_quantity = non_null_list_of(TopProductType)
+    top_products_by_amount = non_null_list_of(TopProductType)
 
 
-class ReportMostSoldProductsGeneral(graphene.ObjectType):
-    items = non_null_list_of(ReportMostSoldProductsProductItem)
-    total_quantity = graphene.NonNull(graphene.Int)
-    total_amount = graphene.NonNull(graphene.Int)
-
-
-class ReportMostSoldProductsQuery(graphene.ObjectType):
-    general = graphene.NonNull(ReportMostSoldProductsGeneral)
-    by_office = non_null_list_of(ReportMostSoldProductsByOfficeItem)
+class ReportType(graphene.ObjectType):
+    office_data = non_null_list_of(OfficeDataType)
+    top_products_by_quantity = non_null_list_of(TopProductType)
+    top_products_by_amount = non_null_list_of(TopProductType)
 
 
 class Query(graphene.ObjectType):
-    report_most_sold_products = graphene.NonNull(
-        ReportMostSoldProductsQuery,
-        start_date=graphene.Date(),
-        end_date=graphene.Date(),
+    sales_report = graphene.Field(
+        graphene.NonNull(ReportType),
+        frequency=graphene.String(required=True),
+        start_date=graphene.Date(required=True),
+        end_date=graphene.Date(required=True),
+        office_ids=graphene.List(graphene.NonNull(graphene.Int)),
+        product_ids=graphene.List(graphene.NonNull(graphene.ID)),
     )
 
-    def resolve_report_most_sold_products(
-        self,
-        info: CustomInfo,
-        start_date: str = None,
-        end_date: str = None,
-    ) -> ReportMostSoldProductsQuery:
-        # start_date = start_date or timezone.now().replace(year=2021, month=1, day=1)
-        # start_date = start_date or timezone.now().replace(year=2024, month=1, day=1)
-        # end_date = end_date or timezone.now()
+    def resolve_sales_report(
+        self, info, frequency, start_date, end_date, office_ids=None, product_ids=None
+    ):
+        # Filter sales based on date range
+        sales = Sale.objects.filter(created_on__range=(start_date, end_date))
 
-        # top 10 most sold products
-        most_sold_products = (
-            Product.objects.annotate(
-                total_quantity=models.Sum(
-                    models.Case(
-                        models.When(
-                            models.Q(
-                                sale_items__sale__created_on__range=[
-                                    start_date,
-                                    end_date,
-                                ]
-                            ),
-                            then="sale_items__quantity",
-                        ),
-                        default=0,
-                        output_field=models.IntegerField(),
-                    )
-                ),
-                total_amount=models.Sum(
-                    models.Case(
-                        models.When(
-                            models.Q(
-                                sale_items__sale__created_on__range=[
-                                    start_date,
-                                    end_date,
-                                ]
-                            ),
-                            then="sale_items__total",
-                        ),
-                        default=0,
-                        output_field=models.DecimalField(),
-                    )
-                ),
+        # Filter sales based on office IDs
+        if office_ids:
+            sales = sales.filter(office_id__in=office_ids)
+
+        # Filter sale items based on product IDs
+        if product_ids:
+            sales = sales.filter(sale_items__product_id__in=product_ids)
+
+        # Annotate total sold units and amount for each office
+        data_by_office = (
+            sales.all()
+            .filter(created_on__range=(start_date, end_date))
+            .values("office_id", "office__name")
+            .annotate(
+                total_sold_units=Coalesce(Sum("sale_items__quantity"), 0),
+                total_sold_amount=Coalesce(Sum("sale_items__total"), 0),
             )
-            .order_by("-total_quantity")
-            .values("id", "name", "total_quantity", "total_amount")
         )
 
-        most_sold_products_general = most_sold_products[:10]
-
-        # top 10 most sold products by office
-        by_office: List[ReportMostSoldProductsByOfficeItem] = []
-        for office in Office.objects.all():
-            most_sold_products_by_office = (
-                Product.objects.annotate(
-                    total_quantity=models.Sum(
-                        models.Case(
-                            models.When(
-                                models.Q(
-                                    sale_items__sale__office=office,
-                                    sale_items__sale__created_on__range=[
-                                        start_date,
-                                        end_date,
-                                    ],
-                                ),
-                                then="sale_items__quantity",
-                            ),
-                            default=0,
-                            output_field=models.IntegerField(),
-                        )
-                    ),
-                    total_amount=models.Sum(
-                        models.Case(
-                            models.When(
-                                models.Q(
-                                    sale_items__sale__office=office,
-                                    sale_items__sale__created_on__range=[
-                                        start_date,
-                                        end_date,
-                                    ],
-                                ),
-                                then="sale_items__total",
-                            ),
-                            default=0,
-                            output_field=models.DecimalField(),
-                        )
-                    ),
+        # Annotate frequency data based on the selected frequency for each office
+        if frequency == "daily":
+            for office in data_by_office:
+                frequency_sales_items = SaleItemModel.objects.filter(
+                    sale__office_id=office["office_id"],
+                    sale__created_on__range=(start_date, end_date),
                 )
-                .order_by("-total_quantity")
-                .values("id", "name", "total_quantity", "total_amount")
-            )
 
-            most_sold_products_by_office = most_sold_products_by_office[:10]
-
-            by_office.append(
-                ReportMostSoldProductsByOfficeItem(
-                    office=office,
-                    items=[
-                        ReportMostSoldProductsProductItem(
-                            product=Product.objects.get(id=item["id"]),
-                            quantity=item["total_quantity"],
-                            total_amount=item["total_amount"],
-                        )
-                        for item in most_sold_products_by_office
-                    ],
-                    total_quantity=sum(
-                        item["total_quantity"] for item in most_sold_products_by_office
-                    ),
-                    total_amount=sum(
-                        item["total_amount"] for item in most_sold_products_by_office
-                    ),
-                )
-            )
-
-        return ReportMostSoldProductsQuery(
-            general=ReportMostSoldProductsGeneral(
-                items=[
-                    ReportMostSoldProductsProductItem(
-                        product=Product.objects.get(id=item["id"]),
-                        quantity=item["total_quantity"],
-                        total_amount=item["total_amount"],
+                if product_ids:
+                    frequency_sales_items = frequency_sales_items.filter(
+                        product_id__in=product_ids
                     )
-                    for item in most_sold_products_general
-                ],
-                total_quantity=sum(
-                    item["total_quantity"] for item in most_sold_products_general
-                ),
-                total_amount=sum(
-                    item["total_amount"] for item in most_sold_products_general
-                ),
-            ),
-            by_office=by_office,
+
+                frequency_data = frequency_sales_items.values(
+                    date=TruncDay("sale__created_on")
+                ).annotate(
+                    total_sold_units=Sum("quantity"),
+                    total_sold_amount=Sum("total"),
+                )
+
+                office["frequency_data"] = frequency_data
+
+        elif frequency == "weekly":
+            for office in data_by_office:
+                frequency_sales_items = SaleItemModel.objects.filter(
+                    sale__office_id=office["office_id"],
+                    sale__created_on__range=(start_date, end_date),
+                )
+
+                if product_ids:
+                    frequency_sales_items = frequency_sales_items.filter(
+                        product_id__in=product_ids
+                    )
+
+                frequency_data = frequency_sales_items.values(
+                    week=TruncWeek("sale__created_on")
+                ).annotate(
+                    total_sold_units=Sum("quantity"),
+                    total_sold_amount=Sum("total"),
+                )
+
+                office["frequency_data"] = frequency_data
+        elif frequency == "monthly":
+            for office in data_by_office:
+                frequency_sales_items = SaleItemModel.objects.filter(
+                    sale__office_id=office["office_id"],
+                    sale__created_on__range=(start_date, end_date),
+                )
+
+                if product_ids:
+                    frequency_sales_items = frequency_sales_items.filter(
+                        product_id__in=product_ids
+                    )
+
+                frequency_data = frequency_sales_items.values(
+                    month=TruncMonth("sale__created_on"),
+                    year=TruncYear("sale__created_on"),
+                ).annotate(
+                    total_sold_units=Sum("quantity"),
+                    total_sold_amount=Sum("total"),
+                )
+
+                office["frequency_data"] = frequency_data
+        elif frequency == "yearly":
+            for office in data_by_office:
+                frequency_sales_items = SaleItemModel.objects.filter(
+                    sale__office_id=office["office_id"],
+                    sale__created_on__range=(start_date, end_date),
+                )
+
+                if product_ids:
+                    frequency_sales_items = frequency_sales_items.filter(
+                        product_id__in=product_ids
+                    )
+
+                frequency_data = frequency_sales_items.values(
+                    year=TruncYear("sale__created_on")
+                ).annotate(
+                    total_sold_units=Sum("quantity"),
+                    total_sold_amount=Sum("total"),
+                )
+
+                office["frequency_data"] = frequency_data
+
+        for office in data_by_office:
+            office_sale_items = SaleItemModel.objects.filter(
+                sale__in=sales,
+                sale__office_id=office["office_id"],
+            )
+
+            if product_ids:
+                office_sale_items = office_sale_items.filter(product_id__in=product_ids)
+
+            office["top_products_by_quantity"] = (
+                office_sale_items.values("product_id", "product__name")
+                .annotate(
+                    total_sold_units=Sum("quantity"),
+                    total_sold_amount=Sum("total"),
+                )
+                .order_by("-total_sold_units")[:10]
+            )
+            office["top_products_by_amount"] = (
+                office_sale_items.values("product_id", "product__name")
+                .annotate(
+                    total_sold_units=Sum("quantity"),
+                    total_sold_amount=Sum("total"),
+                )
+                .order_by("-total_sold_amount")[:10]
+            )
+
+        global_sales_items = SaleItemModel.objects.filter(sale__in=sales)
+
+        if product_ids:
+            global_sales_items = global_sales_items.filter(product_id__in=product_ids)
+
+        # Get top 10 products sold by quantity
+        top_products_by_quantity = (
+            global_sales_items.all()
+            .values("product_id", "product__name")
+            .annotate(
+                total_sold_units=Sum("quantity"),
+                total_sold_amount=Sum("total"),
+            )
+            .order_by("-total_sold_units")[:10]
+        )
+
+        # Get top 10 products sold by amount
+        top_products_by_amount = (
+            global_sales_items.all()
+            .values("product_id", "product__name")
+            .annotate(
+                total_sold_units=Sum("quantity"),
+                total_sold_amount=Sum("total"),
+            )
+            .order_by("-total_sold_amount")[:10]
+        )
+
+        return ReportType(
+            office_data=[
+                OfficeDataType(
+                    office_id=office_data["office_id"],
+                    office_name=office_data["office__name"],
+                    total_sold_units=office_data["total_sold_units"],
+                    total_sold_amount=office_data["total_sold_amount"],
+                    frequency_data=[
+                        FrequencyDataType(
+                            total_sold_units=frequency_item["total_sold_units"],
+                            total_sold_amount=frequency_item["total_sold_amount"],
+                            date=frequency_item.get("date"),
+                            week=frequency_item.get("week"),
+                            month=(
+                                frequency_item.get("month").month
+                                if frequency_item.get("month")
+                                else None
+                            ),
+                            year=(
+                                frequency_item.get("year").year
+                                if frequency_item.get("year")
+                                else None
+                            ),
+                        )
+                        for frequency_item in office_data["frequency_data"]
+                    ],
+                    top_products_by_quantity=[
+                        TopProductType(
+                            product_id=product["product_id"],
+                            product_name=product["product__name"],
+                            total_sold_units=product["total_sold_units"],
+                            total_sold_amount=product["total_sold_amount"],
+                        )
+                        for product in office_data["top_products_by_quantity"]
+                    ],
+                    top_products_by_amount=[
+                        TopProductType(
+                            product_id=product["product_id"],
+                            product_name=product["product__name"],
+                            total_sold_units=product["total_sold_units"],
+                            total_sold_amount=product["total_sold_amount"],
+                        )
+                        for product in office_data["top_products_by_amount"]
+                    ],
+                )
+                for office_data in data_by_office
+            ],
+            top_products_by_quantity=[
+                TopProductType(
+                    product_id=product["product_id"],
+                    product_name=product["product__name"],
+                    total_sold_units=product["total_sold_units"],
+                    total_sold_amount=product["total_sold_amount"],
+                )
+                for product in top_products_by_quantity
+            ],
+            top_products_by_amount=[
+                TopProductType(
+                    product_id=product["product_id"],
+                    product_name=product["product__name"],
+                    total_sold_units=product["total_sold_units"],
+                    total_sold_amount=product["total_sold_amount"],
+                )
+                for product in top_products_by_amount
+            ],
         )

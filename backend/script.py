@@ -597,10 +597,10 @@ def create_contracts():
         # random start between now and a year ago
         naive_contract_start_datetime = fake.date_time_between(
             start_date="-1y", end_date="now", tzinfo=None
-        )
+        ) + timedelta(days=random.randint(0, 60))
         contract_start = timezone.make_aware(naive_contract_start_datetime)
         contract_end = contract_start + timedelta(days=random.randint(1, 30))
-        expiration_date = contract_end + timedelta(days=random.randint(1, 30))
+        expiration_date = contract_start - timedelta(days=random.randint(0, 7))
 
         contract_data = ContractDetailsDict(
             client_id=client.pk,

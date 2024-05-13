@@ -1,31 +1,25 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { CurrentUserQuery } from '@api/graphql';
-// eslint-disable-next-line import/order
-import NextAuth from 'next-auth';
+import { Session } from 'next-auth';
+import { JWT } from 'next-auth/jwt';
+
+import { CurrentUserQuery } from '@/api/graphql';
 
 declare module 'next-auth' {
-    type User = {
-        user: CurrentUserQuery['user'];
-        accessToken: string;
-    };
-
-    /**
-     * Returned by `useSession`, `getSession` and received as a prop on the `SessionProvider` React Context
-     */
     interface Session {
+        token: string;
+        error: string;
         user: CurrentUserQuery['user'];
-        accessToken: string;
-        error?: string | null | undefined;
+    }
+
+    interface User {
+        token: string;
+        user: CurrentUserQuery['user'];
     }
 }
 
-import { JWT } from 'next-auth/jwt';
-
 declare module 'next-auth/jwt' {
-    /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
     interface JWT {
+        token: string;
+        error: string;
         user: CurrentUserQuery['user'];
-        accessToken: string;
-        error?: string | null | undefined;
     }
 }

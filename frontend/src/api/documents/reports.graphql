@@ -1,40 +1,54 @@
-query adminReportMostSoldProducts($startDate: Date!, $endDate: Date!) {
-    reportMostSoldProducts(startDate: $startDate, endDate: $endDate) {
-        general {
-            items {
-                product {
-                    id
-                    name
-                    sku
-                    brand {
-                        name
-                    }
-                }
-                quantity
-                totalAmount
+query reportSales(
+    $frequency: String!
+    $startDate: Date!
+    $endDate: Date!
+    $officeIds: [Int!]
+    $productIds: [ID!]
+) {
+    salesReport(
+        frequency: $frequency
+        startDate: $startDate
+        endDate: $endDate
+        officeIds: $officeIds
+        productIds: $productIds
+    ) {
+        officeData {
+            officeId
+            officeName
+            totalSoldUnits
+            totalSoldAmount
+            topProductsByQuantity {
+                productId
+                productName
+                totalSoldUnits
+                totalSoldAmount
             }
-            totalQuantity
-            totalAmount
+            topProductsByAmount {
+                productId
+                productName
+                totalSoldUnits
+                totalSoldAmount
+            }
+            frequencyData {
+                date
+                month
+                week
+                year
+                totalSoldUnits
+                totalSoldAmount
+            }
         }
-        byOffice {
-            items {
-                product {
-                    id
-                    name
-                    sku
-                    brand {
-                        name
-                    }
-                }
-                quantity
-                totalAmount
-            }
-            totalQuantity
-            totalAmount
-            office {
-                id
-                name
-            }
+        topProductsByQuantity {
+            productId
+            productName
+            totalSoldUnits
+            totalSoldAmount
+        }
+        topProductsByAmount {
+            productId
+            productName
+            totalSoldUnits
+            totalSoldAmount
         }
     }
 }
