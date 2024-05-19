@@ -287,6 +287,8 @@ def create_product_with_details(name, product_type, services=None):
     if services is None:
         services = []
 
+    base_price = random.randint(1000000, 5000000)
+
     # Create a single product
     product = Product.objects.create_product(
         ProductDataDict(
@@ -295,16 +297,14 @@ def create_product_with_details(name, product_type, services=None):
             description=fake.sentence(),
             brand_id=Brand.objects.order_by("?").first().pk,
             type=product_type,
-            price=random.randint(10000, 1000000),
+            price=base_price,
         )
     )
 
     # Generate and update stock items
     stock_items = [
         ProductStockItemDataDict(
-            product_id=product.pk,
-            office_id=office.pk,
-            quantity=random.randint(40, 3650)
+            product_id=product.pk, office_id=office.pk, quantity=random.randint(10, 100)
         )
         for office in Office.objects.all().order_by("?")[0 : random.randint(1, 3)]
     ]
@@ -315,7 +315,7 @@ def create_product_with_details(name, product_type, services=None):
         ProductSupplierDataDict(
             product_id=product.pk,
             supplier_id=supplier.pk,
-            price=random.randint(10000, 1000000),
+            price=base_price + random.randint(-500000, 500000),
         )
         for supplier in SupplierModel.objects.all().order_by("?")[
             0 : random.randint(1, SupplierModel.objects.count())
@@ -410,7 +410,8 @@ def create_internal_orders():
 
         items_data = [
             InternalOrderItemDetailsDict(
-                product_id=stock_item.product.pk, quantity_ordered=random.randint(1, stock_item.quantity)
+                product_id=stock_item.product.pk,
+                quantity_ordered=random.randint(1, stock_item.quantity),
             )
             for stock_item in StockItem.objects.filter(
                 office=source_office, quantity__gt=0
@@ -505,7 +506,9 @@ def create_supplier_orders():
             ).order_by("?")[0 : random.randint(1, 5)]
         ]
 
-        supplier_order = SupplierOrder.objects.create_supplier_order(order_data, items_data)
+        supplier_order = SupplierOrder.objects.create_supplier_order(
+            order_data, items_data
+        )
         supplier_order.created_on = created_on
         supplier_order.save()
 
@@ -518,8 +521,11 @@ def create_supplier_orders():
                 completed_order_items=[
                     SupplierCompletedOrderItemDetailsDict(
                         item_id=order_item.pk,
-                        quantity_received=random.randint(0, order_item.quantity_ordered),
-                    ) for order_item in supplier_order.order_items.all()
+                        quantity_received=random.randint(
+                            0, order_item.quantity_ordered
+                        ),
+                    )
+                    for order_item in supplier_order.order_items.all()
                 ],
             )
             history.created_on = requested_for_date + timedelta(
@@ -538,7 +544,6 @@ def create_supplier_orders():
                 days=random.randint(1, 30)
             )
             history.save()
-
 
 
 def create_sales():
