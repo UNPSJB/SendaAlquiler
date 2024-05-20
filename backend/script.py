@@ -396,7 +396,9 @@ def create_internal_orders():
             Office.objects.order_by("?").exclude(pk=source_office.pk).first()
         )
 
-        requested_for_date = fake.date_time_this_year()
+        requested_for_date = fake.date_time_between(
+            start_date="-1y", end_date="now", tzinfo=None
+        )
         approximate_delivery_date = requested_for_date + timedelta(
             days=random.randint(1, 30)
         )
@@ -421,6 +423,11 @@ def create_internal_orders():
         internal_order = InternalOrder.objects.create_internal_order(
             order_data, items_data
         )
+
+        internal_order.created_on = requested_for_date - timedelta(
+            days=random.randint(1, 30)
+        )
+        internal_order.save()
 
         is_accepted = random.choice([True, False, None])
         if is_accepted:

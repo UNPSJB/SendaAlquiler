@@ -247,6 +247,14 @@ export enum CoreContractItemServiceBillingTypeChoices {
     Weekly = 'WEEKLY',
 }
 
+export type CostReportType = {
+    __typename?: 'CostReportType';
+    numOrders: Scalars['Int']['output'];
+    numProducts: Scalars['Int']['output'];
+    productCostDetails: Array<ProductCostDetailsType>;
+    totalCost: Scalars['Float']['output'];
+};
+
 export type CreateBrand = {
     __typename?: 'CreateBrand';
     brand: Maybe<Brand>;
@@ -541,6 +549,18 @@ export enum InternalOrderQueryDirection {
     Outgoing = 'OUTGOING',
 }
 
+export type InternalOrderReportType = {
+    __typename?: 'InternalOrderReportType';
+    averageOrderProcessingTime: Scalars['Int']['output'];
+    orderCountTrend: Array<OrderCountTrendType>;
+    orderCountTrendByOffice: Array<OrderCountTrendByOfficeType>;
+    orderFulfillmentRate: Maybe<OrderFulfillmentRateType>;
+    orderStatusDistribution: Array<OrderStatusDistributionType>;
+    sourceTargetOfficeAnalysis: Array<SourceTargetOfficeAnalysisType>;
+    topProductsOrdered: Array<TopProductsOrderedType>;
+    topProductsOrderedByOffice: Array<TopProductsOrderedByOfficeType>;
+};
+
 export type Locality = {
     __typename?: 'Locality';
     clients: Array<Client>;
@@ -797,6 +817,14 @@ export type MutationVerifyTokenArgs = {
     token: InputMaybe<Scalars['String']['input']>;
 };
 
+export type NumbersBySupplierType = {
+    __typename?: 'NumbersBySupplierType';
+    avgPrice: Scalars['Float']['output'];
+    numOrders: Scalars['Int']['output'];
+    supplier: SupplierType;
+    totalCost: Scalars['Float']['output'];
+};
+
 /** Obtain JSON Web Token mutation */
 export type ObtainJsonWebToken = {
     __typename?: 'ObtainJSONWebToken';
@@ -849,6 +877,33 @@ export type OfficeType = {
     __typename?: 'OfficeType';
     id: Scalars['ID']['output'];
     name: Scalars['String']['output'];
+};
+
+export type OrderCountTrendByOfficeType = {
+    __typename?: 'OrderCountTrendByOfficeType';
+    officeId: Scalars['ID']['output'];
+    officeName: Scalars['String']['output'];
+    orderCountTrend: Array<OrderCountTrendType>;
+};
+
+export type OrderCountTrendType = {
+    __typename?: 'OrderCountTrendType';
+    count: Scalars['Int']['output'];
+    date: Maybe<Scalars['Date']['output']>;
+    month: Maybe<Scalars['Int']['output']>;
+    week: Maybe<Scalars['Int']['output']>;
+    year: Maybe<Scalars['Int']['output']>;
+};
+
+export type OrderFulfillmentRateType = {
+    __typename?: 'OrderFulfillmentRateType';
+    fulfillmentRate: Maybe<Scalars['Float']['output']>;
+};
+
+export type OrderStatusDistributionType = {
+    __typename?: 'OrderStatusDistributionType';
+    count: Scalars['Int']['output'];
+    status: Scalars['String']['output'];
 };
 
 export type OrderSupplier = {
@@ -948,6 +1003,15 @@ export type PaginatedSupplierQueryResult = {
     results: Array<Supplier>;
 };
 
+export type PriceTrendType = {
+    __typename?: 'PriceTrendType';
+    avgPrice: Scalars['Float']['output'];
+    date: Maybe<Scalars['Date']['output']>;
+    month: Maybe<Scalars['Int']['output']>;
+    week: Maybe<Scalars['Int']['output']>;
+    year: Maybe<Scalars['Int']['output']>;
+};
+
 export type Product = {
     __typename?: 'Product';
     brand: Maybe<Brand>;
@@ -967,6 +1031,17 @@ export type Product = {
     stockItems: Array<ProductStockInOffice>;
     suppliers: Array<ProductSupplier>;
     type: ProductTypeChoices;
+};
+
+export type ProductCostDetailsType = {
+    __typename?: 'ProductCostDetailsType';
+    avgPrice: Scalars['Float']['output'];
+    numOrders: Scalars['Int']['output'];
+    numbersBySupplier: Array<NumbersBySupplierType>;
+    product: ProductType;
+    totalCost: Scalars['Float']['output'];
+    trends: Array<PriceTrendType>;
+    trendsBySupplier: Array<TrendsBySupplierType>;
 };
 
 export type ProductDataInput = {
@@ -1071,11 +1146,13 @@ export type Query = {
     contracts: PaginatedContractQueryResult;
     contractsByClientId: Array<Contract>;
     contractsCsv: Scalars['String']['output'];
+    costReport: CostReportType;
     dashboardStats: DashboardStats;
     employeeById: Maybe<Employee>;
     employees: PaginatedEmployeeQueryResult;
     employeesCsv: Scalars['String']['output'];
     internalOrderById: Maybe<InternalOrder>;
+    internalOrderReport: InternalOrderReportType;
     internalOrders: PaginatedInternalOrderQueryResult;
     internalOrdersCsv: Scalars['String']['output'];
     localities: PaginatedLocalityQueryResult;
@@ -1139,6 +1216,14 @@ export type QueryContractsByClientIdArgs = {
     id: Scalars['ID']['input'];
 };
 
+export type QueryCostReportArgs = {
+    endDate: Scalars['Date']['input'];
+    frequency: Scalars['String']['input'];
+    productsIds: InputMaybe<Array<Scalars['ID']['input']>>;
+    startDate: Scalars['Date']['input'];
+    suppliersIds: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
 export type QueryDashboardStatsArgs = {
     period: DashboardStatsPeriod;
 };
@@ -1154,6 +1239,14 @@ export type QueryEmployeesArgs = {
 
 export type QueryInternalOrderByIdArgs = {
     id: Scalars['ID']['input'];
+};
+
+export type QueryInternalOrderReportArgs = {
+    endDate: Scalars['Date']['input'];
+    frequency: Scalars['String']['input'];
+    officeIds: InputMaybe<Array<Scalars['ID']['input']>>;
+    productIds: InputMaybe<Array<Scalars['ID']['input']>>;
+    startDate: Scalars['Date']['input'];
 };
 
 export type QueryInternalOrdersArgs = {
@@ -1335,6 +1428,16 @@ export type SendPasswordRecoveryEmail = {
     success: Maybe<Scalars['Boolean']['output']>;
 };
 
+export type SourceTargetOfficeAnalysisType = {
+    __typename?: 'SourceTargetOfficeAnalysisType';
+    orderCount: Scalars['Int']['output'];
+    sourceOfficeId: Scalars['ID']['output'];
+    sourceOfficeName: Scalars['String']['output'];
+    targetOfficeId: Scalars['ID']['output'];
+    targetOfficeName: Scalars['String']['output'];
+    totalQuantity: Scalars['Int']['output'];
+};
+
 /**
  *
  *     Enum-like class representing choices for states. Inherits from models.TextChoices.
@@ -1436,12 +1539,38 @@ export type SupplierOrderReportType = {
     officeOrderDetails: Array<OfficeOrderDetailsType>;
 };
 
+export type SupplierType = {
+    __typename?: 'SupplierType';
+    id: Scalars['ID']['output'];
+    name: Scalars['String']['output'];
+};
+
 export type TopProductType = {
     __typename?: 'TopProductType';
     productId: Scalars['Int']['output'];
     productName: Scalars['String']['output'];
     totalSoldAmount: Scalars['Float']['output'];
     totalSoldUnits: Scalars['Int']['output'];
+};
+
+export type TopProductsOrderedByOfficeType = {
+    __typename?: 'TopProductsOrderedByOfficeType';
+    officeId: Scalars['ID']['output'];
+    officeName: Scalars['String']['output'];
+    topProducts: Array<TopProductsOrderedType>;
+};
+
+export type TopProductsOrderedType = {
+    __typename?: 'TopProductsOrderedType';
+    productId: Scalars['ID']['output'];
+    productName: Scalars['String']['output'];
+    totalQuantity: Scalars['Int']['output'];
+};
+
+export type TrendsBySupplierType = {
+    __typename?: 'TrendsBySupplierType';
+    priceTrend: Array<PriceTrendType>;
+    supplier: SupplierType;
 };
 
 export type UpdateClient = {
@@ -2917,6 +3046,129 @@ export type ReportSupplierOrdersQuery = {
                 date: string | null;
                 month: number | null;
                 year: number | null;
+            }>;
+        }>;
+    };
+};
+
+export type CostReportQueryVariables = Exact<{
+    startDate: Scalars['Date']['input'];
+    endDate: Scalars['Date']['input'];
+    suppliersIds: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+    productsIds: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+    frequency: Scalars['String']['input'];
+}>;
+
+export type CostReportQuery = {
+    __typename?: 'Query';
+    costReport: {
+        __typename?: 'CostReportType';
+        totalCost: number;
+        numOrders: number;
+        numProducts: number;
+        productCostDetails: Array<{
+            __typename?: 'ProductCostDetailsType';
+            avgPrice: number;
+            totalCost: number;
+            numOrders: number;
+            product: { __typename?: 'ProductType'; id: string; name: string };
+            trends: Array<{
+                __typename?: 'PriceTrendType';
+                avgPrice: number;
+                date: string | null;
+                week: number | null;
+                month: number | null;
+                year: number | null;
+            }>;
+            trendsBySupplier: Array<{
+                __typename?: 'TrendsBySupplierType';
+                supplier: { __typename?: 'SupplierType'; id: string; name: string };
+                priceTrend: Array<{
+                    __typename?: 'PriceTrendType';
+                    avgPrice: number;
+                    date: string | null;
+                    week: number | null;
+                    month: number | null;
+                    year: number | null;
+                }>;
+            }>;
+            numbersBySupplier: Array<{
+                __typename?: 'NumbersBySupplierType';
+                avgPrice: number;
+                numOrders: number;
+                totalCost: number;
+                supplier: { __typename?: 'SupplierType'; id: string; name: string };
+            }>;
+        }>;
+    };
+};
+
+export type InternalOrderReportQueryVariables = Exact<{
+    startDate: Scalars['Date']['input'];
+    endDate: Scalars['Date']['input'];
+    frequency: Scalars['String']['input'];
+    officeIds: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+    productIds: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
+}>;
+
+export type InternalOrderReportQuery = {
+    __typename?: 'Query';
+    internalOrderReport: {
+        __typename?: 'InternalOrderReportType';
+        averageOrderProcessingTime: number;
+        orderCountTrend: Array<{
+            __typename?: 'OrderCountTrendType';
+            date: string | null;
+            month: number | null;
+            year: number | null;
+            count: number;
+        }>;
+        orderStatusDistribution: Array<{
+            __typename?: 'OrderStatusDistributionType';
+            status: string;
+            count: number;
+        }>;
+        topProductsOrdered: Array<{
+            __typename?: 'TopProductsOrderedType';
+            productId: string;
+            productName: string;
+            totalQuantity: number;
+        }>;
+        orderFulfillmentRate: {
+            __typename?: 'OrderFulfillmentRateType';
+            fulfillmentRate: number | null;
+        } | null;
+        sourceTargetOfficeAnalysis: Array<{
+            __typename?: 'SourceTargetOfficeAnalysisType';
+            sourceOfficeId: string;
+            sourceOfficeName: string;
+            targetOfficeId: string;
+            targetOfficeName: string;
+            orderCount: number;
+            totalQuantity: number;
+        }>;
+        topProductsOrderedByOffice: Array<{
+            __typename?: 'TopProductsOrderedByOfficeType';
+            officeId: string;
+            officeName: string;
+            topProducts: Array<{
+                __typename?: 'TopProductsOrderedType';
+                productId: string;
+                productName: string;
+                totalQuantity: number;
+            }>;
+        }>;
+        orderCountTrendByOffice: Array<{
+            __typename?: 'OrderCountTrendByOfficeType';
+            officeId: string;
+            officeName: string;
+            orderCountTrend: Array<{
+                __typename?: 'OrderCountTrendType';
+                date: string | null;
+                week: number | null;
+                month: number | null;
+                year: number | null;
+                count: number;
             }>;
         }>;
     };
@@ -10894,6 +11146,822 @@ export const ReportSupplierOrdersDocument = {
     ReportSupplierOrdersQuery,
     ReportSupplierOrdersQueryVariables
 >;
+export const CostReportDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'costReport' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'startDate' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'Date' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'endDate' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'Date' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'suppliersIds' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: { kind: 'Name', value: 'ID' },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'productsIds' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: { kind: 'Name', value: 'ID' },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'frequency' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'costReport' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'startDate' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'startDate' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'endDate' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'endDate' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'suppliersIds' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'suppliersIds' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'productsIds' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'productsIds' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'frequency' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'frequency' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'productCostDetails' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'product' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'id',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'name',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'avgPrice' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalCost',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'numOrders',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'trends' },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'avgPrice',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'date',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'week',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'month',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'year',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'trendsBySupplier',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'supplier',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'priceTrend',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'avgPrice',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'date',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'week',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'month',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'year',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'numbersBySupplier',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'supplier',
+                                                            },
+                                                            selectionSet: {
+                                                                kind: 'SelectionSet',
+                                                                selections: [
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'id',
+                                                                        },
+                                                                    },
+                                                                    {
+                                                                        kind: 'Field',
+                                                                        name: {
+                                                                            kind: 'Name',
+                                                                            value: 'name',
+                                                                        },
+                                                                    },
+                                                                ],
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'avgPrice',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'numOrders',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'totalCost',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'totalCost' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'numOrders' },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'numProducts' },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<CostReportQuery, CostReportQueryVariables>;
+export const InternalOrderReportDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'InternalOrderReport' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'startDate' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'Date' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'endDate' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'Date' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'frequency' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'NamedType',
+                            name: { kind: 'Name', value: 'String' },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'officeIds' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: { kind: 'Name', value: 'ID' },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'productIds' },
+                    },
+                    type: {
+                        kind: 'ListType',
+                        type: {
+                            kind: 'NonNullType',
+                            type: {
+                                kind: 'NamedType',
+                                name: { kind: 'Name', value: 'ID' },
+                            },
+                        },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'internalOrderReport' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'startDate' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'startDate' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'endDate' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'endDate' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'frequency' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'frequency' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'officeIds' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'officeIds' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'productIds' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'productIds' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'orderCountTrend' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'date' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'month' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'year' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'count' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'orderStatusDistribution',
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'status' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'count' },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'topProductsOrdered' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productId',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'productName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalQuantity',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'orderFulfillmentRate' },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'fulfillmentRate',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'averageOrderProcessingTime',
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'sourceTargetOfficeAnalysis',
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'sourceOfficeId',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'sourceOfficeName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'targetOfficeId',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'targetOfficeName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'orderCount',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'totalQuantity',
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'topProductsOrderedByOffice',
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'officeId' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'officeName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'topProducts',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'productId',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'productName',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'totalQuantity',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                                {
+                                    kind: 'Field',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'orderCountTrendByOffice',
+                                    },
+                                    selectionSet: {
+                                        kind: 'SelectionSet',
+                                        selections: [
+                                            {
+                                                kind: 'Field',
+                                                name: { kind: 'Name', value: 'officeId' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'officeName',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'orderCountTrend',
+                                                },
+                                                selectionSet: {
+                                                    kind: 'SelectionSet',
+                                                    selections: [
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'date',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'week',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'month',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'year',
+                                                            },
+                                                        },
+                                                        {
+                                                            kind: 'Field',
+                                                            name: {
+                                                                kind: 'Name',
+                                                                value: 'count',
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<InternalOrderReportQuery, InternalOrderReportQueryVariables>;
 export const SalesDocument = {
     kind: 'Document',
     definitions: [

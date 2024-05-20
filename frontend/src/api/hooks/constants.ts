@@ -1,4 +1,6 @@
 import {
+    CostReportQueryVariables,
+    InternalOrderReportQueryVariables,
     ReportSalesQueryVariables,
     ReportSupplierOrdersQueryVariables,
 } from '../graphql';
@@ -63,6 +65,16 @@ export const queryKeys = {
     reportSupplierOrders: (variables: ReportSupplierOrdersQueryVariables) => [
         queryDomains.reports,
         'supplier-orders',
+        variables,
+    ],
+    reportCost: (variables: CostReportQueryVariables) => [
+        queryDomains.reports,
+        'cost',
+        variables,
+    ],
+    internalOrderReport: (variables: InternalOrderReportQueryVariables) => [
+        queryDomains.reports,
+        'internal-order',
         variables,
     ],
 

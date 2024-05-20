@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-import { ClipboardListIcon, ShoppingBagIcon } from 'lucide-react';
+import { ClipboardListIcon, DollarSignIcon, ShoppingBagIcon } from 'lucide-react';
 
 import DashboardLayout, {
     DashboardLayoutBigTitle,
@@ -38,6 +38,16 @@ const Page = () => {
                                     <ClipboardListIcon />
 
                                     <span>Pedidos a proveedores</span>
+                                </div>
+                            </Card>
+                        </Link>
+
+                        <Link href={'/reportes/costo-proveedores'}>
+                            <Card className="!border-none">
+                                <div className="flex flex-row items-center justify-center space-x-4 rounded-md py-6 transition duration-200 hover:bg-black hover:text-white">
+                                    <DollarSignIcon />
+
+                                    <span>Costos proveedores</span>
                                 </div>
                             </Card>
                         </Link>

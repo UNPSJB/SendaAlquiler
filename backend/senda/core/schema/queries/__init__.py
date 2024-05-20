@@ -13,6 +13,8 @@ from .order_supplier import Query as SupplierOrderQuery
 from .dashboard import Query as DashboardQuery
 from .report_sales import Query as SalesReportQuery
 from .report_supplier_order import Query as SupplierOrderReportQuery
+from .report_supplier_costs import Query as SupplierCostsReportQuery
+from .report_internal_orders import Query as InternalOrdersReportQuery
 
 
 class Query(
@@ -29,6 +31,8 @@ class Query(
     DashboardQuery,
     SalesReportQuery,
     SupplierOrderReportQuery,
+    SupplierCostsReportQuery,
+    InternalOrdersReportQuery,
     graphene.ObjectType,
 ):
     pass

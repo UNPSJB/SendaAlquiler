@@ -105,3 +105,125 @@ query reportSupplierOrders(
         }
     }
 }
+
+query costReport(
+    $startDate: Date!
+    $endDate: Date!
+    $suppliersIds: [ID!]
+    $productsIds: [ID!]
+    $frequency: String!
+) {
+    costReport(
+        startDate: $startDate
+        endDate: $endDate
+        suppliersIds: $suppliersIds
+        productsIds: $productsIds
+        frequency: $frequency
+    ) {
+        productCostDetails {
+            product {
+                id
+                name
+            }
+            avgPrice
+            totalCost
+            numOrders
+            trends {
+                avgPrice
+                date
+                week
+                month
+                year
+            }
+            trendsBySupplier {
+                supplier {
+                    id
+                    name
+                }
+                priceTrend {
+                    avgPrice
+                    date
+                    week
+                    month
+                    year
+                }
+            }
+            numbersBySupplier {
+                supplier {
+                    id
+                    name
+                }
+                avgPrice
+                numOrders
+                totalCost
+            }
+        }
+        totalCost
+        numOrders
+        numProducts
+    }
+}
+
+query InternalOrderReport(
+    $startDate: Date!
+    $endDate: Date!
+    $frequency: String!
+    $officeIds: [ID!]
+    $productIds: [ID!]
+) {
+    internalOrderReport(
+        startDate: $startDate
+        endDate: $endDate
+        frequency: $frequency
+        officeIds: $officeIds
+        productIds: $productIds
+    ) {
+        orderCountTrend {
+            date
+            month
+            year
+            count
+        }
+        orderStatusDistribution {
+            status
+            count
+        }
+        topProductsOrdered {
+            productId
+            productName
+            totalQuantity
+        }
+        orderFulfillmentRate {
+            fulfillmentRate
+        }
+        averageOrderProcessingTime
+        sourceTargetOfficeAnalysis {
+            sourceOfficeId
+            sourceOfficeName
+            targetOfficeId
+            targetOfficeName
+            orderCount
+            totalQuantity
+        }
+        topProductsOrderedByOffice {
+            officeId
+            officeName
+            topProducts {
+                productId
+                productName
+                totalQuantity
+            }
+        }
+        orderCountTrendByOffice {
+            officeId
+            officeName
+            orderCountTrend {
+                date
+                week
+                month
+                year
+                count
+            }
+        }
+    }
+}

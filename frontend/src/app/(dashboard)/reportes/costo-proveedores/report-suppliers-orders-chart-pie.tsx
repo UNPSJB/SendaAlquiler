@@ -1,21 +1,21 @@
 import { Legend, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
-import { ReportSalesQuery } from '@/api/graphql';
+import { CostReportQuery } from '@/api/graphql';
 
 import { REPORT_SALES_COLORS } from './report-sales-constants';
 
-import { formatNumberWithThousandsSeparator, formatNumberAsPrice } from '@/lib/utils';
+import { formatNumberWithThousandsSeparator } from '@/lib/utils';
 
 type Props = {
-    report: NonNullable<ReportSalesQuery['salesReport']>;
-    metricKey: 'totalSoldUnits' | 'totalSoldAmount';
+    report: NonNullable<CostReportQuery['costReport']>;
+    metric: 'numOrders' | 'numUnits';
 };
 
-export const ReportSalesChartPie = ({ report, metricKey }: Props) => {
-    const dataForPieChart = report.officeData.map((item) => {
+export const ReportSuppliersOrdersChartPie = ({ report, metric }: Props) => {
+    const dataForPieChart = report.productCostDetails.map((item) => {
         return {
-            name: item.officeName,
-            value: item[metricKey],
+            name: item.office.name,
+            value: item[metric],
         };
     });
 
@@ -34,7 +34,7 @@ export const ReportSalesChartPie = ({ report, metricKey }: Props) => {
                     isAnimationActive={false}
                     data={dataForPieChart}
                     cx="50%"
-                    cy="40%"
+                    cy="50%"
                     outerRadius={80}
                     fill="#8884d8"
                     label={({ cx, cy, midAngle, outerRadius, fill, value }) => {
@@ -64,15 +64,7 @@ export const ReportSalesChartPie = ({ report, metricKey }: Props) => {
                                     fill={fill}
                                     fontSize={12}
                                 >
-                                    {Math.round(
-                                        ((value as number) /
-                                            dataForPieChart.reduce(
-                                                (acc, item) => acc + item.value,
-                                                0,
-                                            )) *
-                                            100,
-                                    )}
-                                    %
+                                    {formatNumberWithThousandsSeparator(value)}
                                 </text>
                             </g>
                         );
@@ -94,9 +86,7 @@ export const ReportSalesChartPie = ({ report, metricKey }: Props) => {
 
                 <Tooltip
                     formatter={(value: number) => {
-                        return metricKey === 'totalSoldUnits'
-                            ? formatNumberWithThousandsSeparator(value)
-                            : `$${formatNumberAsPrice(value)}`;
+                        return formatNumberWithThousandsSeparator(value);
                     }}
                 />
 
