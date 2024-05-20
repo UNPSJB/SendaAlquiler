@@ -19,8 +19,10 @@ const Page = () => {
                 </div>
             }
         >
-            <div className="container flex-1 bg-muted py-8">
-                <div>
+            <div className="container flex-1 space-y-8 bg-muted py-8">
+                <div className="space-y-2">
+                    <h2 className="font-bold">Reportes de ventas</h2>
+
                     <div className="mb-4 grid grid-cols-2 gap-4">
                         <Link href={'/reportes/ventas'}>
                             <Card className="!border-none">
@@ -31,7 +33,13 @@ const Page = () => {
                                 </div>
                             </Card>
                         </Link>
+                    </div>
+                </div>
 
+                <div className="space-y-2">
+                    <h2 className="font-bold">Pedidos a proveedores</h2>
+
+                    <div className="mb-4 grid grid-cols-2 gap-4">
                         <Link href={'/reportes/pedidos-a-proveedores'}>
                             <Card className="!border-none">
                                 <div className="flex flex-row items-center justify-center space-x-4 rounded-md py-6 transition duration-200 hover:bg-black hover:text-white">
@@ -43,6 +51,22 @@ const Page = () => {
                         </Link>
 
                         <Link href={'/reportes/costo-proveedores'}>
+                            <Card className="!border-none">
+                                <div className="flex flex-row items-center justify-center space-x-4 rounded-md py-6 transition duration-200 hover:bg-black hover:text-white">
+                                    <DollarSignIcon />
+
+                                    <span>Costos proveedores</span>
+                                </div>
+                            </Card>
+                        </Link>
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <h2 className="font-bold">Pedidos internos</h2>
+
+                    <div className="mb-4 grid grid-cols-2 gap-4">
+                        <Link href={'/reportes/pedidos-internos'}>
                             <Card className="!border-none">
                                 <div className="flex flex-row items-center justify-center space-x-4 rounded-md py-6 transition duration-200 hover:bg-black hover:text-white">
                                     <DollarSignIcon />
