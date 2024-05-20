@@ -71,7 +71,7 @@ const Page = () => {
                                 <div className="flex flex-row items-center justify-center space-x-4 rounded-md py-6 transition duration-200 hover:bg-black hover:text-white">
                                     <DollarSignIcon />
 
-                                    <span>Costos proveedores</span>
+                                    <span>Pedidos internos</span>
                                 </div>
                             </Card>
                         </Link>
