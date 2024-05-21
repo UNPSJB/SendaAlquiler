@@ -190,7 +190,7 @@ const ReportSuppliersOrders = () => {
         <DashboardLayout
             header={
                 <div className="flex items-center justify-between">
-                    <DashboardLayoutBigTitle>Reporte de costos</DashboardLayoutBigTitle>
+                    <DashboardLayoutBigTitle>Pedidos internos</DashboardLayoutBigTitle>
                 </div>
             }
         >
