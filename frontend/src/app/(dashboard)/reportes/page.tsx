@@ -77,6 +77,22 @@ const Page = () => {
                         </Link>
                     </div>
                 </div>
+
+                <div className="space-y-2">
+                    <h2 className="font-bold">Contratos</h2>
+
+                    <div className="mb-4 grid grid-cols-2 gap-4">
+                        <Link href={'/reportes/contratos'}>
+                            <Card className="!border-none">
+                                <div className="flex flex-row items-center justify-center space-x-4 rounded-md py-6 transition duration-200 hover:bg-black hover:text-white">
+                                    <ClipboardListIcon />
+
+                                    <span>Contratos</span>
+                                </div>
+                            </Card>
+                        </Link>
+                    </div>
+                </div>
             </div>
         </DashboardLayout>
     );
