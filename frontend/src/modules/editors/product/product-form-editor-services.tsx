@@ -19,13 +19,6 @@ import { Input } from '@/components/ui/input';
 import { formatNumberAsPrice, inputToNumber } from '@/lib/utils';
 
 const MAX_PRICE = 9999999999;
-/* 
-export enum ProductServiceBillingTypeChoices {
-    Custom = 'CUSTOM',
-    Monthly = 'MONTHLY',
-    OneTime = 'ONE_TIME',
-    Weekly = 'WEEKLY',
-} */
 
 export const ProductFormEditorServices = () => {
     const formMethods = useFormContext<ProductFormEditorValues>();
@@ -54,7 +47,7 @@ export const ProductFormEditorServices = () => {
                                     servicesFieldArray.remove(index);
                                 }}
                             >
-                                <Trash className="h-4 w-4" />
+                                <Trash className="size-4" />
                             </Button>
                         </div>
 

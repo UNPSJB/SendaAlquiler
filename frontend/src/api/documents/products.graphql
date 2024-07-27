@@ -89,6 +89,9 @@ mutation updateProduct(
     $stockItems: [ProductStockItemInput!]!
     $suppliers: [ProductSupplierInput!]!
     $services: [ProductServiceInput!]!
+    $suppliersIdsToDelete: [ID!]!
+    $servicesIdsToDelete: [ID!]!
+    $stockItemsIdsToDelete: [ID!]!
 ) {
     updateProduct(
         id: $id
@@ -96,6 +99,9 @@ mutation updateProduct(
         stockItems: $stockItems
         suppliers: $suppliers
         services: $services
+        suppliersIdsToDelete: $suppliersIdsToDelete
+        servicesIdsToDelete: $servicesIdsToDelete
+        stockItemsIdsToDelete: $stockItemsIdsToDelete
     ) {
         product {
             ...ProductListItem
