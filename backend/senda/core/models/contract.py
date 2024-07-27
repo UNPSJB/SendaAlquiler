@@ -74,11 +74,10 @@ class ContractItemServiceTotalDetailsDict(TypedDict):
 
 class ContractManager(models.Manager["Contract"]):
     def _diff_month(self, start_date: datetime, end_date: datetime):
-        return (start_date - end_date).days / 30
+        return (end_date - start_date).days / 30
 
     def _diff_week(self, start_date: datetime, end_date: datetime):
-        """Return the number of weeks between two dates."""
-        return (start_date - end_date).days / 7
+        return (end_date - start_date).days / 7
 
     def calculate_service_quantity(
         self,
@@ -90,13 +89,13 @@ class ContractManager(models.Manager["Contract"]):
             service.billing_type == ProductServiceBillingTypeChoices.CUSTOM
             and service.billing_period
         ):
-            return int((start_date - end_date).days / service.billing_period)
+            return int((end_date - start_date).days / service.billing_period)
         elif service.billing_type == ProductServiceBillingTypeChoices.ONE_TIME:
             return 1
         elif service.billing_type == ProductServiceBillingTypeChoices.MONTHLY:
-            return self._diff_month(start_date, end_date)
+            return max(1, int(self._diff_month(start_date, end_date)))
         elif service.billing_type == ProductServiceBillingTypeChoices.WEEKLY:
-            return self._diff_week(start_date, end_date)
+            return max(1, int(self._diff_week(start_date, end_date)))
         else:
             raise ValidationError(f"Invalid billing type {service.billing_type}")
 
@@ -107,16 +106,14 @@ class ContractManager(models.Manager["Contract"]):
         start_date: datetime,
         end_date: datetime,
     ) -> ContractItemServiceTotalDetailsDict:
-        service_subtotal = service.price * self.calculate_service_quantity(
-            service, start_date, end_date
-        )
-        total = service_subtotal - discount
+        quantity = self.calculate_service_quantity(service, start_date, end_date)
+        service_subtotal = service.price * quantity
+        total = max(0, service_subtotal - discount)
 
         return ContractItemServiceTotalDetailsDict(
             service_subtotal=service_subtotal,
             total=total,
         )
-
     def _validate_product_and_services(
         self, item: ContractItemDetailsDict
     ) -> Tuple[Product, List[ProductService]]:
@@ -149,13 +146,17 @@ class ContractManager(models.Manager["Contract"]):
     ) -> ContractItemTotalDetailsDict:
         contract_duration_in_calendar_days = (end_date - start_date).days
 
-        quantity = 0
-        shipping_subtotal = 0
-        shipping_discount = 0
-        for allocation in item.get("allocations"):
-            quantity += allocation.get("quantity")
-            shipping_subtotal += allocation.get("shipping_cost") or 0
-            shipping_discount += allocation.get("shipping_discount") or 0
+        quantity = sum(
+            allocation.get("quantity", 0) for allocation in item.get("allocations", [])
+        )
+        shipping_subtotal = sum(
+            allocation.get("shipping_cost", 0)
+            for allocation in item.get("allocations", [])
+        )
+        shipping_discount = sum(
+            allocation.get("shipping_discount", 0)
+            for allocation in item.get("allocations", [])
+        )
         product_subtotal = product_price * quantity * contract_duration_in_calendar_days
 
         services_subtotal = 0
@@ -261,6 +262,14 @@ class ContractManager(models.Manager["Contract"]):
                             total=service_totals.get("total"),
                             billing_type=service_instance.billing_type,
                             billing_period=service_instance.billing_period,
+                        )
+
+                    for allocation in item_data.get("allocations", []):
+                        ContractItemProductAllocation.objects.create(
+                            item=item,
+                            office_id=allocation.get("office_id"),
+                            quantity=allocation.get("quantity"),
+                            shipping_cost=allocation.get("shipping_cost") or 0,
                         )
 
                 contract.update_totals()
@@ -574,7 +583,8 @@ class ContractItem(TimeStampedModel):
 
     def save(self, *args: Any, **kwargs: Any) -> None:
         self.clean()
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+        self.contract.update_totals()
 
 
 class ContractItemService(TimeStampedModel):
@@ -612,6 +622,10 @@ class ContractItemService(TimeStampedModel):
             ),
         ]
 
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        super().save(*args, **kwargs)
+        self.item.contract.update_totals()
+
 
 class ContractItemProductAllocation(models.Model):
     office = models.ForeignKey(
@@ -637,3 +651,7 @@ class ContractItemProductAllocation(models.Model):
                 name="unique_contract_item_allocation_per_office",
             ),
         ]
+
+    def save(self, *args: Any, **kwargs: Any) -> None:
+        super().save(*args, **kwargs)
+        self.item.contract.update_totals()
