@@ -94,14 +94,7 @@ const columns: ColumnDef<Contract, any>[] = [
 ];
 
 const RowActions = ({ contract }: { contract: Contract }) => {
-    const deleteMutation = useDeleteContract({
-        onSuccess: () => {
-            toast.success('Contrato eliminado correctamente');
-        },
-        onError: () => {
-            toast.error('Ha ocurrido un error al eliminar el contrato');
-        },
-    });
+    const deleteMutation = useDeleteContract();
 
     const [open, setOpen] = useState(false);
 
@@ -147,7 +140,19 @@ const RowActions = ({ contract }: { contract: Contract }) => {
 
                     <Button
                         onClick={() => {
-                            deleteMutation.mutate(contract.id);
+                            deleteMutation.mutate(contract.id, {
+                                onSuccess: () => {
+                                    toast.success(
+                                        `El contract #${contract.id} ha sido eliminado.`,
+                                    );
+                                    setOpen(false);
+                                },
+                                onError: () => {
+                                    toast.error(
+                                        `No se pudo eliminar el contract #${contract.id}.`,
+                                    );
+                                },
+                            });
                         }}
                         variant="destructive"
                     >

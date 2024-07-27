@@ -116,14 +116,7 @@ const columns: ColumnDef<Client, any>[] = [
 ] as const;
 
 const RowActions = ({ client }: { client: Client }) => {
-    const deleteMutation = useDeleteClient({
-        onSuccess: () => {
-            toast.success('Cliente eliminado correctamente');
-        },
-        onError: () => {
-            toast.error('Ha ocurrido un error al eliminar el cliente');
-        },
-    });
+    const deleteMutation = useDeleteClient();
 
     const [open, setOpen] = useState(false);
 
@@ -140,7 +133,7 @@ const RowActions = ({ client }: { client: Client }) => {
         >
             <DropdownMenu>
                 <DropdownMenuTrigger>
-                    <MoreVertical className="h-5 w-5" />
+                    <MoreVertical className="size-5" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent>

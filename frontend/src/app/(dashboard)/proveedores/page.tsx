@@ -112,14 +112,7 @@ const columns: ColumnDef<Supplier, any>[] = [
 ];
 
 const RowActions = ({ supplier }: { supplier: Supplier }) => {
-    const deleteMutation = useDeleteSupplier({
-        onSuccess: () => {
-            toast.success('Proveedor eliminado correctamente');
-        },
-        onError: () => {
-            toast.error('Ha ocurrido un error al eliminar el proveedor');
-        },
-    });
+    const deleteMutation = useDeleteSupplier();
 
     const [open, setOpen] = useState(false);
 
@@ -136,7 +129,7 @@ const RowActions = ({ supplier }: { supplier: Supplier }) => {
         >
             <DropdownMenu>
                 <DropdownMenuTrigger>
-                    <MoreVertical className="h-5 w-5" />
+                    <MoreVertical className="size-5" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent>
@@ -165,7 +158,19 @@ const RowActions = ({ supplier }: { supplier: Supplier }) => {
 
                     <Button
                         onClick={() => {
-                            deleteMutation.mutate(supplier.id);
+                            deleteMutation.mutate(supplier.id, {
+                                onSuccess: () => {
+                                    toast.success(
+                                        `Proveedor ${supplier.name} eliminado correctamente`,
+                                    );
+                                    setOpen(false);
+                                },
+                                onError: () => {
+                                    toast.error(
+                                        `Ha ocurrido un error al eliminar el proveedor ${supplier.name}`,
+                                    );
+                                },
+                            });
                         }}
                         variant="destructive"
                     >

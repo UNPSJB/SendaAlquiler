@@ -101,14 +101,7 @@ const columns: ColumnDef<OrderSupplier, any>[] = [
 ];
 
 const RowActions = ({ supplierOrder }: { supplierOrder: OrderSupplier }) => {
-    const deleteMutation = useDeleteSupplierOrder({
-        onSuccess: () => {
-            toast.success('Pedido a proveedor eliminado correctamente');
-        },
-        onError: () => {
-            toast.error('Ha ocurrido un error al eliminar el pedido a proveedor');
-        },
-    });
+    const deleteMutation = useDeleteSupplierOrder();
 
     const [open, setOpen] = useState(false);
 
@@ -159,7 +152,19 @@ const RowActions = ({ supplierOrder }: { supplierOrder: OrderSupplier }) => {
 
                     <Button
                         onClick={() => {
-                            deleteMutation.mutate(supplierOrder.id);
+                            deleteMutation.mutate(supplierOrder.id, {
+                                onSuccess: () => {
+                                    toast.success(
+                                        `Pedido a proveedor #${supplierOrder.id} para "${supplierOrder.supplier.name}" eliminado correctamente`,
+                                    );
+                                    setOpen(false);
+                                },
+                                onError: () => {
+                                    toast.error(
+                                        `Ha ocurrido un error al eliminar el pedido a proveedor #${supplierOrder.id}`,
+                                    );
+                                },
+                            });
                         }}
                         variant="destructive"
                     >
