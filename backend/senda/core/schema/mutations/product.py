@@ -60,6 +60,7 @@ class CreateProduct(graphene.Mutation):
     product = graphene.Field(ProductType)
     error = graphene.String()
 
+    @employee_or_admin_required
     @staticmethod
     def mutate(
         root,
