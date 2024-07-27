@@ -10,6 +10,8 @@ import {
     ProductFormEditorValues,
 } from '@/modules/editors/product/product-form-editor';
 
+import { getBillingTypeDisplay } from '@/lib/utils';
+
 const Page = () => {
     const { id } = useParams();
     const productByIdQuery = useProductById(id as string);
@@ -89,6 +91,11 @@ const Page = () => {
                 service: {
                     label: service.name,
                     value: service.id,
+                },
+                billingPeriod: service.billingPeriod,
+                billingType: {
+                    value: service.billingType,
+                    label: getBillingTypeDisplay(service.billingType),
                 },
             };
         }),

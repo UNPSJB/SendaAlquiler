@@ -2803,6 +2803,8 @@ export type ProductByIdQuery = {
             id: string;
             name: string;
             price: any;
+            billingType: ProductServiceBillingTypeChoices;
+            billingPeriod: number | null;
         }>;
         suppliers: Array<{
             __typename?: 'ProductSupplier';
@@ -9515,6 +9517,20 @@ export const ProductByIdDocument = {
                                             {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'price' },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'billingType',
+                                                },
+                                            },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'billingPeriod',
+                                                },
                                             },
                                         ],
                                     },

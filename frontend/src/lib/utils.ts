@@ -1,6 +1,8 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+import { ProductServiceBillingTypeChoices } from '@/api/graphql';
+
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
@@ -121,4 +123,19 @@ export const dateToInputValue = (date: Date) => {
 
 export const datetimeToInputValue = (date: Date) => {
     return date.toISOString();
+};
+
+export const getBillingTypeDisplay = (
+    billingType: ProductServiceBillingTypeChoices,
+): string => {
+    switch (billingType) {
+        case ProductServiceBillingTypeChoices.Custom:
+            return 'Personalizado';
+        case ProductServiceBillingTypeChoices.Monthly:
+            return 'Mensual';
+        case ProductServiceBillingTypeChoices.OneTime:
+            return 'Una vez';
+        case ProductServiceBillingTypeChoices.Weekly:
+            return 'Semanal';
+    }
 };
