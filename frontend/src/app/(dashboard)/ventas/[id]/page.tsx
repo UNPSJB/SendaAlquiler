@@ -41,10 +41,6 @@ const getDasboardTitle = (sale: SaleByIdQuery['saleById'] | undefined) => {
                     {sale.client.firstName} {sale.client.lastName} / #{sale.id}
                 </span>
             </div>
-
-            <Button asChild>
-                <Link href={`/ventas/add?duplicateId=${sale.id}`}>Duplicar venta</Link>
-            </Button>
         </div>
     );
 };
