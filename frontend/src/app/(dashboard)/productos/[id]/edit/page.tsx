@@ -49,7 +49,6 @@ const Page = () => {
     }
 
     const product = productByIdQuery.data.productById;
-    console.log(product);
 
     const defaultValues: ProductFormEditorValues = {
         sku: product.sku,

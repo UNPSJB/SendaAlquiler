@@ -27,6 +27,26 @@ export const ProductFormEditorStocks = () => {
 
     const officesQuery = useOffices();
 
+    if (officesQuery.isLoading) {
+        return (
+            <div className="space-y-4">
+                <h2 className="text-lg font-bold">Stock</h2>
+
+                <p>Cargando...</p>
+            </div>
+        );
+    }
+
+    if (!officesQuery.data) {
+        return (
+            <div className="space-y-4">
+                <h2 className="text-lg font-bold">Stock</h2>
+
+                <p>Error</p>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-4">
             <h2 className="text-lg font-bold">Stock</h2>
@@ -41,52 +61,52 @@ export const ProductFormEditorStocks = () => {
                                 rules={{
                                     required: 'La sucursal es requerida',
                                 }}
-                                render={({ field }) => (
-                                    <FormItem className="flex w-1/2 flex-col">
-                                        <FormLabel required>Sucursal</FormLabel>
+                                render={({ field }) => {
+                                    return (
+                                        <FormItem className="flex w-1/2 flex-col">
+                                            <FormLabel required>Sucursal</FormLabel>
 
-                                        <FormControl>
-                                            <ComboboxSimple
-                                                placeholder="Selecciona una sucursal"
-                                                options={(officesQuery.data
-                                                    ? officesQuery.data.offices
-                                                    : []
-                                                )
-                                                    .filter((office) => {
-                                                        const isSelected =
-                                                            stocksFieldArray.fields
-                                                                .map(
-                                                                    (field) =>
-                                                                        field.office
-                                                                            ?.value,
-                                                                )
-                                                                .includes(office.id);
-                                                        const isSelectedInCurrentIndex =
-                                                            stocksFieldArray.fields[index]
-                                                                .office?.value ===
-                                                            office.id;
+                                            <FormControl>
+                                                <ComboboxSimple
+                                                    placeholder="Selecciona una sucursal"
+                                                    options={officesQuery.data.offices
+                                                        .filter((office) => {
+                                                            const isSelected =
+                                                                stocksFieldArray.fields
+                                                                    .map(
+                                                                        (field) =>
+                                                                            field.office
+                                                                                ?.value,
+                                                                    )
+                                                                    .includes(office.id);
+                                                            const isSelectedInCurrentIndex =
+                                                                stocksFieldArray.fields[
+                                                                    index
+                                                                ].office?.value ===
+                                                                office.id;
 
-                                                        return (
-                                                            isSelectedInCurrentIndex ||
-                                                            !isSelected
-                                                        );
-                                                    })
-                                                    .map((office) => {
-                                                        return {
-                                                            label: office.name,
-                                                            value: office.id,
-                                                        };
-                                                    })}
-                                                onChange={(option) => {
-                                                    field.onChange(option);
-                                                }}
-                                                value={field.value || null}
-                                            />
-                                        </FormControl>
+                                                            return (
+                                                                isSelectedInCurrentIndex ||
+                                                                !isSelected
+                                                            );
+                                                        })
+                                                        .map((office) => {
+                                                            return {
+                                                                label: office.name,
+                                                                value: office.id,
+                                                            };
+                                                        })}
+                                                    onChange={(option) => {
+                                                        field.onChange(option);
+                                                    }}
+                                                    value={field.value || null}
+                                                />
+                                            </FormControl>
 
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
+                                            <FormMessage />
+                                        </FormItem>
+                                    );
+                                }}
                             />
 
                             <FormField

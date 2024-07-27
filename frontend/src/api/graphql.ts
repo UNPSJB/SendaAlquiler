@@ -804,8 +804,11 @@ export type MutationUpdateProductArgs = {
     id: Scalars['ID']['input'];
     productData: ProductDataInput;
     services: Array<ProductServiceInput>;
+    servicesIdsToDelete: Array<Scalars['ID']['input']>;
     stockItems: Array<ProductStockItemInput>;
+    stockItemsIdsToDelete: Array<Scalars['ID']['input']>;
     suppliers: Array<ProductSupplierInput>;
+    suppliersIdsToDelete: Array<Scalars['ID']['input']>;
 };
 
 export type MutationUpdateSupplierArgs = {
@@ -2848,6 +2851,9 @@ export type UpdateProductMutationVariables = Exact<{
     stockItems: Array<ProductStockItemInput> | ProductStockItemInput;
     suppliers: Array<ProductSupplierInput> | ProductSupplierInput;
     services: Array<ProductServiceInput> | ProductServiceInput;
+    suppliersIdsToDelete: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+    servicesIdsToDelete: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+    stockItemsIdsToDelete: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
 }>;
 
 export type UpdateProductMutation = {
@@ -9856,6 +9862,66 @@ export const UpdateProductDocument = {
                         },
                     },
                 },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'suppliersIdsToDelete' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: { kind: 'Name', value: 'ID' },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'servicesIdsToDelete' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: { kind: 'Name', value: 'ID' },
+                                },
+                            },
+                        },
+                    },
+                },
+                {
+                    kind: 'VariableDefinition',
+                    variable: {
+                        kind: 'Variable',
+                        name: { kind: 'Name', value: 'stockItemsIdsToDelete' },
+                    },
+                    type: {
+                        kind: 'NonNullType',
+                        type: {
+                            kind: 'ListType',
+                            type: {
+                                kind: 'NonNullType',
+                                type: {
+                                    kind: 'NamedType',
+                                    name: { kind: 'Name', value: 'ID' },
+                                },
+                            },
+                        },
+                    },
+                },
             ],
             selectionSet: {
                 kind: 'SelectionSet',
@@ -9902,6 +9968,33 @@ export const UpdateProductDocument = {
                                 value: {
                                     kind: 'Variable',
                                     name: { kind: 'Name', value: 'services' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'suppliersIdsToDelete' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'suppliersIdsToDelete' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'servicesIdsToDelete' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'servicesIdsToDelete' },
+                                },
+                            },
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'stockItemsIdsToDelete' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: {
+                                        kind: 'Name',
+                                        value: 'stockItemsIdsToDelete',
+                                    },
                                 },
                             },
                         ],

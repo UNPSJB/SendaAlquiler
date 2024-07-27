@@ -6921,6 +6921,30 @@
                                 "deprecationReason": null
                             },
                             {
+                                "name": "servicesIdsToDelete",
+                                "description": null,
+                                "type": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "LIST",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "NON_NULL",
+                                            "name": null,
+                                            "ofType": {
+                                                "kind": "SCALAR",
+                                                "name": "ID",
+                                                "ofType": null
+                                            }
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
                                 "name": "stockItems",
                                 "description": null,
                                 "type": {
@@ -6945,6 +6969,30 @@
                                 "deprecationReason": null
                             },
                             {
+                                "name": "stockItemsIdsToDelete",
+                                "description": null,
+                                "type": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "LIST",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "NON_NULL",
+                                            "name": null,
+                                            "ofType": {
+                                                "kind": "SCALAR",
+                                                "name": "ID",
+                                                "ofType": null
+                                            }
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
                                 "name": "suppliers",
                                 "description": null,
                                 "type": {
@@ -6959,6 +7007,30 @@
                                             "ofType": {
                                                 "kind": "INPUT_OBJECT",
                                                 "name": "ProductSupplierInput",
+                                                "ofType": null
+                                            }
+                                        }
+                                    }
+                                },
+                                "defaultValue": null,
+                                "isDeprecated": false,
+                                "deprecationReason": null
+                            },
+                            {
+                                "name": "suppliersIdsToDelete",
+                                "description": null,
+                                "type": {
+                                    "kind": "NON_NULL",
+                                    "name": null,
+                                    "ofType": {
+                                        "kind": "LIST",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "NON_NULL",
+                                            "name": null,
+                                            "ofType": {
+                                                "kind": "SCALAR",
+                                                "name": "ID",
                                                 "ofType": null
                                             }
                                         }

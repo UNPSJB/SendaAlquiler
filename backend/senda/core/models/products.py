@@ -150,6 +150,26 @@ class ProductManager(models.Manager["Product"]):
                         billing_period=service_data.get("billing_period"),
                     )
 
+    def delete_product_suppliers(
+        self, product_id: int, suppliers_ids: List[int]
+    ) -> None:
+        with transaction.atomic():
+            product = self.get(pk=product_id)
+            product.suppliers.filter(supplier_id__in=suppliers_ids).delete()
+
+    def delete_product_services(
+        self, product_id: int, services_ids: List[int]
+    ) -> None:
+        with transaction.atomic():
+            product = self.get(pk=product_id)
+            product.services.filter(id__in=services_ids).delete()
+
+    def delete_stock_items(
+        self, product_id: int, office_ids: List[int]
+    ) -> None:
+        with transaction.atomic():
+            product = self.get(pk=product_id)
+            product.stock_items.filter(office_id__in=office_ids).delete()
 
 class ProductTypeChoices(models.TextChoices):
     ALQUILABLE = "ALQUILABLE", "ALQUILABLE"

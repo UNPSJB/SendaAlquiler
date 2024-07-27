@@ -136,6 +136,9 @@ class UpdateProduct(graphene.Mutation):
         stock_items = non_null_list_of(ProductStockItemInput, required=False)
         suppliers = non_null_list_of(ProductSupplierInput, required=False)
         services = non_null_list_of(ProductServiceInput, required=False)
+        suppliers_ids_to_delete = non_null_list_of(graphene.ID, required=False)
+        services_ids_to_delete = non_null_list_of(graphene.ID, required=False)
+        stock_items_ids_to_delete = non_null_list_of(graphene.ID, required=False)
 
     product = graphene.Field(ProductType)
     error = graphene.String()
@@ -150,6 +153,9 @@ class UpdateProduct(graphene.Mutation):
         stock_items: List[ProductStockItemInput] = None,
         suppliers: List[ProductSupplierInput] = None,
         services: List[ProductServiceInput] = None,
+        suppliers_ids_to_delete: List[str] = None,
+        services_ids_to_delete: List[str] = None,
+        stock_items_ids_to_delete: List[str] = None,
     ):
         try:
             with transaction.atomic():
@@ -205,6 +211,21 @@ class UpdateProduct(graphene.Mutation):
                             )
                             for service in services
                         ],
+                    )
+
+                if suppliers_ids_to_delete:
+                    Product.objects.delete_product_suppliers(
+                        product_id=product.pk, suppliers_ids=suppliers_ids_to_delete
+                    )
+
+                if services_ids_to_delete:
+                    Product.objects.delete_product_services(
+                        product_id=product.pk, services_ids=services_ids_to_delete
+                    )
+
+                if stock_items_ids_to_delete:
+                    Product.objects.delete_stock_items(
+                        product_id=product.pk, office_ids=stock_items_ids_to_delete
                     )
 
                 return UpdateProduct(product=product)

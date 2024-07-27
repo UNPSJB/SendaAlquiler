@@ -200,6 +200,9 @@ export const ProductFormEditor = ({ cancelHref, defaultValues, idToUpdate }: Pro
                 services,
                 stockItems,
                 suppliers,
+                servicesIdsToDelete: data.servicesIdsToDelete || [],
+                suppliersIdsToDelete: data.suppliersIdsToDelete || [],
+                stockItemsIdsToDelete: data.stockIdsToDelete || [],
             });
         }
     };
@@ -219,7 +222,7 @@ export const ProductFormEditor = ({ cancelHref, defaultValues, idToUpdate }: Pro
                     href="#"
                 >
                     <span>Tutorial</span>
-                    <Book className="h-5 w-5" />
+                    <Book className="size-5" />
                 </a>
             </div>
 
