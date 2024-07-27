@@ -6,7 +6,7 @@ django.setup()
 
 from faker import Faker
 import random
-
+from django.utils import timezone
 from senda.core.models.admin import AdminModel
 from senda.core.models.clients import Client
 from senda.core.models.employees import EmployeeModel, EmployeeOffice
@@ -368,15 +368,32 @@ def create_comerciable_products():
 
 def create_alquilable_products():
     tent_products = [
-        ("Carpa para 2 personas", ["Armado", "Desarmado"]),
-        ("Carpa para 4 personas", ["Armado", "Desarmado"]),
-        ("Carpa para 6 personas", ["Armado", "Desarmado"]),
-        ("Baño quimico", ["Limpieza en Obra", "Limpieza en Evento"]),
+        (
+            "Carpa para 2 personas",
+            ["Armado", "Desarmado"],
+            ProductServiceBillingTypeChoices.MONTHLY,
+        ),
+        (
+            "Carpa para 4 personas",
+            ["Armado", "Desarmado"],
+            ProductServiceBillingTypeChoices.MONTHLY,
+        ),
+        (
+            "Carpa para 6 personas",
+            ["Armado", "Desarmado"],
+            ProductServiceBillingTypeChoices.MONTHLY,
+        ),
+        (
+            "Baño quimico",
+            ["Limpieza en Obra", "Limpieza en Evento"],
+            ProductServiceBillingTypeChoices.MONTHLY,
+        ),
     ]
 
-    for name, service_names in tent_products:
+    for name, service_names, billing_type in tent_products:
         services = [
-            generate_service_data(service_name) for service_name in service_names
+            generate_service_data(service_name, billing_type)
+            for service_name in service_names
         ]
         create_product_with_details(name, ProductTypeChoices.ALQUILABLE, services)
 
@@ -396,9 +413,10 @@ def create_internal_orders():
             Office.objects.order_by("?").exclude(pk=source_office.pk).first()
         )
 
-        requested_for_date = fake.date_time_between(
+        naive_requested_for_date = fake.date_time_between(
             start_date="-1y", end_date="now", tzinfo=None
         )
+        requested_for_date = timezone.make_aware(naive_requested_for_date)
         approximate_delivery_date = requested_for_date + timedelta(
             days=random.randint(1, 30)
         )
@@ -487,9 +505,10 @@ def create_supplier_orders():
         supplier = SupplierModel.objects.order_by("?").first()
         target_office = Office.objects.order_by("?").first()
 
-        requested_for_date = fake.date_time_between(
+        naive_requested_for_date = fake.date_time_between(
             start_date="-1y", end_date="now", tzinfo=None
         )
+        requested_for_date = timezone.make_aware(naive_requested_for_date)
         approximate_delivery_date = requested_for_date + timedelta(
             days=random.randint(1, 30)
         )
@@ -516,6 +535,7 @@ def create_supplier_orders():
         supplier_order = SupplierOrder.objects.create_supplier_order(
             order_data, items_data
         )
+
         supplier_order.created_on = created_on
         supplier_order.save()
 
@@ -538,7 +558,6 @@ def create_supplier_orders():
             history.created_on = requested_for_date + timedelta(
                 days=random.randint(1, 30)
             )
-
             history.save()
         elif is_completed is False:
             history = supplier_order.set_status(
@@ -547,18 +566,16 @@ def create_supplier_orders():
                 note=fake.sentence(),
             )
 
-            history.created_on = requested_for_date + timedelta(
-                days=random.randint(1, 30)
-            )
+            history.created_on = requested_for_date + timedelta(days=random.randint(1, 30))
             history.save()
 
 
 def create_sales():
     for i in range(random.randint(300, 365)):
-        naive_contract_start_datetime = fake.date_time_between(
+        naive_sale_datetime = fake.date_time_between(
             start_date="-1y", end_date="now", tzinfo=None
         )
-        sale_date = timezone.make_aware(naive_contract_start_datetime)
+        sale_date = timezone.make_aware(naive_sale_datetime)
         client = Client.objects.order_by("?").first()
         office = Office.objects.order_by("?").first()
 
