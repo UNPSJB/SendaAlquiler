@@ -136,14 +136,7 @@ const columns: ColumnDef<ProductListItemFragment, any>[] = [
 ];
 
 const RowActions = ({ product }: { product: ProductListItemFragment }) => {
-    const deleteMutation = useDeleteProduct({
-        onSuccess: () => {
-            toast.success('Producto eliminado correctamente');
-        },
-        onError: () => {
-            toast.error('Ha ocurrido un error al eliminar el producto');
-        },
-    });
+    const deleteMutation = useDeleteProduct();
 
     const [open, setOpen] = useState(false);
 

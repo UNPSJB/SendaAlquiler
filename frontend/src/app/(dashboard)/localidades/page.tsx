@@ -69,14 +69,7 @@ const columns: ColumnDef<Locality, any>[] = [
 ];
 
 const RowActions = ({ locality }: { locality: Locality }) => {
-    const deleteMutation = useDeleteLocality({
-        onSuccess: () => {
-            toast.success('Localidad eliminada correctamente');
-        },
-        onError: () => {
-            toast.error('Ha ocurrido un error al eliminar la localidad');
-        },
-    });
+    const deleteMutation = useDeleteLocality();
 
     const [open, setOpen] = useState(false);
 
@@ -93,7 +86,7 @@ const RowActions = ({ locality }: { locality: Locality }) => {
         >
             <DropdownMenu>
                 <DropdownMenuTrigger>
-                    <MoreVertical className="h-5 w-5" />
+                    <MoreVertical className="size-5" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent>
@@ -125,7 +118,15 @@ const RowActions = ({ locality }: { locality: Locality }) => {
                         onClick={() => {
                             deleteMutation.mutate(locality.id, {
                                 onSuccess: () => {
+                                    toast.success(
+                                        `La localidad ${locality.name} ha sido eliminado.`,
+                                    );
                                     setOpen(false);
+                                },
+                                onError: () => {
+                                    toast.error(
+                                        `No se pudo eliminar la localidad ${locality.name}.`,
+                                    );
                                 },
                             });
                         }}

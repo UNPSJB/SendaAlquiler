@@ -111,14 +111,7 @@ const columns: ColumnDef<InternalOrder, any>[] = [
 ];
 
 const RowActions = ({ internalOrder }: { internalOrder: InternalOrder }) => {
-    const deleteMutation = useDeleteInternalOrder({
-        onSuccess: () => {
-            toast.success('Pedido interno eliminado correctamente');
-        },
-        onError: () => {
-            toast.error('Ha ocurrido un error al eliminar el pedido interno');
-        },
-    });
+    const deleteMutation = useDeleteInternalOrder();
 
     const [open, setOpen] = useState(false);
 
@@ -166,7 +159,19 @@ const RowActions = ({ internalOrder }: { internalOrder: InternalOrder }) => {
 
                     <Button
                         onClick={() => {
-                            deleteMutation.mutate(internalOrder.id);
+                            deleteMutation.mutate(internalOrder.id, {
+                                onSuccess: () => {
+                                    toast.success(
+                                        `Pedido interno #${internalOrder.id} eliminado correctamente`,
+                                    );
+                                    setOpen(false);
+                                },
+                                onError: () => {
+                                    toast.error(
+                                        `Ha ocurrido un error al eliminar el pedido interno #${internalOrder.id}`,
+                                    );
+                                },
+                            });
                         }}
                         variant="destructive"
                     >

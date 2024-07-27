@@ -96,14 +96,7 @@ const columns: ColumnDef<Sale, any>[] = [
 ];
 
 const RowActions = ({ sale }: { sale: Sale }) => {
-    const deleteMutation = useDeleteSale({
-        onSuccess: () => {
-            toast.success('Venta eliminada correctamente');
-        },
-        onError: () => {
-            toast.error('Ha ocurrido un error al eliminar la venta');
-        },
-    });
+    const deleteMutation = useDeleteSale();
 
     const [open, setOpen] = useState(false);
 
@@ -155,7 +148,17 @@ const RowActions = ({ sale }: { sale: Sale }) => {
 
                     <Button
                         onClick={() => {
-                            deleteMutation.mutate(sale.id);
+                            deleteMutation.mutate(sale.id, {
+                                onSuccess: () => {
+                                    toast.success('Venta eliminada correctamente');
+                                    setOpen(false);
+                                },
+                                onError: () => {
+                                    toast.error(
+                                        'Ha ocurrido un error al eliminar la venta',
+                                    );
+                                },
+                            });
                         }}
                         variant="destructive"
                     >
