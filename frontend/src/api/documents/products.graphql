@@ -53,6 +53,8 @@ query productById($id: ID!) {
             id
             name
             price
+            billingType
+            billingPeriod
         }
         suppliers {
             supplier {

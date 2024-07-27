@@ -16,7 +16,7 @@ import {
     FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { formatNumberAsPrice, inputToNumber } from '@/lib/utils';
+import { formatNumberAsPrice, getBillingTypeDisplay, inputToNumber } from '@/lib/utils';
 
 const MAX_PRICE = 9999999999;
 
@@ -148,19 +148,27 @@ export const ProductFormEditorServices = () => {
                                                     options={[
                                                         {
                                                             value: ProductServiceBillingTypeChoices.Custom,
-                                                            label: 'Personalizado',
+                                                            label: getBillingTypeDisplay(
+                                                                ProductServiceBillingTypeChoices.Custom,
+                                                            ),
                                                         },
                                                         {
                                                             value: ProductServiceBillingTypeChoices.Monthly,
-                                                            label: 'Mensual',
+                                                            label: getBillingTypeDisplay(
+                                                                ProductServiceBillingTypeChoices.Monthly,
+                                                            ),
                                                         },
                                                         {
                                                             value: ProductServiceBillingTypeChoices.OneTime,
-                                                            label: 'Una vez',
+                                                            label: getBillingTypeDisplay(
+                                                                ProductServiceBillingTypeChoices.OneTime,
+                                                            ),
                                                         },
                                                         {
                                                             value: ProductServiceBillingTypeChoices.Weekly,
-                                                            label: 'Semanal',
+                                                            label: getBillingTypeDisplay(
+                                                                ProductServiceBillingTypeChoices.Weekly,
+                                                            ),
                                                         },
                                                     ]}
                                                     value={field.value || null}
