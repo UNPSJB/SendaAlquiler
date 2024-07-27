@@ -89,14 +89,7 @@ const columns: ColumnDef<Employee, any>[] = [
 ];
 
 const RowActions = ({ employee }: { employee: Employee }) => {
-    const deleteMutation = useDeleteEmployee({
-        onSuccess: () => {
-            toast.success('Empleado eliminado correctamente');
-        },
-        onError: () => {
-            toast.error('Ha ocurrido un error al eliminar el empleado');
-        },
-    });
+    const deleteMutation = useDeleteEmployee();
 
     const [open, setOpen] = useState(false);
 
@@ -113,7 +106,7 @@ const RowActions = ({ employee }: { employee: Employee }) => {
         >
             <DropdownMenu>
                 <DropdownMenuTrigger>
-                    <MoreVertical className="h-5 w-5" />
+                    <MoreVertical className="size-5" />
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent>
