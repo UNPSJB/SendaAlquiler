@@ -279,13 +279,6 @@ const ClientByIdContractsTab: React.FC<ContractsByClientIdTabComponentProps> = (
                                 </div>
                                 <div className="flex justify-end">
                                     <Link
-                                        href={`/contratos/add?duplicateId=${contract.id}`}
-                                        className="border-x px-8 py-4  text-gray-400 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
-                                    >
-                                        Duplicar contrato
-                                    </Link>
-
-                                    <Link
                                         href={`/contratos/${contract.id}`}
                                         className="border-x px-8 py-4  text-gray-400 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
                                     >

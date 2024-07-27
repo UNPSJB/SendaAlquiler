@@ -126,14 +126,6 @@ const ClientByIdSalesTab: React.FC<SalesByClientIdTabComponentProps> = ({ id }) 
 
                                     <div className="flex justify-end">
                                         <Link
-                                            href={`/ventas/add?duplicateId=${sale.id}`}
-                                            passHref
-                                            className="border-x px-8 py-4  text-gray-400 duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
-                                        >
-                                            Comprar de nuevo
-                                        </Link>
-
-                                        <Link
                                             href={`/ventas/${sale.id}`}
                                             passHref
                                             className=" px-8 py-4  font-bold text-muted-foreground duration-300 ease-in-out hover:bg-gray-200 hover:text-gray-700"
