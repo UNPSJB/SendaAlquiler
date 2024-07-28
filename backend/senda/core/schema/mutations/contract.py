@@ -20,6 +20,7 @@ from senda.core.services.mail_service import MailService
 
 from senda.core.decorators import CustomInfo
 from utils.graphene import non_null_list_of
+from django.core.exceptions import ValidationError
 
 
 class ErrorMessages:
@@ -34,12 +35,12 @@ class ErrorMessages:
 
 class ContractItemServiceItemInput(graphene.InputObjectType):
     service_id = graphene.ID(required=True)
-    discount = graphene.Int()
+    discount = graphene.BigInt()
 
 
 class ContractItemInput(graphene.InputObjectType):
     product_id = graphene.ID(required=True)
-    product_discount = graphene.Int()
+    product_discount = graphene.BigInt()
     quantity = graphene.Int(required=True)
     service_items = graphene.List(ContractItemServiceItemInput)
 
@@ -147,7 +148,7 @@ class ChangeContractStatus(graphene.Mutation):
 
     class Arguments:
         id = graphene.ID(required=True)
-        cash_payment = graphene.Int()
+        cash_payment = graphene.BigInt()
         devolutions = graphene.List(graphene.NonNull(ContractItemDevolutionInput))
         status = graphene.String(required=True)
         note = graphene.String()
@@ -173,22 +174,29 @@ class ChangeContractStatus(graphene.Mutation):
         note: str = None,
     ):
         contract = cls.get_contract(id)
-        contract.set_status(
-            cash_payment=cash_payment,
-            devolutions=(
-                [
-                    ContractItemDevolutionDetailsDict(
-                        item_id=int(devolution.item_id), quantity=devolution.quantity
-                    )
-                    for devolution in devolutions
-                ]
-                if devolutions
-                else []
-            ),
-            note=note,
-            responsible_user=info.context.user,
-            status=status,
-        )
+
+        try:
+            contract.set_status(
+                cash_payment=cash_payment,
+                devolutions=(
+                    [
+                        ContractItemDevolutionDetailsDict(
+                            item_id=int(devolution.item_id),
+                            quantity=devolution.quantity,
+                        )
+                        for devolution in devolutions
+                    ]
+                    if devolutions
+                    else []
+                ),
+                note=note,
+                responsible_user=info.context.user,
+                status=status,
+            )
+        except ValidationError as e:
+            return ChangeContractStatus(contract=None, error=str(e))
+        except Exception as e:
+            return ChangeContractStatus(contract=None, error="Error desconocido")
 
         return ChangeContractStatus(contract=contract, error=None)
 

@@ -237,7 +237,7 @@ class Product(TimeStampedModel):
             )
 
         if stock_item.quantity < quantity:
-            raise ValueError("Not enough stock in office.")
+            raise ValidationError(f"El stock disponible ({stock_item.quantity}) es menor al solicitado ({quantity}) para el producto {self.name}")
 
         stock_item.quantity -= quantity
         stock_item.save()

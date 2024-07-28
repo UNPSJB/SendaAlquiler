@@ -383,28 +383,28 @@ class Contract(TimeStampedModel):
     ):
         if self.latest_history_entry:
             if self.latest_history_entry.status == status:
-                raise ValidationError(f"Contract is already in status {status}.")
+                raise ValidationError(f"El contrato ya se encuentra en estado {status}.")
 
         if status == ContractHistoryStatusChoices.CON_DEPOSITO:
             if cash_payment is None:
-                raise ValidationError("Cash payment amount is required.")
+                raise ValidationError("Por favor, ingrese el monto del pago en efectivo.")
 
             if self.total < cash_payment:
-                raise ValidationError("Cash payment amount is greater than total.")
+                raise ValidationError("El monto del pago en efectivo no puede ser mayor que el total del contrato.")
 
             self.first_deposit_amount = cash_payment
             self.save()
 
         if status == ContractHistoryStatusChoices.PAGADO:
             if cash_payment is None:
-                raise ValidationError("Cash payment amount is required.")
+                raise ValidationError("Por favor, ingrese el monto del pago en efectivo.")
 
             total_new_deposited = self.first_deposit_amount + cash_payment
             if self.total < total_new_deposited:
-                raise ValidationError("Cash payment amount is greater than total.")
+                raise ValidationError("El monto total de los pagos no puede ser mayor que el total del contrato.")
 
             if self.total > total_new_deposited:
-                raise ValidationError("Cash payment amount is less than total.")
+                raise ValidationError("El monto total de los pagos es menor que el total del contrato. Por favor, revise los montos.")
 
             self.final_deposit_amount = cash_payment
             self.save()
@@ -416,14 +416,10 @@ class Contract(TimeStampedModel):
 
         if status == "DEVOLUCION":
             if not devolutions:
-                raise ValidationError("Devolution details are required.")
+                raise ValidationError("Por favor, proporcione los detalles de la devolución.")
 
             is_successful_devolution = True
             for item in self.contract_items.all():
-                item.product.increase_stock_in_office(
-                    self.office.pk, item.quantity_returned
-                )
-
                 item_dict_details: ContractItemDevolutionDetailsDict = None
                 for devolution in devolutions:
                     if item.id == devolution.get("item_id"):
@@ -432,16 +428,20 @@ class Contract(TimeStampedModel):
 
                 if not item_dict_details:
                     raise ValidationError(
-                        f"Devolution details for item {item.id} are required."
+                        f"Por favor, proporcione los detalles de devolución para el artículo {item.id}."
                     )
 
                 if item_dict_details.get("quantity") > item.quantity:
                     raise ValidationError(
-                        f"Devolution quantity for item {item.id} is greater than quantity."
+                        f"La cantidad de devolución para el artículo {item.id} no puede ser mayor que la cantidad original."
                     )
 
                 if item_dict_details.get("quantity") < item.quantity:
                     is_successful_devolution = False
+
+                item.product.increase_stock_in_office(
+                    self.office.pk, item_dict_details.get("quantity")
+                )
 
                 item.quantity_returned = item_dict_details.get("quantity")
 
@@ -458,7 +458,6 @@ class Contract(TimeStampedModel):
 
         self.latest_history_entry = latest_history_entry
         self.save()
-
 
 class ContractHistoryStatusChoices(models.TextChoices):
     PRESUPUESTADO = "PRESUPUESTADO", "PRESUPUESTADO"

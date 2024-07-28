@@ -191,7 +191,7 @@ export type ContractItemDevolutionInput = {
 };
 
 export type ContractItemInput = {
-    productDiscount: InputMaybe<Scalars['Int']['input']>;
+    productDiscount: InputMaybe<Scalars['BigInt']['input']>;
     productId: Scalars['ID']['input'];
     quantity: Scalars['Int']['input'];
     serviceItems: InputMaybe<Array<InputMaybe<ContractItemServiceItemInput>>>;
@@ -213,7 +213,7 @@ export type ContractItemService = {
 };
 
 export type ContractItemServiceItemInput = {
-    discount: InputMaybe<Scalars['Int']['input']>;
+    discount: InputMaybe<Scalars['BigInt']['input']>;
     serviceId: Scalars['ID']['input'];
 };
 
@@ -623,7 +623,7 @@ export type MutationCancelSupplierOrderArgs = {
 };
 
 export type MutationChangeContractStatusArgs = {
-    cashPayment: InputMaybe<Scalars['Int']['input']>;
+    cashPayment: InputMaybe<Scalars['BigInt']['input']>;
     devolutions: InputMaybe<Array<ContractItemDevolutionInput>>;
     id: Scalars['ID']['input'];
     note: InputMaybe<Scalars['String']['input']>;
@@ -2045,7 +2045,7 @@ export type DeleteContractMutation = {
 
 export type ChangeContractStatusMutationVariables = Exact<{
     id: Scalars['ID']['input'];
-    cashPayment: InputMaybe<Scalars['Int']['input']>;
+    cashPayment: InputMaybe<Scalars['BigInt']['input']>;
     status: Scalars['String']['input'];
     devolutions: InputMaybe<
         Array<ContractItemDevolutionInput> | ContractItemDevolutionInput
@@ -6212,7 +6212,7 @@ export const ChangeContractStatusDocument = {
                         kind: 'Variable',
                         name: { kind: 'Name', value: 'cashPayment' },
                     },
-                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'Int' } },
+                    type: { kind: 'NamedType', name: { kind: 'Name', value: 'BigInt' } },
                 },
                 {
                     kind: 'VariableDefinition',
