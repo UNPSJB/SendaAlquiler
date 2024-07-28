@@ -258,7 +258,7 @@ export const ContractStatusEditor = ({ contract }: Props) => {
                     }
 
                     if (data.changeContractStatus?.error) {
-                        toast.error('Error al actualizar el estado');
+                        toast.error(data.changeContractStatus?.error);
                     }
                 },
                 onError: () => {
