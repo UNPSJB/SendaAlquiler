@@ -420,10 +420,6 @@ class Contract(TimeStampedModel):
 
             is_successful_devolution = True
             for item in self.contract_items.all():
-                item.product.increase_stock_in_office(
-                    self.office.pk, item.quantity_returned
-                )
-
                 item_dict_details: ContractItemDevolutionDetailsDict = None
                 for devolution in devolutions:
                     if item.id == devolution.get("item_id"):
@@ -442,6 +438,10 @@ class Contract(TimeStampedModel):
 
                 if item_dict_details.get("quantity") < item.quantity:
                     is_successful_devolution = False
+
+                item.product.increase_stock_in_office(
+                    self.office.pk, item_dict_details.get("quantity")
+                )
 
                 item.quantity_returned = item_dict_details.get("quantity")
 
