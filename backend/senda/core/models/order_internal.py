@@ -129,13 +129,6 @@ class InternalOrder(TimeStampedModel):
         null=True,
     )
 
-    contract_item_product_allocation = models.OneToOneField(
-        "ContractItemProductAllocation",
-        related_name="internal_order",
-        on_delete=models.CASCADE,
-        null=True,
-    )
-
     objects: InternalOrderManager = InternalOrderManager()
 
     def __str__(self) -> str:

@@ -87,7 +87,7 @@ export const calculateDiscountAmountFromPercentage = ({
     subtotal,
     percentage,
 }: CalculateDiscountFromPercentageOptions) => {
-    return subtotal * (percentage / 100);
+    return Math.round(subtotal * (percentage / 100));
 };
 
 type CalculateDiscountFromAmountOptions = {

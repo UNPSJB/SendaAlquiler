@@ -31,20 +31,14 @@ export const contractStatusToText = (status: ContractHistoryStatusChoices) => {
 type CalculateContractProductItemSubtotal = {
     days: number;
     unitPricePerDay: number;
-    allocations: {
-        quantity: number;
-    }[];
+    quantity: number;
 };
 
 export const calculateContractProductItemSubtotal = ({
     days,
     unitPricePerDay,
-    allocations,
+    quantity,
 }: CalculateContractProductItemSubtotal) => {
-    const quantity = allocations.reduce(
-        (acc, allocation) => acc + allocation.quantity,
-        0,
-    );
     const subtotal = days * unitPricePerDay * quantity;
     return subtotal;
 };
@@ -53,21 +47,19 @@ type CalculateContractProductItemTotal = {
     days: number;
     unitPricePerDay: number;
     discount: number;
-    allocations: {
-        quantity: number;
-    }[];
+    quantity: number;
 };
 
 export const calculateContractProductItemTotal = ({
     days,
     unitPricePerDay,
     discount,
-    allocations,
+    quantity,
 }: CalculateContractProductItemTotal) => {
     const subtotal = calculateContractProductItemSubtotal({
         days,
         unitPricePerDay,
-        allocations,
+        quantity,
     });
     const totalWithDiscount = subtotal - discount;
     return totalWithDiscount;

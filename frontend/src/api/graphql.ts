@@ -167,7 +167,6 @@ export type ContractInput = {
 
 export type ContractItem = {
     __typename?: 'ContractItem';
-    allocations: Array<ContractItemProductAllocation>;
     contract: Contract;
     createdOn: Scalars['DateTime']['output'];
     id: Scalars['ID']['output'];
@@ -192,27 +191,10 @@ export type ContractItemDevolutionInput = {
 };
 
 export type ContractItemInput = {
-    allocations: Array<InputMaybe<ContractItemProductAllocationInput>>;
     productDiscount: InputMaybe<Scalars['Int']['input']>;
     productId: Scalars['ID']['input'];
-    serviceItems: InputMaybe<Array<InputMaybe<ContractItemServiceItemInput>>>;
-};
-
-export type ContractItemProductAllocation = {
-    __typename?: 'ContractItemProductAllocation';
-    id: Scalars['ID']['output'];
-    internalOrder: Maybe<InternalOrder>;
-    item: ContractItem;
-    office: Office;
-    quantity: Scalars['Int']['output'];
-    shippingCost: Scalars['BigInt']['output'];
-};
-
-export type ContractItemProductAllocationInput = {
-    officeId: Scalars['ID']['input'];
     quantity: Scalars['Int']['input'];
-    shippingCost: InputMaybe<Scalars['Int']['input']>;
-    shippingDiscount: InputMaybe<Scalars['Int']['input']>;
+    serviceItems: InputMaybe<Array<InputMaybe<ContractItemServiceItemInput>>>;
 };
 
 export type ContractItemService = {
@@ -496,7 +478,6 @@ export type InProgressInternalOrderItemInput = {
 export type InternalOrder = {
     __typename?: 'InternalOrder';
     approximateDeliveryDate: Maybe<Scalars['Date']['output']>;
-    contractItemProductAllocation: Maybe<ContractItemProductAllocation>;
     createdOn: Scalars['DateTime']['output'];
     historyEntries: Array<InternalOrderHistory>;
     id: Scalars['ID']['output'];
@@ -838,7 +819,6 @@ export type ObtainJsonWebToken = {
 
 export type Office = {
     __typename?: 'Office';
-    contractItemsAllocations: Array<ContractItemProductAllocation>;
     contracts: Array<Contract>;
     createdOn: Scalars['DateTime']['output'];
     employees: Array<EmployeeOffice>;
@@ -2019,11 +1999,6 @@ export type ContractByIdQuery = {
                 sku: string | null;
                 brand: { __typename?: 'Brand'; name: string } | null;
             };
-            allocations: Array<{
-                __typename?: 'ContractItemProductAllocation';
-                quantity: number;
-                office: { __typename?: 'Office'; id: string; name: string };
-            }>;
             serviceItems: Array<{
                 __typename?: 'ContractItemService';
                 price: any;
@@ -5920,48 +5895,7 @@ export const ContractByIdDocument = {
                                             },
                                             {
                                                 kind: 'Field',
-                                                name: {
-                                                    kind: 'Name',
-                                                    value: 'allocations',
-                                                },
-                                                selectionSet: {
-                                                    kind: 'SelectionSet',
-                                                    selections: [
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'office',
-                                                            },
-                                                            selectionSet: {
-                                                                kind: 'SelectionSet',
-                                                                selections: [
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'id',
-                                                                        },
-                                                                    },
-                                                                    {
-                                                                        kind: 'Field',
-                                                                        name: {
-                                                                            kind: 'Name',
-                                                                            value: 'name',
-                                                                        },
-                                                                    },
-                                                                ],
-                                                            },
-                                                        },
-                                                        {
-                                                            kind: 'Field',
-                                                            name: {
-                                                                kind: 'Name',
-                                                                value: 'quantity',
-                                                            },
-                                                        },
-                                                    ],
-                                                },
+                                                name: { kind: 'Name', value: 'quantity' },
                                             },
                                             {
                                                 kind: 'Field',

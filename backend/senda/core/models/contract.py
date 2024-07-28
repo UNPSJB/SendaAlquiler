@@ -35,13 +35,6 @@ class ContractDetailsDict(TypedDict):
     expiration_date: datetime
 
 
-class ContractItemProductAllocationDetailsDict(TypedDict):
-    office_id: int
-    quantity: int
-    shipping_cost: Optional[int]
-    shipping_discount: Optional[int]
-
-
 class ContractItemServiceDetailsDict(TypedDict):
     service_id: int
     service_discount: Optional[int]
@@ -49,9 +42,9 @@ class ContractItemServiceDetailsDict(TypedDict):
 
 class ContractItemDetailsDict(TypedDict):
     product_id: int
-    allocations: List[ContractItemProductAllocationDetailsDict]
     product_discount: Optional[int]
     services: List[ContractItemServiceDetailsDict]
+    quantity: int
 
 
 class ContractItemTotalDetailsDict(TypedDict):
@@ -114,6 +107,7 @@ class ContractManager(models.Manager["Contract"]):
             service_subtotal=service_subtotal,
             total=total,
         )
+
     def _validate_product_and_services(
         self, item: ContractItemDetailsDict
     ) -> Tuple[Product, List[ProductService]]:
@@ -146,17 +140,7 @@ class ContractManager(models.Manager["Contract"]):
     ) -> ContractItemTotalDetailsDict:
         contract_duration_in_calendar_days = (end_date - start_date).days
 
-        quantity = sum(
-            allocation.get("quantity", 0) for allocation in item.get("allocations", [])
-        )
-        shipping_subtotal = sum(
-            allocation.get("shipping_cost", 0)
-            for allocation in item.get("allocations", [])
-        )
-        shipping_discount = sum(
-            allocation.get("shipping_discount", 0)
-            for allocation in item.get("allocations", [])
-        )
+        quantity = item.get("quantity")
         product_subtotal = product_price * quantity * contract_duration_in_calendar_days
 
         services_subtotal = 0
@@ -175,18 +159,16 @@ class ContractManager(models.Manager["Contract"]):
 
         product_discount = item.get("product_discount") or 0
 
-        total = (
-            (product_subtotal - product_discount)
-            + (services_subtotal - services_discount)
-            + (shipping_subtotal - shipping_discount)
+        total = (product_subtotal - product_discount) + (
+            services_subtotal - services_discount
         )
 
         return ContractItemTotalDetailsDict(
             product_subtotal=product_subtotal,
             services_subtotal=services_subtotal,
             services_discount=services_discount,
-            shipping_subtotal=shipping_subtotal,
-            shipping_discount=shipping_discount,
+            shipping_subtotal=0,
+            shipping_discount=0,
             quantity=quantity,
             total=total,
         )
@@ -262,14 +244,6 @@ class ContractManager(models.Manager["Contract"]):
                             total=service_totals.get("total"),
                             billing_type=service_instance.billing_type,
                             billing_period=service_instance.billing_period,
-                        )
-
-                    for allocation in item_data.get("allocations", []):
-                        ContractItemProductAllocation.objects.create(
-                            item=item,
-                            office_id=allocation.get("office_id"),
-                            quantity=allocation.get("quantity"),
-                            shipping_cost=allocation.get("shipping_cost") or 0,
                         )
 
                 contract.update_totals()
@@ -435,12 +409,21 @@ class Contract(TimeStampedModel):
             self.final_deposit_amount = cash_payment
             self.save()
 
+        if status == ContractHistoryStatusChoices.ACTIVO:
+            with transaction.atomic():
+                for item in self.contract_items.all():
+                    item.product.decrease_stock_in_office(self.office.pk, item.quantity)
+
         if status == "DEVOLUCION":
             if not devolutions:
                 raise ValidationError("Devolution details are required.")
 
             is_successful_devolution = True
             for item in self.contract_items.all():
+                item.product.increase_stock_in_office(
+                    self.office.pk, item.quantity_returned
+                )
+
                 item_dict_details: ContractItemDevolutionDetailsDict = None
                 for devolution in devolutions:
                     if item.id == devolution.get("item_id"):
@@ -461,6 +444,7 @@ class Contract(TimeStampedModel):
                     is_successful_devolution = False
 
                 item.quantity_returned = item_dict_details.get("quantity")
+
                 item.save()
 
             if is_successful_devolution:
@@ -515,7 +499,6 @@ class ContractHistory(TimeStampedModel):
 
 
 class ContractItem(TimeStampedModel):
-    allocations: models.QuerySet["ContractItemProductAllocation"]
     service_items: models.QuerySet["ContractItemService"]
 
     contract = models.ForeignKey(
@@ -619,36 +602,6 @@ class ContractItemService(TimeStampedModel):
             models.UniqueConstraint(
                 fields=["item", "service"],
                 name="unique_contract_item_service",
-            ),
-        ]
-
-    def save(self, *args: Any, **kwargs: Any) -> None:
-        super().save(*args, **kwargs)
-        self.item.contract.update_totals()
-
-
-class ContractItemProductAllocation(models.Model):
-    office = models.ForeignKey(
-        "Office",
-        on_delete=models.CASCADE,
-        related_name="contract_items_allocations",
-    )
-    item = models.ForeignKey(
-        ContractItem,
-        on_delete=models.CASCADE,
-        related_name="allocations",
-    )
-    quantity = models.PositiveIntegerField()
-
-    shipping_cost = models.PositiveBigIntegerField(default=0)
-
-    objects = models.Manager()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["item", "office"],
-                name="unique_contract_item_allocation_per_office",
             ),
         ]
 

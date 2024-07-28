@@ -157,19 +157,16 @@ class ProductManager(models.Manager["Product"]):
             product = self.get(pk=product_id)
             product.suppliers.filter(supplier_id__in=suppliers_ids).delete()
 
-    def delete_product_services(
-        self, product_id: int, services_ids: List[int]
-    ) -> None:
+    def delete_product_services(self, product_id: int, services_ids: List[int]) -> None:
         with transaction.atomic():
             product = self.get(pk=product_id)
             product.services.filter(id__in=services_ids).delete()
 
-    def delete_stock_items(
-        self, product_id: int, office_ids: List[int]
-    ) -> None:
+    def delete_stock_items(self, product_id: int, office_ids: List[int]) -> None:
         with transaction.atomic():
             product = self.get(pk=product_id)
             product.stock_items.filter(office_id__in=office_ids).delete()
+
 
 class ProductTypeChoices(models.TextChoices):
     ALQUILABLE = "ALQUILABLE", "ALQUILABLE"
@@ -264,59 +261,11 @@ class Product(TimeStampedModel):
 
         return stock_item.quantity
 
-    def calculate_stock_availability(
-        self, office_id: int, start_date: str, end_date: str
-    ) -> int:
+    def calculate_stock_availability(self, office_id: int) -> int:
         """Calculates available stock subtracting reserved items within a date range for a specific office."""
 
-        # TODO: TAKE INTO ACCOUNT INTERNAL ORDERS
-
-        from senda.core.models.contract import (
-            ContractHistoryStatusChoices,
-            ContractItemProductAllocation,
-        )
-
         available_stock = self.get_stock_for_office(office_id) or 0
-
-        # take into account ContractItemProductAllocation "office_id" field
-        allocated_stock_qs = ContractItemProductAllocation.objects.filter(
-            item__product_id=self.id,
-            item__contract__latest_history_entry__status__in=[
-                ContractHistoryStatusChoices.CON_DEPOSITO,
-                ContractHistoryStatusChoices.ACTIVO,
-            ],
-            item__contract__contract_start_datetime__date__range=(
-                start_date,
-                end_date,
-            ),
-            office_id=office_id,
-        ).aggregate(total_allocated=models.Sum("quantity"))
-
-        allocated_stock = allocated_stock_qs["total_allocated"] or 0
-
-        return available_stock - allocated_stock
-
-    def calculate_global_stock_availability(
-        self, start_date: datetime, end_date: datetime
-    ) -> int:
-        """Calculates global available stock subtracting reserved items within a date range across all offices."""
-        from senda.core.models.contract import ContractHistoryStatusChoices
-
-        available_stock = self.available_stock
-        reserved_stock_qs = self.contract_items.filter(
-            contract__latest_history_entry__status__in=[
-                ContractHistoryStatusChoices.CON_DEPOSITO,
-                ContractHistoryStatusChoices.ACTIVO,
-            ],
-            contract__contract_start_datetime__date__range=(
-                start_date,
-                end_date,
-            ),
-        ).aggregate(total_reserved=models.Sum("quantity"))
-
-        reserved_stock = reserved_stock_qs["total_reserved"] or 0
-
-        return available_stock - reserved_stock
+        return available_stock
 
 
 class StockItem(TimeStampedModel):

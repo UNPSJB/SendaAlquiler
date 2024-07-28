@@ -16,7 +16,6 @@ import {
 import { ContractFormEditorDiscountType } from '@/app/(dashboard)/contratos/add/page';
 
 import { ContractFormEditorValues } from './contract-form-editor';
-import { ContractFormEditorOrderItemAllocation } from './contract-form-editor-order-item-allocation';
 import { ContractFormEditorOrderItemService } from './contract-form-editor-order-item-service';
 
 import { BaseTable } from '@/components/base-table';
@@ -70,11 +69,10 @@ const productColumns: ColumnDef<OrderRow, any>[] = [
         },
         size: 225,
     }),
-    productColumnsHelper.accessor('allocations', {
+    productColumnsHelper.accessor('quantity', {
         header: 'Cantidad',
         cell: (cell) => {
-            const value = (cell.getValue() || []) as NonNullable<OrderRow['allocations']>;
-            return value.reduce((acc, allocation) => acc + (allocation.quantity || 0), 0);
+            return cell.getValue() || '-';
         },
     }),
     productColumnsHelper.accessor('product.data.price', {
@@ -89,18 +87,12 @@ const productColumns: ColumnDef<OrderRow, any>[] = [
         cell: (cell) => {
             const data = cell.row.original;
 
-            if (
-                !data.product?.data.price ||
-                !data.allocations ||
-                !data.allocations.length
-            ) {
+            if (!data.product?.data.price || !data.quantity) {
                 return '-';
             }
 
             const total = calculateContractProductItemSubtotal({
-                allocations: data.allocations.map((allocation) => ({
-                    quantity: allocation.quantity || 0,
-                })),
+                quantity: data.quantity,
                 days: data.numberOfDays,
                 unitPricePerDay: data.product.data.price,
             });
@@ -120,18 +112,12 @@ const productColumns: ColumnDef<OrderRow, any>[] = [
         cell: (cell) => {
             const data = cell.row.original;
 
-            if (
-                !data.product?.data.price ||
-                !data.allocations ||
-                !data.allocations.length
-            ) {
+            if (!data.product?.data.price || !data.quantity) {
                 return '-';
             }
 
             const total = calculateContractProductItemTotal({
-                allocations: data.allocations.map((allocation) => ({
-                    quantity: allocation.quantity || 0,
-                })),
+                quantity: data.quantity,
                 days: data.numberOfDays,
                 discount: data.productDiscountAmount || 0,
                 unitPricePerDay: data.product.data.price,
@@ -272,17 +258,8 @@ const OrderEditor = ({ orderIndex, ordersFieldArray }: OrderEditorProps) => {
         control: formMethods.control,
         name: `orders.${orderIndex}.services`,
     });
-    const allocationFieldArray = useFieldArray({
-        control: formMethods.control,
-        name: `orders.${orderIndex}.allocations`,
-    });
 
-    const requestedQuantity = (watchedField.allocations || []).reduce(
-        (acc, allocation) => {
-            return acc + (allocation.quantity || 0);
-        },
-        0,
-    );
+    const requestedQuantity = watchedField.quantity;
     const productDiscountType = watchedField.productDiscountType;
 
     let productSubtotal = 0;
@@ -363,8 +340,8 @@ const OrderEditor = ({ orderIndex, ordersFieldArray }: OrderEditorProps) => {
                                                         [],
                                                     );
                                                     setValue(
-                                                        `orders.${orderIndex}.allocations`,
-                                                        [],
+                                                        `orders.${orderIndex}.quantity`,
+                                                        null,
                                                     );
                                                 }
 
@@ -398,52 +375,46 @@ const OrderEditor = ({ orderIndex, ordersFieldArray }: OrderEditorProps) => {
                             </div>
 
                             <div className="space-y-2">
-                                <Label>Stock global disponible</Label>
-                                <Input readOnly disabled value={globalStock || ''} />
+                                <FormField
+                                    name={`orders.${orderIndex}.quantity`}
+                                    control={formMethods.control}
+                                    rules={{
+                                        validate: (value) => {
+                                            if (typeof value !== 'number') {
+                                                return 'Este campo es requerido';
+                                            }
+
+                                            return true;
+                                        },
+                                    }}
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-col space-y-2">
+                                            <FormLabel>Cantidad ordenada</FormLabel>
+
+                                            <FormControl>
+                                                <Input
+                                                    {...field}
+                                                    value={field.value || ''}
+                                                    onChange={(e) => {
+                                                        const val = inputToNumber(
+                                                            e.target.value,
+                                                            {
+                                                                min: 0,
+                                                                max: globalStock,
+                                                            },
+                                                        );
+
+                                                        field.onChange(val);
+                                                    }}
+                                                />
+                                            </FormControl>
+
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
                         </div>
-                    </div>
-
-                    <div className="space-y-4">
-                        <h2 className="font-medium">
-                            ¿Desde qué sucursales se alquilará este producto?
-                        </h2>
-
-                        {product ? (
-                            <>
-                                {allocationFieldArray.fields.map(
-                                    (allocationFormField, index) => {
-                                        return (
-                                            <ContractFormEditorOrderItemAllocation
-                                                key={allocationFormField.id}
-                                                product={product}
-                                                orderIndex={orderIndex}
-                                                index={index}
-                                                allocationsFieldArray={
-                                                    allocationFieldArray
-                                                }
-                                            />
-                                        );
-                                    },
-                                )}
-
-                                <Button
-                                    onClick={() => {
-                                        allocationFieldArray.append({
-                                            office: null,
-                                            quantity: null,
-                                            shippingCost: null,
-                                            shippingDiscount: null,
-                                        });
-                                    }}
-                                    variant="outline"
-                                >
-                                    + Añadir sucursal
-                                </Button>
-                            </>
-                        ) : (
-                            <p>Selecciona un producto para asignar</p>
-                        )}
                     </div>
                 </div>
 

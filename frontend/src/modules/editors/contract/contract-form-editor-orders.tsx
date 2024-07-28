@@ -53,7 +53,7 @@ export const ContractFormEditorOrders = () => {
                                     },
 
                                     services: [],
-                                    allocations: [],
+                                    quantity: null,
                                 });
                             }}
                         >
