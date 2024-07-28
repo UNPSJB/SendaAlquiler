@@ -47,7 +47,6 @@ from senda.core.models.contract import (
     Contract,
     ContractDetailsDict,
     ContractItemDetailsDict,
-    ContractItemProductAllocationDetailsDict,
     ContractItemServiceDetailsDict,
 )
 from django.db import models, transaction
@@ -653,14 +652,6 @@ def create_contracts():
             ContractItemDetailsDict(
                 product_id=product.pk,
                 product_discount=random.randint(0, 1000),
-                allocations=[
-                    ContractItemProductAllocationDetailsDict(
-                        office_id=office.pk,
-                        quantity=random.randint(1, 100),
-                        shipping_cost=random.randint(100, 1000),
-                        shipping_discount=random.randint(0, 100),
-                    )
-                ],
                 services=[
                     ContractItemServiceDetailsDict(
                         service_discount=random.randint(0, 1000),

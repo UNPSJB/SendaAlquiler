@@ -89,14 +89,7 @@ query contractById($id: ID!) {
             }
             productPrice
 
-            allocations {
-                office {
-                    id
-                    name
-                }
-
-                quantity
-            }
+            quantity
 
             serviceItems {
                 service {

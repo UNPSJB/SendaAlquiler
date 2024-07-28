@@ -7,7 +7,6 @@ from senda.core.models.contract import (
     Contract,
     ContractDetailsDict,
     ContractItemDetailsDict,
-    ContractItemProductAllocationDetailsDict,
     ContractItemServiceDetailsDict,
     ContractCreationError,
     ContractItemDevolutionDetailsDict,
@@ -33,13 +32,6 @@ class ErrorMessages:
     INVALID_LOCALITY = "No se ingreso ninguna localidad"
 
 
-class ContractItemProductAllocationInput(graphene.InputObjectType):
-    office_id = graphene.ID(required=True)
-    quantity = graphene.Int(required=True)
-    shipping_cost = graphene.Int()
-    shipping_discount = graphene.Int()
-
-
 class ContractItemServiceItemInput(graphene.InputObjectType):
     service_id = graphene.ID(required=True)
     discount = graphene.Int()
@@ -47,8 +39,8 @@ class ContractItemServiceItemInput(graphene.InputObjectType):
 
 class ContractItemInput(graphene.InputObjectType):
     product_id = graphene.ID(required=True)
-    allocations = graphene.List(ContractItemProductAllocationInput, required=True)
     product_discount = graphene.Int()
+    quantity = graphene.Int(required=True)
     service_items = graphene.List(ContractItemServiceItemInput)
 
 
@@ -84,19 +76,7 @@ class CreateContract(graphene.Mutation):
 
         items_data_dicts: List[ContractItemDetailsDict] = []
         for item in items_data:
-            allocation_data_dicts: List[ContractItemProductAllocationDetailsDict] = []
             service_data_dics: List[ContractItemServiceDetailsDict] = []
-
-            allocations: List[ContractItemProductAllocationInput] = item.allocations
-            for allocation in allocations:
-                allocation_data_dicts.append(
-                    ContractItemProductAllocationDetailsDict(
-                        office_id=allocation.office_id,
-                        quantity=allocation.quantity,
-                        shipping_cost=allocation.shipping_cost,
-                        shipping_discount=allocation.shipping_discount,
-                    )
-                )
 
             services: List[ContractItemServiceItemInput] = item.service_items
             for service in services:
@@ -110,9 +90,9 @@ class CreateContract(graphene.Mutation):
             items_data_dicts.append(
                 ContractItemDetailsDict(
                     product_id=item.product_id,
-                    allocations=allocation_data_dicts,
                     product_discount=item.product_discount,
                     services=service_data_dics,
+                    quantity=item.quantity,
                 )
             )
 

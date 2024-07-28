@@ -62,25 +62,7 @@ export type ContractFormEditorValues = {
                   | null
                   | undefined;
 
-              allocations:
-                  | {
-                        office: {
-                            value: string;
-                            label: string;
-                            data: {
-                                office: {
-                                    id: string;
-                                    name: string;
-                                };
-                                quantity: number;
-                            };
-                        } | null;
-                        shippingCost: number | null;
-                        shippingDiscount: number | null;
-                        quantity: number | null;
-                    }[]
-                  | null
-                  | undefined;
+              quantity: number | null | undefined;
               services:
                   | ({
                         service: {
@@ -151,12 +133,7 @@ export const ContractFormEditor: React.FC<CreateContractFormProps> = ({
 
     const subtotal = (orders || []).reduce((acc, order) => {
         const product = order.product?.data;
-        const quantity =
-            order.allocations?.reduce(
-                (acc, allocation) => acc + (allocation?.quantity || 0),
-                0,
-            ) || 0;
-
+        const quantity = order.quantity || 0;
         const productPrice = product?.price || 0;
         const productSubtotal = productPrice * quantity * contractDurationInDays;
 
@@ -208,16 +185,7 @@ export const ContractFormEditor: React.FC<CreateContractFormProps> = ({
 
                           return next;
                       }),
-                      allocations: order.allocations!.map((allocation) => {
-                          const next: NonNullable<ContractItemInput['allocations']>[0] = {
-                              officeId: allocation!.office!.data.office.id,
-                              quantity: allocation!.quantity!,
-                              shippingCost: allocation!.shippingCost!,
-                              shippingDiscount: allocation!.shippingDiscount,
-                          };
-
-                          return next;
-                      }),
+                      quantity: order.quantity!,
                   };
 
                   return next;
