@@ -140,7 +140,7 @@ mutation deleteContract($id: ID!) {
 
 mutation changeContractStatus(
     $id: ID!
-    $cashPayment: Int
+    $cashPayment: BigInt
     $status: String!
     $devolutions: [ContractItemDevolutionInput!]
     $note: String

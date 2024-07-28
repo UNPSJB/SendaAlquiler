@@ -34,12 +34,12 @@ class ErrorMessages:
 
 class ContractItemServiceItemInput(graphene.InputObjectType):
     service_id = graphene.ID(required=True)
-    discount = graphene.Int()
+    discount = graphene.BigInt()
 
 
 class ContractItemInput(graphene.InputObjectType):
     product_id = graphene.ID(required=True)
-    product_discount = graphene.Int()
+    product_discount = graphene.BigInt()
     quantity = graphene.Int(required=True)
     service_items = graphene.List(ContractItemServiceItemInput)
 
@@ -147,7 +147,7 @@ class ChangeContractStatus(graphene.Mutation):
 
     class Arguments:
         id = graphene.ID(required=True)
-        cash_payment = graphene.Int()
+        cash_payment = graphene.BigInt()
         devolutions = graphene.List(graphene.NonNull(ContractItemDevolutionInput))
         status = graphene.String(required=True)
         note = graphene.String()
