@@ -108,8 +108,9 @@ const Charts = ({ report, range, frequency }: ChartsProps) => {
                     <DashboardCard
                         title="Tasa de cumplimiento de pedidos"
                         value={
-                            report.orderFulfillmentRate?.fulfillmentRate?.toString() ||
-                            'N/A'
+                            report.orderFulfillmentRate?.fulfillmentRate
+                                ? `${report.orderFulfillmentRate?.fulfillmentRate.toFixed(2)}%`
+                                : 'N/A'
                         }
                         percentage="100% del total"
                     />

@@ -79,7 +79,7 @@ const getDefaultValue = (data: ContractByIdQuery['contractById']) => {
                         type: ProductTypeChoices.Alquilable,
                     },
                 },
-                allocations: [],
+                quantity: item.quantity,
                 services: item.serviceItems.map((service) => {
                     return {
                         service: {
