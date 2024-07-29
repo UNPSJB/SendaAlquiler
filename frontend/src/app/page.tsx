@@ -5,7 +5,8 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/modules/auth/auth';
 
 import OfficeProvider from './OfficeProvider';
-import Home from './page-content';
+import Home from './page-content-admin';
+import HomeEmployee from './page-content-employee';
 
 const DashboardLayout = async () => {
     const session = await getServerSession(authOptions);
@@ -15,7 +16,7 @@ const DashboardLayout = async () => {
 
     return (
         <OfficeProvider>
-            <Home />
+            {session?.user.admin ? <Home /> : <HomeEmployee />}
         </OfficeProvider>
     );
 };
