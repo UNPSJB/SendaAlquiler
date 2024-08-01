@@ -228,6 +228,12 @@ class Product(TimeStampedModel):
             or 0
         )
 
+    def has_any_sale(self) -> bool:
+        return self.sale_items.exists()
+
+    def is_in_some_contract(self) -> bool:
+        return self.contract_items.exists()
+
     def decrease_stock_in_office(self, office_id: int, quantity: int) -> None:
         stock_item = self.stock_items.filter(office_id=office_id).first()
 
@@ -237,7 +243,9 @@ class Product(TimeStampedModel):
             )
 
         if stock_item.quantity < quantity:
-            raise ValidationError(f"El stock disponible ({stock_item.quantity}) es menor al solicitado ({quantity}) para el producto {self.name}")
+            raise ValidationError(
+                f"El stock disponible ({stock_item.quantity}) es menor al solicitado ({quantity}) para el producto {self.name}"
+            )
 
         stock_item.quantity -= quantity
         stock_item.save()

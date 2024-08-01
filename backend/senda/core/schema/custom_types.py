@@ -90,10 +90,18 @@ class OfficeType(DjangoObjectType):
 class ProductType(DjangoObjectType):
     type = ProductTypeChoicesEnum(required=True)
     current_office_quantity = graphene.Int(default_value=0, required=True)
+    has_any_sale = graphene.Boolean(required=True)
+    is_in_some_contract = graphene.Boolean(required=True)
 
     def resolve_current_office_quantity(parent: Product, info: CustomInfo):
         stock = parent.get_stock_for_office(int(info.context.office_id))
         return stock or 0
+
+    def resolve_has_any_sale(parent: Product, info: CustomInfo):
+        return parent.has_any_sale()
+
+    def resolve_is_in_some_contract(parent: Product, info: CustomInfo):
+        return parent.is_in_some_contract()
 
     class Meta:
         name = "Product"

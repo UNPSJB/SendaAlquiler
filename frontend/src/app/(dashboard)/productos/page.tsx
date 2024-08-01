@@ -125,6 +125,10 @@ const columns: ColumnDef<ProductListItemFragment, any>[] = [
     columnsHelper.display({
         id: 'actions',
         cell: (props) => {
+            if (props.row.original.hasAnySale || props.row.original.isInSomeContract) {
+                return null;
+            }
+
             return (
                 <div className="flex justify-end">
                     <RowActions product={props.row.original} />

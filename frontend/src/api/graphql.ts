@@ -1002,8 +1002,10 @@ export type Product = {
     createdOn: Scalars['DateTime']['output'];
     currentOfficeQuantity: Scalars['Int']['output'];
     description: Maybe<Scalars['String']['output']>;
+    hasAnySale: Scalars['Boolean']['output'];
     id: Scalars['ID']['output'];
     internalOrders: Array<InternalOrderItem>;
+    isInSomeContract: Scalars['Boolean']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
     price: Maybe<Scalars['BigInt']['output']>;
@@ -2703,6 +2705,8 @@ export type ProductListItemFragment = {
     type: ProductTypeChoices;
     sku: string | null;
     currentOfficeQuantity: number;
+    hasAnySale: boolean;
+    isInSomeContract: boolean;
     brand: { __typename?: 'Brand'; name: string } | null;
     services: Array<{
         __typename?: 'ProductService';
@@ -2736,6 +2740,8 @@ export type ProductsQuery = {
             type: ProductTypeChoices;
             sku: string | null;
             currentOfficeQuantity: number;
+            hasAnySale: boolean;
+            isInSomeContract: boolean;
             brand: { __typename?: 'Brand'; name: string } | null;
             services: Array<{
                 __typename?: 'ProductService';
@@ -2809,6 +2815,8 @@ export type CreateProductMutation = {
             type: ProductTypeChoices;
             sku: string | null;
             currentOfficeQuantity: number;
+            hasAnySale: boolean;
+            isInSomeContract: boolean;
             brand: { __typename?: 'Brand'; name: string } | null;
             services: Array<{
                 __typename?: 'ProductService';
@@ -2846,6 +2854,8 @@ export type UpdateProductMutation = {
             type: ProductTypeChoices;
             sku: string | null;
             currentOfficeQuantity: number;
+            hasAnySale: boolean;
+            isInSomeContract: boolean;
             brand: { __typename?: 'Brand'; name: string } | null;
             services: Array<{
                 __typename?: 'ProductService';
@@ -4011,6 +4021,8 @@ export const ProductListItemFragmentDoc = {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'currentOfficeQuantity' },
                     },
+                    { kind: 'Field', name: { kind: 'Name', value: 'hasAnySale' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isInSomeContract' } },
                 ],
             },
         },
@@ -9313,6 +9325,8 @@ export const ProductsDocument = {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'currentOfficeQuantity' },
                     },
+                    { kind: 'Field', name: { kind: 'Name', value: 'hasAnySale' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isInSomeContract' } },
                 ],
             },
         },
@@ -9714,6 +9728,8 @@ export const CreateProductDocument = {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'currentOfficeQuantity' },
                     },
+                    { kind: 'Field', name: { kind: 'Name', value: 'hasAnySale' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isInSomeContract' } },
                 ],
             },
         },
@@ -10023,6 +10039,8 @@ export const UpdateProductDocument = {
                         kind: 'Field',
                         name: { kind: 'Name', value: 'currentOfficeQuantity' },
                     },
+                    { kind: 'Field', name: { kind: 'Name', value: 'hasAnySale' } },
+                    { kind: 'Field', name: { kind: 'Name', value: 'isInSomeContract' } },
                 ],
             },
         },
