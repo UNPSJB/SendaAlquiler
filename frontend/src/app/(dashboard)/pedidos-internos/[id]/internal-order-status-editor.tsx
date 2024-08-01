@@ -151,7 +151,7 @@ export const InternalOrderStatusEditor = ({ internalOrder }: Props) => {
                                 internalOrder.latestHistoryEntry?.status ===
                                 InternalOrderHistoryStatusChoices.Pending
                                     ? [
-                                          ...(office === internalOrder.sourceOffice
+                                          ...(office?.id === internalOrder.sourceOffice.id
                                               ? [
                                                     {
                                                         value: InternalOrderHistoryStatusChoices.InProgress,
@@ -163,13 +163,18 @@ export const InternalOrderStatusEditor = ({ internalOrder }: Props) => {
                                               value: InternalOrderHistoryStatusChoices.Canceled,
                                               label: 'Cancelar',
                                           },
-                                          {
-                                              value: InternalOrderHistoryStatusChoices.Completed,
-                                              label: 'Completar',
-                                          },
+                                          ...((office?.id ===
+                                              internalOrder.targetOffice.id && [
+                                              {
+                                                  value: InternalOrderHistoryStatusChoices.Completed,
+                                                  label: 'Completar',
+                                              },
+                                          ]) ||
+                                              []),
                                       ]
                                     : internalOrder.latestHistoryEntry?.status ===
-                                        InternalOrderHistoryStatusChoices.InProgress
+                                            InternalOrderHistoryStatusChoices.InProgress &&
+                                        office?.id === internalOrder.targetOffice.id
                                       ? [
                                             {
                                                 value: InternalOrderHistoryStatusChoices.Completed,
