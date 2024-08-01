@@ -131,7 +131,7 @@ export const OrderSupplierFormEditor = ({
                     href="#"
                 >
                     <span>Tutorial</span>
-                    <Book className="h-5 w-5" />
+                    <Book className="size-5" />
                 </a>
             </div>
 
@@ -228,7 +228,6 @@ const OrderSupplierFormEditorOffices = () => {
         return (
             <div className="space-y-4">
                 <h2 className="text-lg font-bold">Productos</h2>
-
                 <p className="text-muted-foreground">
                     Selecciona un proveedor para ver sus productos.
                 </p>
@@ -236,106 +235,119 @@ const OrderSupplierFormEditorOffices = () => {
         );
     }
 
+    const addProduct = () => {
+        ordersFieldArray.append({
+            product: {
+                value: '',
+                label: '',
+            },
+            quantity: 0,
+        });
+    };
+
+    const removeProduct = (index: number) => {
+        ordersFieldArray.remove(index);
+    };
+
+    const handleProductChange = (
+        index: number,
+        option: { value: string; label: string } | null,
+    ) => {
+        if (option) {
+            const isProductAlreadyAdded = ordersFieldArray.fields.some(
+                (field, idx) => idx !== index && field.product.value === option.value,
+            );
+
+            if (isProductAlreadyAdded) {
+                formMethods.setError(`orders.${index}.product`, {
+                    type: 'manual',
+                    message: 'Este producto ya ha sido agregado',
+                });
+            } else {
+                formMethods.clearErrors(`orders.${index}.product`);
+                formMethods.setValue(`orders.${index}.product`, option);
+                formMethods.setValue(`orders.${index}.quantity`, 0);
+            }
+        }
+    };
+
     return (
         <div className="space-y-4">
             <h2 className="text-lg font-bold">Productos</h2>
 
-            {ordersFieldArray.fields.map((field, index) => {
-                return (
-                    <div className="flex space-x-4" key={field.id}>
-                        <div className="flex flex-1 space-x-4">
-                            <FormField
-                                name={`orders.${index}.product`}
-                                control={formMethods.control}
-                                rules={{ required: 'El producto es requerido' }}
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-1 flex-col">
-                                        <FormLabel required>Producto</FormLabel>
+            {ordersFieldArray.fields.map((field, index) => (
+                <div className="flex space-x-4" key={field.id}>
+                    <div className="flex flex-1 space-x-4">
+                        <FormField
+                            name={`orders.${index}.product`}
+                            control={formMethods.control}
+                            rules={{ required: 'El producto es requerido' }}
+                            render={({ field }) => (
+                                <FormItem className="flex flex-1 flex-col">
+                                    <FormLabel required>Producto</FormLabel>
+                                    <FormControl>
+                                        <ComboboxSimple
+                                            placeholder="Selecciona un producto"
+                                            options={(productsQuery.data
+                                                ? productsQuery.data
+                                                      .productsSuppliedBySupplierId
+                                                : []
+                                            ).map((product) => ({
+                                                label: product.name,
+                                                value: product.id,
+                                            }))}
+                                            onChange={(option) =>
+                                                handleProductChange(index, option)
+                                            }
+                                            value={field.value || null}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                                        <FormControl>
-                                            <ComboboxSimple
-                                                placeholder="Selecciona un producto"
-                                                options={(productsQuery.data
-                                                    ? productsQuery.data
-                                                          .productsSuppliedBySupplierId
-                                                    : []
-                                                ).map((product) => {
-                                                    return {
-                                                        label: product.name,
-                                                        value: product.id,
-                                                    };
-                                                })}
-                                                onChange={(option) => {
-                                                    field.onChange(option);
-                                                    formMethods.setValue(
-                                                        `orders.${index}.quantity`,
-                                                        0,
-                                                    );
-                                                }}
-                                                value={field.value || null}
-                                            />
-                                        </FormControl>
-
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                name={`orders.${index}.quantity`}
-                                control={formMethods.control}
-                                rules={{ required: 'La cantidad es requerida' }}
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-1 flex-col">
-                                        <FormLabel required>Cantidad</FormLabel>
-
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                onChange={(e) => {
-                                                    field.onChange(
-                                                        inputToNumber(e.target.value),
-                                                    );
-                                                }}
-                                                value={field.value || ''}
-                                            />
-                                        </FormControl>
-
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <div className="flex pt-7">
-                            <button
-                                className="h-4 w-4"
-                                type="button"
-                                onClick={() => {
-                                    ordersFieldArray.remove(index);
-                                }}
-                            >
-                                <Trash className="h-5 w-5" />
-                            </button>
-                        </div>
+                        <FormField
+                            name={`orders.${index}.quantity`}
+                            control={formMethods.control}
+                            rules={{ required: 'La cantidad es requerida' }}
+                            render={({ field }) => (
+                                <FormItem className="flex flex-1 flex-col">
+                                    <FormLabel required>Cantidad</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            {...field}
+                                            onChange={(e) => {
+                                                field.onChange(
+                                                    inputToNumber(e.target.value),
+                                                );
+                                            }}
+                                            value={field.value || ''}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
-                );
-            })}
 
-            <Button
-                type="button"
-                onClick={() => {
-                    ordersFieldArray.append({
-                        product: {
-                            value: '',
-                            label: '',
-                        },
-                        quantity: 0,
-                    });
-                }}
-            >
+                    <div className="flex pt-7">
+                        <button
+                            className="size-4"
+                            type="button"
+                            onClick={() => removeProduct(index)}
+                        >
+                            <Trash className="size-5" />
+                        </button>
+                    </div>
+                </div>
+            ))}
+
+            <Button type="button" onClick={addProduct}>
                 Agregar producto
             </Button>
         </div>
     );
 };
+
+export default OrderSupplierFormEditorOffices;
