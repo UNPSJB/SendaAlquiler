@@ -98,6 +98,9 @@ class LocalityModelManager(models.Manager["LocalityModel"]):
         Updates an existing locality instance with the provided details.
         """
 
+        if self.filter(postal_code=postal_code).exclude(id=locality.id).exists():
+            raise ValueError("Ya existe una localidad con ese código postal")
+
         locality.name = name
         locality.postal_code = postal_code
         locality.state = state

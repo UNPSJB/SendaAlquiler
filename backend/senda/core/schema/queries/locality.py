@@ -27,6 +27,12 @@ class Query(graphene.ObjectType):
             num_pages=paginator.num_pages,
         )
 
+    locality_by_id = graphene.Field(LocalityType, id=graphene.ID(required=True))
+
+    @employee_or_admin_required
+    def resolve_locality_by_id(self, info: CustomInfo, id: str):
+        return LocalityModel.objects.get(id=id)
+
     all_localities = non_null_list_of(LocalityType)
 
     @employee_or_admin_required

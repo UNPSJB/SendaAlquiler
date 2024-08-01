@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { MoreVertical } from 'lucide-react';
 import { useState } from 'react';
@@ -45,6 +47,16 @@ const columns: ColumnDef<Locality, any>[] = [
     columnsHelper.accessor('name', {
         id: 'name',
         header: 'Nombre',
+        cell(props) {
+            return (
+                <Link
+                    className="text-blue-600"
+                    href={`/localidades/${props.row.original.id}`}
+                >
+                    {props.row.original.name}
+                </Link>
+            );
+        },
     }),
     columnsHelper.accessor('postalCode', {
         id: 'cp',
@@ -58,6 +70,10 @@ const columns: ColumnDef<Locality, any>[] = [
         id: 'actions',
         cell: (props) => {
             const locality = props.row.original;
+
+            if (props.row.original.hasSomeClient) {
+                return null;
+            }
 
             return (
                 <div className="flex justify-end">

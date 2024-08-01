@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
-type LocalityFormEditorValues = {
+export type LocalityFormEditorValues = {
     name: string;
     state: {
         label: string;
@@ -116,7 +116,7 @@ export const LocalityFormEditor = ({ defaultValues, cancelHref, idToUpdate }: Pr
                     href="#"
                 >
                     <span>Tutorial</span>
-                    <Book className="h-5 w-5" />
+                    <Book className="size-5" />
                 </a>
             </div>
 

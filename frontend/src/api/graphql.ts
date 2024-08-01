@@ -547,6 +547,7 @@ export type Locality = {
     clients: Array<Client>;
     contracts: Array<Contract>;
     createdOn: Scalars['DateTime']['output'];
+    hasSomeClient: Scalars['Boolean']['output'];
     id: Scalars['ID']['output'];
     modifiedOn: Scalars['DateTime']['output'];
     name: Scalars['String']['output'];
@@ -1142,6 +1143,7 @@ export type Query = {
     internalOrdersCsv: Scalars['String']['output'];
     localities: PaginatedLocalityQueryResult;
     localitiesCsv: Scalars['String']['output'];
+    localityById: Maybe<Locality>;
     numberOfPendingOutgoingInternalOrders: Maybe<Scalars['Int']['output']>;
     officeById: Maybe<Office>;
     offices: Array<Office>;
@@ -1242,6 +1244,10 @@ export type QueryInternalOrdersArgs = {
 
 export type QueryLocalitiesArgs = {
     page: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type QueryLocalityByIdArgs = {
+    id: Scalars['ID']['input'];
 };
 
 export type QueryOfficeByIdArgs = {
@@ -2608,8 +2614,24 @@ export type LocalitiesQuery = {
             name: string;
             postalCode: string;
             state: StateChoices;
+            hasSomeClient: boolean;
         }>;
     };
+};
+
+export type LocalityByIdQueryVariables = Exact<{
+    id: Scalars['ID']['input'];
+}>;
+
+export type LocalityByIdQuery = {
+    __typename?: 'Query';
+    localityById: {
+        __typename?: 'Locality';
+        id: string;
+        name: string;
+        postalCode: string;
+        state: StateChoices;
+    } | null;
 };
 
 export type CreateLocalityMutationVariables = Exact<{
@@ -8762,6 +8784,13 @@ export const LocalitiesDocument = {
                                                 kind: 'Field',
                                                 name: { kind: 'Name', value: 'state' },
                                             },
+                                            {
+                                                kind: 'Field',
+                                                name: {
+                                                    kind: 'Name',
+                                                    value: 'hasSomeClient',
+                                                },
+                                            },
                                         ],
                                     },
                                 },
@@ -8773,6 +8802,57 @@ export const LocalitiesDocument = {
         },
     ],
 } as unknown as DocumentNode<LocalitiesQuery, LocalitiesQueryVariables>;
+export const LocalityByIdDocument = {
+    kind: 'Document',
+    definitions: [
+        {
+            kind: 'OperationDefinition',
+            operation: 'query',
+            name: { kind: 'Name', value: 'localityById' },
+            variableDefinitions: [
+                {
+                    kind: 'VariableDefinition',
+                    variable: { kind: 'Variable', name: { kind: 'Name', value: 'id' } },
+                    type: {
+                        kind: 'NonNullType',
+                        type: { kind: 'NamedType', name: { kind: 'Name', value: 'ID' } },
+                    },
+                },
+            ],
+            selectionSet: {
+                kind: 'SelectionSet',
+                selections: [
+                    {
+                        kind: 'Field',
+                        name: { kind: 'Name', value: 'localityById' },
+                        arguments: [
+                            {
+                                kind: 'Argument',
+                                name: { kind: 'Name', value: 'id' },
+                                value: {
+                                    kind: 'Variable',
+                                    name: { kind: 'Name', value: 'id' },
+                                },
+                            },
+                        ],
+                        selectionSet: {
+                            kind: 'SelectionSet',
+                            selections: [
+                                { kind: 'Field', name: { kind: 'Name', value: 'id' } },
+                                { kind: 'Field', name: { kind: 'Name', value: 'name' } },
+                                {
+                                    kind: 'Field',
+                                    name: { kind: 'Name', value: 'postalCode' },
+                                },
+                                { kind: 'Field', name: { kind: 'Name', value: 'state' } },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ],
+} as unknown as DocumentNode<LocalityByIdQuery, LocalityByIdQueryVariables>;
 export const CreateLocalityDocument = {
     kind: 'Document',
     definitions: [

@@ -21,6 +21,7 @@ import {
     DeleteLocalityDocument,
     DeleteLocalityMutation,
     AllLocalitiesDocument,
+    LocalityByIdDocument,
 } from '../graphql';
 
 export const useLocalities = () => {
@@ -136,5 +137,14 @@ export const useUpdateLocality = ({
             }
         },
         ...options,
+    });
+};
+
+export const useLocalityById = (id: string) => {
+    return useQuery({
+        queryKey: [queryDomains.localities, id],
+        queryFn: () => {
+            return fetchClient(LocalityByIdDocument, { id });
+        },
     });
 };

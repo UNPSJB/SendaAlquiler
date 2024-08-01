@@ -52,6 +52,7 @@ class LocalityModel(TimeStampedModel):
     Methods:
         __str__: Returns a string representation of the LocalityModel instance, which is the name of the locality.
     """
+
     name = models.CharField(max_length=255)
     postal_code = models.CharField(max_length=10)
     state = models.CharField(choices=StateChoices.choices, max_length=30)
@@ -67,3 +68,12 @@ class LocalityModel(TimeStampedModel):
 
     def __str__(self) -> str:
         return self.name
+
+    def has_some_client(self) -> bool:
+        """
+        Checks if the locality has at least one client associated with it.
+
+        Returns:
+            bool: True if the locality has at least one client, False otherwise.
+        """
+        return self.clients.exists()

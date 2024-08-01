@@ -72,6 +72,11 @@ class PaginatedBrandQueryResult(PaginatedQueryResult):
 class LocalityType(DjangoObjectType):
     state = StateChoicesEnum(required=True)
 
+    has_some_client = graphene.Boolean(required=True)
+
+    def resolve_has_some_client(parent: LocalityModel, info: CustomInfo):
+        return parent.has_some_client()
+
     class Meta:
         name = "Locality"
         model = LocalityModel

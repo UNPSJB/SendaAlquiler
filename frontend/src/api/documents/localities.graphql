@@ -7,7 +7,17 @@ query localities($page: Int) {
             name
             postalCode
             state
+            hasSomeClient
         }
+    }
+}
+
+query localityById($id: ID!) {
+    localityById(id: $id) {
+        id
+        name
+        postalCode
+        state
     }
 }
 
