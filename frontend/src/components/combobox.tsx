@@ -152,7 +152,7 @@ export const ComboboxCreatable: React.FC<ComboboxCreatableProps> = ({
     value,
     placeholder = 'Selecciona una opción',
     messageCreating = 'Creando opción...',
-    createOptionLabel = (inputValue) => `Create "${inputValue}"`, // Default label format
+    createOptionLabel = (inputValue) => `Crear "${inputValue}"`,
 }) => {
     const [open, setOpen] = useState(false);
     const [inputValue, setInputValue] = useState<string>('');
@@ -184,60 +184,55 @@ export const ComboboxCreatable: React.FC<ComboboxCreatableProps> = ({
                     <span className="inline-block w-[90%] overflow-hidden text-ellipsis text-left">
                         {value?.label || placeholder}
                     </span>
-
                     <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-
             <PopoverContent align="start" className="p-0">
-                <Command value={value?.value || ''} shouldFilter={false}>
+                <Command shouldFilter={false}>
                     <CommandInput
                         value={inputValue}
                         onValueChange={handleInputChange}
                         disabled={isDisabled || isLoading}
                     />
-
                     <CommandList>
-                        {isLoading ? (
-                            <CommandPrimitive.Loading>
-                                <div className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-                                    {messageCreating}
-                                </div>
-                            </CommandPrimitive.Loading>
-                        ) : (
-                            <>
-                                {filteredOptions.map((item) => (
-                                    <CommandItem
-                                        key={item.label}
-                                        onSelect={() => {
-                                            onChange(item);
-                                            setOpen(false);
-                                        }}
-                                    >
-                                        <Check
-                                            className={cn(
-                                                'mr-2 h-4 w-4',
-                                                value?.value === item.value
-                                                    ? 'opacity-100'
-                                                    : 'opacity-0',
-                                            )}
-                                        />
-
-                                        <span className="min-w-0 flex-1">
-                                            {item.label}
-                                        </span>
-                                    </CommandItem>
-                                ))}
-
-                                {displayCreateOption && (
-                                    <CommandItem onSelect={handleCreateOptionSelect}>
-                                        {createOptionLabel(inputValue)}
-                                    </CommandItem>
-                                )}
-
-                                <CommandEmpty>No se encontraron resultados.</CommandEmpty>
-                            </>
-                        )}
+                        <CommandEmpty>No se encontraron resultados.</CommandEmpty>
+                        <CommandGroup>
+                            {isLoading ? (
+                                <CommandItem disabled>{messageCreating}</CommandItem>
+                            ) : (
+                                <>
+                                    {filteredOptions.map((item) => (
+                                        <CommandItem
+                                            key={item.label}
+                                            onSelect={() => {
+                                                onChange(item);
+                                                setOpen(false);
+                                            }}
+                                        >
+                                            <Check
+                                                className={cn(
+                                                    'mr-2 h-4 w-4',
+                                                    value?.value === item.value
+                                                        ? 'opacity-100'
+                                                        : 'opacity-0',
+                                                )}
+                                            />
+                                            <span className="min-w-0 flex-1">
+                                                {item.label}
+                                            </span>
+                                        </CommandItem>
+                                    ))}
+                                    {displayCreateOption && (
+                                        <CommandItem
+                                            value="create-option"
+                                            onSelect={handleCreateOptionSelect}
+                                        >
+                                            {createOptionLabel(inputValue)}
+                                        </CommandItem>
+                                    )}
+                                </>
+                            )}
+                        </CommandGroup>
                     </CommandList>
                 </Command>
             </PopoverContent>
