@@ -11,7 +11,7 @@ from senda.core.models.order_internal import (
     InternalOrderDetailsDict,
     InternalOrderItemDetailsDict,
     CompletedOrderItemDetailsDict,
-    InProgressOrderItemDetailsDict
+    InProgressOrderItemDetailsDict,
 )
 from senda.core.schema.custom_types import InternalOrderType
 from utils.graphene import non_null_list_of
@@ -73,7 +73,6 @@ class CreateInternalOrder(graphene.Mutation):
             internal_order = InternalOrder.objects.create_internal_order(
                 items_data=items_data_dicts,
                 order_data=InternalOrderDetailsDict(
-                    contract_item_product_allocation_id=None,
                     approximate_delivery_date=None,
                     note=None,
                     requested_for_date=None,

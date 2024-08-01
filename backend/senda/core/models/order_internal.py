@@ -19,7 +19,6 @@ class InternalOrderCreationError(Exception):
 class InternalOrderDetailsDict(TypedDict):
     source_office_id: int
     target_office_id: int
-    contract_item_product_allocation_id: Optional[int]
     note: Optional[str]
     requested_for_date: datetime
     approximate_delivery_date: Optional[datetime]
@@ -55,9 +54,6 @@ class InternalOrderManager(models.Manager["InternalOrder"]):
                 internal_order = self.create(
                     source_office_id=order_data.get("source_office_id"),
                     target_office_id=order_data.get("target_office_id"),
-                    contract_item_product_allocation_id=order_data.get(
-                        "contract_item_product_allocation_id"
-                    ),
                     requested_for_date=order_data.get("requested_for_date"),
                     approximate_delivery_date=order_data.get(
                         "approximate_delivery_date"
