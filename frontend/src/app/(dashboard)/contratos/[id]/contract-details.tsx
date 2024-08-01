@@ -91,7 +91,12 @@ const productColumns: ColumnDef<Item, any>[] = [
         footer: (props) => {
             const value = props.table
                 .getFilteredRowModel()
-                .rows.reduce((acc, row) => acc + row.original.total, 0);
+                .rows.reduce(
+                    (acc, row) =>
+                        acc +
+                        (row.original.productSubtotal - row.original.productDiscount),
+                    0,
+                );
             return `$${formatNumberAsPrice(value)}`;
         },
     }),
@@ -145,6 +150,12 @@ const serviceColumns: ColumnDef<ServiceRowType, any>[] = [
             const value = cell.getValue();
             return value ? `$${formatNumberAsPrice(value)}` : '-';
         },
+        footer: (props) => {
+            const value = props.table
+                .getFilteredRowModel()
+                .rows.reduce((acc, row) => acc + (row.original.subtotal || 0), 0);
+            return `$${formatNumberAsPrice(value)}`;
+        },
     }),
     serviceColumnsHelper.accessor('discount', {
         header: 'Descuento',
@@ -155,21 +166,26 @@ const serviceColumns: ColumnDef<ServiceRowType, any>[] = [
         footer: (props) => {
             const value = props.table
                 .getFilteredRowModel()
-                .rows.reduce((acc, row) => acc + row.original.discount, 0);
-            return value ? `$${formatNumberAsPrice(value)}` : '-';
+                .rows.reduce((acc, row) => acc + (row.original.discount || 0), 0);
+            return `$${formatNumberAsPrice(value)}`;
         },
     }),
     serviceColumnsHelper.accessor('total', {
         header: 'Total',
         cell: (cell) => {
-            const value = cell.getValue();
-            return value ? `$${formatNumberAsPrice(value)}` : '-';
+            const value = cell.row.original;
+            return `$${formatNumberAsPrice((value.subtotal || 0) - (value.discount || 0))}`;
         },
         footer: (props) => {
             const value = props.table
                 .getFilteredRowModel()
-                .rows.reduce((acc, row) => acc + row.original.total, 0);
-            return value ? `$${formatNumberAsPrice(value)}` : '-';
+                .rows.reduce(
+                    (acc, row) =>
+                        acc +
+                        ((row.original.subtotal || 0) - (row.original.discount || 0)),
+                    0,
+                );
+            return `$${formatNumberAsPrice(value)}`;
         },
     }),
 ];
@@ -185,6 +201,26 @@ enum AccordionValue {
 }
 
 export const ContractDetails = ({ contract }: Props) => {
+    // Fixed calculation for product total
+    const productTotal = contract.contractItems.reduce(
+        (acc, item) => acc + item.productSubtotal - item.productDiscount,
+        0,
+    );
+
+    // Fixed calculation for service total
+    const serviceTotal = contract.contractItems.reduce(
+        (acc, item) =>
+            acc +
+            item.serviceItems.reduce(
+                (serviceAcc, service) => serviceAcc + service.subtotal - service.discount,
+                0,
+            ),
+        0,
+    );
+
+    // Calculate the grand total
+    const grandTotal = productTotal + serviceTotal;
+
     return (
         <>
             <div className="space-y-4 bg-white p-4">
@@ -559,17 +595,7 @@ export const ContractDetails = ({ contract }: Props) => {
                                                 )}
                                             </TableCell>
                                             <TableCell>
-                                                $
-                                                {formatNumberAsPrice(
-                                                    contract.contractItems.reduce(
-                                                        (acc, item) =>
-                                                            acc +
-                                                            item.productSubtotal -
-                                                            item.productDiscount +
-                                                            0,
-                                                        0,
-                                                    ),
-                                                )}
+                                                ${formatNumberAsPrice(productTotal)}
                                             </TableCell>
                                         </TableRow>
 
@@ -582,8 +608,8 @@ export const ContractDetails = ({ contract }: Props) => {
                                                         (acc, item) =>
                                                             acc +
                                                             item.serviceItems.reduce(
-                                                                (acc, service) =>
-                                                                    acc +
+                                                                (serviceAcc, service) =>
+                                                                    serviceAcc +
                                                                     service.subtotal,
                                                                 0,
                                                             ),
@@ -598,8 +624,8 @@ export const ContractDetails = ({ contract }: Props) => {
                                                         (acc, item) =>
                                                             acc +
                                                             item.serviceItems.reduce(
-                                                                (acc, service) =>
-                                                                    acc +
+                                                                (serviceAcc, service) =>
+                                                                    serviceAcc +
                                                                     service.discount,
                                                                 0,
                                                             ),
@@ -608,19 +634,7 @@ export const ContractDetails = ({ contract }: Props) => {
                                                 )}
                                             </TableCell>
                                             <TableCell>
-                                                $
-                                                {formatNumberAsPrice(
-                                                    contract.contractItems.reduce(
-                                                        (acc, item) =>
-                                                            acc +
-                                                            item.serviceItems.reduce(
-                                                                (acc, service) =>
-                                                                    acc + service.total,
-                                                                0,
-                                                            ),
-                                                        0,
-                                                    ),
-                                                )}
+                                                ${formatNumberAsPrice(serviceTotal)}
                                             </TableCell>
                                         </TableRow>
 
@@ -632,11 +646,11 @@ export const ContractDetails = ({ contract }: Props) => {
                                                     contract.contractItems.reduce(
                                                         (acc, item) =>
                                                             acc +
-                                                            item.productSubtotal -
-                                                            item.productDiscount +
+                                                            item.productSubtotal +
                                                             item.serviceItems.reduce(
-                                                                (acc, service) =>
-                                                                    acc + service.total,
+                                                                (serviceAcc, service) =>
+                                                                    serviceAcc +
+                                                                    service.subtotal,
                                                                 0,
                                                             ),
                                                         0,
@@ -651,8 +665,8 @@ export const ContractDetails = ({ contract }: Props) => {
                                                             acc +
                                                             item.productDiscount +
                                                             item.serviceItems.reduce(
-                                                                (acc, service) =>
-                                                                    acc +
+                                                                (serviceAcc, service) =>
+                                                                    serviceAcc +
                                                                     service.discount,
                                                                 0,
                                                             ),
@@ -661,21 +675,7 @@ export const ContractDetails = ({ contract }: Props) => {
                                                 )}
                                             </TableCell>
                                             <TableCell>
-                                                $
-                                                {formatNumberAsPrice(
-                                                    contract.contractItems.reduce(
-                                                        (acc, item) =>
-                                                            acc +
-                                                            item.productSubtotal -
-                                                            item.productDiscount +
-                                                            item.serviceItems.reduce(
-                                                                (acc, service) =>
-                                                                    acc + service.total,
-                                                                0,
-                                                            ),
-                                                        0,
-                                                    ),
-                                                )}
+                                                ${formatNumberAsPrice(grandTotal)}
                                             </TableCell>
                                         </TableRow>
                                     </TableHeader>
