@@ -82,7 +82,7 @@ class LocalityModelManager(models.Manager["LocalityModel"]):
         """
         name = name.strip().lower().title()
 
-        if self.filter(name=name, postal_code=postal_code, state=state).exists():
+        if self.filter(postal_code=postal_code).exists():
             raise ValueError("La localidad ya existe")
 
         return self.create(name=name, postal_code=postal_code, state=state)
