@@ -43,6 +43,12 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type Contract = ContractsQuery['contracts']['results'][0];
 
@@ -97,6 +103,44 @@ const RowActions = ({ contract }: { contract: Contract }) => {
     const deleteMutation = useDeleteContract();
 
     const [open, setOpen] = useState(false);
+
+    if (
+        [
+            ContractHistoryStatusChoices.Finalizado,
+            ContractHistoryStatusChoices.Activo,
+            ContractHistoryStatusChoices.DevolucionExitosa,
+            ContractHistoryStatusChoices.DevolucionFallida,
+        ].includes(contract.latestHistoryEntry!.status)
+    ) {
+        return (
+            <TooltipProvider>
+                <Tooltip>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger>
+                            <MoreVertical className="size-5" />
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent>
+                            <TooltipTrigger className="cursor-auto" asChild>
+                                <DropdownMenuItem className="cursor-auto opacity-50">
+                                    Eliminar
+                                </DropdownMenuItem>
+                            </TooltipTrigger>
+
+                            <TooltipContent>
+                                No puedes eliminar un contrato que está en estado{' '}
+                                <strong>
+                                    <em>
+                                        {contract.latestHistoryEntry!.status.toLowerCase()}
+                                    </em>
+                                </strong>
+                            </TooltipContent>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </Tooltip>
+            </TooltipProvider>
+        );
+    }
 
     return (
         <Dialog

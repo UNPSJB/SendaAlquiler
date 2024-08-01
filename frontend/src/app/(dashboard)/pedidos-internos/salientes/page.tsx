@@ -49,6 +49,12 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 type InternalOrder = InternalOrdersQuery['internalOrders']['results'][0];
 
@@ -114,6 +120,42 @@ const RowActions = ({ internalOrder }: { internalOrder: InternalOrder }) => {
     const deleteMutation = useDeleteInternalOrder();
 
     const [open, setOpen] = useState(false);
+
+    if (
+        [
+            InternalOrderHistoryStatusChoices.InProgress,
+            InternalOrderHistoryStatusChoices.Completed,
+        ].includes(internalOrder.latestHistoryEntry!.status)
+    ) {
+        return (
+            <TooltipProvider>
+                <Tooltip>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger>
+                            <MoreVertical className="size-5" />
+                        </DropdownMenuTrigger>
+
+                        <DropdownMenuContent>
+                            <TooltipTrigger className="cursor-auto" asChild>
+                                <DropdownMenuItem className="cursor-auto opacity-50">
+                                    Eliminar
+                                </DropdownMenuItem>
+                            </TooltipTrigger>
+
+                            <TooltipContent>
+                                No puedes eliminar un contrato que está en estado{' '}
+                                <strong>
+                                    <em>
+                                        {internalOrder.latestHistoryEntry!.status.toLowerCase()}
+                                    </em>
+                                </strong>
+                            </TooltipContent>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </Tooltip>
+            </TooltipProvider>
+        );
+    }
 
     return (
         <Dialog
