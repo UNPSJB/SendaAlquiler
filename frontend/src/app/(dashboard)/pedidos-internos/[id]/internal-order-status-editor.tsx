@@ -175,10 +175,6 @@ export const InternalOrderStatusEditor = ({ internalOrder }: Props) => {
                                                 value: InternalOrderHistoryStatusChoices.Completed,
                                                 label: 'Completar',
                                             },
-                                            {
-                                                value: InternalOrderHistoryStatusChoices.Canceled,
-                                                label: 'Cancelar',
-                                            },
                                         ]
                                       : []
                             }
